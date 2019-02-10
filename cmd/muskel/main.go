@@ -17,7 +17,7 @@ import (
 
 	"github.com/gen2brain/beeep"
 	"github.com/metakeule/observe/lib/runfunc"
-	"gitlab.com/gomidi/midi/muskel"
+	"gitlab.com/gomidi/muskel"
 	"gitlab.com/metakeule/config"
 )
 

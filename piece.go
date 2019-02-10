@@ -6,40 +6,23 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math/rand"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 
-	"gitlab.com/gomidi/midi/cc"
-	"gitlab.com/gomidi/midi/gm"
 	"gitlab.com/gomidi/midi/mid"
 	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 )
 
-// TODO see the following list
-
-/*
-+ patterns and definition
-+ parts und sprünge
-+ Glissandi!
-+ accel. decel. cresc. descr. (wahrscheinlich mit Volume CC)
-+ MIDI controls
-- temperaments
-- ggf. Chords
-- translate augmentation symbols like ^ and ° to pitchbend messages
-*/
-
 type Piece struct {
-	currentBar     int
-	numInstruments int
-	Instruments    []*Instrument
-	rd             *bufio.Reader
-	props          map[string]string
-	temperament    map[string]string
-	//patterns          map[string]string
+	currentBar        int
+	numInstruments    int
+	Instruments       []*Instrument
+	rd                *bufio.Reader
+	props             map[string]string
+	temperament       map[string]string
 	patterns          map[string]*PatternDefinition
 	parts             map[string]int // part name to bar no
 	jumps             map[int]string // bar no at the end of which the jump should be done mapped to the jump definition
@@ -53,84 +36,27 @@ type Piece struct {
 	writerSysLine     int
 }
 
-// pad pads the given string with empty space if it is less then length
-func pad(s string, length int) string {
-	if len(s) >= length {
-		return s
-	}
-
-	diff := length - len(s)
-	var bf bytes.Buffer
-
-	bf.WriteString(s)
-
-	for i := 0; i < diff; i++ {
-		bf.WriteString(" ")
-	}
-	return bf.String()
+// TODO implement parseMIDICC
+func (p *itemParser) parseMIDICC(data string) (cc MIDICC, err error) {
+	return cc, fmt.Errorf("parseMIDICC is not implemented yet")
 }
 
-type Note struct {
-	letter         string
-	octave         int
-	augmenter      string
-	dynamic        string
-	glissandoStart bool
+// TODO implement parseMIDIPitchbend
+func (p *itemParser) parseMIDIPitchbend(string) (pb MIDIPitchbend, err error) {
+	return pb, fmt.Errorf("parseMIDIPitchbend is not implemented yet")
 }
 
-type DrumNote struct {
-	name    string
-	dynamic string
+// TODO implement parseMIDIAftertouch
+func (p *itemParser) parseMIDIAftertouch(string) (at MIDIAftertouch, err error) {
+	return at, fmt.Errorf("parseMIDIAftertouch is not implemented yet")
 }
 
-type MIDICC [2]uint8
-type MIDIPitchbend int16
-type MIDIPolyAftertouch [2]uint8
-type MIDIAftertouch uint8
-
-type OSCMessage struct {
-	Path string
-	Args []interface{}
-}
-type Pattern struct {
-	name         string
-	params       []string
-	replacements []string
-	slicer       string
-	syncFirst    bool
+// TODO implement parseMIDIPolyAftertouch
+func (p *itemParser) parseMIDIPolyAftertouch(string) (pt MIDIPolyAftertouch, err error) {
+	return pt, fmt.Errorf("parseMIDIPolyAftertouch is not implemented yet")
 }
 
-type NTuple struct {
-	endPos uint8 // 32th in bar from the beginning
-	items  []Item
-}
-type RepeatLastEvent struct{}
-type RepeatLastBar struct{}
-type RepeatLastBarUntilChange struct{}
-type RepeatLastNBarsUntilChange int
-type Rest struct{}
-type hold struct{}
-type Lyric string
-
-var Hold = hold{}
-
-func (p *Piece) parseMIDICC(data string) (cc MIDICC, err error) {
-	return
-}
-
-func (p *Piece) parseMIDIPitchbend(string) (pb MIDIPitchbend, err error) {
-	return
-}
-
-func (p *Piece) parseMIDIAftertouch(string) (at MIDIAftertouch, err error) {
-	return
-}
-
-func (p *Piece) parseMIDIPolyAftertouch(string) (pt MIDIPolyAftertouch, err error) {
-	return
-}
-
-func (p *Piece) parseNote(data string) (item interface{}, err error) {
+func (p *itemParser) parseNote(data string) (item interface{}, err error) {
 	if len(data) > 1 {
 
 		switch data[:2] {
@@ -206,23 +132,15 @@ func (p *Piece) parseNote(data string) (item interface{}, err error) {
 	return nt, nil
 }
 
-/*
-- notes, e.g. a'
-- drumnotes e.g. sn
-- motivs e.g. $a
-- MIDI controller events e.g. PB200
-- rests e.g. _
-- samples with a timespan e.g. Sa
-- samples with no timespan ("oneshot") e.g. Za
-- repitition of last event e.g. %
-- multiitems, consisting of several items happening at the same time. e.g. (a',PB200)
-*/
-
-func (p *Piece) parseOSC(data string) (om OSCMessage, err error) {
-	return
+// TODO implement parseOSC
+func (p *itemParser) parseOSC(data string) (om OSCMessage, err error) {
+	return om, fmt.Errorf("parseOSC is not implemented yet")
 }
 
-func (p *Piece) parsePattern(data string) (*PatternCall, error) {
+func (p *itemParser) parsePattern(data string) (*PatternCall, error) {
+	if p.Getter == nil {
+		return nil, fmt.Errorf("could not embed a pattern inside a resolved pattern")
+	}
 	var pc PatternCall
 	err := pc.Parse(data)
 
@@ -243,14 +161,18 @@ func (p *Piece) parsePattern(data string) (*PatternCall, error) {
 		panic(fmt.Sprintf("could no call pattern %s with %q: %s", pc.Name, data, err))
 	}
 
-	// TODO get positions and Items out of the pc.result
+	err = pc.parseBars(pc.result)
+
+	if err != nil {
+		panic(fmt.Sprintf("could no call pattern %s with %q: %s", pc.Name, data, err))
+	}
 
 	return ppc, err
 }
 
 // ntuple has the form {c,e,d}3&
 // where 3& is the ending position that defines the total length
-func (p *Piece) parseNTuple(data string) (nt NTuple, err error) {
+func (p *itemParser) parseNTuple(data string) (nt NTuple, err error) {
 
 	dd := strings.Split(data, "}")
 	if len(dd) != 2 {
@@ -281,7 +203,11 @@ func (p *Piece) parseNTuple(data string) (nt NTuple, err error) {
 	return ntp, nil
 }
 
-func (p *Piece) parseItem(data string) (interface{}, error) {
+type itemParser struct {
+	Getter
+}
+
+func (p *itemParser) parseItem(data string) (interface{}, error) {
 	data = strings.TrimSpace(data)
 	switch len(data) {
 	case 0:
@@ -341,8 +267,6 @@ func (p *Piece) parseItem(data string) (interface{}, error) {
 
 }
 
-type MultiItem []interface{}
-
 func (p *Piece) parseData(data string) (interface{}, error) {
 	if len(data) == 0 {
 		return nil, nil
@@ -355,7 +279,7 @@ func (p *Piece) parseData(data string) (interface{}, error) {
 		d := strings.Split(data, " ")
 		switch len(d) {
 		case 1:
-			it, err := p.parseItem(d[0])
+			it, err := (&itemParser{p}).parseItem(d[0])
 			if err != nil {
 				return nil, err
 			}
@@ -364,7 +288,7 @@ func (p *Piece) parseData(data string) (interface{}, error) {
 			var m MultiItem
 
 			for _, dd := range d {
-				it, err := p.parseItem(strings.TrimSpace(dd))
+				it, err := (&itemParser{p}).parseItem(strings.TrimSpace(dd))
 
 				if err != nil {
 					return nil, err
@@ -381,275 +305,8 @@ func (p *Piece) parseData(data string) (interface{}, error) {
 
 }
 
-// if returned vel is < 0, then it has not been set and
-// is drived from the previous velocity
-// always return such that rand.Intn(4) can be added or substracted
-func velocityFromDynamic(dyn string) (vel int8) {
-	vel = -1
-	for _, rn := range dyn {
-		switch rn {
-		case '+':
-			if vel == -1 {
-				vel = 60
-			}
-			vel += 15
-		case '-':
-			if vel == -1 {
-				vel = 60
-			}
-			vel -= 15
-		case '*': // reset
-			vel = 60
-		}
-	}
-
-	if vel == -1 {
-		return vel
-	}
-
-	if vel > 127 {
-		vel = 123
-	}
-
-	if vel < 4 {
-		vel = 4
-	}
-
-	return
-}
-
-func noteToMIDI(note Note) (midinote_ uint8) {
-	/*
-		rr := regNote.FindAllStringSubmatch(note, -1)
-		if len(rr) < 1 {
-			panic(fmt.Sprintf("invalid note: %v", note))
-		}
-		res := rr[0]
-		//	fmt.Printf("res: %#v\n", res)
-
-		if len(res) < 2 {
-			panic(fmt.Sprintf("invalid note: %v", note))
-		}
-
-		letter := res[1]
-	*/
-
-	midinote := 48 // c
-
-	if note.octave > 0 {
-		midinote += 12 * (note.octave - 1)
-	}
-
-	if note.octave < 0 {
-		midinote += 12 * note.octave
-	}
-
-	switch strings.ToLower(note.letter) {
-	case "c":
-		midinote += 0
-	case "d":
-		midinote += 2
-	case "e":
-		midinote += 4
-	case "f":
-		midinote += 5
-	case "g":
-		midinote += 7
-	case "a":
-		midinote += 9
-	case "b":
-		midinote += 11
-	}
-
-	switch note.augmenter {
-	case "":
-	case "#":
-		midinote += 1
-	case "^":
-	case "°":
-	}
-
-	return uint8(midinote)
-
-}
-
-func isEmpty(b BarEvents) bool {
-	if len(b) == 0 {
-		return true
-	}
-
-	for _, e := range b {
-		if e.Item != nil {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (p *Piece) GetPatternDefinition(name string) *PatternDefinition {
 	return p.patterns[name]
-}
-
-func (iw *instWriter) writeItem(item Item, stopNotes func()) (addedNotes []uint8) {
-	switch v := item.(type) {
-	case Note:
-		stopNotes()
-		vel := int8(-1)
-		if v.dynamic != "" {
-			vel = velocityFromDynamic(v.dynamic)
-		}
-
-		if vel < 0 {
-			vel = iw.prevVel
-		}
-
-		iw.prevVel = vel
-
-		vl := uint8(vel + int8(rand.Intn(4)))
-		n := noteToMIDI(v)
-		//fmt.Printf("NoteOn %v %v\n", n, vl)
-		fmt.Printf("NoteOn %v\n", n)
-		iw.wr.NoteOn(n, vl)
-		addedNotes = append(addedNotes, n)
-	case DrumNote:
-		var note gm.DrumKey
-		switch v.name {
-		case "kd":
-			note = gm.DrumKey_BassDrum1
-		case "sn":
-			note = gm.DrumKey_ElectricSnare
-		case "ho":
-			note = gm.DrumKey_OpenHiHat
-		case "hc":
-			note = gm.DrumKey_ClosedHiHat
-		case "rd":
-			note = gm.DrumKey_RideCymbal1
-		case "tb":
-			note = gm.DrumKey_Tambourine
-		case "tl":
-			note = gm.DrumKey_LowTom
-		case "th":
-			note = gm.DrumKey_HighTom
-		case "tm":
-			note = gm.DrumKey_HiMidTom
-		case "sh":
-			note = gm.DrumKey_CrashCymbal1
-		}
-
-		if note != 0 {
-			stopNotes()
-
-			vel := int8(-1)
-			if v.dynamic != "" {
-				vel = velocityFromDynamic(v.dynamic)
-			}
-
-			if vel < 0 {
-				vel = iw.prevVel
-			}
-
-			iw.prevVel = vel
-			vl := uint8(vel + int8(rand.Intn(4)))
-
-			//fmt.Printf("Drums NoteOn %v %v\n", note.Key(), vl)
-			fmt.Printf("Drums NoteOn %v\n", note.Key())
-			iw.wr.NoteOn(note.Key(), vl)
-			addedNotes = append(addedNotes, note.Key())
-		}
-	case MIDICC:
-		fmt.Printf("MIDICC %v, %v\n", v[0], v[1])
-		iw.wr.ControlChange(v[0], v[1])
-	case MIDIPitchbend:
-		fmt.Printf("MIDIPitchbend %v, \n", int16(v))
-		iw.wr.Pitchbend(int16(v))
-	case MIDIPolyAftertouch:
-		fmt.Printf("MIDIPolyAftertouch %v, %v\n", v[0], v[1])
-		iw.wr.PolyAftertouch(v[0], v[1])
-	case MIDIAftertouch:
-		fmt.Printf("Aftertouch %v, \n", uint8(v))
-		iw.wr.Aftertouch(uint8(v))
-	case OSCMessage:
-	case *PatternCall:
-		// TODO do something with the pc events
-		barevts := v.Events
-
-		_ = barevts
-	case NTuple:
-		// definition of a tuple
-		// we need the complete time length over which the tuple is spread
-		// it is not that easy, since we need to define the noteoff of the
-		// last element. we probably also might want to cut of things as
-		// the next event appears
-		// on the good side: this should allow us also to define lengths
-		// like the conventional western standard notation
-		// on the other hand: it could be a nice effect to have the last
-		// note playing until the next event appears (we always could set
-		// a rest if needed) and for percussions it would not matter
-		// (same problem as with holding percussive notes, maybe we'll want
-		// to have a quick note on the playing notes when they'll want to end
-		// and carry that over through the processing
-		// maybe even an additional parameter could be put into Forward, like
-		// "go Forward these steps but while you are on the way, ensure the
-		// following notes will end on these times: ..."
-		// then we could predefine 32th lengths for drum notes and the needed
-		// length for ntuples. but then there would be no way to hold the
-		// last note of a ntuple.
-		// the total length of the ntuple could be specified by the ending position, e.g.
-		// {a',e'',f}3&
-		// would mean: the total duration is from the current position until 3&
-
-		length := uint32(v.endPos - iw.lastNum32)
-
-		fmt.Printf("total length: %v\n", length)
-
-		//lengthPerItem := uint32(4.0 * math.Round(float64(length)/float64(len(v.items))))
-		//lengthPerItem := uint32(math.Round(float64(length) / float64(len(v.items))))
-
-		var delta uint32
-
-		for _, it := range v.items {
-			if item != Hold {
-				if delta > 0 {
-					//iw.wr.Forward(0, delta, 128)
-					//iw.wr.Forward(0, delta, 32)
-					fmt.Printf("lengthPerItem: %v\n", float64(delta)/float64(uint32(len(v.items))*32))
-					iw.wr.Forward(0, delta, uint32(len(v.items))*32)
-				}
-				added := iw.writeItem(it, stopNotes)
-				delta = 0
-
-				for _, addn := range added {
-					iw.noteOns[addn] = true
-				}
-			}
-			delta += length // lengthPerItem
-		}
-		iw.wr.Forward(0, delta, uint32(len(v.items))*32)
-		stopNotes()
-		iw.lastNum32 += uint8(length)
-
-	case MultiItem:
-		stopNotes()
-
-		for _, it := range v {
-			// ignore the returned velocities
-			added := iw.writeItem(it, func() {})
-			addedNotes = append(addedNotes, added...)
-		}
-		return addedNotes
-
-	case Rest:
-		fmt.Printf("got REST\n")
-		stopNotes()
-	case hold:
-		return nil
-	case Lyric:
-		stopNotes()
-		iw.wr.Lyric(string(v))
-	}
-
-	return addedNotes
 }
 
 func (p *Piece) writeFirstTrack(wr *mid.SMFWriter) error {
@@ -692,274 +349,6 @@ func (p *Piece) writeFirstTrack(wr *mid.SMFWriter) error {
 	return nil
 }
 
-type instWriter struct {
-	p                  *Piece
-	wr                 *mid.SMFWriter
-	instr              *Instrument
-	emptyBars          uint32
-	lastItem           Item
-	prevVel            int8
-	noteOns            map[uint8]bool
-	repeatFrom         int
-	repeatingBars      int
-	currentlyRepeating int
-	totalBeginning     bool
-	insideRepitition   bool
-	lastNum32          uint8
-}
-
-func newInstrumentSMFWriter(p *Piece, wr *mid.SMFWriter, instr *Instrument) *instWriter {
-	return &instWriter{
-		p:              p,
-		wr:             wr,
-		instr:          instr,
-		noteOns:        map[uint8]bool{},
-		totalBeginning: true,
-	}
-}
-
-func (iw *instWriter) writeIntro() {
-	fmt.Printf("Channel: %v\n", iw.instr.MIDIChannel)
-	iw.wr.SetChannel(uint8(iw.instr.MIDIChannel))
-	fmt.Printf("Track: %#v\n", iw.instr.Name)
-	iw.wr.Program(iw.instr.Name)
-	iw.wr.Track(iw.instr.Name)
-	iw.wr.Sequence(iw.instr.Name)
-
-	if iw.instr.MIDIBank >= 0 {
-		fmt.Printf("Bank: %v\n", iw.instr.MIDIBank)
-		iw.wr.ControlChange(cc.BankSelectMSB, uint8(iw.instr.MIDIBank))
-	}
-
-	if iw.instr.MIDIProgram >= 0 {
-		fmt.Printf("ProgramChange: %v\n", iw.instr.MIDIProgram)
-		iw.wr.ProgramChange(uint8(iw.instr.MIDIProgram))
-	}
-
-	if iw.instr.MIDIVolume >= 0 {
-		fmt.Printf("Volume: %v\n", iw.instr.MIDIVolume)
-		//iw.wr.ProgramChange(uint8(iw.instr.MIDIProgram))
-		iw.wr.ControlChange(cc.VolumeMSB, uint8(iw.instr.MIDIVolume))
-	}
-}
-
-func isHolding(be BarEvents) bool {
-	if len(be) == 0 {
-		return false
-	}
-
-	for _, ev := range be {
-		_, is := ev.Item.(hold)
-		if is {
-			return true
-		}
-	}
-	return false
-}
-
-func RepeatingBars(be BarEvents) (num int, untilNext bool) {
-	if len(be) == 0 {
-		return
-	}
-
-	for _, ev := range be {
-		switch v := ev.Item.(type) {
-		case RepeatLastBar:
-			return 1, false
-		case RepeatLastBarUntilChange:
-			return 1, true
-		case RepeatLastNBarsUntilChange:
-			return int(v), true
-		}
-	}
-
-	return
-}
-
-func (iw *instWriter) writeBar(barNo int) error {
-	if barNo < 0 {
-		return fmt.Errorf("bars < 0 not allowed")
-	}
-	fmt.Printf("BAR: %v, IN REPETITION %v emptybars: %v\n", barNo, iw.insideRepitition, iw.emptyBars)
-	b := iw.instr.events[barNo]
-	cursorMoved := false
-
-	var num32 uint8 = 0
-	iw.lastNum32 = 0
-	var barMove uint32 = 0
-
-	if isEmpty(b) && iw.repeatingBars > 0 {
-		//		rp := iw.repeatingBars
-		//		rf := iw.repeatFrom
-		iw.currentlyRepeating = (iw.currentlyRepeating + 1) % iw.repeatingBars
-		//		cr := iw.currentlyRepeating
-		iw.insideRepitition = true
-		fmt.Printf("[1] REPEATING bar: %v\n", iw.repeatFrom+iw.currentlyRepeating)
-		err := iw.writeBar(iw.repeatFrom + iw.currentlyRepeating)
-		iw.insideRepitition = false
-		//		iw.repeatingBars = rp
-		//		iw.repeatFrom = rf
-		//		iw.currentlyRepeating = cr
-		return err
-	} else {
-		if !iw.insideRepitition {
-			fmt.Printf("NO REPITITION\n")
-			iw.repeatFrom = -1
-			iw.repeatingBars = 0
-			iw.currentlyRepeating = 0
-		}
-	}
-
-	if !iw.insideRepitition {
-
-		if nBars, untilNext := RepeatingBars(b); nBars > 0 {
-			if untilNext {
-				iw.repeatFrom = barNo - nBars
-				iw.currentlyRepeating = 0
-				iw.repeatingBars = nBars
-				iw.insideRepitition = true
-				fmt.Printf("in barno %v [0] REPEATING bar: %v\n", barNo, iw.repeatFrom)
-				err := iw.writeBar(iw.repeatFrom)
-				iw.insideRepitition = false
-				return err
-			} else {
-				iw.insideRepitition = true
-				fmt.Printf("in barno %v [3] REPEATING bar: %v\n", barNo, barNo-1)
-				err := iw.writeBar(barNo - 1)
-				iw.insideRepitition = false
-				return err
-			}
-		}
-	}
-
-	if !iw.totalBeginning {
-		barMove = 1
-		if !isHolding(b) {
-			for nt, isOn := range iw.noteOns {
-				if isOn {
-					if !cursorMoved {
-						fmt.Printf("[0] Forward(%v, 0, 0)\n", 1+iw.emptyBars)
-						iw.wr.Forward(1+iw.emptyBars, 0, 0)
-						cursorMoved = true
-						iw.emptyBars = 0
-					}
-					fmt.Printf("[0] NoteOff %v\n", nt)
-					iw.wr.NoteOff(nt)
-					iw.noteOns[nt] = false
-				}
-			}
-		}
-
-	}
-
-	iw.totalBeginning = false
-
-	if isEmpty(b) {
-		iw.emptyBars = iw.emptyBars + 1
-		return nil
-	}
-
-	for barLine, ev := range b {
-		if ev.Item == nil || ev.Item == Hold {
-			continue
-		}
-
-		num32 = iw.p.bars[barNo].positions[barLine]
-
-		diffNum := num32 - iw.lastNum32
-		if diffNum > 0 {
-			if !cursorMoved {
-				cursorMoved = true
-				fmt.Printf("[2] wr.Forward(%v, %v, 32)\n", iw.emptyBars+barMove, uint32(diffNum))
-				iw.wr.Forward(iw.emptyBars+barMove, uint32(diffNum), 32)
-			} else {
-				fmt.Printf("[3] wr.Forward(0, %v, 32)\n", uint32(diffNum))
-				iw.wr.Forward(0, uint32(diffNum), 32)
-			}
-		} else {
-			if !cursorMoved {
-				if iw.emptyBars > 0 {
-					fmt.Printf("[4] Forward(%v, 0, 0)\n", iw.emptyBars)
-					iw.wr.Forward(iw.emptyBars, 0, 0)
-				} else {
-					if barMove > 0 {
-						fmt.Printf("[5] Forward(%v, 0, 0)\n", barMove)
-						iw.wr.Forward(barMove, 0, 0)
-					}
-				}
-				cursorMoved = true
-			}
-		}
-		iw.emptyBars = 0
-		iw.lastNum32 = num32
-		var item Item
-
-		switch it := ev.Item.(type) {
-		case RepeatLastEvent:
-			item = iw.lastItem
-			// TODO maybe allow dynamic override
-		default:
-			_ = it
-			item = ev.Item
-		}
-
-		stopNotes := func() {
-			for nt, isOn := range iw.noteOns {
-				if isOn {
-					fmt.Printf("[3.5] NoteOff %v\n", nt)
-					iw.wr.NoteOff(nt)
-					iw.noteOns[nt] = false
-				}
-			}
-		}
-
-		var addedNotes []uint8
-
-		addedNotes = iw.writeItem(item, stopNotes)
-		iw.lastItem = item
-
-		for _, nt := range addedNotes {
-			iw.noteOns[nt] = true
-		}
-
-	}
-	return nil
-}
-
-func (iw *instWriter) writeTrack() error {
-
-	iw.writeIntro()
-	iw.prevVel = 60
-	iw.emptyBars = 0
-	iw.noteOns = map[uint8]bool{}
-	iw.lastItem = nil
-
-	for barNo := 0; barNo < len(iw.instr.events); barNo++ {
-		iw.writeBar(barNo)
-	}
-
-	var hasNoteOn bool
-
-	for _, isOn := range iw.noteOns {
-		if isOn {
-			hasNoteOn = true
-		}
-	}
-
-	if hasNoteOn {
-		fmt.Printf("[6] Forward(%v, 0, 0)\n", iw.emptyBars+1)
-		iw.wr.Forward(iw.emptyBars+1, 0, 0)
-		for nt, isOn := range iw.noteOns {
-			if isOn {
-				fmt.Printf("[4] NoteOff %v\n", nt)
-				iw.wr.NoteOff(nt)
-				iw.noteOns[nt] = false
-			}
-		}
-	}
-	return nil
-}
-
 func (p *Piece) writeSMF(wr *mid.SMFWriter) error {
 	err := p.writeFirstTrack(wr)
 
@@ -986,86 +375,6 @@ func (p *Piece) writeSMF(wr *mid.SMFWriter) error {
 	fmt.Println("EOT")
 	wr.EndOfTrack()
 	return nil
-}
-
-func getQNNumberFromPos(pos string) (qnnumber int, rest string) {
-	if len(pos) == 0 {
-		panic("empty position is not valid")
-	}
-	qnnumber = -1
-	rest = pos
-
-	if len(pos) > 1 {
-		if i2, err := strconv.Atoi(pos[0:2]); err == nil {
-			qnnumber = i2
-			rest = pos[2:]
-		} else {
-			if i1, err := strconv.Atoi(pos[0:1]); err == nil {
-				qnnumber = i1
-				rest = pos[1:]
-			}
-		}
-	} else {
-		if i1, err := strconv.Atoi(pos[0:1]); err == nil {
-			qnnumber = i1
-			rest = pos[1:]
-		}
-	}
-
-	return
-}
-
-// lastPos must either be "", then pos must be complete
-// (i.e. must start with a number) or lastPos must be complete
-// then pos may be derived from it
-func positionTo32th(lastPos, pos string) (completed string, num32th uint8) {
-
-	number, rest := getQNNumberFromPos(pos)
-	completed = pos
-
-	if number == -1 {
-		if lastPos == "" {
-			panic("lastPos must be given, if pos is incomplete")
-		}
-
-		lastNum, lastRest := getQNNumberFromPos(lastPos)
-
-		if lastNum < 1 {
-			panic("lastPos must be given, if pos is incomplete")
-		}
-
-		number = lastNum
-		rest = lastRest + rest
-		completed = fmt.Sprintf("%v%s", number, rest)
-	}
-
-	num32th = uint8((number - 1) * 8)
-
-	if rest == "" {
-		return
-	}
-
-	switch rest {
-	case ";":
-		num32th += 1
-	case ".":
-		num32th += 2
-	case ".;":
-		num32th += 3
-	case "&":
-		num32th += 4
-	case "&;":
-		num32th += 5
-	case "&.":
-		num32th += 6
-	case "&.;":
-		num32th += 7
-	default:
-		panic("invalid rest: " + rest + " in " + pos)
-	}
-
-	return
-
 }
 
 func (p *Piece) WriteSMF(midifile string) error {
@@ -1153,7 +462,7 @@ func (p *Piece) format(bf *bytes.Buffer) {
 
 	for k, v := range p.patterns {
 		//fmt.Fprintf(bf, "%s %s\n", pad("$"+k+":", 15), v)
-		fmt.Fprintf(bf, "%15s+ %s\n", "$"+k+":", v)
+		fmt.Fprintf(bf, "%15s+ %s\n", "$"+k+":", v.Original)
 	}
 
 	bf.WriteString("\n\n")
@@ -1288,69 +597,6 @@ func (p *Piece) format(bf *bytes.Buffer) {
 func (p *Piece) newBar(b *Bar) {
 	p.bars = append(p.bars, b)
 	p.currentBar++
-}
-
-type TimeSig [2]uint8
-
-type Bar struct {
-	tempoChange       float64
-	timeSigChange     TimeSig
-	positions         []uint8  // each position is number of 32th from start
-	originalPositions []string // original positioning strings
-}
-
-type Item interface{}
-
-type Event struct {
-	Item         Item
-	originalData string
-}
-
-type BarEvents []*Event
-
-func NewPiece(r io.Reader) *Piece {
-	p := &Piece{}
-	p.currentBar = -1
-	p.numInstruments = -1
-	p.rd = bufio.NewReader(r)
-	p.props = map[string]string{}
-	p.temperament = map[string]string{}
-	p.patterns = map[string]*PatternDefinition{}
-	p.parts = map[string]int{}
-	p.jumps = map[int]string{}
-	p.comments = map[int]string{}
-	return p
-}
-
-type Instrument struct {
-	Name        string
-	MIDIChannel int8
-	MIDIProgram int8
-	MIDIVolume  int8
-	MIDIBank    int8
-	events      []BarEvents // in the order of bars
-	colWidth    int
-}
-
-func (i *Instrument) pad(s string) string {
-	return pad(s, i.colWidth)
-}
-
-func (i *Instrument) calcColWidth() {
-	i.colWidth = len(i.Name)
-
-	for _, be := range i.events {
-		for _, ev := range be {
-			l := len(ev.originalData)
-			if l > i.colWidth {
-				i.colWidth = l
-			}
-		}
-	}
-
-	if i.colWidth < 2 {
-		i.colWidth = 2
-	}
 }
 
 func (p *Piece) parseSystemLine(line string) error {
@@ -1717,4 +963,18 @@ func (p *Piece) parse() (err error) {
 		return err
 	}
 	return nil
+}
+
+func NewPiece(r io.Reader) *Piece {
+	p := &Piece{}
+	p.currentBar = -1
+	p.numInstruments = -1
+	p.rd = bufio.NewReader(r)
+	p.props = map[string]string{}
+	p.temperament = map[string]string{}
+	p.patterns = map[string]*PatternDefinition{}
+	p.parts = map[string]int{}
+	p.jumps = map[int]string{}
+	p.comments = map[int]string{}
+	return p
 }
