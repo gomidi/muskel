@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 
+	"math/rand"
+
 	"gitlab.com/gomidi/midi/mid"
 	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
@@ -207,6 +209,72 @@ type itemParser struct {
 	Getter
 }
 
+type RandomProbability struct {
+	prob   uint8
+	item   interface{}
+	chosen bool
+}
+
+type RandomChooser struct {
+	alternatives []interface{}
+	chosen       int
+}
+
+func (p *itemParser) parseRandom(data string) (item interface{}, err error) {
+	if len(data) == 0 {
+		return nil, fmt.Errorf("invalid random value: ?%s", data)
+	}
+
+	switch data[0] {
+	case '[':
+		idx := strings.Index(data, "]")
+		if idx < 0 {
+			return nil, fmt.Errorf("invalid random value: ?%s", data)
+		}
+
+		num := data[1:idx]
+
+		var rp RandomProbability
+		var n int
+		n, err = strconv.Atoi(num)
+
+		if err != nil {
+			return nil, fmt.Errorf("invalid random value: ?%s, syntax must be [n] where n is a number between 0 and 100", data)
+		}
+
+		rp.prob = uint8(n)
+
+		if rp.prob < 0 || rp.prob > 100 {
+			return nil, fmt.Errorf("invalid random value: ?%s, syntax must be [n] where n is a number between 0 and 100", data)
+		}
+
+		rp.item, err = p.parseItem(data[idx+1:])
+
+		if err != nil {
+			return nil, fmt.Errorf("invalid random value item: ?%s", data)
+		}
+		return &rp, nil
+	case '(':
+		alternatives := strings.Trim(data, "()")
+		alt := strings.Split(alternatives, ",")
+		var r RandomChooser
+		for _, a := range alt {
+			a = strings.TrimSpace(a)
+			if a != "" {
+				item, err = p.parseItem(a)
+
+				if err != nil {
+					return nil, fmt.Errorf("invalid random value item: %s", a)
+				}
+				r.alternatives = append(r.alternatives, item)
+			}
+		}
+		return &r, nil
+	default:
+		return nil, fmt.Errorf("invalid random value: ?%s", data)
+	}
+}
+
 func (p *itemParser) parseItem(data string) (interface{}, error) {
 	data = strings.TrimSpace(data)
 	switch len(data) {
@@ -231,6 +299,8 @@ func (p *itemParser) parseItem(data string) (interface{}, error) {
 			return p.parseNote(data[1:])
 		case 'Z':
 			return p.parseNote(data[1:])
+		case '?':
+			return p.parseRandom(data[1:])
 		case 'O':
 			return p.parseOSC(data[1:])
 		case '.':
@@ -349,8 +419,380 @@ func (p *Piece) writeFirstTrack(wr *mid.SMFWriter) error {
 	return nil
 }
 
+func (p *Piece) trackBarNumbers() {
+	for _, instr := range p.Instruments {
+		var events []BarEvents
+
+		for barNo, bar := range instr.events {
+			es := make(BarEvents, len(bar))
+			events = append(events, es)
+
+			//			if bar.
+
+			for barLine, ev := range bar {
+				//
+				/*
+					set the bar number and position
+				*/
+				ev.BarNo = barNo
+				ev.OriginalBarNo = barNo
+				ev.DistanceToStartOfBarIn32th = p.bars[barNo].positions[barLine]
+
+				events[barNo][barLine] = ev
+			}
+		}
+
+		instr.events = events
+		//instr.unrolled = events
+	}
+}
+
+func (p *Piece) unrollBarsAndJumps() {
+	var unrolledBars []*Bar
+	var instrBarevents = map[int][]BarEvents{}
+	var num, denom = uint8(4), uint8(4)
+
+	var newBarNo int
+	//var barMoved int
+
+	for _, bar := range p.bars {
+
+		bar.barNo = newBarNo
+		if bar.timeSigChange[0] > 0 {
+			num, denom = bar.timeSigChange[0], bar.timeSigChange[1]
+		}
+
+		bar.timeSig[0] = num
+		bar.timeSig[1] = denom
+
+		unrolledBars = append(unrolledBars, bar)
+		newBarNo++
+
+		for ii, instr := range p.Instruments {
+			instrBarevents[ii] = append(instrBarevents[ii], instr.events[bar.originalBarNo])
+		}
+
+		if jump, has := p.jumps[bar.originalBarNo]; has {
+			startJump := bar.originalBarNo
+
+			// unroll the repeating bars in p.Bars for the first track and for reference
+			//		(and renumber them properly)
+			for j, bar2ndloop := range p.bars[p.parts[jump]:startJump] {
+				newBarNo++
+				nub := bar2ndloop.Dup()
+				if bar2ndloop.timeSigChange[0] > 0 {
+					num, denom = bar2ndloop.timeSigChange[0], bar2ndloop.timeSigChange[1]
+				}
+				nub.barNo = newBarNo
+				nub.timeSig[0] = num
+				nub.timeSig[1] = denom
+				unrolledBars = append(unrolledBars, nub)
+				for ii, instr := range p.Instruments {
+					instrBarevents[ii] = append(instrBarevents[ii], instr.events[p.parts[jump]+j])
+				}
+			}
+		}
+
+		/*
+			maybe we want an additional field for the original bar as in the notes (and the original line)
+		*/
+
+		/*
+					the unrolled events arent any longer in the synced line
+			an therefor need the reference to the original bar number
+			and then the distance from this bars start. other than that, they are sorted
+			by this distance. So before unrolling, we simply tag the events
+		*/
+
+		/*
+			TODO go through each event
+			on the first run, pick up every event that fits into its bar
+			when we reach the end of a bar where the jump happens (jumpingBar)
+			we restart from the bar were we jump to and set the bars of the
+			copied events to the new real bar.
+
+			maybe we want an additional field for the original bar as in the notes (and the original line)
+		*/
+
+		// unroll the repeating bars in p.Bars for the first track and for reference
+		//		(and renumber them properly)
+
+		/*
+			now unroll the random elements and selections indicated by ? to allow for randomized pattern selection
+		*/
+
+		/*
+			for _, instr := range p.Instruments {
+				var unrolled []*Event
+				for _, ev := range instr.unrolled {
+					// handle patterns
+					_ = ev
+				}
+
+				instr.unrolled = unrolled
+			}
+		*/
+	}
+
+	p.bars = unrolledBars
+
+	for ii, instr := range p.Instruments {
+		instr.events = instrBarevents[ii]
+	}
+}
+
+func (p *Piece) flattenInstrumentEvents() {
+	var currentlyRepeatingBars []BarEvents
+	var indexWithinCurrentlyRepeatingBars int
+
+	for _, instr := range p.Instruments {
+		var events []*Event
+		for barNo, bar := range instr.events {
+
+			numBar, denomBar := p.bars[barNo].timeSig[0], p.bars[barNo].timeSig[1]
+			lenBar := length32ths(numBar, denomBar)
+
+			numRep, untilNext := bar.RepeatingBars()
+
+			if numRep > 0 {
+				if !untilNext {
+					for _, ev := range instr.events[barNo-1] {
+						eNu := ev.Dup()
+						eNu.BarNo = barNo
+						// skip empty items
+						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+							events = append(events, eNu)
+						}
+					}
+				} else {
+					currentlyRepeatingBars = instr.events[barNo-numRep : barNo]
+					indexWithinCurrentlyRepeatingBars = 0
+					for _, ev := range instr.events[barNo-1] {
+						eNu := ev.Dup()
+						eNu.BarNo = barNo
+						// skip empty items
+						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+							events = append(events, eNu)
+						}
+					}
+				}
+				continue
+			}
+
+			if bar.isEmpty() {
+				switch len(currentlyRepeatingBars) {
+				case 0:
+					continue
+				case 1:
+					for _, ev := range currentlyRepeatingBars[0] {
+						eNu := ev.Dup()
+						eNu.BarNo = barNo
+
+						// skip empty items
+						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+							events = append(events, eNu)
+						}
+					}
+					continue
+				default:
+					indexWithinCurrentlyRepeatingBars = (indexWithinCurrentlyRepeatingBars + 1) % len(currentlyRepeatingBars)
+					for _, ev := range currentlyRepeatingBars[indexWithinCurrentlyRepeatingBars] {
+						eNu := ev.Dup()
+						eNu.BarNo = barNo
+						// skip empty items
+						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+							events = append(events, eNu)
+						}
+					}
+					continue
+				}
+			}
+
+			for barLine, ev := range bar {
+				//
+				/*
+					set the bar number and position
+				*/
+				eNu := ev.Dup()
+				eNu.BarNo = barNo
+				eNu.DistanceToStartOfBarIn32th = p.bars[barNo].positions[barLine]
+
+				// skip empty items
+				if ev.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+					events = append(events, ev)
+				}
+			}
+		}
+
+		instr.unrolled = events
+	}
+
+}
+
+func (p *Piece) evalRandomItems() {
+	for _, instr := range p.Instruments {
+		var unrolled []*Event
+		for _, ev := range instr.unrolled {
+			switch v := ev.Item.(type) {
+			case *RandomChooser:
+				v.chosen = rand.Intn(len(v.alternatives))
+				nuEv := ev.Dup()
+				nuEv.Item = v.alternatives[v.chosen]
+				unrolled = append(unrolled, nuEv)
+			case *RandomProbability:
+				if got := rand.Intn(int(v.prob)); got >= 50 {
+					nuEv := ev.Dup()
+					nuEv.Item = v.item
+					unrolled = append(unrolled, nuEv)
+				}
+
+			default:
+				unrolled = append(unrolled, ev)
+			}
+			// handle patterns
+			_ = ev
+		}
+
+		instr.unrolled = unrolled
+	}
+}
+
+func (p *Piece) unfoldPatterns() {
+	for _, instr := range p.Instruments {
+		var unrolled []*Event
+		for idx, ev := range instr.unrolled {
+			// handle patterns
+
+			switch v := ev.Item.(type) {
+			case *PatternCall:
+				/*
+						TODO
+						1. calc the distance of the next event in 32ths (respecting bar changes etc)
+						2. for each pattern event:
+						   a. calc the distance to the previous pattern event in 32ths
+						   b. if it is smaller than the next normal event, write it to unrolled
+						   c. otherwise skip the pattern event loop
+
+						ad 1:
+						  we need the distance between the bars and corresponding from the start of the bar to
+						  the event. then for each bar the length in 32ths has to be calculated + distance from start
+						  of event - distance from start of previous
+
+					    ad 2:
+						  a for the first pattern event it is either 0 (sync start) or based on the first position. for
+						    the following pattern events it is the position related to current position minus the relative position
+							of the previous pattern event
+
+					Question: what to do, if there is no next event?
+					I think then the pattern can be fully unrolled
+				*/
+				// there is a following event
+				if idx+1 < len(instr.unrolled) {
+					// 1. calc the distance of the next event in 32ths (respecting bar changes etc)
+					diffBars := instr.unrolled[idx+1].BarNo - ev.BarNo
+					var diff32ths int
+					for didx := 0; didx < diffBars; didx++ {
+						diff32ths += p.bars[ev.BarNo+didx].length32th()
+					}
+
+					diff32ths += int(instr.unrolled[idx+1].DistanceToStartOfBarIn32th)
+					diff32ths -= int(ev.DistanceToStartOfBarIn32th)
+
+					// 2a. calc the distance to the previous pattern event in 32ths
+					preventRelPosition := uint8(0)
+					_ = preventRelPosition
+					prevPos := ""
+					barLenInBetween := 0
+				pattenEventLoop:
+					for idxBarPev, barpev := range v.Events {
+						currentBarNo := ev.BarNo + idxBarPev
+
+						for idxPev, pev := range barpev {
+							_ = pev
+							nuev := ev.Dup()
+							nuev.BarNo = currentBarNo
+							nuev.Item = pev.item
+
+							if idxBarPev == 0 && idxPev == 0 {
+								//dist := pev.position
+								if !v.SyncFirst {
+									prevPos, nuev.DistanceToStartOfBarIn32th = positionTo32th(prevPos, pev.position)
+								}
+								preventRelPosition = nuev.DistanceToStartOfBarIn32th
+
+								// 2c. otherwise skip the pattern event loop
+								if int(nuev.DistanceToStartOfBarIn32th) >= diff32ths {
+									break pattenEventLoop
+								}
+
+								// 2b. if it is smaller than the next normal event, write it to unrolled
+								unrolled = append(unrolled, nuev)
+
+							} else {
+								prevPos, nuev.DistanceToStartOfBarIn32th = positionTo32th(prevPos, pev.position)
+
+								// 2c. otherwise skip the pattern event loop
+								if barLenInBetween+int(nuev.DistanceToStartOfBarIn32th) >= diff32ths {
+									break pattenEventLoop
+								}
+
+								// 2b. if it is smaller than the next normal event, write it to unrolled
+								unrolled = append(unrolled, nuev)
+							}
+						}
+
+						prevPos = ""
+						barLenInBetween += p.bars[currentBarNo].length32th()
+
+					}
+				}
+
+				//v.Events
+			default:
+				unrolled = append(unrolled, ev)
+			}
+		}
+
+		instr.unrolled = unrolled
+	}
+}
+
+func (p *Piece) unrollInstruments() error {
+
+	// attach the barnumbers and position in 32th relative to start to the event
+	p.trackBarNumbers()
+
+	// unroll the repetition within an instrument and the total jumps
+	// thereby creating new bars and attaching those new bar numbers in addition
+	// to the original bar numbers to the events
+	p.unrollBarsAndJumps()
+
+	// since now we have the barnumbers properly attached to events, we can flatten
+	// the events so that we have a single line of events where we could easily look
+	// for the next event
+	p.flattenInstrumentEvents()
+
+	// evaluate randomness here before the pattern unfolding, to be able to randomly choose
+	// patterns
+	p.evalRandomItems()
+
+	// unfold the patterns in a way that they are interrupted by the next non empty event
+	p.unfoldPatterns()
+
+	// evalute randomness a second time, so that randomness produced by patterns can be evaluated
+	p.evalRandomItems()
+
+	return nil
+}
+
 func (p *Piece) writeSMF(wr *mid.SMFWriter) error {
-	err := p.writeFirstTrack(wr)
+
+	err := p.unrollInstruments()
+	if err != nil {
+		return err
+	}
+
+	err = p.writeFirstTrack(wr)
 
 	if err != nil {
 		return err
@@ -365,7 +807,8 @@ func (p *Piece) writeSMF(wr *mid.SMFWriter) error {
 		fmt.Println("EOT")
 		wr.EndOfTrack()
 		iw := newInstrumentSMFWriter(p, wr, instr)
-		err = iw.writeTrack()
+		err = iw.writeUnrolled()
+		//err = iw.writeTrack()
 		//		err = p.writeInstrumentTrack(wr, instr)
 		if err != nil {
 			return err
@@ -444,8 +887,8 @@ func (p *Piece) format(bf *bytes.Buffer) {
 	//fmt.Fprintf(bf, "%s %s\n", pad("version:", 15), time.Now().Format(time.RFC822))
 
 	for k, v := range p.props {
-		//fmt.Fprintf(bf, "%s %s\n", pad(k+":", 15), v)
-		fmt.Fprintf(bf, "%15s+ %s\n", k+":", v)
+		fmt.Fprintf(bf, "%s %s\n", pad(k+":", 15), v)
+		//fmt.Fprintf(bf, "%15s+ %s\n", k+":", v)
 	}
 
 	//bf.WriteString("\n// temperament\n")
@@ -462,7 +905,8 @@ func (p *Piece) format(bf *bytes.Buffer) {
 
 	for k, v := range p.patterns {
 		//fmt.Fprintf(bf, "%s %s\n", pad("$"+k+":", 15), v)
-		fmt.Fprintf(bf, "%15s+ %s\n", "$"+k+":", v.Original)
+		fmt.Fprintf(bf, "%s %s\n", pad("$"+k+":", 15), v.Original)
+		//fmt.Fprintf(bf, "%15s+ %s\n", "$"+k+":", v.Original)
 	}
 
 	bf.WriteString("\n\n")
@@ -550,17 +994,17 @@ func (p *Piece) format(bf *bytes.Buffer) {
 		for pi, pos := range bar.originalPositions {
 			switch {
 			case pos[0] == '&':
-				//l = fmt.Sprintf("     %s |", pad(pos, 3))
-				l = fmt.Sprintf("     %3s+ |")
+				l = fmt.Sprintf("     %s |", pad(pos, 3))
+				//l = fmt.Sprintf("     %3s+ |")
 			case strings.Index("123456789", pos[0:1]) != -1:
-				//l = fmt.Sprintf("    %s |", pad(pos, 4))
-				l = fmt.Sprintf("    %4s+ |")
+				l = fmt.Sprintf("    %s |", pad(pos, 4))
+				//l= fmt.Sprintf("    %4s+ |")
 			case pos[0] == '.':
-				//l = fmt.Sprintf("     %s |", pad(pos, 3))
-				l = fmt.Sprintf("     %3s+ |")
+				l = fmt.Sprintf("     %s |", pad(pos, 3))
+				//l = fmt.Sprintf("     %3s+ |")
 			case pos[0] == ';':
-				//l = fmt.Sprintf("     %s |", pad(pos, 3))
-				l = fmt.Sprintf("     %3s+ |")
+				l = fmt.Sprintf("     %s |", pad(pos, 3))
+				//l = fmt.Sprintf("     %3s+ |")
 			}
 
 			for _, instr := range p.Instruments {
@@ -590,11 +1034,14 @@ func (p *Piece) format(bf *bytes.Buffer) {
 		}
 
 	}
-	bf.WriteString("// END\n")
+	//bf.WriteString("// END\n")
+	bf.WriteString("\n")
 
 }
 
 func (p *Piece) newBar(b *Bar) {
+	b.barNo = p.currentBar
+	b.originalBarNo = p.currentBar
 	p.bars = append(p.bars, b)
 	p.currentBar++
 }
@@ -617,6 +1064,16 @@ func (p *Piece) parseSystemLine(line string) error {
 		default:
 
 			var b Bar
+
+			// its a jump
+			if tab0[0] == '[' {
+				part := strings.Trim(tab0, "[]")
+				if _, has := p.parts[part]; !has {
+					return fmt.Errorf("could not jump to part %#v: not found", part)
+				}
+				p.jumps[p.currentBar] = part
+				return nil
+			}
 
 			if idx := strings.Index(tab0, "@"); idx >= 0 {
 				bpm, err := strconv.ParseFloat(tab0[idx+1:], 64)

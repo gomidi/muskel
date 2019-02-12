@@ -24,14 +24,14 @@ import (
 var (
 	cfg = config.MustNew("muskel", "0.0.1", "muskel is a musical sketch language")
 
-	argFile    = cfg.NewString("file", "name/path of the muskel file", config.Shortflag('f'), config.Required)
-	argFmt     = cfg.NewBool("fmt", "format the muskel file in place")
-	argWatch   = cfg.NewBool("watch", "watch for changes of the file and redo the command on each change", config.Shortflag('w'))
-	argOutFile = cfg.NewString("out", "output file", config.Shortflag('o'))
-	argSleep   = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds", config.Default(int32(200)))
+	argFile    = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
+	argFmt     = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
+	argWatch   = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
+	argOutFile = cfg.NewString("out", "path of the output file (SMF)", config.Shortflag('o'))
+	argSleep   = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(200)))
 
 	cmdSMF  = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
-	cmdPlay = cfg.MustCommand("play", "play a muskel file with audacious")
+	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs audacious)")
 )
 
 func fileCheckSum(file string) string {
@@ -68,8 +68,6 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
 	oldFileChecksum := ""
 	inFilep, _ := filepath.Abs(inFile)
-
-	fmt.Printf("watching \n%s\n", inFilep)
 
 	dir_ = path.Dir(inFile)
 	file_ = path.Base(inFile)
@@ -163,6 +161,7 @@ func run() error {
 	cmd, file, dir := runCmd()
 
 	if argWatch.Get() {
+		fmt.Printf("watching \n%s\n", argFile.Get())
 		r := runfunc.New(dir, cmd, runfunc.Sleep(time.Millisecond*time.Duration(int(argSleep.Get()))))
 
 		errors := make(chan error, 1)

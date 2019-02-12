@@ -88,7 +88,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		fmt.Printf("Aftertouch %v, \n", uint8(v))
 		iw.wr.Aftertouch(uint8(v))
 	case OSCMessage:
-	case *PatternCall:
+		//	case *PatternCall:
 		/*
 			Was wir wollen:
 
@@ -98,9 +98,11 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			4. dann brechen wir das pattern ab.
 		*/
 		// TODO do something with the pc events
+	/*
 		barevts := v.Events
 
 		_ = barevts
+	*/
 	case NTuple:
 		// definition of a tuple
 		// we need the complete time length over which the tuple is spread
@@ -227,6 +229,42 @@ func (iw *instWriter) writeIntro() {
 		//iw.wr.ProgramChange(uint8(iw.instr.MIDIProgram))
 		iw.wr.ControlChange(cc.VolumeMSB, uint8(iw.instr.MIDIVolume))
 	}
+}
+
+func (iw *instWriter) writeUnrolled() error {
+	var lastEv *Event
+
+	// there are no empty events any longer
+	for _, ev := range iw.instr.unrolled {
+		diffBars := ev.BarNo
+		if lastEv != nil {
+			diffBars -= lastEv.BarNo
+		}
+
+		if ev.Item != Hold {
+			iw.wr.Forward(uint32(diffBars), uint32(ev.DistanceToStartOfBarIn32th), 32)
+			stopNotes := func() {
+				for nt, isOn := range iw.noteOns {
+					if isOn {
+						fmt.Printf("[3.5] NoteOff %v\n", nt)
+						iw.wr.NoteOff(nt)
+						iw.noteOns[nt] = false
+					}
+				}
+			}
+
+			var addedNotes []uint8
+
+			addedNotes = iw.writeItem(ev.Item, stopNotes)
+
+			for _, nt := range addedNotes {
+				iw.noteOns[nt] = true
+			}
+			iw.lastItem = ev.Item
+			lastEv = ev
+		}
+	}
+	return nil
 }
 
 func (iw *instWriter) writeBar(barNo int) error {
@@ -387,9 +425,13 @@ func (iw *instWriter) writeTrack() error {
 	iw.noteOns = map[uint8]bool{}
 	iw.lastItem = nil
 
-	for barNo := 0; barNo < len(iw.instr.events); barNo++ {
-		iw.writeBar(barNo)
-	}
+	iw.writeUnrolled()
+
+	/*
+		for barNo := 0; barNo < len(iw.instr.events); barNo++ {
+			iw.writeBar(barNo)
+		}
+	*/
 
 	var hasNoteOn bool
 
@@ -421,6 +463,7 @@ type Instrument struct {
 	MIDIBank    int8
 	events      []BarEvents // in the order of bars
 	colWidth    int
+	unrolled    []*Event
 }
 
 func (i *Instrument) pad(s string) string {

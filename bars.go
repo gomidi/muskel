@@ -5,11 +5,52 @@ type Bar struct {
 	timeSigChange     [2]uint8
 	positions         []uint8  // each position is number of 32th from start
 	originalPositions []string // original positioning strings
+	lineNo            int      // line numbers are counted from the start of the system
+	barNo             int
+	originalBarNo     int
+	// real time sig (inherited or changed)
+	timeSig [2]uint8
+}
+
+func (b *Bar) length32th() int {
+	return length32ths(b.timeSig[0], b.timeSig[1])
+}
+
+// length returns the bar length in 32th
+func length32ths(num, denom uint8) int {
+	return int(num*32) / int(denom)
+}
+
+func (b *Bar) Dup() (nuB *Bar) {
+	return &Bar{
+		tempoChange:       b.tempoChange,
+		timeSigChange:     b.timeSigChange,
+		positions:         b.positions,
+		originalPositions: b.originalPositions,
+		lineNo:            b.lineNo,
+		barNo:             b.barNo,
+		originalBarNo:     b.originalBarNo,
+		timeSig:           b.timeSig,
+	}
 }
 
 type Event struct {
-	Item         interface{}
-	originalData string
+	Item                       interface{}
+	originalData               string
+	BarNo                      int
+	OriginalBarNo              int
+	DistanceToStartOfBarIn32th uint8
+	lineNo                     int // line numbers are counted from the start of the system
+}
+
+func (e *Event) Dup() *Event {
+	return &Event{
+		Item:                       e.Item,
+		originalData:               e.originalData,
+		BarNo:                      e.BarNo,
+		OriginalBarNo:              e.OriginalBarNo,
+		DistanceToStartOfBarIn32th: e.DistanceToStartOfBarIn32th,
+	}
 }
 
 type BarEvents []*Event
