@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// pad pads the given string with empty space if it is less then length
+// pad pads the given string with empty space to the right if it is less then length
 func pad(s string, length int) string {
 	if len(s) >= length {
 		return s
@@ -33,16 +33,16 @@ func velocityFromDynamic(dyn string) (vel int8) {
 		switch rn {
 		case '+':
 			if vel == -1 {
-				vel = 60
+				vel = 63
 			}
 			vel += 15
 		case '-':
 			if vel == -1 {
-				vel = 60
+				vel = 63
 			}
 			vel -= 15
 		case '*': // reset
-			vel = 60
+			vel = 63
 		}
 	}
 
@@ -54,29 +54,14 @@ func velocityFromDynamic(dyn string) (vel int8) {
 		vel = 123
 	}
 
-	if vel < 4 {
-		vel = 4
+	if vel < 5 {
+		vel = 5
 	}
 
 	return
 }
 
 func noteToMIDI(note Note) (midinote_ uint8) {
-	/*
-		rr := regNote.FindAllStringSubmatch(note, -1)
-		if len(rr) < 1 {
-			panic(fmt.Sprintf("invalid note: %v", note))
-		}
-		res := rr[0]
-		//	fmt.Printf("res: %#v\n", res)
-
-		if len(res) < 2 {
-			panic(fmt.Sprintf("invalid note: %v", note))
-		}
-
-		letter := res[1]
-	*/
-
 	midinote := 48 // c
 
 	if note.octave > 0 {
@@ -114,6 +99,39 @@ func noteToMIDI(note Note) (midinote_ uint8) {
 
 	return uint8(midinote)
 
+}
+
+func pos32thToString(pos uint8) string {
+	qn := pos / 8
+	rest := pos % 8
+
+	var bf bytes.Buffer
+	fmt.Fprintf(&bf, "%v", qn+1)
+
+	eights := rest / 4
+	rest = rest % 4
+
+	if eights > 0 {
+		fmt.Fprint(&bf, "&")
+	}
+
+	sixteenth := rest / 2
+	rest = rest % 2
+
+	if sixteenth > 0 {
+		fmt.Fprint(&bf, ".")
+	}
+
+	if rest > 0 {
+		fmt.Fprint(&bf, ";")
+	}
+
+	return bf.String()
+}
+
+// length returns the bar length in 32th
+func length32ths(num, denom uint8) int {
+	return int(num*32) / int(denom)
 }
 
 func getQNNumberFromPos(pos string) (qnnumber int, rest string) {

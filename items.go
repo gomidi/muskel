@@ -48,6 +48,17 @@ type Rest struct{}
 type hold struct{}
 type Lyric string
 
+type RandomProbability struct {
+	prob   uint8
+	item   interface{}
+	chosen bool
+}
+
+type RandomChooser struct {
+	alternatives []interface{}
+	chosen       int
+}
+
 var Hold = hold{}
 
 /*

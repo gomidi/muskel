@@ -9,36 +9,36 @@ import (
 func TestParseFragment(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected fragment
+		expected patternFragment
 	}{
-		{"2a'", fragment{"2", "a'"}},
-		{"a'", fragment{"", "a'"}},
-		{"2", fragment{"2", ""}},
-		{"2&", fragment{"2&", ""}},
-		{"&", fragment{"&", ""}},
-		{".", fragment{".", ""}},
-		{";", fragment{";", ""}},
-		{"2;", fragment{"2;", ""}},
-		{"2.;", fragment{"2.;", ""}},
-		{"2.", fragment{"2.", ""}},
-		{"&.", fragment{"&.", ""}},
-		{"&;", fragment{"&;", ""}},
-		{"&.;", fragment{"&.;", ""}},
+		{"2a'", patternFragment{"2", "a'"}},
+		{"a'", patternFragment{"", "a'"}},
+		{"2", patternFragment{"2", ""}},
+		{"2&", patternFragment{"2&", ""}},
+		{"&", patternFragment{"&", ""}},
+		{".", patternFragment{".", ""}},
+		{";", patternFragment{";", ""}},
+		{"2;", patternFragment{"2;", ""}},
+		{"2.;", patternFragment{"2.;", ""}},
+		{"2.", patternFragment{"2.", ""}},
+		{"&.", patternFragment{"&.", ""}},
+		{"&;", patternFragment{"&;", ""}},
+		{"&.;", patternFragment{"&.;", ""}},
 
-		{"2&a", fragment{"2&", "a"}},
-		{"&a", fragment{"&", "a"}},
-		{".a", fragment{".", "a"}},
-		{";a", fragment{";", "a"}},
-		{"2;a", fragment{"2;", "a"}},
-		{"2.;a", fragment{"2.;", "a"}},
-		{"2.a", fragment{"2.", "a"}},
-		{"&.a", fragment{"&.", "a"}},
-		{"&;a", fragment{"&;", "a"}},
-		{"&.;a", fragment{"&.;", "a"}},
+		{"2&a", patternFragment{"2&", "a"}},
+		{"&a", patternFragment{"&", "a"}},
+		{".a", patternFragment{".", "a"}},
+		{";a", patternFragment{";", "a"}},
+		{"2;a", patternFragment{"2;", "a"}},
+		{"2.;a", patternFragment{"2.;", "a"}},
+		{"2.a", patternFragment{"2.", "a"}},
+		{"&.a", patternFragment{"&.", "a"}},
+		{"&;a", patternFragment{"&;", "a"}},
+		{"&.;a", patternFragment{"&.;", "a"}},
 	}
 
 	for i, test := range tests {
-		var f fragment
+		var f patternFragment
 
 		f.parse(test.input)
 
@@ -182,7 +182,7 @@ func TestCall(t *testing.T) {
 
 		var pdd = get.GetPatternDefinition(pc.Name)
 		if pdd != nil {
-			res, err = pdd.Call(&pc, get)
+			res, err = pdd.Call(&pc, get.GetPatternDefinition)
 		}
 
 		if res != test.expected {

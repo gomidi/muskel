@@ -181,7 +181,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 }
 
 type instWriter struct {
-	p                  *Piece
+	p                  *SMFWriter
 	wr                 *mid.SMFWriter
 	instr              *Instrument
 	emptyBars          uint32
@@ -196,7 +196,7 @@ type instWriter struct {
 	lastNum32          uint8
 }
 
-func newInstrumentSMFWriter(p *Piece, wr *mid.SMFWriter, instr *Instrument) *instWriter {
+func newInstrumentSMFWriter(p *SMFWriter, wr *mid.SMFWriter, instr *Instrument) *instWriter {
 	return &instWriter{
 		p:              p,
 		wr:             wr,
@@ -267,6 +267,7 @@ func (iw *instWriter) writeUnrolled() error {
 	return nil
 }
 
+/*
 func (iw *instWriter) writeBar(barNo int) error {
 	if barNo < 0 {
 		return fmt.Errorf("bars < 0 not allowed")
@@ -416,6 +417,7 @@ func (iw *instWriter) writeBar(barNo int) error {
 	}
 	return nil
 }
+*/
 
 func (iw *instWriter) writeTrack() error {
 
@@ -464,6 +466,17 @@ type Instrument struct {
 	events      []BarEvents // in the order of bars
 	colWidth    int
 	unrolled    []*Event
+}
+
+func (i *Instrument) Dup() *Instrument {
+	return &Instrument{
+		Name:        i.Name,
+		MIDIChannel: i.MIDIChannel,
+		MIDIProgram: i.MIDIProgram,
+		MIDIVolume:  i.MIDIVolume,
+		MIDIBank:    i.MIDIBank,
+		colWidth:    i.colWidth, // ? set to 0??
+	}
 }
 
 func (i *Instrument) pad(s string) string {

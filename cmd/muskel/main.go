@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"crypto/md5"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -85,16 +83,8 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		}
 		oldFileChecksum = newChecksum
 
-		b, err := ioutil.ReadFile(inFile)
-
-		if err != nil {
-			return err
-		}
-
-		p := muskel.NewPiece(bytes.NewReader(b))
-
-		err = p.Parse()
-
+		sc, err := muskel.ParseFile(inFile)
+		
 		if err != nil {
 			beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 			beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
@@ -102,7 +92,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		}
 
 		if argFmt.Get() {
-			err = p.WriteFormatted(inFilep)
+			err = sc.WriteToFile(inFilep)
 			if err != nil {
 				beeep.Alert("ERROR while formatting MuSkeL:", err.Error(), "assets/warning.png")
 				return err
@@ -116,7 +106,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
 		switch cfg.ActiveCommand() {
 		case cmdSMF:
-			err = p.WriteSMF(outFile)
+			err = sc.WriteSMF(outFile)
 			if err != nil {
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
 				return err
@@ -125,7 +115,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 			beeep.Notify("OK MuSkeL converted to SMF", path.Base(outFile), "assets/information.png")
 			return nil
 		case cmdPlay:
-			err = p.WriteSMF(outFile)
+			err = sc.WriteSMF(outFile)
 			if err != nil {
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
 				return err

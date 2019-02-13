@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"regexp"
 	"strconv"
 	"strings"
@@ -79,16 +80,20 @@ func (p *PatternCall) parseEvent(data string) (ev *positionedEvent, err error) {
 		rn, _, err = rd.ReadRune()
 
 		if err != nil {
-			return nil, err
+			break
 		}
 
 		switch {
 		case strings.IndexRune("123456789&;:.", rn) >= 0:
-			bf.WriteRune(rn)
+			positionBf.WriteRune(rn)
 		default:
 			bf.WriteRune(rn)
 		}
 
+	}
+
+	if err != nil && err != io.EOF {
+		return nil, err
 	}
 
 	ev.position = positionBf.String()
@@ -101,7 +106,7 @@ func (p *PatternCall) parseEvent(data string) (ev *positionedEvent, err error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return ev, nil
 }
 
 func (p *PatternCall) parseBars(data string) error {
@@ -117,7 +122,7 @@ func (p *PatternCall) parseBars(data string) error {
 			if ev != "" {
 				e, err := p.parseEvent(ev)
 				if err != nil {
-					return fmt.Errorf("could not parse event %q", ev)
+					return fmt.Errorf("could not parse event %q: %s", ev, err.Error())
 				}
 				p.Events[bidx] = append(p.Events[bidx], e)
 			}
@@ -155,20 +160,22 @@ func splitBarsAndItems(def string) (all [][]string) {
 //var pattReg = regexp.MustCompile("%" + regexp.QuoteMeta("[") + "([1-9]+)" + regexp.QuoteMeta("]"))
 var pattReg = regexp.MustCompile(regexp.QuoteMeta("#") + "([1-9]+)")
 
+/*
 type Getter interface {
 	GetPatternDefinition(name string) *PatternDefinition
 }
+*/
 
 var regPos = regexp.MustCompile("^([1-9]?[0-9]?)([&;" + regexp.QuoteMeta(".") + "]*)")
 
 //var regNote = regexp.MustCompile(`^([a-gA-G])([#\\^°]?)(["']*)$`)
 
-type fragment struct {
+type patternFragment struct {
 	position string
 	item     string
 }
 
-func (f *fragment) parse(s string) {
+func (f *patternFragment) parse(s string) {
 	if regPos.MatchString(s) {
 		all := regPos.FindAllString(s, 1)
 		f.position = all[0]
@@ -179,8 +186,8 @@ func (f *fragment) parse(s string) {
 }
 
 func replaceItemWith(src string, replacement string) string {
-	var fsrc fragment
-	var frepl fragment
+	var fsrc patternFragment
+	var frepl patternFragment
 	fsrc.parse(src)
 	frepl.parse(replacement)
 
@@ -225,7 +232,7 @@ func (p *PatternDefinition) Parse(definitionLine string) error {
 	return nil
 }
 
-func (p *PatternDefinition) Call(call *PatternCall, getter Getter) (string, error) {
+func (p *PatternDefinition) Call(call *PatternCall, getter func(name string) *PatternDefinition) (string, error) {
 	s := p.Original
 
 	// replace params
@@ -257,7 +264,7 @@ func (p *PatternDefinition) Call(call *PatternCall, getter Getter) (string, erro
 				var pc PatternCall
 				pc.Parse(item[1:])
 
-				pd := getter.GetPatternDefinition(pc.Name)
+				pd := getter(pc.Name)
 				if pd == nil {
 					return "", fmt.Errorf("ERROR while calling pattern %q: can't find referenced pattern %q", p.Name, pc.Name)
 				}

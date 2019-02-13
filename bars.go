@@ -12,13 +12,34 @@ type Bar struct {
 	timeSig [2]uint8
 }
 
-func (b *Bar) length32th() int {
-	return length32ths(b.timeSig[0], b.timeSig[1])
+func (b *Bar) ensurePositionExist(pos uint8) {
+
+	for i, p := range b.positions {
+		if p == pos {
+			return
+		}
+
+		if p > pos {
+			np := append([]uint8{}, b.positions[:i]...)
+			np = append(np, pos)
+			np = append(np, b.positions[i:]...)
+			b.positions = np
+
+			op := append([]string{}, b.originalPositions[:i]...)
+			op = append(op, pos32thToString(pos))
+			op = append(op, b.originalPositions[i:]...)
+			b.originalPositions = op
+			return
+		}
+	}
+
+	b.positions = append(b.positions, pos)
+	b.originalPositions = append(b.originalPositions, pos32thToString(pos))
+	return
 }
 
-// length returns the bar length in 32th
-func length32ths(num, denom uint8) int {
-	return int(num*32) / int(denom)
+func (b *Bar) length32th() int {
+	return length32ths(b.timeSig[0], b.timeSig[1])
 }
 
 func (b *Bar) Dup() (nuB *Bar) {

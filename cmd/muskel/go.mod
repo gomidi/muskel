@@ -2,7 +2,6 @@ module gitlab.com/gomidi/muskel/cmd/muskel
 
 require (
 	github.com/gen2brain/beeep v0.0.0-20180718162406-4e430518395f
-	github.com/godbus/dbus v4.1.0+incompatible // indirect
 	github.com/metakeule/observe v0.0.0-20170406094839-eba094fd212a
 	gitlab.com/gomidi/muskel v0.0.1
 	gitlab.com/metakeule/config v1.13.0
