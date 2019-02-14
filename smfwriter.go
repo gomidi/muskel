@@ -248,8 +248,8 @@ func (p *Score) flattenInstrumentEvents() {
 					}
 				} else {
 					indexWithinCurrentlyRepeatingBars = 0
-					currentlyRepeatingBars = instr.events[barNo-numRep+indexWithinCurrentlyRepeatingBars : barNo]
-					for _, ev := range instr.events[barNo-1] {
+					currentlyRepeatingBars = instr.events[barNo-numRep : barNo]
+					for _, ev := range instr.events[barNo-numRep] {
 						eNu := ev.Dup()
 						eNu.BarNo = barNo
 						// skip empty items
@@ -278,7 +278,9 @@ func (p *Score) flattenInstrumentEvents() {
 					}
 					continue
 				default:
+					fmt.Printf("IDX: %v, len %v\n", indexWithinCurrentlyRepeatingBars, len(currentlyRepeatingBars))
 					indexWithinCurrentlyRepeatingBars = (indexWithinCurrentlyRepeatingBars + 1) % len(currentlyRepeatingBars)
+					fmt.Printf("new IDX: %v\n", indexWithinCurrentlyRepeatingBars)
 					for _, ev := range currentlyRepeatingBars[indexWithinCurrentlyRepeatingBars] {
 						eNu := ev.Dup()
 						fmt.Printf("[3] setting bar no to : %v\n", barNo)
@@ -291,7 +293,8 @@ func (p *Score) flattenInstrumentEvents() {
 					continue
 				}
 			} else {
-
+				currentlyRepeatingBars = []BarEvents{}
+				indexWithinCurrentlyRepeatingBars = 0
 				for barLine, ev := range bar {
 					//
 					/*
