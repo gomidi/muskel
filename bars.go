@@ -10,6 +10,7 @@ type Bar struct {
 	originalBarNo     int
 	// real time sig (inherited or changed)
 	timeSig [2]uint8
+	jumpTo  string
 }
 
 func (b *Bar) ensurePositionExist(pos uint8) {

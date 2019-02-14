@@ -123,15 +123,18 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 			for _, ev := range instr.unrolled {
 				p.score.Bars[ev.BarNo].ensurePositionExist(ev.DistanceToStartOfBarIn32th)
 
-				if ev.BarNo > lastBarNo {
+				diff := ev.BarNo - lastBarNo
+
+				for d := 0; d < diff; d++ {
 					instr.events = append(instr.events, be)
 					be = BarEvents{}
-					lastBarNo = ev.BarNo
 				}
 
+				lastBarNo = ev.BarNo
 				be = append(be, ev)
 			}
 
+			fmt.Printf("len bars in instrument: %v\n", len(be))
 			instr.events = append(instr.events, be)
 
 			instr.calcColWidth()
@@ -207,6 +210,12 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 	} else {
 
 		for i, bar := range p.score.Bars {
+			if bar.jumpTo != "" {
+				l = fmt.Sprintf("[%s]", bar.jumpTo)
+				p.writeSystemLine(bf, l)
+				continue
+			}
+
 			if bar.timeSigChange[0] != 0 {
 				l = fmt.Sprintf("%v/%v", bar.timeSigChange[0], bar.timeSigChange[1])
 			} else {
@@ -244,20 +253,21 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 
 				if pi == 0 {
 					for prt, br := range p.score.Parts {
-						if br == i {
+						if br[0] == i {
 							l += fmt.Sprintf(" %s", prt)
 						}
 					}
 				}
 
-				if pi == len(bar.originalPositions)-1 {
-					for br, jmp := range p.score.Jumps {
-						if br == i {
-							l += fmt.Sprintf(" %s", jmp)
+				/*
+					if pi == len(bar.originalPositions)-1 {
+						for br, jmp := range p.score.Jumps {
+							if br == i {
+								l += fmt.Sprintf(" %s", jmp)
+							}
 						}
 					}
-				}
-
+				*/
 				p.writeSystemLine(bf, l)
 			}
 

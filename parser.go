@@ -19,6 +19,8 @@ type Parser struct {
 	lineNosystemStart int
 	currentBar        int
 	numInstruments    int
+	jumpInLineBefore  bool
+	inPart            string
 }
 
 func NewParser(r io.Reader) *Parser {
@@ -59,6 +61,7 @@ func Parse(rd io.Reader) (sc *Score, err error) {
 
 func (p *Parser) newBar(b *Bar) {
 	p.currentBar++
+	fmt.Printf("parser: adding bar %v\n", p.currentBar)
 	b.barNo = p.currentBar
 	b.originalBarNo = p.currentBar
 	p.Score.Bars = append(p.Score.Bars, b)
@@ -123,6 +126,7 @@ func (p *Parser) parseSystemLine(line string) error {
 		case "":
 			var b Bar
 			p.newBar(&b)
+			p.jumpInLineBefore = false
 			return nil
 		// normal bar change without anything
 		default:
@@ -135,10 +139,19 @@ func (p *Parser) parseSystemLine(line string) error {
 				if _, has := p.Score.Parts[part]; !has {
 					return fmt.Errorf("could not jump to part %#v: not found", part)
 				}
-				p.Score.Jumps[p.currentBar] = part
+
+				if p.inPart != "" {
+					p.Score.Parts[part] = [2]int{p.Score.Parts[part][0], p.currentBar}
+					p.inPart = ""
+				}
+
+				b.jumpTo = part
+				p.newBar(&b)
+				p.jumpInLineBefore = true
 				return nil
 			}
 
+			p.jumpInLineBefore = false
 			if idx := strings.Index(tab0, "@"); idx >= 0 {
 				bpm, err := strconv.ParseFloat(tab0[idx+1:], 64)
 				if err != nil {
@@ -179,6 +192,10 @@ func (p *Parser) parseSystemLine(line string) error {
 	case 0:
 		panic("must not happen")
 	default:
+		if p.jumpInLineBefore {
+			p.newBar(&Bar{})
+			p.jumpInLineBefore = false
+		}
 		if p.numInstruments == -1 {
 			p.numInstruments = len(tabs) - 2
 		}
@@ -307,15 +324,16 @@ func (p *Parser) parseSystemLine(line string) error {
 			if _, hasPart := p.Score.Parts[part]; hasPart {
 				return fmt.Errorf("part %#v already exists", part)
 			} else {
-				p.Score.Parts[part] = p.currentBar
+				if p.inPart != "" {
+					p.Score.Parts[part] = [2]int{p.Score.Parts[part][0], p.currentBar}
+				}
+				p.Score.Parts[part] = [2]int{p.currentBar, -1}
+				p.inPart = part
 			}
 
 		case 0:
 		// do nothing
 		default:
-			// probably a jump; check
-			p.Score.Jumps[p.currentBar] = part
-			//fmt.Printf("line: %v, position: %v part: %v\n", lineNo, position, part)
 		}
 
 	}

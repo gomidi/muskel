@@ -149,31 +149,23 @@ func (p *Score) unrollBarsAndJumps(nu *Score) {
 		nu.Instruments = append(nu.Instruments, instr.Dup())
 	}
 
+	fmt.Printf("len bars: %v\n", len(p.Bars))
+
 	for _, bar := range p.Bars {
-		//		fmt.Printf("bar.barNo: %v, bar.originalBarNo: %v\n", bar.barNo, bar.originalBarNo)
+		fmt.Printf("bar.barNo: %v, bar.originalBarNo: %v\n", bar.barNo, bar.originalBarNo)
 
-		bar.barNo = newBarNo
-		if bar.timeSigChange[0] > 0 {
-			num, denom = bar.timeSigChange[0], bar.timeSigChange[1]
-		}
+		if jump := bar.jumpTo; jump != "" {
+			//startJump := bar.originalBarNo
 
-		bar.timeSig[0] = num
-		bar.timeSig[1] = denom
-
-		unrolledBars = append(unrolledBars, bar)
-		newBarNo++
-
-		for ii, instr := range p.Instruments {
-			instrBarevents[ii] = append(instrBarevents[ii], instr.events[bar.originalBarNo])
-		}
-
-		if jump, has := p.Jumps[bar.originalBarNo]; has {
-			startJump := bar.originalBarNo
-
+			/*
+				var nub *Bar
+			*/
 			// unroll the repeating bars in p.Bars for the first track and for reference
 			//		(and renumber them properly)
-			for j, bar2ndloop := range p.Bars[p.Parts[jump]:startJump] {
-				newBarNo++
+
+			// TODO track the end of the current part
+			for j, bar2ndloop := range p.Bars[p.Parts[jump][0] : p.Parts[jump][1]+1] {
+
 				nub := bar2ndloop.Dup()
 				if bar2ndloop.timeSigChange[0] > 0 {
 					num, denom = bar2ndloop.timeSigChange[0], bar2ndloop.timeSigChange[1]
@@ -182,16 +174,47 @@ func (p *Score) unrollBarsAndJumps(nu *Score) {
 				nub.timeSig[0] = num
 				nub.timeSig[1] = denom
 				unrolledBars = append(unrolledBars, nub)
-				for ii, instr := range p.Instruments {
-					instrBarevents[ii] = append(instrBarevents[ii], instr.events[p.Parts[jump]+j])
+				for iii, _instr := range p.Instruments {
+					fmt.Printf("adding bar %v => %v\n", p.Parts[jump][0]+j, newBarNo)
+					instrBarevents[iii] = append(instrBarevents[iii], _instr.events[p.Parts[jump][0]+j])
 				}
+				newBarNo++
 			}
+
+			/*
+				nub = nub.Dup()
+				nub.barNo = newBarNo
+				unrolledBars = append(unrolledBars, nub)
+				for iii, _instr := range p.Instruments {
+						fmt.Printf("adding bar %v => %v\n", p.Parts[jump]+j, newBarNo)
+						instrBarevents[iii] = append(instrBarevents[iii], Event{Item: nil, BarNo: newBarNo})
+					}
+				newBarNo++
+			*/
+		} else {
+			bar.barNo = newBarNo
+			if bar.timeSigChange[0] > 0 {
+				num, denom = bar.timeSigChange[0], bar.timeSigChange[1]
+			}
+
+			bar.timeSig[0] = num
+			bar.timeSig[1] = denom
+
+			unrolledBars = append(unrolledBars, bar)
+			newBarNo++
+
+			for ii, instr := range p.Instruments {
+				fmt.Printf("adding bar %v\n", bar.originalBarNo)
+				instrBarevents[ii] = append(instrBarevents[ii], instr.events[bar.originalBarNo])
+			}
+
 		}
 	}
 
 	nu.Bars = unrolledBars
 
 	for ii, instr := range nu.Instruments {
+		fmt.Printf("[0] len bars in instr: %v\n", len(instrBarevents[ii]))
 		instr.events = instrBarevents[ii]
 	}
 }
@@ -219,17 +242,19 @@ func (p *Score) flattenInstrumentEvents() {
 						eNu.BarNo = barNo
 						// skip empty items
 						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+							fmt.Printf("[0] setting bar no to : %v\n", barNo)
 							events = append(events, eNu)
 						}
 					}
 				} else {
-					currentlyRepeatingBars = instr.events[barNo-numRep : barNo]
 					indexWithinCurrentlyRepeatingBars = 0
+					currentlyRepeatingBars = instr.events[barNo-numRep+indexWithinCurrentlyRepeatingBars : barNo]
 					for _, ev := range instr.events[barNo-1] {
 						eNu := ev.Dup()
 						eNu.BarNo = barNo
 						// skip empty items
 						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+							fmt.Printf("[1] setting bar no to : %v\n", barNo)
 							events = append(events, eNu)
 						}
 					}
@@ -245,9 +270,9 @@ func (p *Score) flattenInstrumentEvents() {
 					for _, ev := range currentlyRepeatingBars[0] {
 						eNu := ev.Dup()
 						eNu.BarNo = barNo
-
 						// skip empty items
 						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+							fmt.Printf("[2] setting bar no to : %v\n", barNo)
 							events = append(events, eNu)
 						}
 					}
@@ -256,6 +281,7 @@ func (p *Score) flattenInstrumentEvents() {
 					indexWithinCurrentlyRepeatingBars = (indexWithinCurrentlyRepeatingBars + 1) % len(currentlyRepeatingBars)
 					for _, ev := range currentlyRepeatingBars[indexWithinCurrentlyRepeatingBars] {
 						eNu := ev.Dup()
+						fmt.Printf("[3] setting bar no to : %v\n", barNo)
 						eNu.BarNo = barNo
 						// skip empty items
 						if eNu.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
@@ -264,25 +290,31 @@ func (p *Score) flattenInstrumentEvents() {
 					}
 					continue
 				}
-			}
+			} else {
 
-			for barLine, ev := range bar {
-				//
-				/*
-					set the bar number and position
-				*/
-				eNu := ev.Dup()
-				eNu.BarNo = barNo
-				eNu.DistanceToStartOfBarIn32th = p.Bars[barNo].positions[barLine]
+				for barLine, ev := range bar {
+					//
+					/*
+						set the bar number and position
+					*/
+					eNu := ev.Dup()
+					eNu.BarNo = barNo
+					eNu.DistanceToStartOfBarIn32th = p.Bars[barNo].positions[barLine]
 
-				// skip empty items
-				if ev.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
-					events = append(events, ev)
+					// skip empty items
+					if ev.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
+						fmt.Printf("[4] setting bar no to : %v\n", barNo)
+						events = append(events, eNu)
+					}
 				}
 			}
 		}
 
 		instr.unrolled = events
+
+		for _, unev := range instr.unrolled {
+			fmt.Printf("Events: bar: %v, dist from start: %v\n", unev.BarNo, unev.DistanceToStartOfBarIn32th)
+		}
 	}
 
 }

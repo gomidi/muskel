@@ -25,10 +25,9 @@ type Score struct {
 	Meta               map[string]string
 	Temperament        map[string]string
 	PatternDefinitions map[string]*PatternDefinition
-	Parts              map[string]int // part name to bar no
-	Jumps              map[int]string // bar no at the end of which the jump should be done mapped to the jump definition
-	Comments           map[int]string // line calculated from the start of the system
-	HeaderComments     []string       // comments in the header, as they come
+	Parts              map[string][2]int // part name to start bar no and last bar
+	Comments           map[int]string    // line calculated from the start of the system
+	HeaderComments     []string          // comments in the header, as they come
 
 	isUnrolled        bool
 	barNumbersTracked bool
@@ -39,8 +38,7 @@ func NewScore() *Score {
 		Meta:               map[string]string{},
 		Temperament:        map[string]string{},
 		PatternDefinitions: map[string]*PatternDefinition{},
-		Parts:              map[string]int{},
-		Jumps:              map[int]string{},
+		Parts:              map[string][2]int{},
 		Comments:           map[int]string{},
 		isUnrolled:         false,
 	}
@@ -62,7 +60,6 @@ func (s *Score) Unroll() (*Score, error) {
 	nu.Meta = s.Meta
 	nu.Comments = s.Comments
 	nu.Parts = s.Parts
-	nu.Jumps = s.Jumps
 	nu.Temperament = s.Temperament
 	nu.PatternDefinitions = s.PatternDefinitions
 	nu.HeaderComments = s.HeaderComments
