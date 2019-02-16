@@ -6,7 +6,231 @@ import (
 	"testing"
 )
 
+func TestUnrollPattern(t *testing.T) {
+	t.Skip()
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`
+$a:  1a' 2&b 5&c"
+=
+  | piano | vox |
+
+1 | $a |    |
+2 |    |  E  |
+
+1 |    | F|
+`, `
+
+
+
+$a:             1a' 2&b 5&c"
+
+
+
+=
+         | piano | vox |
+Ch       | -     | -   |
+Bank     | -     | -   |
+Prog     | -     | -   |
+Vol      | -     | -   |
+
+    1    | a'    |     |
+    2    |       | E   |
+    2&   | b     |     |
+
+    1    |       | F   |
+    1&   | c"    |     |
+`},
+		{
+			`
+$a:  1a' 2&b 5&c"
+=
+  | piano | 
+
+1 | $a |
+
+1 | d   | 
+& | e' |
+`, `
+
+
+
+$a:             1a' 2&b 5&c"
+
+
+
+=
+         | piano |
+Ch       | -     |
+Bank     | -     |
+Prog     | -     |
+Vol      | -     |
+
+    1    | a'    |
+    2&   | b     |
+
+    1    | d     |
+     &   | e'    |
+`},
+
+		{
+			`
+$a:  1a' 4&b 5&c"
+=
+  | piano | 
+3/4
+1 | $a |
+`, `
+
+
+
+$a:             1a' 2&b 5&c"
+
+
+
+=
+         | piano |
+Ch       | -     |
+Bank     | -     |
+Prog     | -     |
+Vol      | -     |
+
+    1    | a'    |
+	
+    1&   | b     |
+    2&   | c"    |
+`},
+		/*
+		   {
+		   			`
+		   $a:  1a' 2&b | 1&c"
+		   =
+		     | piano | vox |
+
+		   1 | $a |   |
+		   2 |    | $a |
+
+		   1 |    |  |
+		   `, `
+
+
+
+		   $a:             1a' 2&b | 1&c"
+
+
+
+		   =
+		            | piano | vox |
+		   Ch       | -     | -   |
+		   Bank     | -     | -   |
+		   Prog     | -     | -   |
+		   Vol      | -     | -   |
+
+		       1    | a'    |     |
+		       2    |       | a'  |
+		       2&   | b     |     |
+		   	3    |       | b   |
+
+		       1    |       |     |
+		       1&   | c"    |     |
+		   	2    |       | c"  |
+		   `},
+		*/
+		{
+			`
+$a:  1a' 2&b 5&c"
+=
+  | piano |
+
+1 | $a |
+`, `
+
+
+
+$a:             1a' 2&b 5&c"
+
+
+
+=
+         | piano |
+Ch       | -     |
+Bank     | -     |
+Prog     | -     |
+Vol      | -     |
+
+    1    | a'    |
+    2&   | b     |
+
+    1&   | c"    |
+`},
+		{
+			`
+$a:  1a' 2b
+=
+  | piano |
+
+1 | $a |
+`, `
+
+
+
+$a:             1a' 2b
+
+
+
+=
+         | piano |
+Ch       | -     |
+Bank     | -     |
+Prog     | -     |
+Vol      | -     |
+
+    1    | a'    |
+    2    | b     |
+`},
+	}
+
+	for i, test := range tests {
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+
+		if err != nil {
+			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		unr, err := sc.Unroll()
+
+		if err != nil {
+			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		var bf bytes.Buffer
+
+		err = unr.WriteTo(&bf)
+
+		if err != nil {
+			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		result := strings.TrimSpace(bf.String())
+		expected := strings.TrimSpace(test.expected)
+
+		//		fmt.Println(result)
+
+		if result != expected {
+			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, result, expected, result, expected)
+			//			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
+		}
+	}
+}
+
 func TestUnroll(t *testing.T) {
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -152,8 +376,6 @@ Vol      | -     |
 
 1  | |
 
-1  | |
-
 1  |b |
 		   		   		   			`,
 			`
@@ -178,9 +400,6 @@ Vol      | -     |
 
     1    | a'    |
     1&   | c"    |
-
-    1    | d'    |
-    2&   | e"    |
 
     1    | b     |
 		   		   		   `,

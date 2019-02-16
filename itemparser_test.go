@@ -31,84 +31,84 @@ func TestParseItem(t *testing.T) {
 			&PatternCall{Name:"pa", Params:[]string(nil), Replacements:[]string(nil), Slice:[2]int{-1, -1}, SyncFirst:false, result:"2c#", Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}}}
 			Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}
 		*/
-
-		{"$pa",
-			&PatternCall{
-				Name:   "pa",
-				Slice:  [2]int{-1, -1},
-				result: "2a'",
-				Events: [][]*positionedEvent{
-					[]*positionedEvent{
+		/*
+			{"$pa",
+				&PatternCall{
+					Name:   "pa",
+					Slice:  [2]int{-1, -1},
+					result: "2a'",
+					Events: []*positionedEvent{
 						&positionedEvent{
-							position: "2",
-							item:     Note{letter: "a", octave: 2},
+							position:     "2",
+							item:         Note{letter: "a", octave: 2},
+							originalData: "a'",
 						},
 					},
 				},
 			},
-		},
-		{"$pa/3/",
-			&PatternCall{
-				Name:         "pa",
-				Replacements: []string{"3"},
-				Slice:        [2]int{-1, -1},
-				result:       "3a'",
-				Events: [][]*positionedEvent{
-					[]*positionedEvent{
+			{"$pa/3/",
+				&PatternCall{
+					Name:         "pa",
+					Replacements: []string{"3"},
+					Slice:        [2]int{-1, -1},
+					result:       "3a'",
+					Events: []*positionedEvent{
 						&positionedEvent{
-							position: "3",
-							item:     Note{letter: "a", octave: 2},
+							position:     "3",
+							item:         Note{letter: "a", octave: 2},
+							originalData: "a'",
 						},
 					},
 				},
 			},
-		},
-		{"$pb(a')/: : 3&/",
-			&PatternCall{
-				Name:         "pb",
-				Replacements: []string{":", ":", "3&"},
-				Slice:        [2]int{-1, -1},
-				result:       "1a' 2a' 3&a'",
-				Params:       []string{"a'"},
-				Events: [][]*positionedEvent{
-					[]*positionedEvent{
+			{"$pb(a')/: : 3&/",
+				&PatternCall{
+					Name:         "pb",
+					Replacements: []string{":", ":", "3&"},
+					Slice:        [2]int{-1, -1},
+					result:       "1a' 2a' 3&a'",
+					Params:       []string{"a'"},
+					Events: []*positionedEvent{
 						&positionedEvent{
-							position: "1",
-							item:     Note{letter: "a", octave: 2},
+							position:     "1",
+							item:         Note{letter: "a", octave: 2},
+							originalData: "a'",
 						},
 						&positionedEvent{
-							position: "2",
-							item:     Note{letter: "a", octave: 2},
+							position:     "2",
+							item:         Note{letter: "a", octave: 2},
+							originalData: "a'",
 						},
 						&positionedEvent{
-							position: "3&",
-							item:     Note{letter: "a", octave: 2},
-						},
-					},
-				},
-			},
-		},
-		{"$pb(a')[1:]/: 3&/",
-			&PatternCall{
-				Name:         "pb",
-				Replacements: []string{":", "3&"},
-				Slice:        [2]int{1, -1},
-				result:       "2a' 3&a'",
-				Params:       []string{"a'"},
-				Events: [][]*positionedEvent{
-					[]*positionedEvent{
-						&positionedEvent{
-							position: "2",
-							item:     Note{letter: "a", octave: 2},
-						},
-						&positionedEvent{
-							position: "3&",
-							item:     Note{letter: "a", octave: 2},
+							position:     "3&",
+							item:         Note{letter: "a", octave: 2},
+							originalData: "a'",
 						},
 					},
 				},
 			},
-		},
+			{"$pb(a')[1:]/: 3&/",
+				&PatternCall{
+					Name:         "pb",
+					Replacements: []string{":", "3&"},
+					Slice:        [2]int{1, -1},
+					result:       "2a' 3&a'",
+					Params:       []string{"a'"},
+					Events: []*positionedEvent{
+						&positionedEvent{
+							position:     "2",
+							item:         Note{letter: "a", octave: 2},
+							originalData: "a'",
+						},
+						&positionedEvent{
+							position:     "3&",
+							item:         Note{letter: "a", octave: 2},
+							originalData: "a'",
+						},
+					},
+				},
+			},
+		*/
 		//	{"O[30]/a/b", &OSCMessage{}},
 	}
 
@@ -133,7 +133,7 @@ func TestParseItem(t *testing.T) {
 			return nil
 		}
 
-		result, err := parser.parseItem(test.input)
+		result, err := parser.parseItem(test.input, 0)
 
 		if err != nil {
 			t.Errorf("[%v] could not parse item for %#v: %s", i, test.input, err.Error())
@@ -141,7 +141,7 @@ func TestParseItem(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(result, test.expected) {
-			t.Errorf("[%v] parseItem(%#v) = %#v // expected %#v", i, test.input, result, test.expected)
+			t.Errorf("[%v] parseItem(%#v) = \n%#v \n// expected\n%#v", i, test.input, result, test.expected)
 		}
 	}
 }

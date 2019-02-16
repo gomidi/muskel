@@ -3,7 +3,7 @@ package muskel
 type Bar struct {
 	tempoChange       float64
 	timeSigChange     [2]uint8
-	positions         []uint8  // each position is number of 32th from start
+	positions         []uint   // each position is number of 32th from start
 	originalPositions []string // original positioning strings
 	lineNo            int      // line numbers are counted from the start of the system
 	barNo             int
@@ -13,7 +13,7 @@ type Bar struct {
 	jumpTo  string
 }
 
-func (b *Bar) ensurePositionExist(pos uint8) {
+func (b *Bar) ensurePositionExist(pos uint) {
 
 	for i, p := range b.positions {
 		if p == pos {
@@ -21,7 +21,7 @@ func (b *Bar) ensurePositionExist(pos uint8) {
 		}
 
 		if p > pos {
-			np := append([]uint8{}, b.positions[:i]...)
+			np := append([]uint{}, b.positions[:i]...)
 			np = append(np, pos)
 			np = append(np, b.positions[i:]...)
 			b.positions = np
@@ -61,7 +61,7 @@ type Event struct {
 	originalData               string
 	BarNo                      int
 	OriginalBarNo              int
-	DistanceToStartOfBarIn32th uint8
+	DistanceToStartOfBarIn32th uint
 	lineNo                     int // line numbers are counted from the start of the system
 }
 

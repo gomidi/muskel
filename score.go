@@ -13,11 +13,6 @@ import (
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 )
 
-/*
-TODO create an unrolled score and make conversion between the two.
-SMF may only be written to an unrolled score
-*/
-
 type Score struct {
 	Instruments []*Instrument
 	Bars        []*Bar
@@ -26,7 +21,7 @@ type Score struct {
 	Temperament        map[string]string
 	PatternDefinitions map[string]*PatternDefinition
 	Parts              map[string][2]int // part name to start bar no and last bar
-	Comments           map[int]string    // line calculated from the start of the system
+	BodyComments       map[int]string    // line calculated from the start of the system
 	HeaderComments     []string          // comments in the header, as they come
 
 	isUnrolled        bool
@@ -39,15 +34,51 @@ func NewScore() *Score {
 		Temperament:        map[string]string{},
 		PatternDefinitions: map[string]*PatternDefinition{},
 		Parts:              map[string][2]int{},
-		Comments:           map[int]string{},
+		BodyComments:       map[int]string{},
 		isUnrolled:         false,
 	}
 }
 
+// trackBarNumbers tracks the bar numbers and positions for each event
+func (p *Score) trackBarNumbers() {
+	if p.barNumbersTracked {
+		return
+	}
+	for _, instr := range p.Instruments {
+		var events []BarEvents
+
+		for barNo, bar := range instr.events {
+			es := make(BarEvents, len(bar))
+			events = append(events, es)
+
+			//			if bar.
+
+			for barLine, ev := range bar {
+				//
+				/*
+					set the bar number and position
+				*/
+				ev.BarNo = barNo
+				ev.OriginalBarNo = barNo
+				//fmt.Printf("barNo: %v, BarLine: %v p.Bar: %#v\n", barNo, barLine, p.Bars[barNo])
+				ev.DistanceToStartOfBarIn32th = p.Bars[barNo].positions[barLine]
+
+				events[barNo][barLine] = ev
+			}
+		}
+
+		instr.events = events
+		//instr.unrolled = events
+	}
+	p.barNumbersTracked = true
+}
+
+// Unroll unrolls repetitions, patterns and randomness and returns a score
+// without repetition, randomness and patterns
 func (s *Score) Unroll() (*Score, error) {
 
 	for _, b := range s.Bars {
-		b.positions = make([]uint8, len(b.originalPositions))
+		b.positions = make([]uint, len(b.originalPositions))
 		var oldPos string
 
 		for pi, pos := range b.originalPositions {
@@ -55,19 +86,12 @@ func (s *Score) Unroll() (*Score, error) {
 		}
 	}
 
-	nu := NewScore()
-	nu.isUnrolled = true
-	nu.Meta = s.Meta
-	nu.Comments = s.Comments
-	nu.Parts = s.Parts
-	nu.Temperament = s.Temperament
-	nu.PatternDefinitions = s.PatternDefinitions
-	nu.HeaderComments = s.HeaderComments
-	nu.barNumbersTracked = true
-	err := s.unrollInstruments(nu)
-	return nu, err
+	ur := newScoreUnroller(s)
+	err := ur.unrollInstruments()
+	return ur.dest, err
 }
 
+// WriteSMF writes the score to the given SMF file
 func (s *Score) WriteSMF(midifile string) error {
 
 	if !s.isUnrolled {
@@ -94,6 +118,7 @@ func (s *Score) WriteSMF(midifile string) error {
 	)
 }
 
+// WriteTo writes the score to the given writer (in a formatted way)
 func (s *Score) WriteTo(wr io.Writer) (err error) {
 	/*
 		defer func() {
@@ -112,6 +137,8 @@ func (s *Score) WriteTo(wr io.Writer) (err error) {
 	return
 }
 
+// WriteTo writes the score to the given file (in a formatted way)
+// It only writes to the file if the formatting was successful
 func (s *Score) WriteToFile(filepath string) (err error) {
 	dir, err := ioutil.TempDir(".", "muskel-fmt")
 	if err != nil {

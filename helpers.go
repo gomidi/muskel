@@ -101,7 +101,7 @@ func noteToMIDI(note Note) (midinote_ uint8) {
 
 }
 
-func pos32thToString(pos uint8) string {
+func pos32thToString(pos uint) string {
 	qn := pos / 8
 	rest := pos % 8
 
@@ -164,7 +164,7 @@ func getQNNumberFromPos(pos string) (qnnumber int, rest string) {
 // lastPos must either be "", then pos must be complete
 // (i.e. must start with a number) or lastPos must be complete
 // then pos may be derived from it
-func positionTo32th(lastPos, pos string) (completed string, num32th uint8) {
+func positionTo32th(lastPos, pos string) (completed string, num32th uint) {
 
 	number, rest := getQNNumberFromPos(pos)
 	completed = pos
@@ -185,7 +185,7 @@ func positionTo32th(lastPos, pos string) (completed string, num32th uint8) {
 		completed = fmt.Sprintf("%v%s", number, rest)
 	}
 
-	num32th = uint8((number - 1) * 8)
+	num32th = uint((number - 1) * 8)
 
 	if rest == "" {
 		return

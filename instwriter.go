@@ -155,7 +155,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 		iw.wr.Forward(0, delta, uint32(len(v.items))*32)
 		stopNotes()
-		iw.lastNum32 += uint8(length)
+		iw.lastNum32 += uint(length)
 
 	case MultiItem:
 		stopNotes()
@@ -193,7 +193,7 @@ type instWriter struct {
 	currentlyRepeating int
 	totalBeginning     bool
 	insideRepitition   bool
-	lastNum32          uint8
+	lastNum32          uint
 }
 
 func newInstrumentSMFWriter(p *SMFWriter, wr *mid.SMFWriter, instr *Instrument) *instWriter {

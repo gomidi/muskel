@@ -37,7 +37,7 @@ type OSCMessage struct {
 }
 
 type NTuple struct {
-	endPos uint8 // 32th in bar from the beginning
+	endPos uint // 32th in bar from the beginning
 	items  []interface{}
 }
 type RepeatLastEvent struct{}

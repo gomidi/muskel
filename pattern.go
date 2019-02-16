@@ -16,6 +16,15 @@ type PatternDefinition struct {
 	Original  string
 }
 
+/*
+TODO
+
+we remove all pipe symbols from possible pattern definitions
+and use a full sausage of quarternote positions (up to 99)
+that are spread over the actual bars with the aid of the
+spread method
+*/
+
 type PatternCall struct {
 	Name         string
 	Params       []string
@@ -23,19 +32,37 @@ type PatternCall struct {
 	Slice        [2]int
 	SyncFirst    bool
 	result       string
-	Events       [][]*positionedEvent
+	offset       uint
+	Events       []*positionedEvent // just a sausage of positions within one fictive infinite bar
+}
+
+// Spread is called unless the returned positionOfNextBar is < 0
+// The first call to spread is with start number of the position within the bar where the
+// pattern is embedded.
+// Subsequent calls will set start to the last returned positionOfNextBar
+// when the last event is return, positionOfNextBar is -1
+func (p *PatternCall) Spread(start int, num, denom uint8) (barEvents []*positionedEvent, positionOfNextBar int) {
+	/*
+	   TODO
+
+	   for each positioned event:
+
+	*/
+	return nil, -1
 }
 
 type positionedEvent struct {
-	position string
-	item     interface{}
+	position        string
+	originalData    string
+	positionIn32ths uint
+	item            interface{}
 }
 
-func (p *PatternCall) parseItem(data string) (item interface{}, err error) {
-	return (&itemParser{nil}).parseItem(data)
+func (p *PatternCall) parseItem(data string, posIn32th uint) (item interface{}, err error) {
+	return (&itemParser{nil}).parseItem(data, posIn32th)
 }
 
-func (p *PatternCall) parseItems(data string) (item interface{}, err error) {
+func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{}, err error) {
 	if len(data) == 0 {
 		return nil, nil
 	}
@@ -50,7 +77,7 @@ func (p *PatternCall) parseItems(data string) (item interface{}, err error) {
 			it = strings.TrimSpace(it)
 
 			if it != "" {
-				ite, err := p.parseItem(it)
+				ite, err := p.parseItem(it, posIn32th)
 				if err != nil {
 					return nil, err
 				}
@@ -61,13 +88,13 @@ func (p *PatternCall) parseItems(data string) (item interface{}, err error) {
 		return items, nil
 
 	default:
-		return p.parseItem(data)
+		return p.parseItem(data, posIn32th)
 	}
 
 	return
 }
 
-func (p *PatternCall) parseEvent(data string) (ev *positionedEvent, err error) {
+func (p *PatternCall) parseEvent(data string, posIn32th uint) (ev *positionedEvent, err error) {
 
 	ev = &positionedEvent{}
 	var positionBf bytes.Buffer
@@ -97,8 +124,11 @@ func (p *PatternCall) parseEvent(data string) (ev *positionedEvent, err error) {
 	}
 
 	ev.position = positionBf.String()
-
-	item, err := p.parseItems(bf.String())
+	_, ev.positionIn32ths = positionTo32th("", ev.position)
+	//	p.offset = posIn32th
+	ev.positionIn32ths += posIn32th
+	ev.originalData = bf.String()
+	item, err := p.parseItems(ev.originalData, posIn32th)
 
 	ev.item = item
 
@@ -109,25 +139,25 @@ func (p *PatternCall) parseEvent(data string) (ev *positionedEvent, err error) {
 	return ev, nil
 }
 
-func (p *PatternCall) parseBars(data string) error {
-	bars := strings.Split(data, "|")
-	p.Events = make([][]*positionedEvent, len(bars))
+func (p *PatternCall) parseBars(data string, posIn32th uint) error {
+	//bars := strings.Split(data, "|")
+	//p.Events = make([][]*positionedEvent, len(bars))
+	p.Events = []*positionedEvent{}
 
-	for bidx, bar := range bars {
-		evts := strings.Split(strings.TrimSpace(bar), " ")
+	evts := strings.Split(strings.TrimSpace(data), " ")
 
-		for _, ev := range evts {
-			ev = strings.TrimSpace(ev)
+	for _, ev := range evts {
+		ev = strings.TrimSpace(ev)
 
-			if ev != "" {
-				e, err := p.parseEvent(ev)
-				if err != nil {
-					return fmt.Errorf("could not parse event %q: %s", ev, err.Error())
-				}
-				p.Events[bidx] = append(p.Events[bidx], e)
+		if ev != "" {
+			e, err := p.parseEvent(ev, posIn32th)
+			if err != nil {
+				return fmt.Errorf("could not parse event %q: %s", ev, err.Error())
 			}
+			p.Events = append(p.Events, e)
 		}
 	}
+
 	return nil
 }
 
@@ -257,7 +287,7 @@ func (p *PatternDefinition) Call(call *PatternCall, getter func(name string) *Pa
 
 	all := splitBarsAndItems(s)
 
-	// we must parse each item and if we have a pattern call, we must the pattern we get via the getter
+	// we must parse each item and if we have a pattern call, we must parse the pattern we get via the getter
 	for bidx, bar := range all {
 		for itidx, item := range bar {
 			if len(item) > 1 && item[0] == '$' {

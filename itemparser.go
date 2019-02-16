@@ -107,7 +107,7 @@ func (p *itemParser) parseOSC(data string) (om OSCMessage, err error) {
 	return om, fmt.Errorf("parseOSC is not implemented yet")
 }
 
-func (p *itemParser) parsePattern(data string) (*PatternCall, error) {
+func (p *itemParser) parsePattern(data string, positionIn32th uint) (*PatternCall, error) {
 	if p.GetDefinition == nil {
 		return nil, fmt.Errorf("could not embed a pattern inside a resolved pattern")
 	}
@@ -126,12 +126,12 @@ func (p *itemParser) parsePattern(data string) (*PatternCall, error) {
 
 	ppc := &pc
 
-	pc.result, err = pd.Call(ppc, p.GetDefinition)
+	ppc.result, err = pd.Call(ppc, p.GetDefinition)
 	if err != nil {
 		panic(fmt.Sprintf("could not call pattern %s with %q: %s", pc.Name, data, err))
 	}
 
-	err = pc.parseBars(pc.result)
+	err = ppc.parseBars(pc.result, positionIn32th)
 
 	if err != nil {
 		panic(fmt.Sprintf("could not call pattern %s with %q: %s", pc.Name, data, err))
@@ -142,7 +142,7 @@ func (p *itemParser) parsePattern(data string) (*PatternCall, error) {
 
 // ntuple has the form {c,e,d}3&
 // where 3& is the ending position that defines the total length
-func (p *itemParser) parseNTuple(data string) (nt NTuple, err error) {
+func (p *itemParser) parseNTuple(data string, posIn32th uint) (nt NTuple, err error) {
 
 	orig := data
 
@@ -175,7 +175,7 @@ func (p *itemParser) parseNTuple(data string) (nt NTuple, err error) {
 	ntp.endPos = endPos
 
 	for pos, it := range d {
-		itt, err := p.parseItem(it)
+		itt, err := p.parseItem(it, posIn32th)
 		if err != nil {
 			return nt, fmt.Errorf("ERROR invalid n-tuple at position %v: %#v: %s", pos, it, err)
 		}
@@ -188,7 +188,7 @@ type itemParser struct {
 	GetDefinition func(name string) *PatternDefinition
 }
 
-func (p *itemParser) parseRandom(data string) (item interface{}, err error) {
+func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{}, err error) {
 	if len(data) == 0 {
 		return nil, fmt.Errorf("invalid random value: ?%s", data)
 	}
@@ -216,7 +216,7 @@ func (p *itemParser) parseRandom(data string) (item interface{}, err error) {
 			return nil, fmt.Errorf("invalid random value: ?%s, syntax must be [n] where n is a number between 0 and 100", data)
 		}
 
-		rp.item, err = p.parseItem(data[idx+1:])
+		rp.item, err = p.parseItem(data[idx+1:], posIn32th)
 
 		if err != nil {
 			return nil, fmt.Errorf("invalid random value item: ?%s", data)
@@ -229,7 +229,7 @@ func (p *itemParser) parseRandom(data string) (item interface{}, err error) {
 		for _, a := range alt {
 			a = strings.TrimSpace(a)
 			if a != "" {
-				item, err = p.parseItem(a)
+				item, err = p.parseItem(a, posIn32th)
 
 				if err != nil {
 					return nil, fmt.Errorf("invalid random value item: %s", a)
@@ -243,7 +243,7 @@ func (p *itemParser) parseRandom(data string) (item interface{}, err error) {
 	}
 }
 
-func (p *itemParser) parseItem(data string) (interface{}, error) {
+func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error) {
 	data = strings.TrimSpace(data)
 	switch len(data) {
 	case 0:
@@ -260,15 +260,15 @@ func (p *itemParser) parseItem(data string) (interface{}, error) {
 		case '_':
 			return Rest{}, nil
 		case '{':
-			return p.parseNTuple(data[1:])
+			return p.parseNTuple(data[1:], posIn32th)
 		case '$':
-			return p.parsePattern(data[1:])
+			return p.parsePattern(data[1:], posIn32th)
 		case 'S':
 			return parseNote(data[1:])
 		case 'Z':
 			return parseNote(data[1:])
 		case '?':
-			return p.parseRandom(data[1:])
+			return p.parseRandom(data[1:], posIn32th)
 		case 'O':
 			return p.parseOSC(data[1:])
 		case '.':

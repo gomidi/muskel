@@ -7,16 +7,16 @@ import (
 
 func TestBarEnsurePositionExist(t *testing.T) {
 	tests := []struct {
-		positions         []uint8
+		positions         []uint
 		originalPositions []string
-		ensure            uint8
-		resultPos         []uint8
+		ensure            uint
+		resultPos         []uint
 		resultOrig        []string
 	}{
-		{[]uint8{0, 8}, []string{"1", "2"}, 4, []uint8{0, 4, 8}, []string{"1", "1&", "2"}},
-		{[]uint8{0, 8}, []string{"1", "2"}, 12, []uint8{0, 8, 12}, []string{"1", "2", "2&"}},
-		{[]uint8{8, 16}, []string{"2", "3"}, 12, []uint8{8, 12, 16}, []string{"2", "2&", "3"}},
-		{[]uint8{}, []string{}, 4, []uint8{4}, []string{"1&"}},
+		{[]uint{0, 8}, []string{"1", "2"}, 4, []uint{0, 4, 8}, []string{"1", "1&", "2"}},
+		{[]uint{0, 8}, []string{"1", "2"}, 12, []uint{0, 8, 12}, []string{"1", "2", "2&"}},
+		{[]uint{8, 16}, []string{"2", "3"}, 12, []uint{8, 12, 16}, []string{"2", "2&", "3"}},
+		{[]uint{}, []string{}, 4, []uint{4}, []string{"1&"}},
 	}
 
 	for i, test := range tests {

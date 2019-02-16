@@ -120,7 +120,23 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 			var be BarEvents
 			var lastBarNo int
 
+			var lastBar = p.score.Bars[len(p.score.Bars)-1]
+
 			for _, ev := range instr.unrolled {
+				fmt.Printf("event: %#v\n", ev)
+
+				missing := ev.BarNo - (len(p.score.Bars) - 1)
+
+				for m := 0; m < missing; m++ {
+					nb := lastBar.Dup()
+					nb.positions = []uint{}
+					nb.originalPositions = []string{}
+					nb.barNo = ev.BarNo
+					nb.timeSigChange = [2]uint8{0, 0}
+					p.score.Bars = append(p.score.Bars, nb)
+				}
+
+				fmt.Printf("ev.BarNo: %v  len(p.score.Bars): %v\n", ev.BarNo, len(p.score.Bars))
 				p.score.Bars[ev.BarNo].ensurePositionExist(ev.DistanceToStartOfBarIn32th)
 
 				diff := ev.BarNo - lastBarNo
@@ -140,6 +156,9 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 			instr.calcColWidth()
 		}
 
+		fmt.Printf("len bars: %v\n", len(p.score.Bars))
+		fmt.Printf("len events: %v\n", len(p.score.Instruments[0].events))
+
 		for i, bar := range p.score.Bars {
 			if bar.timeSigChange[0] != 0 {
 				l = fmt.Sprintf("%v/%v", bar.timeSigChange[0], bar.timeSigChange[1])
@@ -152,6 +171,8 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 			}
 
 			p.writeSystemLine(bf, l)
+
+			var instrPrinted = false
 
 			for pi, pos := range bar.originalPositions {
 				switch {
@@ -170,18 +191,25 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 				}
 
 				for _, instr := range p.score.Instruments {
+					instrPrinted = false
 					be := instr.events[i]
 
 					for _, iev := range be {
 						if iev.DistanceToStartOfBarIn32th == bar.positions[pi] {
-							l += fmt.Sprintf(" %s |", instr.pad(be[pi].originalData))
+							l += fmt.Sprintf(" %s |", instr.pad(iev.originalData))
+							instrPrinted = true
 							break
 						}
 
 						if iev.DistanceToStartOfBarIn32th > bar.positions[pi] {
 							l += fmt.Sprintf(" %s |", instr.pad(""))
+							instrPrinted = true
 							break
 						}
+					}
+
+					if !instrPrinted {
+						l += fmt.Sprintf(" %s |", instr.pad(""))
 					}
 				}
 
@@ -278,7 +306,7 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 }
 
 func (p *Formatter) writeSystemLine(bf *bytes.Buffer, line string) {
-	if comment, has := p.score.Comments[p.writerSysLine]; has {
+	if comment, has := p.score.BodyComments[p.writerSysLine]; has {
 		p.writerSysLine++
 		bf.WriteString(comment + "\n")
 		p.writeSystemLine(bf, line)

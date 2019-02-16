@@ -9,7 +9,7 @@ func TestPositionTo32th(t *testing.T) {
 		lastPos   string
 		pos       string
 		completed string
-		num32th   uint8
+		num32th   uint
 	}{
 		{"", "1", "1", 0},
 		{"1", ";", "1;", 1},
@@ -201,7 +201,7 @@ func TestPad(t *testing.T) {
 func TestPos32thToString(t *testing.T) {
 
 	tests := []struct {
-		pos      uint8
+		pos      uint
 		expected string
 	}{
 		{0, "1"},
