@@ -317,15 +317,18 @@ Vol      | -     |
 	}
 
 	for i, test := range tests {
-		if i != 0 {
-			continue
-		}
+		/*
+			if i != 0 {
+				continue
+			}
+		*/
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
 			continue
 		}
+		//		sc.SmallColumns = true
 
 		unr, err := sc.Unroll()
 

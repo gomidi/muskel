@@ -24,6 +24,7 @@ type Score struct {
 	BodyComments       map[int]string    // line calculated from the start of the system
 	HeaderComments     []string          // comments in the header, as they come
 
+	SmallColumns      bool // if the formatting should have no distance to the column lines
 	isUnrolled        bool
 	barNumbersTracked bool
 }
@@ -87,6 +88,7 @@ func (s *Score) Unroll() (*Score, error) {
 	}
 
 	ur := newScoreUnroller(s)
+	ur.dest.SmallColumns = s.SmallColumns
 	err := ur.unrollInstruments()
 	return ur.dest, err
 }
@@ -184,6 +186,7 @@ func (s *Score) WriteTo(wr io.Writer) (err error) {
 	var bf bytes.Buffer
 
 	fm := NewFormatter(s)
+	fm.smallCols = s.SmallColumns
 	fm.Format(&bf)
 
 	_, err = bf.WriteTo(wr)

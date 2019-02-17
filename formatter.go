@@ -10,6 +10,7 @@ import (
 type Formatter struct {
 	score         *Score
 	writerSysLine int
+	smallCols     bool
 }
 
 func NewFormatter(s *Score) *Formatter {
@@ -19,58 +20,111 @@ func NewFormatter(s *Score) *Formatter {
 func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	// 9 whitespace to first pipe
 	l := "         |"
+	if p.smallCols {
+		l = "        |"
+	}
 
 	for _, instr := range p.score.Instruments {
 		instr.calcColWidth()
 		//instrColWidths[i] = instr.colWidth
-		l += fmt.Sprintf(" %s |", instr.pad(instr.Name))
+		if p.smallCols {
+			l += fmt.Sprintf("%s|", instr.pad(instr.Name))
+		} else {
+
+			l += fmt.Sprintf(" %s |", instr.pad(instr.Name))
+		}
 	}
 
 	p.writeSystemLine(bf, l)
 
 	l = "Ch       |"
+	if p.smallCols {
+		l = "Ch      |"
+	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIChannel == -1 {
-			l += fmt.Sprintf(" %v |", instr.pad("-"))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad("-"))
+			} else {
+
+				l += fmt.Sprintf(" %v |", instr.pad("-"))
+			}
 		} else {
-			l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIChannel+1)))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIChannel+1)))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIChannel+1)))
+			}
 		}
 	}
 
 	p.writeSystemLine(bf, l)
 
 	l = "Bank     |"
+	if p.smallCols {
+		l = "Bank    |"
+	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIBank == -1 {
-			l += fmt.Sprintf(" %v |", instr.pad("-"))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad("-"))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad("-"))
+			}
 		} else {
-			l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIBank+1)))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIBank+1)))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIBank+1)))
+			}
 		}
 	}
 
 	p.writeSystemLine(bf, l)
 
 	l = "Prog     |"
+	if p.smallCols {
+		l = "Prog    |"
+	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIProgram == -1 {
-			l += fmt.Sprintf(" %v |", instr.pad("-"))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad("-"))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad("-"))
+			}
 		} else {
-			l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIProgram+1)))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIProgram+1)))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIProgram+1)))
+			}
 		}
 	}
 
 	p.writeSystemLine(bf, l)
 
 	l = "Vol      |"
+	if p.smallCols {
+		l = "Vol     |"
+	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIVolume == -1 {
-			l += fmt.Sprintf(" %v |", instr.pad("-"))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad("-"))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad("-"))
+			}
 		} else {
-			l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIVolume+1)))
+			if p.smallCols {
+				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIVolume+1)))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIVolume+1)))
+			}
 		}
 	}
 
@@ -144,6 +198,12 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 
 	bf.WriteString("\n=\n")
 
+	barLine := " |"
+
+	if p.smallCols {
+		barLine = "|"
+	}
+
 	var l string
 
 	if p.score.isUnrolled {
@@ -173,16 +233,16 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 			for pi, pos := range bar.originalPositions {
 				switch {
 				case pos[0] == '&':
-					l = fmt.Sprintf("     %s |", pad(pos, 3))
+					l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
 					//l = fmt.Sprintf("     %3s+ |")
 				case strings.Index("123456789", pos[0:1]) != -1:
-					l = fmt.Sprintf("    %s |", pad(pos, 4))
+					l = fmt.Sprintf("    %s"+barLine, pad(pos, 4))
 					//l= fmt.Sprintf("    %4s+ |")
 				case pos[0] == '.':
-					l = fmt.Sprintf("     %s |", pad(pos, 3))
+					l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
 					//l = fmt.Sprintf("     %3s+ |")
 				case pos[0] == ';':
-					l = fmt.Sprintf("     %s |", pad(pos, 3))
+					l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
 					//l = fmt.Sprintf("     %3s+ |")
 				}
 
@@ -192,20 +252,32 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 
 					for _, iev := range be {
 						if iev.DistanceToStartOfBarIn32th == bar.positions[pi] {
-							l += fmt.Sprintf(" %s |", instr.pad(iev.originalData))
+							if p.smallCols {
+								l += fmt.Sprintf("%s"+barLine, instr.pad(iev.originalData))
+							} else {
+								l += fmt.Sprintf(" %s"+barLine, instr.pad(iev.originalData))
+							}
 							instrPrinted = true
 							break
 						}
 
 						if iev.DistanceToStartOfBarIn32th > bar.positions[pi] {
-							l += fmt.Sprintf(" %s |", instr.pad(""))
+							if p.smallCols {
+								l += fmt.Sprintf("%s"+barLine, instr.pad(""))
+							} else {
+								l += fmt.Sprintf(" %s"+barLine, instr.pad(""))
+							}
 							instrPrinted = true
 							break
 						}
 					}
 
 					if !instrPrinted {
-						l += fmt.Sprintf(" %s |", instr.pad(""))
+						if p.smallCols {
+							l += fmt.Sprintf("%s"+barLine, instr.pad(""))
+						} else {
+							l += fmt.Sprintf(" %s"+barLine, instr.pad(""))
+						}
 					}
 				}
 
@@ -257,30 +329,35 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 			for pi, pos := range bar.originalPositions {
 				switch {
 				case pos[0] == '&':
-					l = fmt.Sprintf("     %s |", pad(pos, 3))
+					l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
 					//l = fmt.Sprintf("     %3s+ |")
 				case strings.Index("123456789", pos[0:1]) != -1:
-					l = fmt.Sprintf("    %s |", pad(pos, 4))
+					l = fmt.Sprintf("    %s"+barLine, pad(pos, 4))
 					//l= fmt.Sprintf("    %4s+ |")
 				case pos[0] == '.':
-					l = fmt.Sprintf("     %s |", pad(pos, 3))
+					l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
 					//l = fmt.Sprintf("     %3s+ |")
 				case pos[0] == ';':
-					l = fmt.Sprintf("     %s |", pad(pos, 3))
+					l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
 					//l = fmt.Sprintf("     %3s+ |")
 				}
 
 				for _, instr := range p.score.Instruments {
 					be := instr.events[i]
 
-					l += fmt.Sprintf(" %s |", instr.pad(be[pi].originalData))
+					l += fmt.Sprintf(" %s"+barLine, instr.pad(be[pi].originalData))
 
 				}
 
 				if pi == 0 {
 					for prt, br := range p.score.Parts {
 						if br[0] == i {
-							l += fmt.Sprintf(" %s", prt)
+							if p.smallCols {
+								l += fmt.Sprintf("%s", prt)
+
+							} else {
+								l += fmt.Sprintf(" %s", prt)
+							}
 						}
 					}
 				}
