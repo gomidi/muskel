@@ -313,6 +313,19 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 		}
 	}
 
+	ev := []*positionedEvent{}
+
+	lenevents := len(p.Events)
+
+	for idx, e := range p.Events {
+		if idx < lenevents-1 && p.Events[idx+1].positionIn32ths <= e.positionIn32ths {
+			continue
+		}
+		ev = append(ev, e)
+	}
+
+	p.Events = ev
+
 	//fmt.Printf("len events: %v\n", len(p.Events))
 
 	// slice the items

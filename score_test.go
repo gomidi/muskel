@@ -12,6 +12,101 @@ func TestUnrollPattern(t *testing.T) {
 		input    string
 		expected string
 	}{
+		{
+			`
+$a: 1a' 2&#1 5&c"
+$b: 1$a(#1) 5$a(d)
+=
+  | piano | vox |
+
+1 | $a(g) | $b(f)   |
+
+1 | ./.   |    |
+`, `
+
+
+
+$a:             1a' 2&#1 5&c"
+$b:             1$a(#1) 5$a(d)
+
+
+
+=
+         | piano | vox |
+Ch       | -     | -   |
+Bank     | -     | -   |
+Prog     | -     | -   |
+Vol      | -     | -   |
+
+    1    | a'    | a'  |
+    2&   | g     | f   |
+
+    1    | a'    | a'  |
+    2&   | g     | d   |
+			`},
+		{
+			`
+$a:  1a' 2&#1 5&c"
+=
+  | piano | vox |
+
+1 | $a(g) | $a(f)   |
+
+1 | ./.   |    |
+`, `
+
+
+
+$a:             1a' 2&#1 5&c"
+
+
+
+=
+         | piano | vox |
+Ch       | -     | -   |
+Bank     | -     | -   |
+Prog     | -     | -   |
+Vol      | -     | -   |
+
+    1    | a'    | a'  |
+    2&   | g     | f   |
+
+    1    | a'    |     |
+    1&   |       | c"  |
+    2&   | g     |     |
+			`},
+		{
+			`
+$a:  1a' 2&b 5&c"
+=
+  | piano | vox |
+
+1 | $a |    |
+2 |    |  E  |
+
+1 | ./.   | F|
+`, `
+
+
+
+$a:             1a' 2&b 5&c"
+
+
+
+=
+         | piano | vox |
+Ch       | -     | -   |
+Bank     | -     | -   |
+Prog     | -     | -   |
+Vol      | -     | -   |
+
+    1    | a'    |     |
+    2    |       | E   |
+    2&   | b     |     |
+
+    1    | a'    | F   |
+    2&   | b     |     |
+			`},
 
 		{
 			`
@@ -222,9 +317,9 @@ Vol      | -     |
 	}
 
 	for i, test := range tests {
-		//		if i != 4 {
-		//			continue
-		//		}
+		if i != 0 {
+			continue
+		}
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
 
 		if err != nil {

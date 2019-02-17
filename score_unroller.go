@@ -235,6 +235,7 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 
 	//	fmt.Printf("offset: %v\n", ev.DistanceToStartOfBarIn32th)
 	pvs := PatternEvents(v.Events)
+	//	fmt.Printf("pattern events: %v\n", v.Events)
 
 	evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
 	unrolled = append(unrolled, s.convertEvents(ev.BarNo, evts...)...)
@@ -294,22 +295,51 @@ func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Inst
 	//	fmt.Printf("offset: %v\n", ev.DistanceToStartOfBarIn32th)
 	pvs := PatternEvents(v.Events)
 
-	evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
-	unrolled = append(unrolled, s.convertEvents(ev.BarNo, evts...)...)
-
 	// for each following empty bar
-	diffBars := (instr.unrolled[idx+1].BarNo - ev.BarNo) - 1
+	nextEv := instr.unrolled[idx+1]
+	//fmt.Printf("current event: %T %s at bar %v pos %v\n", ev.Item, ev.Item, ev.BarNo, ev.DistanceToStartOfBarIn32th)
+	//fmt.Printf("nextEv: %T %s at bar %v pos %v\n", nextEv.Item, nextEv.Item, nextEv.BarNo, nextEv.DistanceToStartOfBarIn32th)
+	//	diffBars := (nextEv.BarNo - ev.BarNo)
 
 	//	fmt.Printf("diffBars: %v\n", diffBars)
-	for didx := 1; didx <= diffBars; didx++ {
+	var didx int
+barLoop:
+	for {
 		if positionOfNextBar == -1 {
 			break
 		}
 		timesig = s.dest.Bars[ev.BarNo+didx].timeSig
 		evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
-		unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, evts...)...)
+		ev2 := s.convertEvents(ev.BarNo+didx, evts...)
+
+		for _, e2 := range ev2 {
+			if ev.BarNo+didx > nextEv.BarNo ||
+				(ev.BarNo+didx == nextEv.BarNo && e2.DistanceToStartOfBarIn32th >= nextEv.DistanceToStartOfBarIn32th) {
+				break barLoop
+			}
+			unrolled = append(unrolled, e2)
+		}
+		didx++
+		//		unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, evts...)...)
 	}
 
+	/*
+		evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
+		unrolled = append(unrolled, s.convertEvents(ev.BarNo, evts...)...)
+
+		// for each following empty bar
+		diffBars := (instr.unrolled[idx+1].BarNo - ev.BarNo) - 1
+
+		//	fmt.Printf("diffBars: %v\n", diffBars)
+		for didx := 1; didx <= diffBars; didx++ {
+			if positionOfNextBar == -1 {
+				break
+			}
+			timesig = s.dest.Bars[ev.BarNo+didx].timeSig
+			evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
+			unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, evts...)...)
+		}
+	*/
 	//	fmt.Printf("unrolled: %v\n", unrolled)
 
 	return

@@ -3,6 +3,7 @@ package muskel
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -15,44 +16,7 @@ func NewFormatter(s *Score) *Formatter {
 	return &Formatter{score: s}
 }
 
-func (p *Formatter) Format(bf *bytes.Buffer) {
-	//bf.WriteString("\n// info\n")
-
-	//fmt.Fprintf(bf, "%s %s\n", pad("version:", 15), time.Now().Format(time.RFC822))
-
-	for k, v := range p.score.Meta {
-		fmt.Fprintf(bf, "%s %s\n", pad(k+":", 15), v)
-		//fmt.Fprintf(bf, "%15s+ %s\n", k+":", v)
-	}
-
-	//bf.WriteString("\n// temperament\n")
-
-	bf.WriteString("\n\n")
-
-	for k, v := range p.score.Temperament {
-		fmt.Fprintf(bf, "/%s/%s\n", k, v)
-	}
-
-	bf.WriteString("\n\n")
-
-	//bf.WriteString("\n// pattern definitions\n")
-
-	for k, v := range p.score.PatternDefinitions {
-		//fmt.Fprintf(bf, "%s %s\n", pad("$"+k+":", 15), v)
-		fmt.Fprintf(bf, "%s %s\n", pad("$"+k+":", 15), v.Original)
-		//fmt.Fprintf(bf, "%15s+ %s\n", "$"+k+":", v.Original)
-	}
-
-	bf.WriteString("\n\n")
-
-	for _, comment := range p.score.HeaderComments {
-		bf.WriteString(comment + "\n")
-	}
-
-	//fmt.Fprintf(bf, "\n\nBPM: %0.2f\n", p.tempoBPM)
-
-	bf.WriteString("\n=\n")
-
+func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	// 9 whitespace to first pipe
 	l := "         |"
 
@@ -111,10 +75,82 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 	}
 
 	p.writeSystemLine(bf, l)
+}
+
+func (f *Formatter) printSorted(bf *bytes.Buffer, format string, m map[string]string) {
+	var keys = make([]string, len(m))
+
+	var i int
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		fmt.Fprintf(bf, format, k, m[k])
+	}
+}
+
+func (p *Formatter) Format(bf *bytes.Buffer) {
+	//bf.WriteString("\n// info\n")
+
+	//fmt.Fprintf(bf, "%s %s\n", pad("version:", 15), time.Now().Format(time.RFC822))
+
+	metaMap := map[string]string{}
+
+	for k, v := range p.score.Meta {
+		metaMap[pad(k+":", 15)] = v
+		//fmt.Fprintf(bf, "%s %s\n", pad(k+":", 15), v)
+		//fmt.Fprintf(bf, "%15s+ %s\n", k+":", v)
+	}
+
+	p.printSorted(bf, "%s %s\n", metaMap)
+
+	//bf.WriteString("\n// temperament\n")
+
+	bf.WriteString("\n\n")
+
+	p.printSorted(bf, "/%s/%s\n", p.score.Temperament)
+	/*
+		for k, v := range p.score.Temperament {
+			fmt.Fprintf(bf, "/%s/%s\n", k, v)
+		}
+	*/
+
+	bf.WriteString("\n\n")
+
+	//bf.WriteString("\n// pattern definitions\n")
+
+	pattDefMap := map[string]string{}
+
+	for k, v := range p.score.PatternDefinitions {
+		//fmt.Fprintf(bf, "%s %s\n", pad("$"+k+":", 15), v)
+		pattDefMap[pad("$"+k+":", 15)] = v.Original
+		//fmt.Fprintf(bf, "%s %s\n", pad("$"+k+":", 15), v.Original)
+		//fmt.Fprintf(bf, "%15s+ %s\n", "$"+k+":", v.Original)
+	}
+
+	p.printSorted(bf, "%s %s\n", pattDefMap)
+
+	bf.WriteString("\n\n")
+
+	for _, comment := range p.score.HeaderComments {
+		bf.WriteString(comment + "\n")
+	}
+
+	//fmt.Fprintf(bf, "\n\nBPM: %0.2f\n", p.tempoBPM)
+
+	bf.WriteString("\n=\n")
+
+	var l string
 
 	if p.score.isUnrolled {
 
 		p.score.enroll()
+
+		p.writeInstrumentLines(bf)
 
 		//		fmt.Printf("len bars: %v\n", len(p.score.Bars))
 		//		fmt.Printf("len events: %v\n", len(p.score.Instruments[0].events))
@@ -196,6 +232,8 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 
 		}
 	} else {
+
+		p.writeInstrumentLines(bf)
 
 		for i, bar := range p.score.Bars {
 			if bar.jumpTo != "" {
