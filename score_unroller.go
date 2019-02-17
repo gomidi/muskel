@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"fmt"
 	"math/rand"
 )
 
@@ -43,7 +42,7 @@ func (s *ScoreUnroller) unrollJump(jump string) {
 		nub.timeSig[1] = s.denom
 		s.unrolledBars = append(s.unrolledBars, nub)
 		for iii, _instr := range s.src.Instruments {
-			fmt.Printf("adding bar %v => %v\n", s.src.Parts[jump][0]+j, s.newBarNo)
+			//			fmt.Printf("adding bar %v => %v\n", s.src.Parts[jump][0]+j, s.newBarNo)
 			s.instrBarevents[iii] = append(s.instrBarevents[iii], _instr.events[s.src.Parts[jump][0]+j])
 		}
 		s.newBarNo++
@@ -63,7 +62,7 @@ func (s *ScoreUnroller) unrollBar(bar *Bar) {
 	s.newBarNo++
 
 	for ii, instr := range s.src.Instruments {
-		fmt.Printf("adding bar %v\n", bar.originalBarNo)
+		//		fmt.Printf("adding bar %v\n", bar.originalBarNo)
 		s.instrBarevents[ii] = append(s.instrBarevents[ii], instr.events[bar.originalBarNo])
 	}
 }
@@ -87,10 +86,10 @@ func (s *ScoreUnroller) unrollBarsAndJumps() {
 
 	s.createInstruments()
 
-	fmt.Printf("len bars: %v\n", len(s.src.Bars))
+	//	fmt.Printf("len bars: %v\n", len(s.src.Bars))
 
 	for _, bar := range s.src.Bars {
-		fmt.Printf("bar.barNo: %v, bar.originalBarNo: %v\n", bar.barNo, bar.originalBarNo)
+		//		fmt.Printf("bar.barNo: %v, bar.originalBarNo: %v\n", bar.barNo, bar.originalBarNo)
 
 		if jump := bar.jumpTo; jump != "" {
 			s.unrollJump(jump)
@@ -103,7 +102,7 @@ func (s *ScoreUnroller) unrollBarsAndJumps() {
 	s.dest.Bars = s.unrolledBars
 
 	for ii, instr := range s.dest.Instruments {
-		fmt.Printf("[0] len bars in instr: %v\n", len(s.instrBarevents[ii]))
+		//		fmt.Printf("[0] len bars in instr: %v\n", len(s.instrBarevents[ii]))
 		instr.events = s.instrBarevents[ii]
 	}
 }
@@ -147,9 +146,9 @@ func (s *ScoreUnroller) flattenInstrumentBarEvents(barNo int, bar BarEvents, ins
 		case 1:
 			return s.dupEvents(s.currentlyRepeatingBars[0], barNo, lenBar)
 		default:
-			fmt.Printf("IDX: %v, len %v\n", s.indexWithinCurrentlyRepeatingBars, len(s.currentlyRepeatingBars))
+			//			fmt.Printf("IDX: %v, len %v\n", s.indexWithinCurrentlyRepeatingBars, len(s.currentlyRepeatingBars))
 			s.indexWithinCurrentlyRepeatingBars = (s.indexWithinCurrentlyRepeatingBars + 1) % len(s.currentlyRepeatingBars)
-			fmt.Printf("new IDX: %v\n", s.indexWithinCurrentlyRepeatingBars)
+			//			fmt.Printf("new IDX: %v\n", s.indexWithinCurrentlyRepeatingBars)
 			return s.dupEvents(s.currentlyRepeatingBars[s.indexWithinCurrentlyRepeatingBars], barNo, lenBar)
 		}
 	}
@@ -163,7 +162,7 @@ func (s *ScoreUnroller) flattenInstrumentBarEvents(barNo int, bar BarEvents, ins
 
 		// skip empty items
 		if ev.Item != nil && int(eNu.DistanceToStartOfBarIn32th) < lenBar {
-			fmt.Printf("[4] setting bar no to : %v\n", barNo)
+			//			fmt.Printf("[4] setting bar no to : %v\n", barNo)
 			events = append(events, eNu)
 		}
 	}
@@ -186,9 +185,11 @@ func (s *ScoreUnroller) flattenInstrumentEvents() {
 
 		instr.unrolled = events
 
-		for _, unev := range instr.unrolled {
-			fmt.Printf("Events: bar: %v, dist from start: %v\n", unev.BarNo, unev.DistanceToStartOfBarIn32th)
-		}
+		/*
+			for _, unev := range instr.unrolled {
+				fmt.Printf("Events: bar: %v, dist from start: %v\n", unev.BarNo, unev.DistanceToStartOfBarIn32th)
+			}
+		*/
 	}
 
 }
@@ -239,7 +240,7 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 		} else {
 			prevPos, nuev.DistanceToStartOfBarIn32th = positionTo32th(prevPos, pev.position)
 		}
-		fmt.Printf("nuev: %#v\n", nuev)
+		//		fmt.Printf("nuev: %#v\n", nuev)
 		unrolled = append(unrolled, nuev)
 	}
 	return
@@ -281,7 +282,7 @@ func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Inst
 	*/
 
 	// there is a following event
-	fmt.Printf("have next event")
+	//	fmt.Printf("have next event")
 	// 1. calc the distance of the next event in 32ths (respecting bar changes etc)
 	diffBars := instr.unrolled[idx+1].BarNo - ev.BarNo
 	var diff32ths int
@@ -337,7 +338,7 @@ func (s *ScoreUnroller) unfoldPatterns() {
 	for _, instr := range s.dest.Instruments {
 		var unrolled []*Event
 		for idx, ev := range instr.unrolled {
-			fmt.Printf("unrolled event: %#v\n", ev)
+			//			fmt.Printf("unrolled event: %#v\n", ev)
 			// handle patterns
 			unrolled = append(unrolled, s.unfoldPattern(idx, ev, instr)...)
 		}

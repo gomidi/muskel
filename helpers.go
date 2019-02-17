@@ -3,6 +3,7 @@ package muskel
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -99,6 +100,63 @@ func noteToMIDI(note Note) (midinote_ uint8) {
 
 	return uint8(midinote)
 
+}
+
+type patternFragment struct {
+	position string
+	item     string
+}
+
+func (f *patternFragment) parse(s string) {
+	if regPos.MatchString(s) {
+		all := regPos.FindAllString(s, 1)
+		f.position = all[0]
+
+		s = regPos.ReplaceAllString(s, "")
+	}
+	f.item = s
+}
+
+// syntax for params:  #1 #2 etc.
+var pattReg = regexp.MustCompile(regexp.QuoteMeta("#") + "([1-9]+)")
+var regPos = regexp.MustCompile("^([1-9]?[0-9]?)([&;" + regexp.QuoteMeta(".") + "]*)")
+
+type positionedEvent struct {
+	position     string
+	originalData string
+	//barNo           int
+	positionIn32ths uint
+	item            interface{}
+}
+
+func (p *positionedEvent) String() string {
+	//return p.position + p.originalData
+	return pos32thToString(p.positionIn32ths) + p.originalData
+}
+
+func splitItems(def string) (items []string) {
+	def = strings.TrimSpace(def)
+
+	its := strings.Split(def, " ")
+
+	for _, it := range its {
+		it = strings.TrimSpace(it)
+		if it != "" {
+			items = append(items, it)
+		}
+	}
+	return
+}
+
+func replaceItemWith(replacement string) (position string, item string) {
+	var frepl patternFragment
+	frepl.parse(replacement)
+
+	position = frepl.position
+
+	item = frepl.item
+
+	return
 }
 
 func pos32thToString(pos uint) string {

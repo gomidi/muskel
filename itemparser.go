@@ -107,37 +107,14 @@ func (p *itemParser) parseOSC(data string) (om OSCMessage, err error) {
 	return om, fmt.Errorf("parseOSC is not implemented yet")
 }
 
-func (p *itemParser) parsePattern(data string, positionIn32th uint) (*PatternCall, error) {
+func (p *itemParser) parsePattern(data string, positionIn32th uint) (pc *PatternCall, err error) {
 	if p.GetDefinition == nil {
-		return nil, fmt.Errorf("could not embed a pattern inside a resolved pattern")
+		return nil, fmt.Errorf("no definition resolver defined")
 	}
-	var pc PatternCall
-	err := pc.Parse(data)
-
-	if err != nil {
-		return nil, fmt.Errorf("could not parse pattern call: %s", err)
-	}
-
-	pd := p.GetDefinition(pc.Name)
-
-	if pd == nil {
-		return nil, fmt.Errorf("could not find definition for pattern %s", pc.Name)
-	}
-
-	ppc := &pc
-
-	ppc.result, err = pd.Call(ppc, p.GetDefinition)
-	if err != nil {
-		panic(fmt.Sprintf("could not call pattern %s with %q: %s", pc.Name, data, err))
-	}
-
-	err = ppc.parseBars(pc.result, positionIn32th)
-
-	if err != nil {
-		panic(fmt.Sprintf("could not call pattern %s with %q: %s", pc.Name, data, err))
-	}
-
-	return ppc, err
+	pc = &PatternCall{}
+	pc.getter = p.GetDefinition
+	err = pc.parsePattern(data, positionIn32th)
+	return
 }
 
 // ntuple has the form {c,e,d}3&
@@ -245,6 +222,7 @@ func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{},
 
 func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error) {
 	data = strings.TrimSpace(data)
+	fmt.Printf("parseItem called with %q\n", data)
 	switch len(data) {
 	case 0:
 		return nil, nil
