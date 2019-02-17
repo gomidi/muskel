@@ -10,7 +10,6 @@ import (
 type Formatter struct {
 	score         *Score
 	writerSysLine int
-	smallCols     bool
 }
 
 func NewFormatter(s *Score) *Formatter {
@@ -20,14 +19,14 @@ func NewFormatter(s *Score) *Formatter {
 func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	// 9 whitespace to first pipe
 	l := "         |"
-	if p.smallCols {
+	if p.score.SmallColumns {
 		l = "        |"
 	}
 
 	for _, instr := range p.score.Instruments {
 		instr.calcColWidth()
 		//instrColWidths[i] = instr.colWidth
-		if p.smallCols {
+		if p.score.SmallColumns {
 			l += fmt.Sprintf("%s|", instr.pad(instr.Name))
 		} else {
 
@@ -38,20 +37,20 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	p.writeSystemLine(bf, l)
 
 	l = "Ch       |"
-	if p.smallCols {
+	if p.score.SmallColumns {
 		l = "Ch      |"
 	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIChannel == -1 {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad("-"))
 			} else {
 
 				l += fmt.Sprintf(" %v |", instr.pad("-"))
 			}
 		} else {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIChannel+1)))
 			} else {
 				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIChannel+1)))
@@ -62,19 +61,19 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	p.writeSystemLine(bf, l)
 
 	l = "Bank     |"
-	if p.smallCols {
+	if p.score.SmallColumns {
 		l = "Bank    |"
 	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIBank == -1 {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad("-"))
 			} else {
 				l += fmt.Sprintf(" %v |", instr.pad("-"))
 			}
 		} else {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIBank+1)))
 			} else {
 				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIBank+1)))
@@ -85,19 +84,19 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	p.writeSystemLine(bf, l)
 
 	l = "Prog     |"
-	if p.smallCols {
+	if p.score.SmallColumns {
 		l = "Prog    |"
 	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIProgram == -1 {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad("-"))
 			} else {
 				l += fmt.Sprintf(" %v |", instr.pad("-"))
 			}
 		} else {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIProgram+1)))
 			} else {
 				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIProgram+1)))
@@ -108,19 +107,19 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	p.writeSystemLine(bf, l)
 
 	l = "Vol      |"
-	if p.smallCols {
+	if p.score.SmallColumns {
 		l = "Vol     |"
 	}
 
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIVolume == -1 {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad("-"))
 			} else {
 				l += fmt.Sprintf(" %v |", instr.pad("-"))
 			}
 		} else {
-			if p.smallCols {
+			if p.score.SmallColumns {
 				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDIVolume+1)))
 			} else {
 				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDIVolume+1)))
@@ -200,7 +199,7 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 
 	barLine := " |"
 
-	if p.smallCols {
+	if p.score.SmallColumns {
 		barLine = "|"
 	}
 
@@ -252,7 +251,7 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 
 					for _, iev := range be {
 						if iev.DistanceToStartOfBarIn32th == bar.positions[pi] {
-							if p.smallCols {
+							if p.score.SmallColumns {
 								l += fmt.Sprintf("%s"+barLine, instr.pad(iev.originalData))
 							} else {
 								l += fmt.Sprintf(" %s"+barLine, instr.pad(iev.originalData))
@@ -262,7 +261,7 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 						}
 
 						if iev.DistanceToStartOfBarIn32th > bar.positions[pi] {
-							if p.smallCols {
+							if p.score.SmallColumns {
 								l += fmt.Sprintf("%s"+barLine, instr.pad(""))
 							} else {
 								l += fmt.Sprintf(" %s"+barLine, instr.pad(""))
@@ -273,7 +272,7 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 					}
 
 					if !instrPrinted {
-						if p.smallCols {
+						if p.score.SmallColumns {
 							l += fmt.Sprintf("%s"+barLine, instr.pad(""))
 						} else {
 							l += fmt.Sprintf(" %s"+barLine, instr.pad(""))
@@ -352,7 +351,7 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 				if pi == 0 {
 					for prt, br := range p.score.Parts {
 						if br[0] == i {
-							if p.smallCols {
+							if p.score.SmallColumns {
 								l += fmt.Sprintf("%s", prt)
 
 							} else {

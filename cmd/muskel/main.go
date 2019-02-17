@@ -22,11 +22,13 @@ import (
 var (
 	cfg = config.MustNew("muskel", "0.0.1", "muskel is a musical sketch language")
 
-	argFile    = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
-	argFmt     = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
-	argWatch   = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
-	argOutFile = cfg.NewString("out", "path of the output file (SMF)", config.Shortflag('o'))
-	argSleep   = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(200)))
+	argFile      = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
+	argFmt       = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
+	argWatch     = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
+	argOutFile   = cfg.NewString("out", "path of the output file (SMF)", config.Shortflag('o'))
+	argSleep     = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(200)))
+	argSmallCols = cfg.NewBool("small", "small columns in formatting", config.Shortflag('s'), config.Default(false))
+	argUnroll    = cfg.NewString("unroll", "unroll the source to the given file name", config.Shortflag('u'))
 
 	cmdSMF  = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
 	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs audacious)")
@@ -84,11 +86,31 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		oldFileChecksum = newChecksum
 
 		sc, err := muskel.ParseFile(inFile)
-		
+
 		if err != nil {
 			beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 			beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
 			return err
+		}
+
+		if argSmallCols.Get() {
+			sc.SmallColumns = true
+		}
+
+		if argUnroll.IsSet() {
+			var ur *muskel.Score
+			ur, err = sc.Unroll()
+			if err != nil {
+				beeep.Alert("ERROR while unrolling MuSkeL:", err.Error(), "assets/warning.png")
+				return err
+			}
+
+			err = ur.WriteToFile(argUnroll.Get())
+			if err != nil {
+				beeep.Alert("ERROR while writing unrolled MuSkeL:", err.Error(), "assets/warning.png")
+				return err
+			}
+
 		}
 
 		if argFmt.Get() {

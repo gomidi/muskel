@@ -186,7 +186,6 @@ func (s *Score) WriteTo(wr io.Writer) (err error) {
 	var bf bytes.Buffer
 
 	fm := NewFormatter(s)
-	fm.smallCols = s.SmallColumns
 	fm.Format(&bf)
 
 	_, err = bf.WriteTo(wr)
