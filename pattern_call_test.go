@@ -1,6 +1,7 @@
 package muskel
 
 import (
+	"bytes"
 	"reflect"
 	"strings"
 	"testing"
@@ -22,6 +23,70 @@ func newPatternGetter() *patternGetter {
 	return &patternGetter{
 		patterns: map[string]*PatternDefinition{},
 	}
+}
+
+func TestSpread(t *testing.T) {
+
+	tests := []struct {
+		num   uint8
+		denom uint8
+
+		expectedEvents            string
+		expectedPositionOfNextBar int
+	}{
+		{4, 4, "2a 2&b 3c'", 32},
+		{3, 4, "1f 3&g", 56},
+		{3, 4, "1a", 80},
+		{2, 4, "", 96},
+		{4, 4, "1e", -1},
+	}
+
+	get := newPatternGetter()
+
+	var pd PatternDefinition
+	err := pd.Parse("$pattA: 2a 2&b 3c' 5f 7&g 8a 13e"[1:])
+
+	get.add(&pd)
+
+	var pc = &PatternCall{}
+	pc.getter = get.GetPatternDefinition
+	if err == nil {
+		err = pc.parsePattern("$pattA"[1:], 0)
+	}
+
+	if err != nil {
+		t.Errorf("parsePattern() returned unexpected error: %s", err)
+		return
+	}
+
+	var positionOfNextBar int
+	var newPositionOfNextBar int
+	var events []*positionedEvent
+
+	for i, test := range tests {
+		if positionOfNextBar >= 0 {
+			events, newPositionOfNextBar = PatternEvents(pc.Events).Spread(positionOfNextBar, test.num, test.denom)
+		}
+
+		if newPositionOfNextBar != test.expectedPositionOfNextBar {
+			t.Errorf("[%v] Spread(%v, %v, %v) returned positionOfNextBar %v // expected: %v", i, positionOfNextBar, test.num, test.denom, newPositionOfNextBar, test.expectedPositionOfNextBar)
+		}
+
+		positionOfNextBar = newPositionOfNextBar
+
+		var bf bytes.Buffer
+
+		for _, event := range events {
+			bf.WriteString(event.String() + " ")
+		}
+
+		res := strings.TrimSpace(bf.String())
+
+		if res != test.expectedEvents {
+			t.Errorf("[%v] Spread(%v, %v, %v) returned events = %q // expected %q", i, positionOfNextBar, test.num, test.denom, res, test.expectedEvents)
+		}
+	}
+
 }
 
 func TestParsePattern(t *testing.T) {
@@ -171,132 +236,6 @@ func TestParsePattern(t *testing.T) {
 		}
 	}
 
-}
-
-func TestCall(t *testing.T) {
-	t.Skip()
-	tests := []struct {
-		definitions string
-		call        string
-		expected    string
-		err         bool
-	}{
-		{
-			"$pattA: 2a 2&b | 1c'",
-			"$pattA",
-			"2a 2&b|1c'",
-			false,
-		},
-		{
-			`$pattx: 2a 2&b | 1c'
-			 $pattB: $pattx | $pattx`,
-			"$pattB",
-			"2a 2&b|1c'|2a 2&b|1c'",
-			false,
-		},
-		{
-			`$pattx: 2a 2&b | 1c'`,
-			"$pattx[1:]",
-			"2&b|1c'",
-			false,
-		},
-		{
-			`$pattx: 2a 2&b | 1c'`,
-			"$pattx[2:]",
-			"1c'",
-			false,
-		},
-		{
-			`$pattx: 2a 2&b | 1c'`,
-			"$pattx[:2]",
-			"2a 2&b",
-			false,
-		},
-		{
-			`$pattx: 2a 2&b | 1c'`,
-			"$pattx[1:2]",
-			"2&b",
-			false,
-		},
-		{
-			`$pattx: 2a 2&b | 1c'`,
-			"$pattx/1 : d/",
-			"1a 2&b|1d",
-			false,
-		},
-		{
-			`$pattx: 2a &b | 1c'`,
-			"$pattx[:2]/: ;/",
-			"2a ;b",
-			false,
-		},
-		{
-			`$pattx: 2#1 2&b | 1c'`,
-			"$pattx(g)",
-			"2g 2&b|1c'",
-			false,
-		},
-		{
-			`$pattx: 2#1 #2b | 1c'`,
-			"$pattx(%,&)",
-			"2% &b|1c'",
-			false,
-		},
-		{
-			`$pattx: 2#1 2&b | 1#1`,
-			"$pattx(g'+)",
-			"2g'+ 2&b|1g'+",
-			false,
-		},
-		{
-			`$pattx: 2#1 2&b | 1c'
-			 $pattB: $pattx(#1) | $pattx(#2)`,
-			"$pattB(g,f')",
-			"2g 2&b|1c'|2f' 2&b|1c'",
-			false,
-		},
-	}
-
-	for i, test := range tests {
-
-		get := newPatternGetter()
-
-		var err error
-		defs := strings.Split(test.definitions, "\n")
-
-		for _, df := range defs {
-			var pd PatternDefinition
-			err = pd.Parse(strings.TrimSpace(df)[1:])
-			if err != nil {
-				break
-			}
-			get.add(&pd)
-		}
-
-		var pc PatternCall
-		if err == nil {
-			err = pc.Parse(test.call[1:])
-		}
-		/*
-			if err != nil && !test.err {
-				t.Errorf("[%v] Parse(%q) returned unexpected error: %s", i, test.input, err)
-			}
-
-			if err == nil && test.err {
-				t.Errorf("[%v] Parse(%q) returned no error, but we expected one", i, test.input)
-			}
-		*/
-		var res string
-
-		var pdd = get.GetPatternDefinition(pc.Name)
-		if pdd != nil {
-			res, err = pdd.Call(pc.Params...)
-		}
-
-		if res != test.expected {
-			t.Errorf("[%v] Call(%q) resulted in %#v // expected: %#v", i, test.call, res, test.expected)
-		}
-	}
 }
 
 func TestParseCall(t *testing.T) {

@@ -129,6 +129,15 @@ type positionedEvent struct {
 	item            interface{}
 }
 
+func (p *positionedEvent) dup() (nu *positionedEvent) {
+	return &positionedEvent{
+		position:        p.position,
+		originalData:    p.originalData,
+		positionIn32ths: p.positionIn32ths,
+		item:            p.item,
+	}
+}
+
 func (p *positionedEvent) String() string {
 	//return p.position + p.originalData
 	return pos32thToString(p.positionIn32ths) + p.originalData

@@ -35,19 +35,35 @@ func (p *PatternCall) String() string {
 	return bf.String()
 }
 
+type PatternEvents []*positionedEvent
+
 // Spread is called unless the returned positionOfNextBar is < 0
 // The first call to spread is with start number of the position within the bar where the
 // pattern is embedded.
 // Subsequent calls will set start to the last returned positionOfNextBar
 // when the last event is return, positionOfNextBar is -1
-func (p *PatternCall) Spread(start int, num, denom uint8) (barEvents []*positionedEvent, positionOfNextBar int) {
-	/*
-	   TODO
+// the returned events are relative to the bar given by start
+func (p PatternEvents) Spread(start int, num, denom uint8) (barEvents []*positionedEvent, positionOfNextBar int) {
+	barLength := length32ths(num, denom)
+	positionOfNextBar = start + barLength
 
-	   for each positioned event:
+	var lastIdx int
 
-	*/
-	return nil, -1
+	for idx, ev := range p {
+		if int(ev.positionIn32ths) >= start && int(ev.positionIn32ths) < positionOfNextBar {
+			nu := ev.dup()
+			nu.positionIn32ths -= uint(start)
+			nu.position = pos32thToString(nu.positionIn32ths)
+			barEvents = append(barEvents, nu)
+			lastIdx = idx
+		}
+	}
+
+	if lastIdx == len(p)-1 {
+		positionOfNextBar = -1
+	}
+
+	return
 }
 
 func (p *PatternCall) parseItem(data string, posIn32th uint) (item interface{}, err error) {
@@ -61,7 +77,7 @@ func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{},
 		return nil, nil
 	}
 
-	fmt.Printf("PatternCall#parseItems called with %q\n", data)
+	//	fmt.Printf("PatternCall#parseItems called with %q\n", data)
 
 	switch data[0] {
 	case '(':
@@ -92,16 +108,13 @@ func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{},
 
 func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev *positionedEvent, err error) {
 	ev = &positionedEvent{}
-	//ev.position = position
 	_, ev.positionIn32ths = positionTo32th("", position)
-	//	p.offset = posIn32th
 	ev.positionIn32ths += posIn32th
-
 	ev.originalData = data
 	item, err := p.parseItems(ev.originalData, posIn32th)
 	ev.item = item
 	if p.SyncFirst {
-		fmt.Printf("removing %v from %v\n", p.firstPos, ev.positionIn32ths)
+		//		fmt.Printf("removing %v from %v\n", p.firstPos, ev.positionIn32ths)
 		ev.positionIn32ths -= p.firstPos
 	}
 	ev.position = pos32thToString(ev.positionIn32ths)
@@ -147,7 +160,7 @@ func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *posi
 		_, p.firstPos = positionTo32th("", pos)
 	}
 
-	fmt.Printf("making event for event no %v: %#v\n", idx, bf.String())
+	//	fmt.Printf("making event for event no %v: %#v\n", idx, bf.String())
 	//	panic("heyho")
 	ev, err = p.mkEvent(pos, posIn32th, bf.String())
 
@@ -242,7 +255,7 @@ func (p *PatternCall) parsePattern(data string, positionIn32th uint) error {
 		return fmt.Errorf("need pattern getter")
 	}
 
-	fmt.Printf("parse pattern called with: %q\n", data)
+	//	fmt.Printf("parse pattern called with: %q\n", data)
 
 	err := p.Parse(data)
 
@@ -261,7 +274,7 @@ func (p *PatternCall) parsePattern(data string, positionIn32th uint) error {
 		return fmt.Errorf("could not call pattern %s with %q: %s", p.Name, data, err)
 	}
 
-	fmt.Printf("result: %q\n", p.result)
+	//	fmt.Printf("result: %q\n", p.result)
 
 	return p.parseEvents(p.result, positionIn32th)
 }

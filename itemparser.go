@@ -222,7 +222,7 @@ func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{},
 
 func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error) {
 	data = strings.TrimSpace(data)
-	fmt.Printf("parseItem called with %q\n", data)
+	//	fmt.Printf("parseItem called with %q\n", data)
 	switch len(data) {
 	case 0:
 		return nil, nil

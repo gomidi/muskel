@@ -7,11 +7,12 @@ import (
 )
 
 func TestUnrollPattern(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		expected string
 	}{
+
 		{
 			`
 $a:  1a' 2&b 5&c"
@@ -43,22 +44,22 @@ Vol      | -     | -   |
 
     1    |       | F   |
     1&   | c"    |     |
-`},
+			`},
+
 		{
 			`
-$a:  1a' 2&b 5&c"
+$a:  1a' 2&b 5g
 =
-  | piano | 
+  | piano |
 
 1 | $a |
 
-1 | d   | 
-& | e' |
+1 |  |
 `, `
 
 
 
-$a:             1a' 2&b 5&c"
+$a:             1a' 2&b 5g
 
 
 
@@ -72,22 +73,22 @@ Vol      | -     |
     1    | a'    |
     2&   | b     |
 
-    1    | d     |
-     &   | e'    |
-`},
-
+    1    | g     |
+		   		   `},
 		{
 			`
-$a:  1a' 4&b 5&c"
+$a:  1a' 2&b 5g
 =
-  | piano | 
-3/4
+  | piano |
+
 1 | $a |
+
+1 | e |
 `, `
 
 
 
-$a:             1a' 2&b 5&c"
+$a:             1a' 2&b 5g
 
 
 
@@ -99,49 +100,13 @@ Prog     | -     |
 Vol      | -     |
 
     1    | a'    |
-	
-    1&   | b     |
-    2&   | c"    |
-`},
-		/*
-		   {
-		   			`
-		   $a:  1a' 2&b | 1&c"
-		   =
-		     | piano | vox |
+    2&   | b     |
 
-		   1 | $a |   |
-		   2 |    | $a |
-
-		   1 |    |  |
-		   `, `
-
-
-
-		   $a:             1a' 2&b | 1&c"
-
-
-
-		   =
-		            | piano | vox |
-		   Ch       | -     | -   |
-		   Bank     | -     | -   |
-		   Prog     | -     | -   |
-		   Vol      | -     | -   |
-
-		       1    | a'    |     |
-		       2    |       | a'  |
-		       2&   | b     |     |
-		   	3    |       | b   |
-
-		       1    |       |     |
-		       1&   | c"    |     |
-		   	2    |       | c"  |
+    1    | e     |
 		   `},
-		*/
 		{
 			`
-$a:  1a' 2&b 5&c"
+$a:  1a' 2&b 5g
 =
   | piano |
 
@@ -150,7 +115,7 @@ $a:  1a' 2&b 5&c"
 
 
 
-$a:             1a' 2&b 5&c"
+$a:             1a' 2&b 5g
 
 
 
@@ -163,16 +128,79 @@ Vol      | -     |
 
     1    | a'    |
     2&   | b     |
+		   		   `},
+		{
+			`
+$a:  1a' 4&b 5&c"
+=
+  | piano |
+3/4
+1 | $a |
 
-    1&   | c"    |
-`},
+1& |    |
+`, `
+
+
+
+$a:             1a' 4&b 5&c"
+
+
+
+=
+         | piano |
+Ch       | -     |
+Bank     | -     |
+Prog     | -     |
+Vol      | -     |
+3/4
+    1    | a'    |
+
+    1&   | b     |
+    2&   | c"    |
+		   `},
+
+		{
+			`
+$a:  1a' 2&b 5&c"
+=
+  | piano | vox |
+
+1 | $a |   |
+2 |    | $a |
+
+1 |    |  |
+`, `
+
+
+
+$a:             1a' 2&b 5&c"
+
+
+
+=
+         | piano | vox |
+Ch       | -     | -   |
+Bank     | -     | -   |
+Prog     | -     | -   |
+Vol      | -     | -   |
+
+    1    | a'    |     |
+    2    |       | a'  |
+    2&   | b     |     |
+    3&   |       | b   |
+
+    1    |       |     |
+    1&   | c"    |     |
+    2&   |       | c"  |
+		   		   `},
+
 		{
 			`
 $a:  1a' 2b
 =
   | piano |
 
-1 | $a |
+2 | $a |
 `, `
 
 
@@ -188,12 +216,15 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 
-    1    | a'    |
-    2    | b     |
-`},
+    2    | a'    |
+    3    | b     |
+		   `},
 	}
 
 	for i, test := range tests {
+		//		if i != 4 {
+		//			continue
+		//		}
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
 
 		if err != nil {
@@ -230,7 +261,7 @@ Vol      | -     |
 }
 
 func TestUnroll(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		expected string

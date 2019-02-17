@@ -114,50 +114,10 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 
 	if p.score.isUnrolled {
 
-		// enroll the instrument events again
-		for _, instr := range p.score.Instruments {
-			instr.events = []BarEvents{}
-			var be BarEvents
-			var lastBarNo int
+		p.score.enroll()
 
-			var lastBar = p.score.Bars[len(p.score.Bars)-1]
-
-			for _, ev := range instr.unrolled {
-//				fmt.Printf("event: %#v\n", ev)
-
-				missing := ev.BarNo - (len(p.score.Bars) - 1)
-
-				for m := 0; m < missing; m++ {
-					nb := lastBar.Dup()
-					nb.positions = []uint{}
-					nb.originalPositions = []string{}
-					nb.barNo = ev.BarNo
-					nb.timeSigChange = [2]uint8{0, 0}
-					p.score.Bars = append(p.score.Bars, nb)
-				}
-
-//				fmt.Printf("ev.BarNo: %v  len(p.score.Bars): %v\n", ev.BarNo, len(p.score.Bars))
-				p.score.Bars[ev.BarNo].ensurePositionExist(ev.DistanceToStartOfBarIn32th)
-
-				diff := ev.BarNo - lastBarNo
-
-				for d := 0; d < diff; d++ {
-					instr.events = append(instr.events, be)
-					be = BarEvents{}
-				}
-
-				lastBarNo = ev.BarNo
-				be = append(be, ev)
-			}
-
-//			fmt.Printf("len bars in instrument: %v\n", len(be))
-			instr.events = append(instr.events, be)
-
-			instr.calcColWidth()
-		}
-
-//		fmt.Printf("len bars: %v\n", len(p.score.Bars))
-//		fmt.Printf("len events: %v\n", len(p.score.Instruments[0].events))
+		//		fmt.Printf("len bars: %v\n", len(p.score.Bars))
+		//		fmt.Printf("len events: %v\n", len(p.score.Instruments[0].events))
 
 		for i, bar := range p.score.Bars {
 			if bar.timeSigChange[0] != 0 {

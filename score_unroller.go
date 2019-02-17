@@ -226,39 +226,39 @@ func (s *ScoreUnroller) evalRandomItems() {
 }
 
 func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternCall) (unrolled []*Event) {
-	prevPos := ""
 
-	for idxPev, pev := range v.Events {
-		nuev := ev.Dup()
-		nuev.Item = pev.item
-		nuev.originalData = pev.originalData
+	var positionOfNextBar int = 0
 
-		if idxPev == 0 {
-			if !v.SyncFirst {
-				prevPos, nuev.DistanceToStartOfBarIn32th = positionTo32th(prevPos, pev.position)
-			}
-		} else {
-			prevPos, nuev.DistanceToStartOfBarIn32th = positionTo32th(prevPos, pev.position)
+	timesig := s.dest.Bars[ev.BarNo].timeSig
+
+	var evts []*positionedEvent
+
+	//	fmt.Printf("offset: %v\n", ev.DistanceToStartOfBarIn32th)
+	pvs := PatternEvents(v.Events)
+
+	evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
+	unrolled = append(unrolled, s.convertEvents(ev.BarNo, evts...)...)
+
+	diffBars := (len(s.dest.Bars) - 1) - ev.BarNo
+
+	// for each following empty bar
+	for didx := 1; didx <= diffBars; didx++ {
+		if positionOfNextBar == -1 {
+			break
 		}
-		//		fmt.Printf("nuev: %#v\n", nuev)
-		unrolled = append(unrolled, nuev)
+		timesig = s.dest.Bars[ev.BarNo+didx].timeSig
+		evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
+		unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, evts...)...)
+		didx++
 	}
+
+	//	fmt.Printf("unrolled: %v\n", unrolled)
+
 	return
 }
 
-func (s *ScoreUnroller) unfoldPatternCallEventWithFollowingEvent(idx int, syncfirst bool, ev *Event, pev *positionedEvent) *Event {
-	nu := ev.Dup()
-	nu.Item = pev.item
-	nu.originalData = pev.originalData
-
-	if syncfirst || idx > 0 {
-		s.prevPos, nu.DistanceToStartOfBarIn32th = positionTo32th(s.prevPos, pev.position)
-	}
-
-	return nu
-}
-
 func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Instrument, ev *Event, v *PatternCall) (unrolled []*Event) {
+	//	panic("hiho")
 	/*
 			TODO
 			1. calc the distance of the next event in 32ths (respecting bar changes etc)
@@ -284,31 +284,51 @@ func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Inst
 	// there is a following event
 	//	fmt.Printf("have next event")
 	// 1. calc the distance of the next event in 32ths (respecting bar changes etc)
-	diffBars := instr.unrolled[idx+1].BarNo - ev.BarNo
-	var diff32ths int
-	for didx := 0; didx < diffBars; didx++ {
-		diff32ths += s.dest.Bars[ev.BarNo+didx].length32th()
-	}
 
-	diff32ths += int(instr.unrolled[idx+1].DistanceToStartOfBarIn32th)
-	diff32ths -= int(ev.DistanceToStartOfBarIn32th)
+	var positionOfNextBar int = 0
 
-	// 2a. calc the distance to the previous pattern event in 32ths
-	//preventRelPosition := uint8(0)
-	//_ = preventRelPosition
-	s.prevPos = ""
-	//	barLenInBetween := 0
+	timesig := s.dest.Bars[ev.BarNo].timeSig
 
-	for idxPev, pev := range v.Events {
-		nuev := s.unfoldPatternCallEventWithFollowingEvent(idxPev, v.SyncFirst, ev, pev)
-		if int(nuev.DistanceToStartOfBarIn32th) < diff32ths {
-			unrolled = append(unrolled, nuev)
+	var evts []*positionedEvent
+
+	//	fmt.Printf("offset: %v\n", ev.DistanceToStartOfBarIn32th)
+	pvs := PatternEvents(v.Events)
+
+	evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
+	unrolled = append(unrolled, s.convertEvents(ev.BarNo, evts...)...)
+
+	// for each following empty bar
+	diffBars := (instr.unrolled[idx+1].BarNo - ev.BarNo) - 1
+
+	//	fmt.Printf("diffBars: %v\n", diffBars)
+	for didx := 1; didx <= diffBars; didx++ {
+		if positionOfNextBar == -1 {
+			break
 		}
-		s.prevPos = "" // ??
+		timesig = s.dest.Bars[ev.BarNo+didx].timeSig
+		evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
+		unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, evts...)...)
 	}
+
+	//	fmt.Printf("unrolled: %v\n", unrolled)
 
 	return
 
+}
+
+func (s *ScoreUnroller) convertEvents(barNo int, in ...*positionedEvent) (out []*Event) {
+	out = make([]*Event, len(in))
+
+	for i, pev := range in {
+		ev := &Event{}
+		ev.BarNo = barNo
+		ev.DistanceToStartOfBarIn32th = pev.positionIn32ths
+		ev.Item = pev.item
+		ev.originalData = pev.originalData
+		out[i] = ev
+	}
+
+	return
 }
 
 func (s *ScoreUnroller) unfoldPatternCall(idx int, instr *Instrument, ev *Event, v *PatternCall) (unrolled []*Event) {

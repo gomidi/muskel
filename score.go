@@ -91,6 +91,59 @@ func (s *Score) Unroll() (*Score, error) {
 	return ur.dest, err
 }
 
+func (p *Score) enroll() {
+
+	// enroll the instrument events again
+	for _, instr := range p.Instruments {
+		instr.events = []BarEvents{}
+		var be BarEvents
+		var lastBarNo int
+
+		//		var lastBar = p.Bars[len(p.Bars)-1]
+
+		for _, ev := range instr.unrolled {
+			//				fmt.Printf("event: %#v\n", ev)
+
+			/*
+				missingBars := ev.BarNo - (len(p.Bars) - 1)
+
+				if missingBars > 0 {
+					fmt.Printf("missing bars: %v\n", missingBars)
+				}
+
+				for m := 0; m < missingBars; m++ {
+					nb := lastBar.Dup()
+					nb.positions = []uint{}
+					nb.originalPositions = []string{}
+					nb.barNo = ev.BarNo
+					nb.timeSigChange = [2]uint8{0, 0}
+					p.Bars = append(p.Bars, nb)
+				}
+			*/
+
+			//				fmt.Printf("ev.BarNo: %v  len(p.score.Bars): %v\n", ev.BarNo, len(p.score.Bars))
+			p.Bars[ev.BarNo].ensurePositionExist(ev.DistanceToStartOfBarIn32th)
+
+			diff := ev.BarNo - lastBarNo
+
+			for d := 0; d < diff; d++ {
+				instr.events = append(instr.events, be)
+				be = BarEvents{}
+			}
+
+			lastBarNo = ev.BarNo
+			be = append(be, ev)
+		}
+
+		//		fmt.Printf("last bar with event: %v, last bar total: %v len bars: %v\n", lastBarNo, p.Bars[len(p.Bars)-1].barNo, len(p.Bars))
+
+		//			fmt.Printf("len bars in instrument: %v\n", len(be))
+		instr.events = append(instr.events, be)
+
+		instr.calcColWidth()
+	}
+}
+
 // WriteSMF writes the score to the given SMF file
 func (s *Score) WriteSMF(midifile string) error {
 
