@@ -231,7 +231,7 @@ func getQNNumberFromPos(pos string) (qnnumber int, rest string) {
 // lastPos must either be "", then pos must be complete
 // (i.e. must start with a number) or lastPos must be complete
 // then pos may be derived from it
-func positionTo32th(lastPos, pos string) (completed string, num32th uint) {
+func positionTo32th(lastPos, pos string) (completed string, num32th uint, err error) {
 
 	number, rest := getQNNumberFromPos(pos)
 	completed = pos
@@ -250,6 +250,9 @@ func positionTo32th(lastPos, pos string) (completed string, num32th uint) {
 		number = lastNum
 		rest = lastRest + rest
 		completed = fmt.Sprintf("%v%s", number, rest)
+
+		//		fmt.Printf("lastPos: %q pos: %q completed: %q\n", lastPos, pos, completed)
+
 	}
 
 	num32th = uint((number - 1) * 8)
@@ -274,7 +277,7 @@ func positionTo32th(lastPos, pos string) (completed string, num32th uint) {
 	case "&.;":
 		num32th += 7
 	default:
-		panic("invalid rest: " + rest + " in " + pos)
+		err = fmt.Errorf("invalid rest: %q in position %q", rest, pos)
 	}
 
 	return

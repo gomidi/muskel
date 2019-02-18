@@ -24,9 +24,11 @@ type Score struct {
 	BodyComments       map[int]string    // line calculated from the start of the system
 	HeaderComments     []string          // comments in the header, as they come
 
-	SmallColumns      bool // if the formatting should have no distance to the column lines
-	isUnrolled        bool
-	barNumbersTracked bool
+	SmallColumns        bool // if the formatting should have no distance to the column lines
+	isUnrolled          bool
+	barNumbersTracked   bool
+	lineWhereBodyStarts int
+	lastLine            int
 }
 
 func NewScore() *Score {
@@ -76,20 +78,23 @@ func (p *Score) trackBarNumbers() {
 
 // Unroll unrolls repetitions, patterns and randomness and returns a score
 // without repetition, randomness and patterns
-func (s *Score) Unroll() (*Score, error) {
+func (s *Score) Unroll() (dest *Score, err error) {
 
 	for _, b := range s.Bars {
 		b.positions = make([]uint, len(b.originalPositions))
 		var oldPos string
 
 		for pi, pos := range b.originalPositions {
-			oldPos, b.positions[pi] = positionTo32th(oldPos, pos)
+			oldPos, b.positions[pi], err = positionTo32th(oldPos, pos)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
 	ur := newScoreUnroller(s)
 	ur.dest.SmallColumns = s.SmallColumns
-	err := ur.unrollInstruments()
+	err = ur.unrollInstruments()
 	return ur.dest, err
 }
 
@@ -105,24 +110,6 @@ func (p *Score) enroll() {
 
 		for _, ev := range instr.unrolled {
 			//				fmt.Printf("event: %#v\n", ev)
-
-			/*
-				missingBars := ev.BarNo - (len(p.Bars) - 1)
-
-				if missingBars > 0 {
-					fmt.Printf("missing bars: %v\n", missingBars)
-				}
-
-				for m := 0; m < missingBars; m++ {
-					nb := lastBar.Dup()
-					nb.positions = []uint{}
-					nb.originalPositions = []string{}
-					nb.barNo = ev.BarNo
-					nb.timeSigChange = [2]uint8{0, 0}
-					p.Bars = append(p.Bars, nb)
-				}
-			*/
-
 			//				fmt.Printf("ev.BarNo: %v  len(p.score.Bars): %v\n", ev.BarNo, len(p.score.Bars))
 			p.Bars[ev.BarNo].ensurePositionExist(ev.DistanceToStartOfBarIn32th)
 
@@ -141,6 +128,10 @@ func (p *Score) enroll() {
 
 		//			fmt.Printf("len bars in instrument: %v\n", len(be))
 		instr.events = append(instr.events, be)
+
+		if lastBarNo < p.Bars[len(p.Bars)-1].barNo {
+			instr.events = append(instr.events, BarEvents{})
+		}
 
 		instr.calcColWidth()
 	}
@@ -209,9 +200,9 @@ func (s *Score) WriteToFile(filepath string) (err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
+			f.Close()
 			err = fmt.Errorf("Error: %v", r)
 		}
-		f.Close()
 		os.RemoveAll(dir)
 	}()
 
@@ -219,6 +210,7 @@ func (s *Score) WriteToFile(filepath string) (err error) {
 	if err != nil {
 		return
 	}
+	f.Close()
 
 	err = os.Rename(path.Join(dir, base), filepath)
 	return

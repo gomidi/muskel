@@ -2,6 +2,8 @@ package muskel
 
 import (
 	"math/rand"
+	"time"
+	//"crypto/rand"
 )
 
 type ScoreUnroller struct {
@@ -63,7 +65,9 @@ func (s *ScoreUnroller) unrollBar(bar *Bar) {
 
 	for ii, instr := range s.src.Instruments {
 		//		fmt.Printf("adding bar %v\n", bar.originalBarNo)
-		s.instrBarevents[ii] = append(s.instrBarevents[ii], instr.events[bar.originalBarNo])
+		if len(instr.events)-1 >= bar.originalBarNo {
+			s.instrBarevents[ii] = append(s.instrBarevents[ii], instr.events[bar.originalBarNo])
+		}
 	}
 }
 
@@ -203,15 +207,30 @@ func (s *ScoreUnroller) evalRandomItems() {
 		for _, ev := range instr.unrolled {
 			switch v := ev.Item.(type) {
 			case *RandomChooser:
+				rand.Seed(time.Now().UnixNano())
 				v.chosen = rand.Intn(len(v.alternatives))
+				//				fmt.Printf("chosen: %v\n", v.chosen)
 				nuEv := ev.Dup()
 				nuEv.Item = v.alternatives[v.chosen]
+				nuEv.originalData = v.alternativesOriginalData[v.chosen]
 				unrolled = append(unrolled, nuEv)
 			case *RandomProbability:
-				if got := rand.Intn(int(v.prob)); got >= 50 {
+				switch int(v.prob) {
+				case 0:
+				// zero percent chance
+				case 100:
 					nuEv := ev.Dup()
+					nuEv.originalData = v.itemOriginalData
 					nuEv.Item = v.item
 					unrolled = append(unrolled, nuEv)
+				default:
+					rand.Seed(time.Now().UnixNano())
+					if got := rand.Intn(int(v.prob)); got >= 50 {
+						nuEv := ev.Dup()
+						nuEv.Item = v.item
+						nuEv.originalData = v.itemOriginalData
+						unrolled = append(unrolled, nuEv)
+					}
 				}
 
 			default:
@@ -396,6 +415,28 @@ func (s *ScoreUnroller) unfoldPatterns() {
 	}
 }
 
+func (s *ScoreUnroller) unfoldRepeated() {
+	for _, instr := range s.dest.Instruments {
+		var lastEvent *Event
+		for i, ev := range instr.unrolled {
+			switch ev.Item.(type) {
+			case RepeatLastEvent:
+				//				fmt.Printf("got repeated: %v\n", lastItem)
+				ev.Item = lastEvent.Item
+				ev.originalData = lastEvent.originalData
+			case hold:
+				// do nothing
+			default:
+				if ev.Item != nil {
+					lastEvent = ev
+					//					fmt.Printf("set lastitem to: %v\n", lastItem)
+				}
+			}
+			instr.unrolled[i] = ev
+		}
+	}
+}
+
 func (s *ScoreUnroller) unrollInstruments() error {
 
 	// attach the barnumbers and position in 32th relative to start to the event
@@ -420,6 +461,13 @@ func (s *ScoreUnroller) unrollInstruments() error {
 
 	// evalute randomness a second time, so that randomness produced by patterns can be evaluated
 	s.evalRandomItems()
+
+	// unfold the repeated items
+	// we don't want to repeat patterns or randomness via repeated items, because it is confusing
+	// and does not bring much to the table
+	// it is more interesting to be sure that repeating always means doubling the real item
+	// before
+	s.unfoldRepeated()
 
 	return nil
 }

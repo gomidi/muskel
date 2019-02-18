@@ -7,11 +7,47 @@ import (
 )
 
 func TestUnrollPattern(t *testing.T) {
-	//t.Skip()
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected string
 	}{
+		{`
+$a:             1f" 2g
+
+
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e'     |
+    2    | $a     |
+
+    1    | %      |
+`,
+			`
+$a:             1f" 2g
+
+
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e'     |
+    2    | f"     |
+    3    | g      |
+
+    1    | g      |
+`,
+		},
 		{
 			`
 $a: 1a' 2&#1 5&c"
@@ -317,11 +353,11 @@ Vol      | -     |
 	}
 
 	for i, test := range tests {
-		/*
-			if i != 0 {
-				continue
-			}
-		*/
+
+		//		if i != 0 {
+		//			continue
+		//		}
+
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
 
 		if err != nil {
@@ -364,6 +400,55 @@ func TestUnroll(t *testing.T) {
 		input    string
 		expected string
 	}{
+		{
+			`
+test: out of range
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e'     |
+
+    1    |        |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e'     |
+
+    1    |        |`,
+		},
+		{
+			`
+=
+         | Vocals | Piano | 
+Ch       | -      | -     |
+Bank     | -      | -     |
+Prog     | -      | -     |
+Vol      | -      | -     |
+
+    3    |        |       |
+     &   |        |       |
+`,
+			`
+=
+         | Vocals | Piano |
+Ch       | -      | -     |
+Bank     | -      | -     |
+Prog     | -      | -     |
+Vol      | -      | -     |
+
+    3    |        |       |
+     &   |        |       |
+`,
+		},
 
 		{
 			`
@@ -555,17 +640,17 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 
-    1    | a'    |
+    1    | a'    | A
      &   | c"    |
 
     2    | d     |
 
-    1    | a'    |
+    1    | a'    | A
      &   | c"    |
 
     2    | d     |
 
-    1    | a'    |
+    1    | a'    | A
      &   | c"    |
 
     2    | d     |
@@ -592,12 +677,12 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 
-    1    | a'    |
+    1    | a'    | A
      &   | c"    |
 
     2    | d     |
 
-    1    | a'    |
+    1    | a'    | A
      &   | c"    |
 
     2    | d     |
@@ -606,9 +691,52 @@ Vol      | -     |
 
 		   `,
 		},
+		{
+			`
+=
+    |piano| vox |
+
+1   |a'   | e   | A
+ &  |c"   | %   |
+2   |     | f   |
+
+2   |d    |     |
+[A]
+1&  |e    |     |
+2   |     | g   |`,
+			`
+=
+         | piano | vox |
+Ch       | -     | -   |
+Bank     | -     | -   |
+Prog     | -     | -   |
+Vol      | -     | -   |
+
+    1    | a'    | e   | A
+     &   | c"    | e   |
+    2    |       | f   |
+
+    2    | d     |     |
+
+    1    | a'    | e   | A
+     &   | c"    | e   |
+    2    |       | f   |
+
+    2    | d     |     |
+
+    1&   | e     |     |
+    2    |       | g   |
+
+		   `,
+		},
 	}
 
 	for i, test := range tests {
+		/*
+			if i != 0 {
+				continue
+			}
+		*/
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
 
 		if err != nil {

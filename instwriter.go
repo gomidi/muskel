@@ -175,6 +175,8 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 	case Lyric:
 		stopNotes()
 		iw.wr.Lyric(string(v))
+	default:
+		panic(fmt.Sprintf("unsupported item: %#v", v))
 	}
 
 	return addedNotes

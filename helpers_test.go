@@ -27,7 +27,7 @@ func TestPositionTo32th(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		completed, num32th := positionTo32th(test.lastPos, test.pos)
+		completed, num32th, _ := positionTo32th(test.lastPos, test.pos)
 
 		if completed != test.completed || num32th != test.num32th {
 			t.Errorf("[%v] positionTo32th(%#v, %#v) = %#v, %v // expected %#v, %v", i, test.lastPos, test.pos, completed, num32th, test.completed, test.num32th)

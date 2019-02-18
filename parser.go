@@ -19,17 +19,17 @@ type Parser struct {
 	current struct {
 		isComment bool // track, if we are currently inside a comment
 		isHeader  bool // track, if we are currently inside a header
-		line    int
+		line      int
 	}
 
-	lineWhereBodyStarts int
+	//	lineWhereBodyStarts int
 }
 
 func NewParser(r io.Reader) *Parser {
 	sc := NewScore()
 	return &Parser{
 		Score:  sc,
-		input:     bufio.NewReader(r),
+		input:  bufio.NewReader(r),
 		header: &HeaderParser{sc},
 		body: &BodyParser{
 			Score:          sc,
@@ -52,6 +52,7 @@ func ParseFile(filepath string) (sc *Score, err error) {
 
 // Parse reads from the given reader and returns the resulting Score
 func Parse(rd io.Reader) (sc *Score, err error) {
+
 	/*
 		defer func() {
 			if r := recover(); r != nil {
@@ -59,7 +60,6 @@ func Parse(rd io.Reader) (sc *Score, err error) {
 			}
 		}()
 	*/
-
 	ps := NewParser(rd)
 	err = ps.Parse()
 
@@ -77,16 +77,15 @@ func (p *Parser) addComment(line []byte) {
 		p.header.addComment(line)
 		return
 	}
-	p.body.addComment(p.current.line-p.lineWhereBodyStarts, line)
+	p.body.addComment(p.current.line-p.Score.lineWhereBodyStarts, line)
 }
 
 // parseLine parses a line
 func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
-	p.current.line++
 
 	if len(line) > 0 && string(line[0]) == "=" {
 		p.current.isHeader = false
-		p.lineWhereBodyStarts = p.current.line + 1
+		p.Score.lineWhereBodyStarts = p.current.line + 1
 		return p.header.parseHeader(header.String())
 	}
 
@@ -127,10 +126,22 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 		}
 		err := p.body.parseLine(string(line))
 		if err != nil {
-			return fmt.Errorf("Error in line %v:\n%s\n", p.current.line, err.Error())
+			return fmt.Errorf("Error in line %v:\n%s\n", p.current.line+1, err.Error())
 		}
 	}
 	return nil
+}
+
+func (p *Parser) readLine(header *bytes.Buffer) error {
+	p.current.line++
+	line, _, err := p.input.ReadLine()
+
+	if err != nil {
+		return err
+	}
+	p.Score.lastLine++
+
+	return p.parseLine(header, line)
 }
 
 func (p *Parser) Parse() (err error) {
@@ -138,26 +149,24 @@ func (p *Parser) Parse() (err error) {
 
 	p.current.isHeader = true
 	p.current.isComment = false
-	p.current.line = 0
-	p.lineWhereBodyStarts = 0
+	p.current.line = -1
+	p.Score.lineWhereBodyStarts = 0
 
 	for {
-		line, _, err := p.input.ReadLine()
+		err = p.readLine(header)
 
 		if err != nil {
 			break
 		}
-
-		err = p.parseLine(header, line)
-
-		if err != nil {
-			break
-		}
-
 	}
 
 	if err == io.EOF {
 		return nil
 	}
+
+	if err != nil {
+		fmt.Printf("ERROR while parsing: %v\n", err)
+	}
+
 	return err
 }

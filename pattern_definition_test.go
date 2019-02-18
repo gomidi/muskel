@@ -6,6 +6,7 @@ import (
 )
 
 func TestParseDefinition(t *testing.T) {
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected PatternDefinition
@@ -39,6 +40,7 @@ func TestParseDefinition(t *testing.T) {
 }
 
 func TestCallDefinition(t *testing.T) {
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		params   []string

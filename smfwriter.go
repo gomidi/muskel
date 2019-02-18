@@ -5,9 +5,9 @@ import (
 )
 
 type SMFWriter struct {
-	score        *Score
-	unrolledbars []*Bar
-	wr           *mid.SMFWriter
+	score *Score
+	//unrolledbars []*Bar
+	wr *mid.SMFWriter
 }
 
 func NewSMFWriter(s *Score) *SMFWriter {
@@ -55,7 +55,7 @@ func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
 	num := uint8(4)
 	denom := uint8(4)
 
-	for i, b := range p.unrolledbars {
+	for i, b := range p.score.Bars {
 		/*
 			b.positions = make([]uint8, len(b.originalPositions))
 			var oldPos string

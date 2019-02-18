@@ -26,7 +26,7 @@ func newPatternGetter() *patternGetter {
 }
 
 func TestSpread(t *testing.T) {
-
+	//	t.Skip()
 	tests := []struct {
 		num   uint8
 		denom uint8
@@ -90,6 +90,7 @@ func TestSpread(t *testing.T) {
 }
 
 func TestParsePattern(t *testing.T) {
+	//	t.Skip()
 	//parsePattern(data string, positionIn32th uint, getter func(name string) *PatternDefinition) error
 
 	tests := []struct {
@@ -239,7 +240,7 @@ func TestParsePattern(t *testing.T) {
 }
 
 func TestParseCall(t *testing.T) {
-
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected PatternCall

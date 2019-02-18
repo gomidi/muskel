@@ -6,6 +6,7 @@ import (
 )
 
 func TestParseFragment(t *testing.T) {
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected patternFragment

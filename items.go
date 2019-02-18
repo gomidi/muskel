@@ -49,14 +49,16 @@ type hold struct{}
 type Lyric string
 
 type RandomProbability struct {
-	prob   uint8
-	item   interface{}
-	chosen bool
+	prob             uint8
+	item             interface{}
+	chosen           bool
+	itemOriginalData string
 }
 
 type RandomChooser struct {
-	alternatives []interface{}
-	chosen       int
+	alternatives             []interface{}
+	alternativesOriginalData []string
+	chosen                   int
 }
 
 var Hold = hold{}

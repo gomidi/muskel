@@ -8,11 +8,13 @@ import (
 
 type BodyParser struct {
 	*Score
-	currentBar       int
-	jumpInLineBefore bool
-	inPart           string
-	numInstruments   int
-	lastPosition     string
+	currentBar        int
+	jumpInLineBefore  bool
+	inPart            string
+	numInstruments    int
+	lastPosition      string
+	currentPosition   string
+	currentPosIn32ths uint
 }
 
 func (p *BodyParser) newBar(b *Bar) {
@@ -197,6 +199,10 @@ func (p *BodyParser) setInstrumentName(i int, instr *Instrument, name string) er
 
 // setInstrumentChannel sets the MIDI channel of an instrument
 func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string) error {
+	if data == "-" {
+		instr.MIDIChannel = -1
+		return nil
+	}
 	cc, errC := strconv.Atoi(data)
 	if errC != nil {
 		return fmt.Errorf("%#v is not a valid MIDI channel", data)
@@ -221,6 +227,10 @@ func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string)
 
 // setInstrumentProgram sets the MIDI program value of an instrument
 func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string) error {
+	if data == "-" {
+		instr.MIDIProgram = -1
+		return nil
+	}
 	pr, err := strconv.Atoi(data)
 	if err != nil {
 		return fmt.Errorf("%#v is not a valid MIDI program value", data)
@@ -245,6 +255,10 @@ func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string)
 
 // setInstrumentVolume sets the MIDI volume of an instrument
 func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) error {
+	if data == "-" {
+		instr.MIDIVolume = -1
+		return nil
+	}
 	pr, err := strconv.Atoi(data)
 	if err != nil {
 		return fmt.Errorf("%#v is not a valid MIDI volume value", data)
@@ -269,6 +283,10 @@ func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) 
 
 // setInstrumentBank sets the MIDI bank for an instrument
 func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) error {
+	if data == "-" {
+		instr.MIDIBank = -1
+		return nil
+	}
 	pr, err := strconv.Atoi(data)
 	if err != nil {
 		return fmt.Errorf("%#v is not a valid MIDI bank value", data)
@@ -292,7 +310,7 @@ func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) er
 }
 
 // parseInstrEvents parses the events of a single instrument in a non-bar line
-func (p *BodyParser) parseInstrEvents(i int, instr *Instrument, position, data string) error {
+func (p *BodyParser) parseInstrEvents(i int, instr *Instrument, data string) (err error) {
 	var barEvents BarEvents
 
 	if diff := (p.currentBar - (len(instr.events) - 1)); diff > 0 {
@@ -304,10 +322,7 @@ func (p *BodyParser) parseInstrEvents(i int, instr *Instrument, position, data s
 	ev := &Event{}
 	ev.originalData = data
 
-	var posIn32th uint
-	p.lastPosition, posIn32th = positionTo32th(p.lastPosition, position)
-
-	item, err := p.parseItem(ev.originalData, posIn32th)
+	item, err := p.parseItem(ev.originalData, p.currentPosIn32ths)
 
 	if err != nil {
 		return fmt.Errorf("column %v: %s", i+1, err)
@@ -320,30 +335,6 @@ func (p *BodyParser) parseInstrEvents(i int, instr *Instrument, position, data s
 	barEvents = append(barEvents, ev)
 	instr.events[p.currentBar] = barEvents
 
-	if i == 0 {
-		p.Score.Bars[p.currentBar].originalPositions = append(p.Score.Bars[p.currentBar].originalPositions, position)
-		p.Score.Bars[p.currentBar].positions = append(p.Score.Bars[p.currentBar].positions, posIn32th)
-	}
-
-	return nil
-}
-
-// handleInstrCol handles the data for a column of an instrument
-func (p *BodyParser) handleInstrCol(i int, instr *Instrument, firstColumn, data string) error {
-	switch strings.ToLower(firstColumn) {
-	case "":
-		return p.setInstrumentName(i, instr, data)
-	case "ch", "channel":
-		return p.setInstrumentChannel(i, instr, data)
-	case "prog", "program":
-		return p.setInstrumentProgram(i, instr, data)
-	case "vol", "volume":
-		return p.setInstrumentVolume(i, instr, data)
-	case "bank":
-		return p.setInstrumentBank(i, instr, data)
-	default:
-		return p.parseInstrEvents(i, instr, firstColumn, data)
-	}
 	return nil
 }
 
@@ -367,7 +358,7 @@ func (p *BodyParser) handleLastColumn(data string) error {
 }
 
 // parseEventsLine parses a non-bar line / event line
-func (p *BodyParser) parseEventsLine(tabs []string) error {
+func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 	if p.jumpInLineBefore {
 		p.newBar(&Bar{})
 		p.jumpInLineBefore = false
@@ -384,7 +375,30 @@ func (p *BodyParser) parseEventsLine(tabs []string) error {
 		instr := p.getInstrument(i)
 		data = strings.TrimSpace(data)
 
-		err := p.handleInstrCol(i, instr, firstColumn, data)
+		switch strings.ToLower(firstColumn) {
+		case "":
+			err = p.setInstrumentName(i, instr, data)
+		case "ch", "channel":
+			err = p.setInstrumentChannel(i, instr, data)
+		case "prog", "program":
+			err = p.setInstrumentProgram(i, instr, data)
+		case "vol", "volume":
+			err = p.setInstrumentVolume(i, instr, data)
+		case "bank":
+			err = p.setInstrumentBank(i, instr, data)
+		default:
+			if i == 0 {
+				p.lastPosition, p.currentPosIn32ths, err = positionTo32th(p.lastPosition, firstColumn)
+				if err != nil {
+					return err
+				}
+
+				p.Score.Bars[p.currentBar].originalPositions = append(p.Score.Bars[p.currentBar].originalPositions, firstColumn)
+				p.Score.Bars[p.currentBar].positions = append(p.Score.Bars[p.currentBar].positions, p.currentPosIn32ths)
+			}
+
+			err = p.parseInstrEvents(i, instr, data)
+		}
 
 		if err != nil {
 			return err
@@ -397,6 +411,7 @@ func (p *BodyParser) parseEventsLine(tabs []string) error {
 
 // parseLine parses a line in the body (everything after the =)
 func (p *BodyParser) parseLine(line string) error {
+	//	fmt.Printf("parse body line %q\n", line)
 	tabs := strings.Split(line, "|")
 
 	switch len(tabs) {

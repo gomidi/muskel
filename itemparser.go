@@ -135,7 +135,11 @@ func (p *itemParser) parseNTuple(data string, posIn32th uint) (nt NTuple, err er
 		return
 	}
 
-	completedEndPos, endPos := positionTo32th("", dd[1])
+	completedEndPos, endPos, err := positionTo32th("", dd[1])
+
+	if err != nil {
+		return nt, err
+	}
 
 	_ = completedEndPos
 
@@ -198,6 +202,7 @@ func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{},
 		if err != nil {
 			return nil, fmt.Errorf("invalid random value item: ?%s", data)
 		}
+		rp.itemOriginalData = data[idx+1:]
 		return &rp, nil
 	case '(':
 		alternatives := strings.Trim(data, "()")
@@ -212,6 +217,7 @@ func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{},
 					return nil, fmt.Errorf("invalid random value item: %s", a)
 				}
 				r.alternatives = append(r.alternatives, item)
+				r.alternativesOriginalData = append(r.alternativesOriginalData, a)
 			}
 		}
 		return &r, nil

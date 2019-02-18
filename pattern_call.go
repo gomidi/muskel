@@ -108,7 +108,10 @@ func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{},
 
 func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev *positionedEvent, err error) {
 	ev = &positionedEvent{}
-	_, ev.positionIn32ths = positionTo32th("", position)
+	_, ev.positionIn32ths, err = positionTo32th("", position)
+	if err != nil {
+		return nil, err
+	}
 	ev.positionIn32ths += posIn32th
 	ev.originalData = data
 	item, err := p.parseItems(ev.originalData, posIn32th)
@@ -157,7 +160,10 @@ func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *posi
 
 	pos := positionBf.String()
 	if idx == 0 {
-		_, p.firstPos = positionTo32th("", pos)
+		_, p.firstPos, err = positionTo32th("", pos)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	//	fmt.Printf("making event for event no %v: %#v\n", idx, bf.String())
@@ -200,7 +206,7 @@ func (p *PatternCall) sliceEvents() {
 }
 
 // replaceEvents replaces the events according to the pattern call replace definition
-func (p *PatternCall) replaceEvents(posIn32th uint) error {
+func (p *PatternCall) replaceEvents(posIn32th uint) (err error) {
 	lenRepl := len(p.Replacements)
 
 	if lenRepl == 0 {
@@ -224,10 +230,15 @@ func (p *PatternCall) replaceEvents(posIn32th uint) error {
 			}
 
 			if itidx == 0 {
-				_, p.firstPos = positionTo32th("", position)
+				_, p.firstPos, err = positionTo32th("", position)
+				if err != nil {
+					return err
+				}
 			}
 
-			nu, err := p.mkEvent(position, posIn32th, item)
+			var nu *positionedEvent
+
+			nu, err = p.mkEvent(position, posIn32th, item)
 
 			if err != nil {
 				return err

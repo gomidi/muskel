@@ -7,7 +7,7 @@ import (
 )
 
 func TestFormatter(t *testing.T) {
-	//t.Skip()
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected string

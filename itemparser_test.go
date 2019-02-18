@@ -25,8 +25,8 @@ func TestParseItem(t *testing.T) {
 		{"\"hiho\"", Lyric("hiho")},
 		{"Sa'", Note{letter: "a", octave: 2}},
 		{"Za'", Note{letter: "a", octave: 2}},
-		{"?[30]kd", &RandomProbability{prob: 30, item: DrumNote{name: "kd"}}},
-		{"?(kd,sn)", &RandomChooser{alternatives: []interface{}{DrumNote{name: "kd"}, DrumNote{name: "sn"}}}},
+		{"?[30]kd", &RandomProbability{prob: 30, item: DrumNote{name: "kd"}, itemOriginalData: "kd"}},
+		{"?(kd,sn)", &RandomChooser{alternatives: []interface{}{DrumNote{name: "kd"}, DrumNote{name: "sn"}}, alternativesOriginalData: []string{"kd", "sn"}}},
 		/*
 			&PatternCall{Name:"pa", Params:[]string(nil), Replacements:[]string(nil), Slice:[2]int{-1, -1}, SyncFirst:false, result:"2c#", Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}}}
 			Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}

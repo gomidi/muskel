@@ -6,6 +6,7 @@ import (
 )
 
 func TestBarEnsurePositionExist(t *testing.T) {
+	//	t.Skip()
 	tests := []struct {
 		positions         []uint
 		originalPositions []string

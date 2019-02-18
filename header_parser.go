@@ -67,6 +67,7 @@ func (p *HeaderParser) parseHeaderLine(line string) error {
 
 // parseHeader parses the header (everything up to the  =)
 func (p *HeaderParser) parseHeader(data string) error {
+	//	fmt.Printf("parsing header line: %q\n", data)
 	lines := strings.Split(data, "\n")
 
 	for _, line := range lines {
