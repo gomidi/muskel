@@ -14,6 +14,45 @@ func TestFormatter(t *testing.T) {
 	}{
 		{
 			`
+$a:             1f" 2&g
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e'     |
+    2    | $a     |
+
+    1    |./.     |
+
+    1    | %      |`,
+			`
+$a:             1f" 2&g
+
+
+
+=
+        |Vocals|
+Ch      |1     |
+Bank    |-     |
+Prog    |-     |
+Vol     |-     |
+
+    1   |e'    |
+    2   |f"    |
+    3&  |g     |
+
+    1   |e'    |
+    2   |f"    |
+    3&  |g     |
+
+    1   |g     |`,
+		},
+		{
+			`
 author: Heino
 title: hoch auf dem gelben wagen
 

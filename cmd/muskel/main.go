@@ -20,7 +20,7 @@ import (
 )
 
 var (
-	cfg = config.MustNew("muskel", "0.0.1", "muskel is a musical sketch language")
+	cfg = config.MustNew("muskel", "0.0.3", "muskel is a musical sketch language")
 
 	argFile      = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
 	argFmt       = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
@@ -88,6 +88,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		sc, err := muskel.ParseFile(inFile)
 
 		if err != nil {
+			fmt.Printf("ERROR while parsing MuSkeL: %s\n", err.Error())
 			beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
 			beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
 			return err
@@ -101,12 +102,14 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 			var ur *muskel.Score
 			ur, err = sc.Unroll()
 			if err != nil {
+				fmt.Printf("ERROR while unrolling MuSkeL: %s\n", err.Error())
 				beeep.Alert("ERROR while unrolling MuSkeL:", err.Error(), "assets/warning.png")
 				return err
 			}
 
 			err = ur.WriteToFile(argUnroll.Get())
 			if err != nil {
+				fmt.Printf("ERROR while writing unrolling MuSkeL: %s\n", err.Error())
 				beeep.Alert("ERROR while writing unrolled MuSkeL:", err.Error(), "assets/warning.png")
 				return err
 			}
@@ -116,7 +119,8 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		if argFmt.Get() {
 			err = sc.WriteToFile(inFilep)
 			if err != nil {
-				beeep.Alert("ERROR while formatting MuSkeL:", err.Error(), "assets/warning.png")
+				fmt.Printf("ERROR while writing formatting MuSkeL: %s\n", err.Error())
+				beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
 				return err
 			}
 
@@ -130,6 +134,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		case cmdSMF:
 			err = sc.WriteSMF(outFile)
 			if err != nil {
+				fmt.Printf("ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
 				return err
 			}
@@ -139,6 +144,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		case cmdPlay:
 			err = sc.WriteSMF(outFile)
 			if err != nil {
+				fmt.Printf("ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
 				return err
 			}
