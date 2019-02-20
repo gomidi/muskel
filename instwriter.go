@@ -485,14 +485,23 @@ func (i *Instrument) pad(s string) string {
 	return pad(s, i.colWidth)
 }
 
-func (i *Instrument) calcColWidth() {
+func (i *Instrument) calcColWidth(unrolled bool) {
 	i.colWidth = len(i.Name)
 
-	for _, be := range i.events {
-		for _, ev := range be {
+	if unrolled {
+		for _, ev := range i.unrolled {
 			l := len(ev.originalData)
 			if l > i.colWidth {
 				i.colWidth = l
+			}
+		}
+	} else {
+		for _, be := range i.events {
+			for _, ev := range be {
+				l := len(ev.originalData)
+				if l > i.colWidth {
+					i.colWidth = l
+				}
 			}
 		}
 	}

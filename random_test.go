@@ -162,7 +162,7 @@ Vol      | -     |
 }
 
 func TestRandom1(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		expected string

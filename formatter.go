@@ -24,7 +24,7 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	}
 
 	for _, instr := range p.score.Instruments {
-		instr.calcColWidth()
+		instr.calcColWidth(p.score.isUnrolled)
 		//instrColWidths[i] = instr.colWidth
 		if p.score.SmallColumns {
 			l += fmt.Sprintf("%s|", instr.pad(instr.Name))
@@ -34,7 +34,7 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 		}
 	}
 
-	p.writeBodyWithComment(bf, l)
+	p.writeBodyLine(bf, l)
 
 	l = "Ch       |"
 	if p.score.SmallColumns {
@@ -58,7 +58,7 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 		}
 	}
 
-	p.writeBodyWithComment(bf, l)
+	p.writeBodyLine(bf, l)
 
 	l = "Bank     |"
 	if p.score.SmallColumns {
@@ -81,7 +81,7 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 		}
 	}
 
-	p.writeBodyWithComment(bf, l)
+	p.writeBodyLine(bf, l)
 
 	l = "Prog     |"
 	if p.score.SmallColumns {
@@ -104,7 +104,7 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 		}
 	}
 
-	p.writeBodyWithComment(bf, l)
+	p.writeBodyLine(bf, l)
 
 	l = "Vol      |"
 	if p.score.SmallColumns {
@@ -127,7 +127,7 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 		}
 	}
 
-	p.writeBodyWithComment(bf, l)
+	p.writeBodyLine(bf, l)
 }
 
 func (f *Formatter) printSorted(bf *bytes.Buffer, format string, m map[string]string) {
@@ -146,108 +146,55 @@ func (f *Formatter) printSorted(bf *bytes.Buffer, format string, m map[string]st
 	}
 }
 
-// we don't write comments here, since the lines are changed anyway
-func (p *Formatter) printUnrolled(bf *bytes.Buffer, barLine string) {
-	var l string
-	p.score.enroll()
+func (f *Formatter) prepareBars() {
+	if f.score.isUnrolled {
+		//		f.score.Bars = f.score.un
+	}
 
-	p.writeInstrumentLines(bf)
+	for _, b := range f.score.Bars {
+		b.events = map[barEventKey]*Event{}
 
-	//		fmt.Printf("len bars: %v\n", len(p.score.Bars))
-	//		fmt.Printf("len events: %v\n", len(p.score.Instruments[0].events))
-
-	for i, bar := range p.score.Bars {
-		if bar.timeSigChange[0] != 0 {
-			l = fmt.Sprintf("%v/%v", bar.timeSigChange[0], bar.timeSigChange[1])
+		if f.score.isUnrolled {
+			for i, instr := range f.score.Instruments {
+				for _, ev := range instr.unrolled {
+					if ev.BarNo == b.barNo {
+						b.addInstrEvent(ev.DistanceToStartOfBarIn32th, i, ev)
+					}
+				}
+			}
 		} else {
-			l = ""
-		}
-
-		if bar.tempoChange > 0 {
-			l += fmt.Sprintf("@%g", bar.tempoChange)
-		}
-
-		bf.WriteString(l + "\n")
-
-		var instrPrinted = false
-
-		for pi, pos := range bar.originalPositions {
-			switch {
-			case pos[0] == '&':
-				l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
-				//l = fmt.Sprintf("     %3s+ |")
-			case strings.Index("123456789", pos[0:1]) != -1:
-				l = fmt.Sprintf("    %s"+barLine, pad(pos, 4))
-				//l= fmt.Sprintf("    %4s+ |")
-			case pos[0] == '.':
-				l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
-				//l = fmt.Sprintf("     %3s+ |")
-			case pos[0] == ';':
-				l = fmt.Sprintf("     %s"+barLine, pad(pos, 3))
-				//l = fmt.Sprintf("     %3s+ |")
-			}
-
-			for _, instr := range p.score.Instruments {
-				instrPrinted = false
-				be := instr.events[i]
-
-				for _, iev := range be {
-					if iev.DistanceToStartOfBarIn32th == bar.positions[pi] {
-						if p.score.SmallColumns {
-							l += fmt.Sprintf("%s"+barLine, instr.pad(iev.originalData))
-						} else {
-							l += fmt.Sprintf(" %s"+barLine, instr.pad(iev.originalData))
+			for i, instr := range f.score.Instruments {
+				for j, bev := range instr.events {
+					if j == b.barNo {
+						for bidx, ev := range bev {
+							//b.addInstrEvent(position, i, ev)
+							b.addInstrEvent(b.positions[bidx], i, ev)
+							//							b.events[barEventKey{instrCol: i, position: b.positions[bidx]}] = ev
 						}
-						instrPrinted = true
-						break
-					}
-
-					if iev.DistanceToStartOfBarIn32th > bar.positions[pi] {
-						if p.score.SmallColumns {
-							l += fmt.Sprintf("%s"+barLine, instr.pad(""))
-						} else {
-							l += fmt.Sprintf(" %s"+barLine, instr.pad(""))
-						}
-						instrPrinted = true
-						break
-					}
-				}
-
-				if !instrPrinted {
-					if p.score.SmallColumns {
-						l += fmt.Sprintf("%s"+barLine, instr.pad(""))
-					} else {
-						l += fmt.Sprintf(" %s"+barLine, instr.pad(""))
 					}
 				}
 			}
-
-			if pi == 0 {
-				for prt, br := range p.score.Parts {
-					if br[0] == bar.originalBarNo {
-						l += fmt.Sprintf(" %s", prt)
-					}
-				}
-			}
-
-			bf.WriteString(l + "\n")
-
 		}
-
 	}
 }
 
-func (p *Formatter) printNormalBody(bf *bytes.Buffer, barLine string) {
+func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 	var l string
 
 	p.writeInstrumentLines(bf)
+	p.prepareBars()
 
-	//		fmt.Printf("len bars: %v\n", len(p.score.Bars))
+	var prefix string
 
-	for i, bar := range p.score.Bars {
+	if !p.score.SmallColumns {
+		prefix = " "
+	}
+
+	for _, bar := range p.score.Bars {
+
 		if bar.jumpTo != "" {
 			l = fmt.Sprintf("[%s]", bar.jumpTo)
-			p.writeBodyWithComment(bf, l)
+			p.writeBodyLine(bf, l)
 			continue
 		}
 
@@ -261,7 +208,7 @@ func (p *Formatter) printNormalBody(bf *bytes.Buffer, barLine string) {
 			l += fmt.Sprintf("@%g", bar.tempoChange)
 		}
 
-		p.writeBodyWithComment(bf, l)
+		p.writeBodyLine(bf, l)
 		//			fmt.Printf("bar.originalPositions: %v\n", bar.originalPositions)
 
 		for pi, pos := range bar.originalPositions {
@@ -280,36 +227,22 @@ func (p *Formatter) printNormalBody(bf *bytes.Buffer, barLine string) {
 				//l = fmt.Sprintf("     %3s+ |")
 			}
 
-			for _, instr := range p.score.Instruments {
-				be := instr.events[i]
-
-				l += fmt.Sprintf(" %s"+barLine, instr.pad(be[pi].originalData))
-
+			for instrCol, instr := range p.score.Instruments {
+				if ev, has := bar.events[barEventKey{instrCol, bar.positions[pi]}]; has && ev != nil {
+					l += fmt.Sprintf(prefix+"%s"+barLine, instr.pad(ev.originalData))
+				} else {
+					l += fmt.Sprintf(prefix+"%s"+barLine, instr.pad(""))
+				}
 			}
 
 			if pi == 0 {
 				for prt, br := range p.score.Parts {
-					if br[0] == i {
-						if p.score.SmallColumns {
-							l += fmt.Sprintf("%s", prt)
-
-						} else {
-							l += fmt.Sprintf(" %s", prt)
-						}
+					if br[0] == bar.originalBarNo {
+						l += fmt.Sprintf(prefix+"%s", prt)
 					}
 				}
 			}
-
-			/*
-				if pi == len(bar.originalPositions)-1 {
-					for br, jmp := range p.score.Jumps {
-						if br == i {
-							l += fmt.Sprintf(" %s", jmp)
-						}
-					}
-				}
-			*/
-			p.writeBodyWithComment(bf, l)
+			p.writeBodyLine(bf, l)
 		}
 
 	}
@@ -323,6 +256,7 @@ func (p *Formatter) printNormalBody(bf *bytes.Buffer, barLine string) {
 			bf.WriteString(comment + "\n")
 		}
 	}
+
 }
 
 func (p *Formatter) printHeader(bf *bytes.Buffer) {
@@ -364,20 +298,18 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 		barLine = "|"
 	}
 
-	if p.score.isUnrolled {
-		p.printUnrolled(bf, barLine)
-		return
-	}
-
-	p.printNormalBody(bf, barLine)
+	p.printBody(bf, barLine)
 }
 
-func (p *Formatter) writeBodyWithComment(bf *bytes.Buffer, line string) {
-	if comment, has := p.score.BodyComments[p.writerSysLine]; has {
-		p.writerSysLine++
-		bf.WriteString(comment + "\n")
-		p.writeBodyWithComment(bf, line)
-		return
+func (p *Formatter) writeBodyLine(bf *bytes.Buffer, line string) {
+	// we don't write comments for unrolled scores, since the lines won't match anyway
+	if !p.score.isUnrolled {
+		if comment, has := p.score.BodyComments[p.writerSysLine]; has {
+			p.writerSysLine++
+			bf.WriteString(comment + "\n")
+			p.writeBodyLine(bf, line)
+			return
+		}
 	}
 	p.writerSysLine++
 	bf.WriteString(line + "\n")

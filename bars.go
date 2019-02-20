@@ -1,5 +1,10 @@
 package muskel
 
+type barEventKey struct {
+	instrCol int
+	position uint
+}
+
 type Bar struct {
 	tempoChange       float64
 	timeSigChange     [2]uint8
@@ -11,6 +16,18 @@ type Bar struct {
 	// real time sig (inherited or changed)
 	timeSig [2]uint8
 	jumpTo  string
+	events  map[barEventKey]*Event
+}
+
+func NewBar() *Bar {
+	return &Bar{
+		events: map[barEventKey]*Event{},
+	}
+}
+
+func (b *Bar) addInstrEvent(position uint, instrCol int, ev *Event) {
+	b.ensurePositionExist(position)
+	b.events[barEventKey{instrCol: instrCol, position: position}] = ev
 }
 
 func (b *Bar) ensurePositionExist(pos uint) {
@@ -53,6 +70,7 @@ func (b *Bar) Dup() (nuB *Bar) {
 		barNo:             b.barNo,
 		originalBarNo:     b.originalBarNo,
 		timeSig:           b.timeSig,
+		events:            map[barEventKey]*Event{},
 	}
 }
 

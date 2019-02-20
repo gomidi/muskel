@@ -2,7 +2,6 @@ package muskel
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -133,7 +132,7 @@ func (p *Score) enroll() {
 			instr.events = append(instr.events, BarEvents{})
 		}
 
-		instr.calcColWidth()
+		instr.calcColWidth(p.isUnrolled)
 	}
 }
 
@@ -197,15 +196,15 @@ func (s *Score) WriteToFile(filepath string) (err error) {
 	if err != nil {
 		return err
 	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			f.Close()
-			err = fmt.Errorf("Error: %v", r)
-		}
-		os.RemoveAll(dir)
-	}()
-
+	/*
+		defer func() {
+			if r := recover(); r != nil {
+				f.Close()
+				err = fmt.Errorf("Error: %v", r)
+			}
+			os.RemoveAll(dir)
+		}()
+	*/
 	err = s.WriteTo(f)
 	if err != nil {
 		return

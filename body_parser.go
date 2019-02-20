@@ -70,15 +70,14 @@ func (p *BodyParser) parseItem(data string, posIn32th uint) (interface{}, error)
 
 // handleEmptyLine handles an empty line
 func (p *BodyParser) handleEmptyLine() error {
-	var b Bar
-	p.newBar(&b)
+	p.newBar(NewBar())
 	p.jumpInLineBefore = false
 	return nil
 }
 
 // handleJump handles a jump
 func (p *BodyParser) handleJump(data string) error {
-	var b Bar
+	b := NewBar()
 	part := strings.Trim(data, "[]")
 	if _, has := p.Score.Parts[part]; !has {
 		return fmt.Errorf("could not jump to part %#v: not found", part)
@@ -90,7 +89,7 @@ func (p *BodyParser) handleJump(data string) error {
 	}
 
 	b.jumpTo = part
-	p.newBar(&b)
+	p.newBar(b)
 	p.jumpInLineBefore = true
 	return nil
 }
@@ -139,7 +138,7 @@ func (p *BodyParser) parseBarLine(data string) error {
 		return p.handleJump(data)
 
 	}
-	var b = &Bar{}
+	var b = NewBar()
 	p.jumpInLineBefore = false
 
 	if idx := strings.Index(data, "@"); idx >= 0 {
@@ -360,7 +359,7 @@ func (p *BodyParser) handleLastColumn(data string) error {
 // parseEventsLine parses a non-bar line / event line
 func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 	if p.jumpInLineBefore {
-		p.newBar(&Bar{})
+		p.newBar(NewBar())
 		p.jumpInLineBefore = false
 	}
 
