@@ -10,6 +10,9 @@ import (
 )
 
 func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes []uint8) {
+	if item == nil {
+		return nil
+	}
 	switch v := item.(type) {
 	case Note:
 		stopNotes()
@@ -236,27 +239,51 @@ func (iw *instWriter) writeIntro() {
 func (iw *instWriter) writeUnrolled() error {
 	var lastEv *Event
 
-	// there are no empty events any longer
+	iw.prevVel = 63
+
+	stopNotes := func() {
+		for nt, isOn := range iw.noteOns {
+			if isOn {
+				fmt.Printf("NoteOff %v\n", nt)
+				iw.wr.NoteOff(nt)
+				delete(iw.noteOns, nt)
+				//iw.noteOns[nt] = false
+			}
+		}
+	}
+
+	isHolding := false
+
 	for _, ev := range iw.instr.unrolled {
+		if ev.Item == nil {
+			continue
+		}
 		diffBars := ev.BarNo
 		if lastEv != nil {
 			diffBars -= lastEv.BarNo
 		}
 
 		if ev.Item != Hold {
-			iw.wr.Forward(uint32(diffBars), uint32(ev.DistanceToStartOfBarIn32th), 32)
-			stopNotes := func() {
-				for nt, isOn := range iw.noteOns {
-					if isOn {
-						fmt.Printf("[3.5] NoteOff %v\n", nt)
-						iw.wr.NoteOff(nt)
-						iw.noteOns[nt] = false
-					}
+			if lastEv != nil && lastEv.BarNo == ev.BarNo {
+				isHolding = false
+				fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th)
+				iw.wr.Forward(0, uint32(ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th), 32)
+			} else {
+				if !isHolding && len(iw.noteOns) > 0 {
+					iw.wr.Forward(uint32(diffBars), 0, 32)
+					stopNotes()
+					fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th)
+					iw.wr.Forward(0, uint32(ev.DistanceToStartOfBarIn32th), 32)
+				} else {
+					fmt.Printf("FORWARD(%v, %v, 32)\n", diffBars, ev.DistanceToStartOfBarIn32th)
+					iw.wr.Forward(uint32(diffBars), uint32(ev.DistanceToStartOfBarIn32th), 32)
 				}
+				isHolding = false
+
 			}
 
 			var addedNotes []uint8
-
+			fmt.Printf("writing item: %#v\n", ev.Item)
 			addedNotes = iw.writeItem(ev.Item, stopNotes)
 
 			for _, nt := range addedNotes {
@@ -264,8 +291,14 @@ func (iw *instWriter) writeUnrolled() error {
 			}
 			iw.lastItem = ev.Item
 			lastEv = ev
+		} else {
+			isHolding = true
 		}
 	}
+
+	iw.wr.Forward(1, 0, 32)
+	stopNotes()
+
 	return nil
 }
 
