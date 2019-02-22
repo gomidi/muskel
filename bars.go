@@ -61,6 +61,19 @@ func (b *Bar) length32th() int {
 }
 
 func (b *Bar) Dup() (nuB *Bar) {
+	/*
+		tempoChange       float64
+		timeSigChange     [2]uint8
+		positions         []uint   // each position is number of 32th from start
+		originalPositions []string // original positioning strings
+		lineNo            int      // line numbers are counted from the start of the system
+		barNo             int
+		originalBarNo     int
+		// real time sig (inherited or changed)
+		timeSig [2]uint8
+		jumpTo  string
+		events  map[barEventKey]*Event
+	*/
 	return &Bar{
 		tempoChange:       b.tempoChange,
 		timeSigChange:     b.timeSigChange,
@@ -70,6 +83,7 @@ func (b *Bar) Dup() (nuB *Bar) {
 		barNo:             b.barNo,
 		originalBarNo:     b.originalBarNo,
 		timeSig:           b.timeSig,
+		jumpTo:            b.jumpTo,
 		events:            map[barEventKey]*Event{},
 	}
 }
@@ -90,6 +104,7 @@ func (e *Event) Dup() *Event {
 		BarNo:                      e.BarNo,
 		OriginalBarNo:              e.OriginalBarNo,
 		DistanceToStartOfBarIn32th: e.DistanceToStartOfBarIn32th,
+		lineNo:                     e.lineNo,
 	}
 }
 

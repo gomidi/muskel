@@ -95,11 +95,11 @@ Vol     |-    |-  |
 	}
 
 	for i, test := range tests {
-
-		//		if i != 0 {
-		//			continue
-		//		}
-
+		/*
+			if i != 0 {
+				continue
+			}
+		*/
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
 
 		if err != nil {

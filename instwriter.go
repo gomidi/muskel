@@ -511,6 +511,7 @@ func (i *Instrument) Dup() *Instrument {
 		MIDIVolume:  i.MIDIVolume,
 		MIDIBank:    i.MIDIBank,
 		colWidth:    i.colWidth, // ? set to 0??
+		events:      i.events,
 	}
 }
 

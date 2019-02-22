@@ -7,7 +7,7 @@ import (
 )
 
 type ScoreUnroller struct {
-	src  *Score
+	//	src  *Score
 	dest *Score
 
 	// from unrollBarsAndJumps
@@ -25,27 +25,28 @@ type ScoreUnroller struct {
 	prevPos string
 }
 
-func (s *ScoreUnroller) createInstruments() {
-	for _, instr := range s.src.Instruments {
+func (s *ScoreUnroller) createInstruments(instruments []*Instrument) {
+	for _, instr := range instruments {
 		s.dest.Instruments = append(s.dest.Instruments, instr.Dup())
 	}
 }
 
 // unrollJump unrolls a jump
 func (s *ScoreUnroller) unrollJump(jump string) {
-	for j, bar2ndloop := range s.src.Bars[s.src.Parts[jump][0] : s.src.Parts[jump][1]+1] {
+	for j, bar2ndloop := range s.dest.Bars[s.dest.Parts[jump][0] : s.dest.Parts[jump][1]+1] {
 
 		nub := bar2ndloop.Dup()
 		if bar2ndloop.timeSigChange[0] > 0 {
 			s.num, s.denom = bar2ndloop.timeSigChange[0], bar2ndloop.timeSigChange[1]
 		}
 		nub.barNo = s.newBarNo
+		//		fmt.Printf("adding new unrolled bar: %v\n", nub.barNo)
 		nub.timeSig[0] = s.num
 		nub.timeSig[1] = s.denom
 		s.unrolledBars = append(s.unrolledBars, nub)
-		for iii, _instr := range s.src.Instruments {
-			//			fmt.Printf("adding bar %v => %v\n", s.src.Parts[jump][0]+j, s.newBarNo)
-			s.instrBarevents[iii] = append(s.instrBarevents[iii], _instr.events[s.src.Parts[jump][0]+j])
+		for iii, _instr := range s.dest.Instruments {
+			//			fmt.Printf("adding bar %v => %v\n    %v\n", s.dest.Parts[jump][0]+j, s.newBarNo, _instr.events[s.dest.Parts[jump][0]+j])
+			s.instrBarevents[iii] = append(s.instrBarevents[iii], _instr.events[s.dest.Parts[jump][0]+j])
 		}
 		s.newBarNo++
 	}
@@ -63,7 +64,7 @@ func (s *ScoreUnroller) unrollBar(bar *Bar) {
 	s.unrolledBars = append(s.unrolledBars, bar)
 	s.newBarNo++
 
-	for ii, instr := range s.src.Instruments {
+	for ii, instr := range s.dest.Instruments {
 		//		fmt.Printf("adding bar %v\n", bar.originalBarNo)
 		if len(instr.events)-1 >= bar.originalBarNo {
 			s.instrBarevents[ii] = append(s.instrBarevents[ii], instr.events[bar.originalBarNo])
@@ -73,10 +74,6 @@ func (s *ScoreUnroller) unrollBar(bar *Bar) {
 
 // unrollBarsAndJumps unrolls the bars and jumps
 func (s *ScoreUnroller) unrollBarsAndJumps() {
-
-	if s.src.isUnrolled {
-		panic("source must not be the unrolled score")
-	}
 
 	if !s.dest.isUnrolled {
 		panic("destination must be the unrolled score")
@@ -88,14 +85,16 @@ func (s *ScoreUnroller) unrollBarsAndJumps() {
 	s.denom = 4
 	s.newBarNo = 0
 
-	s.createInstruments()
+	//	s.createInstruments()
 
 	//	fmt.Printf("len bars: %v\n", len(s.src.Bars))
 
-	for _, bar := range s.src.Bars {
+	//for _, bar := range s.src.Bars {
+	for _, bar := range s.dest.Bars {
 		//		fmt.Printf("bar.barNo: %v, bar.originalBarNo: %v\n", bar.barNo, bar.originalBarNo)
 
 		if jump := bar.jumpTo; jump != "" {
+			//fmt.Printf("doing the jump for bar: %v\n", bar.barNo)
 			s.unrollJump(jump)
 			continue
 		}
@@ -109,6 +108,7 @@ func (s *ScoreUnroller) unrollBarsAndJumps() {
 		//		fmt.Printf("[0] len bars in instr: %v\n", len(s.instrBarevents[ii]))
 		instr.events = s.instrBarevents[ii]
 	}
+
 }
 
 // dupEvents duplicates the given events and sets the bar number to the given ones
@@ -437,10 +437,20 @@ func (s *ScoreUnroller) unfoldRepeated() {
 	}
 }
 
-func (s *ScoreUnroller) unrollInstruments() error {
+func (s *ScoreUnroller) copyBars(bars []*Bar) {
+	for _, b := range bars {
+		s.dest.Bars = append(s.dest.Bars, b.Dup())
+	}
+}
+
+func (s *ScoreUnroller) unrollInstruments(bars []*Bar, instr []*Instrument) error {
+
+	s.copyBars(bars)
 
 	// attach the barnumbers and position in 32th relative to start to the event
-	s.src.trackBarNumbers()
+	//s.src.trackBarNumbers()
+	s.createInstruments(instr)
+	s.trackBarNumbers()
 
 	// unroll the repetition within an instrument and the total jumps
 	// thereby creating new bars and attaching those new bar numbers in addition
@@ -484,7 +494,7 @@ func newScoreUnroller(src *Score) *ScoreUnroller {
 	nu.barNumbersTracked = true
 
 	return &ScoreUnroller{
-		src:  src,
+		//		src:  src,
 		dest: nu,
 	}
 }

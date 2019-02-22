@@ -53,13 +53,12 @@ func ParseFile(filepath string) (sc *Score, err error) {
 // Parse reads from the given reader and returns the resulting Score
 func Parse(rd io.Reader) (sc *Score, err error) {
 
-	/*
-		defer func() {
-			if r := recover(); r != nil {
-				err = fmt.Errorf("Error: %v", r)
-			}
-		}()
-	*/
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
+		}
+	}()
+
 	ps := NewParser(rd)
 	err = ps.Parse()
 

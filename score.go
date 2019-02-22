@@ -2,8 +2,10 @@ package muskel
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
@@ -42,11 +44,9 @@ func NewScore() *Score {
 }
 
 // trackBarNumbers tracks the bar numbers and positions for each event
-func (p *Score) trackBarNumbers() {
-	if p.barNumbersTracked {
-		return
-	}
-	for _, instr := range p.Instruments {
+func (p *ScoreUnroller) trackBarNumbers() {
+
+	for _, instr := range p.dest.Instruments {
 		var events []BarEvents
 
 		for barNo, bar := range instr.events {
@@ -56,23 +56,28 @@ func (p *Score) trackBarNumbers() {
 			//			if bar.
 
 			for barLine, ev := range bar {
+				nuev := ev.Dup()
 				//
 				/*
 					set the bar number and position
 				*/
-				ev.BarNo = barNo
-				ev.OriginalBarNo = barNo
+				nuev.BarNo = barNo
+				nuev.OriginalBarNo = barNo
 				//fmt.Printf("barNo: %v, BarLine: %v p.Bar: %#v\n", barNo, barLine, p.Bars[barNo])
-				ev.DistanceToStartOfBarIn32th = p.Bars[barNo].positions[barLine]
+				nuev.DistanceToStartOfBarIn32th = p.dest.Bars[barNo].positions[barLine]
 
-				events[barNo][barLine] = ev
+				events[barNo][barLine] = nuev
 			}
 		}
 
+		//		nu := instr.Dup()
+
 		instr.events = events
+
+		//		p.dest.Instruments = append(p.dest.Instruments, nu)
 		//instr.unrolled = events
 	}
-	p.barNumbersTracked = true
+	//	p.dest.barNumbersTracked = true
 }
 
 // Unroll unrolls repetitions, patterns and randomness and returns a score
@@ -93,7 +98,7 @@ func (s *Score) Unroll() (dest *Score, err error) {
 
 	ur := newScoreUnroller(s)
 	ur.dest.SmallColumns = s.SmallColumns
-	err = ur.unrollInstruments()
+	err = ur.unrollInstruments(s.Bars, s.Instruments)
 	return ur.dest, err
 }
 
@@ -159,19 +164,18 @@ func (s *Score) WriteSMF(midifile string) error {
 
 	return mid.NewSMFFile(midifile, numTracks, sw.Write,
 		smfwriter.TimeFormat(smf.MetricTicks(960)),
-		//		smfwriter.Debug(log.New(os.Stdout, "write MIDI", log.Lshortfile)),
+		smfwriter.Debug(log.New(os.Stdout, "write MIDI", log.Lshortfile)),
 	)
 }
 
 // WriteTo writes the score to the given writer (in a formatted way)
 func (s *Score) WriteTo(wr io.Writer) (err error) {
-	/*
-		defer func() {
-			if r := recover(); r != nil {
-				err = fmt.Errorf("Error: %v", r)
-			}
-		}()
-	*/
+
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("%v", r)
+		}
+	}()
 
 	var bf bytes.Buffer
 
@@ -196,15 +200,15 @@ func (s *Score) WriteToFile(filepath string) (err error) {
 	if err != nil {
 		return err
 	}
-	/*
-		defer func() {
-			if r := recover(); r != nil {
-				f.Close()
-				err = fmt.Errorf("Error: %v", r)
-			}
-			os.RemoveAll(dir)
-		}()
-	*/
+
+	defer func() {
+		if r := recover(); r != nil {
+			f.Close()
+			err = fmt.Errorf("%v", r)
+		}
+		os.RemoveAll(dir)
+	}()
+
 	err = s.WriteTo(f)
 	if err != nil {
 		return

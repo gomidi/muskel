@@ -175,6 +175,15 @@ func (f *Formatter) prepareBars() {
 				}
 			}
 		}
+
+		/*
+			for i, pos := range b.positions {
+				if b.originalPositions[i] != pos32thToString(pos) {
+					panic(fmt.Sprintf("strange things happening in bar %v at pos %v: %v 32th distance is not %q, but %q", b.barNo, i, pos, b.originalPositions[i], pos32thToString(pos)))
+				}
+				b.originalPositions[i] = pos32thToString(pos)
+			}
+		*/
 	}
 }
 
