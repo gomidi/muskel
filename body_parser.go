@@ -158,6 +158,9 @@ func (p *BodyParser) includeScore(sc *Score, file string) error {
 }
 
 func (p *BodyParser) include(file string) error {
+	if p.Score.isPartial() {
+		return fmt.Errorf("can't include within a partial")
+	}
 	sc, err := p.Score.include(file)
 	if err != nil {
 		return fmt.Errorf("can't include %q in score: %s", file, err.Error())

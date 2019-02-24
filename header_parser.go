@@ -66,6 +66,9 @@ func (p *HeaderParser) includeScore(sc *Score) error {
 }
 
 func (p *HeaderParser) include(file string) error {
+	if p.Score.isPartial() {
+		return fmt.Errorf("can't include within a partial")
+	}
 	p.Score.HeaderIncludes = append(p.Score.HeaderIncludes, file)
 	sc, err := p.Score.include(file)
 	if err != nil {
