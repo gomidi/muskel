@@ -210,7 +210,7 @@ func TestFormatter(t *testing.T) {
 	}{
 		{
 			`
-$a:             1f" 2&g
+aa:             1f" 2&g
 
 =
          | Vocals |
@@ -220,13 +220,13 @@ Prog     | -      |
 Vol      | -      |
 
     1    | e'     |
-    2    | $a     |
+    2    | aa     |
 
     1    |./.     |
 
     1    | %      |`,
 			`
-$a:             1f" 2&g
+aa:             1f" 2&g
 
 
 
@@ -249,29 +249,29 @@ Vol     |-     |
 		},
 		{
 			`
-author: Heino
-title: hoch auf dem gelben wagen
+@author: Heino
+@title: hoch auf dem gelben wagen
 
 /a"/440Hz
 
-$a: 1a' 2&#1 5&c"
-$b: 1$a(#1) 5$a(d)
+aa: 1a' 2&#1 5&c"
+bb: 1aa(#1) 5aa(d)
 =
   | piano | vox |
 
-1 | $a(g) | $b(f)   |
+1 | aa(g) | bb(f)   |
 
 1 | ./.   |    |
 `, `
-author:         Heino
-title:          hoch auf dem gelben wagen
+@author:        Heino
+@title:         hoch auf dem gelben wagen
 
 
 /a"/440Hz
 
 
-$a:             1a' 2&#1 5&c"
-$b:             1$a(#1) 5$a(d)
+aa:             1a' 2&#1 5&c"
+bb:             1aa(#1) 5aa(d)
 
 
 

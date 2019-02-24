@@ -266,7 +266,7 @@ func (p *Formatter) printHeader(bf *bytes.Buffer) {
 	metaMap := map[string]string{}
 
 	for k, v := range p.score.Meta {
-		metaMap[pad(k+":", 15)] = v
+		metaMap[pad("@"+k+":", 15)] = v
 	}
 
 	p.printSorted(bf, "%s %s\n", metaMap)
@@ -279,7 +279,7 @@ func (p *Formatter) printHeader(bf *bytes.Buffer) {
 	pattDefMap := map[string]string{}
 
 	for k, v := range p.score.PatternDefinitions {
-		pattDefMap[pad("$"+k+":", 15)] = v.Original
+		pattDefMap[pad(k+":", 15)] = v.Original
 	}
 
 	p.printSorted(bf, "%s %s\n", pattDefMap)

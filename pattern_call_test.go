@@ -102,98 +102,98 @@ func TestParsePattern(t *testing.T) {
 		/*
 		 */
 		{
-			"$pattA: 2a 2&b 3c'",
-			"$pattA",
+			"pattA: 2a 2&b 3c'",
+			"pattA",
 			"2a 2&b 3c'",
 			false,
 		},
 		{
-			"$pattA: 12a 12&b 13c'",
-			"$pattA",
+			"pattA: 12a 12&b 13c'",
+			"pattA",
 			"12a 12&b 13c'",
 			false,
 		},
 		{
-			"$pattA: 2a 2&#1 #2c'",
-			"$pattA(e',3&)",
+			"pattA: 2a 2&#1 #2c'",
+			"pattA(e',3&)",
 			"2a 2&e' 3&c'",
 			false,
 		},
 		{
-			"$pattA: 2a 2&#1 #2c'",
-			"$pattA(e',3&)[1:]",
+			"pattA: 2a 2&#1 #2c'",
+			"pattA(e',3&)[1:]",
 			"2&e' 3&c'",
 			false,
 		},
 		{
-			"$pattA: 1b 2a 2&#1 #2c'",
-			"$pattA(e',3&)[:3]/1& d :/",
+			"pattA: 1b 2a 2&#1 #2c'",
+			"pattA(e',3&)[:3]/1& d :/",
 			"1&b 2d 2&e'",
 			false,
 		},
 		{
-			"$pattA: 1b 2a\n$pattB: 1$pattA",
-			"$pattB",
+			"pattA: 1b 2a\npattB: 1pattA",
+			"pattB",
 			"1b 2a",
 			false,
 		},
 		{
-			"$pattA: 1b #1a\n$pattB: 1$pattA(3)",
-			"$pattB",
+			"pattA: 1b #1a\npattB: 1pattA(3)",
+			"pattB",
 			"1b 3a",
 			false,
 		},
 		{
-			"$pattA: 1b #1a\n$pattB: 1$pattA(#1)",
-			"$pattB(3&)",
+			"pattA: 1b #1a\npattB: 1pattA(#1)",
+			"pattB(3&)",
 			"1b 3&a",
 			false,
 		},
 		{
-			"$pattA: 1#2 #1a\n$pattB: 1$pattA(#1,c)",
-			"$pattB(3&)",
+			"pattA: 1#2 #1a\npattB: 1pattA(#1,c)",
+			"pattB(3&)",
 			"1c 3&a",
 			false,
 		},
 		{
-			"$pattA: 1b 2a\n$pattB: 2$pattA",
-			"$pattB",
+			"pattA: 1b 2a\npattB: 2pattA",
+			"pattB",
 			"2b 3a",
 			false,
 		},
 		{
-			"$pattA: 1b 2a\n$pattB: 2&$pattA",
-			"$pattB",
+			"pattA: 1b 2a\npattB: 2&pattA",
+			"pattB",
 			"2&b 3&a",
 			false,
 		},
 		{
-			"$pattA: 1&b 2&a\n$pattB: 2&$pattA",
-			"$pattB",
+			"pattA: 1&b 2&a\npattB: 2&pattA",
+			"pattB",
 			"3b 4a",
 			false,
 		},
 		{
-			"$pattA: 1&b 2&a\n$pattB: 2&$pattA\n$pattC: 1$pattB",
-			"$pattC",
+			"pattA: 1&b 2&a\npattB: 2&pattA\npattC: 1pattB",
+			"pattC",
 			"3b 4a",
 			false,
 		},
 		{
-			"$pattA: 1&b 2&a\n$pattB: 2&$pattA\n$pattC: 1&$pattB",
-			"$pattC",
+			"pattA: 1&b 2&a\npattB: 2&pattA\npattC: 1&pattB",
+			"pattC",
 			"3&b 4&a",
 			false,
 		},
 		{
-			"$pattA: 1&b 2&a\n$pattB: 2&$\\pattA",
-			"$pattB",
+			"pattA: 1&b 2&a\npattB: 2&!pattA",
+			"pattB",
 			"2&b 3&a",
 			false,
 		},
 		{
-			"$pattA: 1&b 2&a\n$pattB: 2&$pattA\n$pattC: 1&$\\pattB",
-			"$pattC",
+			"pattA: 1&b 2&a\npattB: 2&pattA\npattC: 1&!pattB",
+			"pattC",
 			"2b 3a",
 			false,
 		},
@@ -208,7 +208,7 @@ func TestParsePattern(t *testing.T) {
 
 		for _, df := range defs {
 			var pd PatternDefinition
-			err = pd.Parse(strings.TrimSpace(df)[1:])
+			err = pd.Parse(strings.TrimSpace(df))
 			if err != nil {
 				break
 			}
@@ -218,7 +218,7 @@ func TestParsePattern(t *testing.T) {
 		var pc = &PatternCall{}
 		pc.getter = get.GetPatternDefinition
 		if err == nil {
-			err = pc.parsePattern(test.call[1:], 0)
+			err = pc.parsePattern(test.call, 0)
 			//			err = pc.Parse(test.call[1:])
 		}
 
@@ -257,7 +257,7 @@ func TestParseCall(t *testing.T) {
 			Replacements: []string{"d", ":", "f"},
 			Params:       []string{"a", "b"},
 		}, false},
-		{"\\first(a,2)[1:]/d : f/", PatternCall{
+		{"!first(a,2)[1:]/d : f/", PatternCall{
 			Name:         "first",
 			Slice:        [2]int{1, -1},
 			Replacements: []string{"d", ":", "f"},

@@ -2,6 +2,7 @@ package muskel
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -27,7 +28,7 @@ func (p *HeaderParser) parseTemperamentLine(line string) error {
 // parsePatternDefinitionLine parses a line in the header that defines a pattern
 func (p *HeaderParser) parsePatternDefinitionLine(line string) error {
 	var pd PatternDefinition
-	err := pd.Parse(line[1:])
+	err := pd.Parse(line)
 	if err != nil {
 		return fmt.Errorf("invalid pattern definition line %#v: %s", line, err)
 	}
@@ -49,6 +50,8 @@ func (p *HeaderParser) parseMetaLine(line string) error {
 	return nil
 }
 
+var regExPattern = regexp.MustCompile("^([a-zA-Z][a-zA-Z]+).*")
+
 // parseHeaderLine parses a line of the header
 func (p *HeaderParser) parseHeaderLine(line string) error {
 	if len(line) == 0 {
@@ -58,10 +61,13 @@ func (p *HeaderParser) parseHeaderLine(line string) error {
 	switch line[0] {
 	case '/':
 		return p.parseTemperamentLine(line)
-	case '$':
-		return p.parsePatternDefinitionLine(line)
+	case '@':
+		return p.parseMetaLine(line[1:])
 	default:
-		return p.parseMetaLine(line)
+		if regExPattern.MatchString(line) {
+			return p.parsePatternDefinitionLine(line)
+		}
+		return nil
 	}
 }
 

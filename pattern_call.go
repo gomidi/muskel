@@ -277,7 +277,7 @@ func (p *PatternCall) parsePattern(data string, positionIn32th uint) error {
 	def := p.getter(p.Name)
 
 	if def == nil {
-		return fmt.Errorf("could not find definition for pattern %s", p.Name)
+		return fmt.Errorf("could not find definition for pattern %q", p.Name)
 	}
 
 	p.result, err = def.Call(p.Params...)
@@ -368,7 +368,7 @@ func (p *PatternCall) Parse(call string) error {
 
 	p.Name = call
 
-	if p.Name[0] == '\\' {
+	if p.Name[0] == '!' {
 		p.SyncFirst = true
 		p.Name = p.Name[1:]
 	}

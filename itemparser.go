@@ -245,8 +245,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			return Rest{}, nil
 		case '{':
 			return p.parseNTuple(data[1:], posIn32th)
-		case '$':
-			return p.parsePattern(data[1:], posIn32th)
+		//case '$':
+		//	return p.parsePattern(data[1:], posIn32th)
 		case 'S':
 			return parseNote(data[1:])
 		case 'Z':
@@ -255,6 +255,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			return p.parseRandom(data[1:], posIn32th)
 		case 'O':
 			return p.parseOSC(data[1:])
+		case '!':
+			return p.parsePattern(data, posIn32th)
 		case '.':
 			if data == "..." {
 				return RepeatLastBarUntilChange{}, nil
@@ -278,6 +280,9 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 				case "PT":
 					return parseMIDIPolyAftertouch(data[2:])
 				default:
+					if regExPattern.MatchString(data) {
+						return p.parsePattern(data, posIn32th)
+					}
 				}
 			}
 			res, err := parseNote(data)

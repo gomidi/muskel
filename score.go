@@ -43,6 +43,10 @@ func NewScore() *Score {
 	}
 }
 
+func (s *Score) isPartial() bool {
+	return s.Meta["partial"] != ""
+}
+
 // trackBarNumbers tracks the bar numbers and positions for each event
 func (p *ScoreUnroller) trackBarNumbers() {
 

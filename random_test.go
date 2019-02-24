@@ -43,16 +43,16 @@ Vol      | -     |
 		},
 		{
 			`
-$a: 1c
-$b: 2d
+aa: 1c
+bb: 2d
 =
   | piano |
 
-1 | ?($a,$b) | 
+1 | ?(aa,bb) | 
 
 `, [2]string{`
-$a:             1c
-$b:             2d
+aa:             1c
+bb:             2d
 
 
 
@@ -66,8 +66,8 @@ Vol      | -     |
     1    | c     |
 `,
 				`
-$a:             1c
-$b:             2d
+aa:             1c
+bb:             2d
 
 
 
