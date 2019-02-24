@@ -44,14 +44,14 @@ func TestSpread(t *testing.T) {
 	get := newPatternGetter()
 
 	var pd PatternDefinition
-	err := pd.Parse("$pattA: 2a 2&b 3c' 5f 7&g 8a 13e"[1:])
+	err := pd.Parse("pattA: 2a 2&b 3c' 5f 7&g 8a 13e")
 
 	get.add(&pd)
 
 	var pc = &PatternCall{}
 	pc.getter = get.GetPatternDefinition
 	if err == nil {
-		err = pc.parsePattern("$pattA"[1:], 0)
+		err = pc.parsePattern("pattA", 0)
 	}
 
 	if err != nil {

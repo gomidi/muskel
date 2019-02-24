@@ -15,15 +15,18 @@ import (
 )
 
 type Score struct {
+	FileName    string
 	Instruments []*Instrument
 	Bars        []*Bar
 
-	Meta               map[string]string
-	Temperament        map[string]string
-	PatternDefinitions map[string]*PatternDefinition
-	Parts              map[string][2]int // part name to start bar no and last bar
-	BodyComments       map[int]string    // line calculated from the start of the system
-	HeaderComments     []string          // comments in the header, as they come
+	Meta                       map[string]string
+	HeaderIncludes             []string
+	Temperament                map[string]string
+	PatternDefinitions         map[string]*PatternDefinition
+	IncludedPatternDefinitions map[string]*PatternDefinition
+	Parts                      map[string][2]int // part name to start bar no and last bar
+	BodyComments               map[int]string    // line calculated from the start of the system
+	HeaderComments             []string          // comments in the header, as they come
 
 	SmallColumns        bool // if the formatting should have no distance to the column lines
 	isUnrolled          bool
@@ -55,17 +58,30 @@ func (s *Score) AddMissingProperties() {
 
 func NewScore() *Score {
 	return &Score{
-		Meta:               map[string]string{},
-		Temperament:        map[string]string{},
-		PatternDefinitions: map[string]*PatternDefinition{},
-		Parts:              map[string][2]int{},
-		BodyComments:       map[int]string{},
-		isUnrolled:         false,
+		Meta:                       map[string]string{},
+		Temperament:                map[string]string{},
+		PatternDefinitions:         map[string]*PatternDefinition{},
+		Parts:                      map[string][2]int{},
+		BodyComments:               map[int]string{},
+		isUnrolled:                 false,
+		IncludedPatternDefinitions: map[string]*PatternDefinition{},
 	}
 }
 
 func (s *Score) isPartial() bool {
 	return s.Meta["partial"] != ""
+}
+
+func (p *Score) include(file string) (*Score, error) {
+	//	wd, _ := os.Getwd()
+	//	fmt.Println(wd)
+	//	sc, err := ParseFile(filepath.Join(wd, file+".mski"))
+	sc, err := ParseFile(file + ".mski")
+	if err != nil {
+		return nil, fmt.Errorf("Error while including file %q: %s", file, err.Error())
+	}
+
+	return sc, nil
 }
 
 // trackBarNumbers tracks the bar numbers and positions for each event
@@ -125,6 +141,23 @@ func (s *Score) Unroll() (dest *Score, err error) {
 	ur.dest.SmallColumns = s.SmallColumns
 	err = ur.unrollInstruments(s.Bars, s.Instruments)
 	return ur.dest, err
+}
+
+func (s *Score) AddInstrument(i *Instrument) error {
+	if s.hasInstrument(i.Name) {
+		return fmt.Errorf("instrument %q already defined", i.Name)
+	}
+	s.Instruments = append(s.Instruments, i)
+	return nil
+}
+
+func (p *Score) hasInstrument(name string) bool {
+	for _, instr := range p.Instruments {
+		if instr.Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Score) enroll() {

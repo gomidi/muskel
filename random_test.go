@@ -16,7 +16,6 @@ func TestRandom2(t *testing.T) {
 			`
 =
   | piano |
-
 1 | ?(a,b) | 
 
 `, [2]string{`
@@ -26,7 +25,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a     |
 `,
 				`
@@ -36,7 +34,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | b     |
 `,
 			},
@@ -47,7 +44,6 @@ aa: 1c
 bb: 2d
 =
   | piano |
-
 1 | ?(aa,bb) | 
 
 `, [2]string{`
@@ -62,7 +58,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | c     |
 `,
 				`
@@ -77,7 +72,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    |       |
     2    | d     |
 `,
@@ -87,7 +81,6 @@ Vol      | -     |
 			`
 =
   | piano |
-
 1 | ?[50]a | 
 
 `, [2]string{`
@@ -97,7 +90,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a     |
 `,
 				`
@@ -107,7 +99,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    |       |
 `,
 			},
@@ -120,7 +111,7 @@ Vol      | -     |
 		//			continue
 		//		}
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "random2")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -171,7 +162,6 @@ func TestRandom1(t *testing.T) {
 			`
 =
   | piano | vox |
-
 1 | ?[100]a | ?[0]c   |
 
 1 | ./.   |    |
@@ -182,7 +172,6 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
-
     1    | a     |     |
 
     1    | a     |     |
@@ -191,7 +180,6 @@ Vol      | -     | -   |
 			`
 =
   | piano |
-
 1 | ?(b) | 
 
 `, `
@@ -201,7 +189,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | b     |
 `},
 	}
@@ -212,7 +199,7 @@ Vol      | -     |
 		//			continue
 		//		}
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "random1")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)

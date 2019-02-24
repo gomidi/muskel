@@ -33,7 +33,7 @@ func NewParser(r io.Reader) *Parser {
 		header: &HeaderParser{sc},
 		body: &BodyParser{
 			Score:          sc,
-			currentBar:     -1,
+			currentBarNo:     -1,
 			numInstruments: -1,
 		},
 	}
@@ -47,19 +47,20 @@ func ParseFile(filepath string) (sc *Score, err error) {
 		return nil, err
 	}
 
-	return Parse(bytes.NewReader(b))
+	return Parse(bytes.NewReader(b), filepath)
 }
 
 // Parse reads from the given reader and returns the resulting Score
-func Parse(rd io.Reader) (sc *Score, err error) {
-
-	defer func() {
-		if r := recover(); r != nil {
-			err = fmt.Errorf("%v", r)
-		}
-	}()
-
+func Parse(rd io.Reader, filepath string) (sc *Score, err error) {
+	/*
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("%v", r)
+			}
+		}()
+	*/
 	ps := NewParser(rd)
+	ps.Score.FileName = filepath
 	err = ps.Parse()
 
 	if err != nil {
@@ -85,7 +86,14 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 	if len(line) > 0 && string(line[0]) == "=" {
 		p.current.isHeader = false
 		p.Score.lineWhereBodyStarts = p.current.line + 1
-		return p.header.parseHeader(header.String())
+		err := p.header.parseHeader(header.String())
+		if err != nil {
+			return err
+		}
+		if p.Score.Meta["partial"] == "header" {
+			return io.EOF
+		}
+		return nil
 	}
 
 	if len(line) == 1 {
@@ -123,6 +131,14 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 			header.WriteString("\n")
 			return nil
 		}
+
+		//		fmt.Printf("partial header: %q\n", p.Score.Meta["partial"])
+		//		fmt.Printf("meta: %v\n", p.Score.Meta)
+
+		if p.Score.Meta["partial"] == "header" {
+			return io.EOF
+		}
+
 		err := p.body.parseLine(string(line))
 		if err != nil {
 			return fmt.Errorf("Error in line %v:\n%s\n", p.current.line+1, err.Error())
@@ -150,6 +166,7 @@ func (p *Parser) Parse() (err error) {
 	p.current.isComment = false
 	p.current.line = -1
 	p.Score.lineWhereBodyStarts = 0
+	p.body.jumpInLineBefore = true
 
 	for {
 		err = p.readLine(header)

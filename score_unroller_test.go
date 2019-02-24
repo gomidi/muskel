@@ -21,7 +21,6 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e'     |
 
     1    |        |`,
@@ -32,7 +31,6 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e'     |
 
     1    |        |`,
@@ -45,7 +43,6 @@ Ch       | -      | -     |
 Bank     | -      | -     |
 Prog     | -      | -     |
 Vol      | -      | -     |
-
     3    |        |       |
      &   |        |       |
 `,
@@ -56,7 +53,6 @@ Ch       | -      | -     |
 Bank     | -      | -     |
 Prog     | -      | -     |
 Vol      | -      | -     |
-
     3    |        |       |
      &   |        |       |
 `,
@@ -66,7 +62,6 @@ Vol      | -      | -     |
 			`
 =
    |piano|
-
 1  |a'   |
 						`,
 			`
@@ -76,7 +71,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
 			`,
 		},
@@ -84,7 +78,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   |
 &  |c"|
 						`,
@@ -95,7 +88,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
      &   | c"    |
 			`,
@@ -105,7 +97,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   |
 &  |c"|
 
@@ -118,7 +109,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
      &   | c"    |
 
@@ -129,7 +119,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   |
 &  |c"|
 
@@ -142,7 +131,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
      &   | c"    |
 
@@ -154,7 +142,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   |
 &  |c"|
 
@@ -171,7 +158,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
      &   | c"    |
 
@@ -189,7 +175,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   |
 &  |c"|
 
@@ -211,7 +196,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
      &   | c"    |
 
@@ -235,7 +219,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   | A
 &  |c"|
 
@@ -251,7 +234,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    | A
      &   | c"    |
 
@@ -274,7 +256,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   | A
 &  |c"|
 
@@ -291,7 +272,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    | A
      &   | c"    |
 
@@ -314,7 +294,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   | A
 &  |c"|
 
@@ -331,7 +310,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    | A
      &   | c"    |
 
@@ -354,7 +332,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   | A
 &  |c"|
 
@@ -371,7 +348,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    | A
      &   | c"    |
 
@@ -394,7 +370,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   | A
 &  |c"|
 
@@ -411,7 +386,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    | A
      &   | c"    |
 
@@ -434,7 +408,6 @@ Vol      | -     |
 			`
 =
    |piano|
-
 1  |a'   | A
 &  |c"|
 
@@ -448,7 +421,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    | A
      &   | c"    |
 
@@ -467,7 +439,6 @@ Vol      | -     |
 			`
 =
     |piano| vox |
-
 1   |a'   | e   | A
  &  |c"   | %   |
 2   |     | f   |
@@ -483,7 +454,6 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
-
     1    | a'    | e   | A
      &   | c"    | e   |
     2    |       | f   |
@@ -509,7 +479,7 @@ Vol      | -     | -   |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)

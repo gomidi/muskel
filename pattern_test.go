@@ -67,7 +67,6 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e'     |
     2    | aa     |
 
@@ -84,7 +83,6 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e'     |
     2    | f"     |
     3    | g      |
@@ -98,7 +96,6 @@ aa: 1a' 2&#1 5&c"
 bb: 1aa(#1) 5aa(d)
 =
   | piano | vox |
-
 1 | aa(g) | bb(f)   |
 
 1 | ./.   |    |
@@ -117,7 +114,6 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
-
     1    | a'    | a'  |
     2&   | g     | f   |
 
@@ -129,7 +125,6 @@ Vol      | -     | -   |
 aa:  1a' 2&#1 5&c"
 =
   | piano | vox |
-
 1 | aa(g) | aa(f)   |
 
 1 | ./.   |    |
@@ -147,7 +142,6 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
-
     1    | a'    | a'  |
     2&   | g     | f   |
 
@@ -160,7 +154,6 @@ Vol      | -     | -   |
 aa:  1a' 2&b 5&c"
 =
   | piano | vox |
-
 1 | aa |    |
 2 |    |  E  |
 
@@ -179,7 +172,6 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
-
     1    | a'    |     |
     2    |       | E   |
     2&   | b     |     |
@@ -193,7 +185,6 @@ Vol      | -     | -   |
 aa:  1a' 2&b 5&c"
 =
   | piano | vox |
-
 1 | aa |    |
 2 |    |  E  |
 
@@ -212,7 +203,6 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
-
     1    | a'    |     |
     2    |       | E   |
     2&   | b     |     |
@@ -226,7 +216,6 @@ Vol      | -     | -   |
 aa:  1a' 2&b 5g
 =
   | piano |
-
 1 | aa |
 
 1 |  |
@@ -244,7 +233,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
     2&   | b     |
 
@@ -255,7 +243,6 @@ Vol      | -     |
 aa:  1a' 2&b 5g
 =
   | piano |
-
 1 | aa |
 
 1 | e |
@@ -273,7 +260,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
     2&   | b     |
 
@@ -284,7 +270,6 @@ Vol      | -     |
 aa:  1a' 2&b 5g
 =
   | piano |
-
 1 | aa |
 `, `
 
@@ -300,7 +285,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     1    | a'    |
     2&   | b     |
 		   		   `},
@@ -339,7 +323,6 @@ Vol      | -     |
 aa:  1a' 2&b 5&c"
 =
   | piano | vox |
-
 1 | aa |   |
 2 |    | aa |
 
@@ -358,7 +341,6 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
-
     1    | a'    |     |
     2    |       | a'  |
     2&   | b     |     |
@@ -374,7 +356,6 @@ Vol      | -     | -   |
 aa:  1a' 2b
 =
   | piano |
-
 2 | aa |
 `, `
 
@@ -390,7 +371,6 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
-
     2    | a'    |
     3    | b     |
 		   `},
@@ -402,7 +382,7 @@ Vol      | -     |
 		//			continue
 		//		}
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll-pattern")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)

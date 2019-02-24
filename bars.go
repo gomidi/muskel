@@ -14,9 +14,11 @@ type Bar struct {
 	barNo             int
 	originalBarNo     int
 	// real time sig (inherited or changed)
-	timeSig [2]uint8
-	jumpTo  string
-	events  map[barEventKey]*Event
+	timeSig       [2]uint8
+	jumpTo        string
+	include       string
+	includedScore *Score // must be an unrolled score
+	events        map[barEventKey]*Event
 }
 
 func NewBar() *Bar {
@@ -84,7 +86,9 @@ func (b *Bar) Dup() (nuB *Bar) {
 		originalBarNo:     b.originalBarNo,
 		timeSig:           b.timeSig,
 		jumpTo:            b.jumpTo,
+		include:           b.include,
 		events:            map[barEventKey]*Event{},
+		includedScore:     b.includedScore,
 	}
 }
 
@@ -109,6 +113,14 @@ func (e *Event) Dup() *Event {
 }
 
 type BarEvents []*Event
+
+func (b BarEvents) Dup() BarEvents {
+	var nu BarEvents
+	for _, be := range b {
+		nu = append(nu, be.Dup())
+	}
+	return nu
+}
 
 func (b BarEvents) isEmpty() bool {
 	if len(b) == 0 {

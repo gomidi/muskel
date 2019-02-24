@@ -21,7 +21,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
     2    | f      |
@@ -34,7 +33,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
     2    | f      |
@@ -49,7 +47,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -63,7 +60,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -79,7 +75,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -94,7 +89,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -111,7 +105,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -126,7 +119,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -143,7 +135,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -158,7 +149,6 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e      | A
 [A]
 [A]
@@ -174,7 +164,7 @@ Vol      | -      |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter-jumps")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -218,7 +208,6 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-
     1    | e'     |
     2    | aa     |
 
@@ -236,7 +225,6 @@ Ch      |1     |
 Bank    |-     |
 Prog    |-     |
 Vol     |-     |
-
     1   |e'    |
     2   |f"    |
     3&  |g     |
@@ -258,7 +246,6 @@ aa: 1a' 2&#1 5&c"
 bb: 1aa(#1) 5aa(d)
 =
   | piano | vox |
-
 1 | aa(g) | bb(f)   |
 
 1 | ./.   |    |
@@ -281,7 +268,6 @@ Ch      |-    |-  |
 Bank    |-    |-  |
 Prog    |-    |-  |
 Vol     |-    |-  |
-
     1   |a'   |a' |
     2&  |g    |f  |
 
@@ -296,7 +282,7 @@ Vol     |-    |-  |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)

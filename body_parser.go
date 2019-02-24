@@ -8,7 +8,7 @@ import (
 
 type BodyParser struct {
 	*Score
-	currentBar        int
+	currentBarNo      int
 	jumpInLineBefore  bool
 	inPart            string
 	numInstruments    int
@@ -18,15 +18,18 @@ type BodyParser struct {
 }
 
 func (p *BodyParser) newBar(b *Bar) {
-	p.currentBar++
+	p.currentBarNo++
 	//fmt.Printf("parser: adding bar %v\n", p.currentBar)
-	b.barNo = p.currentBar
-	b.originalBarNo = p.currentBar
+	b.barNo = p.currentBarNo
+	b.originalBarNo = p.currentBarNo
 	p.Score.Bars = append(p.Score.Bars, b)
 }
 
 func (p *BodyParser) GetPatternDefinition(name string) *PatternDefinition {
-	return p.Score.PatternDefinitions[name]
+	if def := p.Score.PatternDefinitions[name]; def != nil {
+		return def
+	}
+	return p.Score.IncludedPatternDefinitions[name]
 }
 
 // parseSingleItem parses a single item (no multiitem)
@@ -71,6 +74,7 @@ func (p *BodyParser) parseItem(data string, posIn32th uint) (interface{}, error)
 // handleEmptyLine handles an empty line
 func (p *BodyParser) handleEmptyLine() error {
 	if !p.jumpInLineBefore {
+		//		fmt.Println("new bar added in empty line")
 		p.newBar(NewBar())
 	}
 	//	p.jumpInLineBefore = false
@@ -86,7 +90,7 @@ func (p *BodyParser) handleJump(data string) error {
 	}
 
 	if p.inPart != "" {
-		p.Score.Parts[part] = [2]int{p.Score.Parts[part][0], p.currentBar}
+		p.Score.Parts[part] = [2]int{p.Score.Parts[part][0], p.currentBarNo}
 		p.inPart = ""
 	}
 
@@ -126,16 +130,82 @@ func (p *BodyParser) handleTimeSigChange(b *Bar, data string) error {
 	b.timeSigChange[0] = uint8(num)
 	b.timeSigChange[1] = uint8(denom)
 
+	//	fmt.Println("new bar added based on time sig change")
 	p.newBar(b)
 	p.jumpInLineBefore = false
 	return nil
 }
 
+func (p *BodyParser) includeScore(sc *Score, file string) error {
+	b := NewBar()
+	b.include = file
+
+	for _, instr := range sc.Instruments {
+		if !p.Score.hasInstrument(instr.Name) {
+			return fmt.Errorf("instrument %q not found in main score", instr.Name)
+		}
+	}
+	//b.includedBars = make([]*Bar, len(sc.Bars))
+	ur, err := sc.Unroll()
+	if err != nil {
+		return fmt.Errorf("could not unroll score: %s", err.Error())
+	}
+
+	b.includedScore = ur
+	p.newBar(b)
+	p.jumpInLineBefore = true
+	return nil
+}
+
+func (p *BodyParser) include(file string) error {
+	sc, err := p.Score.include(file)
+	if err != nil {
+		return fmt.Errorf("can't include %q in score: %s", file, err.Error())
+	}
+
+	if !sc.isPartial() {
+		return fmt.Errorf("can't include %q: it is no partial", file)
+	}
+
+	if sc.Meta["partial"] != "score" {
+		return fmt.Errorf("can't include %q in score: it must be partial \"score\" but is %q", file, sc.Meta["partial"])
+	}
+
+	err = p.includeScore(sc, file)
+	if err != nil {
+		return fmt.Errorf("can't include %q in score: %s", file, err.Error())
+	}
+	return nil
+}
+
+func (p *BodyParser) parseCommand(data string) error {
+	var c CommandCall
+	err := c.Parse(data)
+	if err != nil {
+		return err
+	}
+	switch c.Name {
+	case "include":
+		if len(c.Params) != 1 {
+			return fmt.Errorf("include command needs one parameter")
+		}
+		return p.include(strings.Trim(c.Params[0], "\""))
+	default:
+		return fmt.Errorf("unsupported command in body: %q", c.Name)
+	}
+}
+
 // parseBarLine parses a bar line (i.e. either simple bar change, or jump, or time signature change or tempo change and combinations of the last two
 func (p *BodyParser) parseBarLine(data string) error {
-	if data == "" {
+
+	if strings.TrimSpace(data) == "" {
 		return p.handleEmptyLine()
 	}
+
+	if data[0] == '$' {
+		return p.parseCommand(data[1:])
+	}
+
 	// its a jump
 	if data[0] == '[' {
 		return p.handleJump(data)
@@ -150,12 +220,12 @@ func (p *BodyParser) parseBarLine(data string) error {
 			return err
 		}
 		data = strings.TrimSpace(data[:idx])
-	}
-
-	if data == "" {
-		// add bar
-		p.newBar(b)
-		return nil
+		if data == "" {
+			// add bar
+			//			fmt.Println("new bar added based on tempo change")
+			p.newBar(b)
+			return nil
+		}
 	}
 
 	return p.handleTimeSigChange(b, data)
@@ -179,7 +249,7 @@ func (p *BodyParser) getInstrument(i int) (instr *Instrument) {
 		instr.MIDIChannel = -1
 		instr.MIDIVolume = -1
 		instr.MIDIBank = -1
-		p.Score.Instruments = append(p.Score.Instruments, instr)
+		p.Score.AddInstrument(instr)
 		return
 	}
 	return p.Score.Instruments[i]
@@ -315,12 +385,12 @@ func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) er
 func (p *BodyParser) parseInstrEvents(i int, instr *Instrument, data string) (err error) {
 	var barEvents BarEvents
 
-	if diff := (p.currentBar - (len(instr.events) - 1)); diff > 0 {
+	if diff := (p.currentBarNo - (len(instr.events) - 1)); diff > 0 {
 		for _d := 0; _d < diff; _d++ {
 			instr.events = append(instr.events, barEvents)
 		}
 	}
-	barEvents = instr.events[p.currentBar]
+	barEvents = instr.events[p.currentBarNo]
 	ev := &Event{}
 	ev.originalData = data
 
@@ -335,7 +405,7 @@ func (p *BodyParser) parseInstrEvents(i int, instr *Instrument, data string) (er
 	}
 
 	barEvents = append(barEvents, ev)
-	instr.events[p.currentBar] = barEvents
+	instr.events[p.currentBarNo] = barEvents
 
 	return nil
 }
@@ -352,19 +422,16 @@ func (p *BodyParser) handleLastColumn(data string) error {
 	}
 
 	if p.inPart != "" {
-		p.Score.Parts[data] = [2]int{p.Score.Parts[data][0], p.currentBar}
+		p.Score.Parts[data] = [2]int{p.Score.Parts[data][0], p.currentBarNo}
 	}
-	p.Score.Parts[data] = [2]int{p.currentBar, -1}
+	p.Score.Parts[data] = [2]int{p.currentBarNo, -1}
 	p.inPart = data
 	return nil
 }
 
 // parseEventsLine parses a non-bar line / event line
 func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
-	if p.jumpInLineBefore {
-		p.newBar(NewBar())
-		p.jumpInLineBefore = false
-	}
+	//	fmt.Printf("parseEventsLine in score %q\n", p.Score.FileName)
 
 	if p.numInstruments == -1 {
 		p.numInstruments = len(tabs) - 2
@@ -389,14 +456,19 @@ func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 		case "bank":
 			err = p.setInstrumentBank(i, instr, data)
 		default:
+			if p.jumpInLineBefore { //&& p.firstBarSet {
+				//				fmt.Println("new bar in parse events")
+				p.newBar(NewBar())
+			}
+			p.jumpInLineBefore = false
 			if i == 0 {
 				p.lastPosition, p.currentPosIn32ths, err = positionTo32th(p.lastPosition, firstColumn)
 				if err != nil {
 					return err
 				}
 
-				p.Score.Bars[p.currentBar].originalPositions = append(p.Score.Bars[p.currentBar].originalPositions, firstColumn)
-				p.Score.Bars[p.currentBar].positions = append(p.Score.Bars[p.currentBar].positions, p.currentPosIn32ths)
+				p.Score.Bars[p.currentBarNo].originalPositions = append(p.Score.Bars[p.currentBarNo].originalPositions, firstColumn)
+				p.Score.Bars[p.currentBarNo].positions = append(p.Score.Bars[p.currentBarNo].positions, p.currentPosIn32ths)
 			}
 
 			err = p.parseInstrEvents(i, instr, data)

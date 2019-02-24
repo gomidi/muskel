@@ -38,6 +38,7 @@ func (p *HeaderParser) parsePatternDefinitionLine(line string) error {
 
 // parseMetaLine parses a line in the header that contains a meta property
 func (p *HeaderParser) parseMetaLine(line string) error {
+	//	fmt.Printf("parsing meta line %q\n", line)
 	keyVal := strings.Split(line, ":")
 	if len(keyVal) != 2 {
 		return fmt.Errorf("invalid header line %#v, format must be key: value", line)
@@ -47,10 +48,53 @@ func (p *HeaderParser) parseMetaLine(line string) error {
 	val := strings.TrimSpace(keyVal[1])
 
 	p.Score.Meta[key] = val
+	//	fmt.Printf("setting meta %q -> %q\n", key, val)
 	return nil
 }
 
 var regExPattern = regexp.MustCompile("^([a-zA-Z][a-zA-Z]+).*")
+
+func (p *HeaderParser) includeScore(sc *Score) error {
+	//panic("implement")
+	for k, v := range sc.PatternDefinitions {
+		if p.Score.PatternDefinitions[k] != nil || p.Score.IncludedPatternDefinitions[k] != nil {
+			return fmt.Errorf("pattern %q already defined in main file, can't redefine", k)
+		}
+		p.Score.IncludedPatternDefinitions[k] = v
+	}
+	return nil
+}
+
+func (p *HeaderParser) include(file string) error {
+	p.Score.HeaderIncludes = append(p.Score.HeaderIncludes, file)
+	sc, err := p.Score.include(file)
+	if err != nil {
+		return fmt.Errorf("Error while including file %q: %s", file, err.Error())
+	}
+
+	err = p.includeScore(sc)
+	if err != nil {
+		return fmt.Errorf("Error while including file %q: %s", file, err.Error())
+	}
+	return nil
+}
+
+func (p *HeaderParser) parseCommand(data string) error {
+	var c CommandCall
+	err := c.Parse(data)
+	if err != nil {
+		return err
+	}
+	switch c.Name {
+	case "include":
+		if len(c.Params) != 1 {
+			return fmt.Errorf("include command needs one parameter")
+		}
+		return p.include(strings.Trim(c.Params[0], "\""))
+	default:
+		return fmt.Errorf("unsupported command in body: %q", c.Name)
+	}
+}
 
 // parseHeaderLine parses a line of the header
 func (p *HeaderParser) parseHeaderLine(line string) error {
@@ -63,6 +107,8 @@ func (p *HeaderParser) parseHeaderLine(line string) error {
 		return p.parseTemperamentLine(line)
 	case '@':
 		return p.parseMetaLine(line[1:])
+	case '$':
+		return p.parseCommand(line[1:])
 	default:
 		if regExPattern.MatchString(line) {
 			return p.parsePatternDefinitionLine(line)

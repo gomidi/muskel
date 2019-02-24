@@ -181,8 +181,12 @@ func (f *Formatter) prepareBars() {
 
 func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 	var l string
-
+	p.jumpInLineBefore = true
 	p.writeInstrumentLines(bf)
+	//	fmt.Printf("num bars: %v\n", len(p.score.Bars))
+	//	for b, bar := range p.score.Bars {
+	//		fmt.Printf("bar %v: %#v\n", b, bar)
+	//	}
 	p.prepareBars()
 
 	var prefix string
@@ -213,6 +217,8 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 		if !p.jumpInLineBefore || l != "" {
 			p.writeBodyLine(bf, l)
 		}
+
+		p.jumpInLineBefore = false
 		//			fmt.Printf("bar.originalPositions: %v\n", bar.originalPositions)
 
 		for pi, pos := range bar.originalPositions {
@@ -272,6 +278,10 @@ func (p *Formatter) printHeader(bf *bytes.Buffer) {
 	p.printSorted(bf, "%s %s\n", metaMap)
 
 	bf.WriteString("\n\n")
+
+	for _, incl := range p.score.HeaderIncludes {
+		fmt.Fprintf(bf, "$include(%q)\n", incl)
+	}
 
 	p.printSorted(bf, "/%s/%s\n", p.score.Temperament)
 	bf.WriteString("\n\n")

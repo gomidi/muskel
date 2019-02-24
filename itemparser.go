@@ -226,6 +226,10 @@ func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{},
 	}
 }
 
+func (p *itemParser) parseCommand(data string, posIn32th uint) (interface{}, error) {
+	panic("TODO implement")
+}
+
 func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error) {
 	data = strings.TrimSpace(data)
 	//	fmt.Printf("parseItem called with %q\n", data)
@@ -245,8 +249,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			return Rest{}, nil
 		case '{':
 			return p.parseNTuple(data[1:], posIn32th)
-		//case '$':
-		//	return p.parsePattern(data[1:], posIn32th)
+		case '$':
+			return p.parseCommand(data[1:], posIn32th)
 		case 'S':
 			return parseNote(data[1:])
 		case 'Z':

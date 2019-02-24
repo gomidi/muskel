@@ -12,7 +12,7 @@ type ScoreUnroller struct {
 
 	// from unrollBarsAndJumps
 	unrolledBars   []*Bar
-	instrBarevents map[int][]BarEvents
+	instrBarevents map[string][]BarEvents
 	num            uint8
 	denom          uint8
 	newBarNo       int
@@ -27,7 +27,7 @@ type ScoreUnroller struct {
 
 func (s *ScoreUnroller) createInstruments(instruments []*Instrument) {
 	for _, instr := range instruments {
-		s.dest.Instruments = append(s.dest.Instruments, instr.Dup())
+		s.dest.AddInstrument(instr.Dup())
 	}
 }
 
@@ -44,9 +44,30 @@ func (s *ScoreUnroller) unrollJump(jump string) {
 		nub.timeSig[0] = s.num
 		nub.timeSig[1] = s.denom
 		s.unrolledBars = append(s.unrolledBars, nub)
-		for iii, _instr := range s.dest.Instruments {
+		for _, _instr := range s.dest.Instruments {
 			//			fmt.Printf("adding bar %v => %v\n    %v\n", s.dest.Parts[jump][0]+j, s.newBarNo, _instr.events[s.dest.Parts[jump][0]+j])
-			s.instrBarevents[iii] = append(s.instrBarevents[iii], _instr.events[s.dest.Parts[jump][0]+j])
+			s.instrBarevents[_instr.Name] = append(s.instrBarevents[_instr.Name], _instr.events[s.dest.Parts[jump][0]+j])
+		}
+		s.newBarNo++
+	}
+}
+
+// unrollJump unrolls a jump
+func (s *ScoreUnroller) unrollInclude(sc *Score) {
+	for j, bar2ndloop := range sc.Bars {
+
+		nub := bar2ndloop.Dup()
+		if bar2ndloop.timeSigChange[0] > 0 {
+			s.num, s.denom = bar2ndloop.timeSigChange[0], bar2ndloop.timeSigChange[1]
+		}
+		nub.barNo = s.newBarNo
+		//		fmt.Printf("adding new unrolled bar: %v\n", nub.barNo)
+		nub.timeSig[0] = s.num
+		nub.timeSig[1] = s.denom
+		s.unrolledBars = append(s.unrolledBars, nub)
+		for _, _instr := range sc.Instruments {
+			//			fmt.Printf("adding bar %v => %v\n    %v\n", s.dest.Parts[jump][0]+j, s.newBarNo, _instr.events[s.dest.Parts[jump][0]+j])
+			s.instrBarevents[_instr.Name] = append(s.instrBarevents[_instr.Name], _instr.events[j].Dup())
 		}
 		s.newBarNo++
 	}
@@ -64,10 +85,10 @@ func (s *ScoreUnroller) unrollBar(bar *Bar) {
 	s.unrolledBars = append(s.unrolledBars, bar)
 	s.newBarNo++
 
-	for ii, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Instruments {
 		//		fmt.Printf("adding bar %v\n", bar.originalBarNo)
 		if len(instr.events)-1 >= bar.originalBarNo {
-			s.instrBarevents[ii] = append(s.instrBarevents[ii], instr.events[bar.originalBarNo])
+			s.instrBarevents[instr.Name] = append(s.instrBarevents[instr.Name], instr.events[bar.originalBarNo])
 		}
 	}
 }
@@ -80,7 +101,7 @@ func (s *ScoreUnroller) unrollBarsAndJumps() {
 	}
 
 	s.unrolledBars = []*Bar{}
-	s.instrBarevents = map[int][]BarEvents{}
+	s.instrBarevents = map[string][]BarEvents{}
 	s.num = 4
 	s.denom = 4
 	s.newBarNo = 0
@@ -99,14 +120,19 @@ func (s *ScoreUnroller) unrollBarsAndJumps() {
 			continue
 		}
 
+		if include := bar.include; include != "" {
+			s.unrollInclude(bar.includedScore)
+			continue
+		}
+
 		s.unrollBar(bar)
 	}
 
 	s.dest.Bars = s.unrolledBars
 
-	for ii, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Instruments {
 		//		fmt.Printf("[0] len bars in instr: %v\n", len(s.instrBarevents[ii]))
-		instr.events = s.instrBarevents[ii]
+		instr.events = s.instrBarevents[instr.Name]
 	}
 
 }
@@ -485,11 +511,14 @@ func (s *ScoreUnroller) unrollInstruments(bars []*Bar, instr []*Instrument) erro
 func newScoreUnroller(src *Score) *ScoreUnroller {
 	nu := NewScore()
 	nu.isUnrolled = true
+	nu.HeaderIncludes = src.HeaderIncludes
+	nu.FileName = src.FileName
 	nu.Meta = src.Meta
 	nu.BodyComments = src.BodyComments
 	nu.Parts = src.Parts
 	nu.Temperament = src.Temperament
 	nu.PatternDefinitions = src.PatternDefinitions
+	nu.IncludedPatternDefinitions = src.IncludedPatternDefinitions
 	nu.HeaderComments = src.HeaderComments
 	nu.barNumbersTracked = true
 
