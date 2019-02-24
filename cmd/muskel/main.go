@@ -98,6 +98,8 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 			sc.SmallColumns = true
 		}
 
+		sc.AddMissingProperties()
+
 		if argUnroll.IsSet() {
 			var ur *muskel.Score
 			ur, err = sc.Unroll()

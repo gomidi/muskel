@@ -32,6 +32,27 @@ type Score struct {
 	lastLine            int
 }
 
+func (s *Score) AddMissingProperties() {
+	if s.isPartial() {
+		return
+	}
+	prefill := map[string]string{
+		"composer":  "[insert composer here]",
+		"title":     "[insert title here]",
+		"date":      "[insert date here]",
+		"version":   "[insert version here]",
+		"copyright": "[insert copyright/license notice here]",
+		"genre":     "[insert genre here]",
+		"tags":      "[insert tags here] (comma separated)",
+	}
+
+	for k, v := range prefill {
+		if s.Meta[k] == "" {
+			s.Meta[k] = v
+		}
+	}
+}
+
 func NewScore() *Score {
 	return &Score{
 		Meta:               map[string]string{},
