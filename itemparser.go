@@ -2,9 +2,30 @@ package muskel
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
+
+var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("*") + "]*)$")
+
+func parseMIDINote(data string) (nt MIDINote, err error) {
+	mt := regexMIDINote.FindStringSubmatch(data)
+	if len(mt) < 2 {
+		return nt, fmt.Errorf("not a valid MIDINote: %q", data)
+	}
+	fmt.Printf("parse MIDInotes: %#v\n", mt)
+	i, err := strconv.Atoi(mt[1])
+	if err != nil {
+		return nt, fmt.Errorf("not a valid MIDINote: %q: %s", data, err.Error())
+	}
+	if i < 1 && i > 128 {
+		return nt, fmt.Errorf("not a valid MIDINote: %q: must be >= 1 and <= 128", data)
+	}
+	nt[0] = int8(i)
+	nt[1] = velocityFromDynamic(mt[2])
+	return nt, nil
+}
 
 // TODO implement parseMIDICC
 func parseMIDICC(data string) (cc MIDICC, err error) {
@@ -27,28 +48,6 @@ func parseMIDIPolyAftertouch(string) (pt MIDIPolyAftertouch, err error) {
 }
 
 func parseNote(data string) (item interface{}, err error) {
-	if len(data) > 1 {
-
-		switch data[:2] {
-		case "kd", "sn", "ho", "hc", "rd", "tb", "tl", "tm", "th", "sh":
-			var dn DrumNote
-			dn.name = data[:2]
-			for _, l := range data[2:] {
-				switch l {
-				case '+':
-					dn.dynamic += "+"
-				case '-':
-					dn.dynamic += "-"
-				case '*':
-					dn.dynamic += "*"
-				default:
-					return nil, fmt.Errorf("invalid drum note: %#v", data)
-				}
-			}
-			return dn, nil
-		default:
-		}
-	}
 	var nt Note
 
 	switch data[:1] {
@@ -251,14 +250,14 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			return p.parseNTuple(data[1:], posIn32th)
 		case '$':
 			return p.parseCommand(data[1:], posIn32th)
-		case 'S':
-			return parseNote(data[1:])
-		case 'Z':
-			return parseNote(data[1:])
+		//case 'S':
+		//	return parseNote(data[1:])
+		//case 'Z':
+		//	return parseNote(data[1:])
 		case '?':
 			return p.parseRandom(data[1:], posIn32th)
-		case 'O':
-			return p.parseOSC(data[1:])
+		//case 'O':
+		//	return p.parseOSC(data[1:])
 		case '!':
 			return p.parsePattern(data, posIn32th)
 		case '.':
@@ -275,6 +274,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 		default:
 			if len(data) > 1 {
 				switch data[0:2] {
+				case "MN":
+					return parseMIDINote(data[2:])
 				case "CC":
 					return parseMIDICC(data[2:])
 				case "PB":

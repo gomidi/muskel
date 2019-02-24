@@ -13,6 +13,39 @@ func TestInclude(t *testing.T) {
 	}{
 		{
 			`
+$include("drumnotes")
+
+=
+   | Voc | Drums | Piano |
+Ch | -   | -     | -     |
+1  | a"  | kd    | b"    |
+2& | c   | sn    | d     |
+
+1  |     | ho    |       |
+`,
+			`
+
+
+$include("drumnotes")
+
+
+
+
+
+=
+         | Voc | Drums | Piano |
+Ch       | -   | -     | -     |
+Bank     | -   | -     | -     |
+Prog     | -   | -     | -     |
+Vol      | -   | -     | -     |
+    1    | a"  | MN35  | b"    |
+    2&   | c   | MN39  | d     |
+
+    1    |     | MN45  |       |
+`,
+		},
+		{
+			`
 $include("testdata/includes/header")
 @other: test
 hu: 1sn 2kd

@@ -5,7 +5,6 @@ import (
 	"math/rand"
 
 	"gitlab.com/gomidi/midi/cc"
-	"gitlab.com/gomidi/midi/gm"
 	"gitlab.com/gomidi/midi/mid"
 )
 
@@ -33,51 +32,22 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		fmt.Printf("NoteOn %v\n", n)
 		iw.wr.NoteOn(n, vl)
 		addedNotes = append(addedNotes, n)
-	case DrumNote:
-		var note gm.DrumKey
-		switch v.name {
-		case "kd":
-			note = gm.DrumKey_BassDrum1
-		case "sn":
-			note = gm.DrumKey_ElectricSnare
-		case "ho":
-			note = gm.DrumKey_OpenHiHat
-		case "hc":
-			note = gm.DrumKey_ClosedHiHat
-		case "rd":
-			note = gm.DrumKey_RideCymbal1
-		case "tb":
-			note = gm.DrumKey_Tambourine
-		case "tl":
-			note = gm.DrumKey_LowTom
-		case "th":
-			note = gm.DrumKey_HighTom
-		case "tm":
-			note = gm.DrumKey_HiMidTom
-		case "sh":
-			note = gm.DrumKey_CrashCymbal1
+	case MIDINote:
+		stopNotes()
+		vel := v[1]
+
+		if vel < 0 {
+			vel = iw.prevVel
 		}
 
-		if note != 0 {
-			stopNotes()
+		iw.prevVel = vel
 
-			vel := int8(-1)
-			if v.dynamic != "" {
-				vel = velocityFromDynamic(v.dynamic)
-			}
-
-			if vel < 0 {
-				vel = iw.prevVel
-			}
-
-			iw.prevVel = vel
-			vl := uint8(vel + int8(rand.Intn(4)))
-
-			//fmt.Printf("Drums NoteOn %v %v\n", note.Key(), vl)
-			fmt.Printf("Drums NoteOn %v\n", note.Key())
-			iw.wr.NoteOn(note.Key(), vl)
-			addedNotes = append(addedNotes, note.Key())
-		}
+		vl := uint8(vel + int8(rand.Intn(4)))
+		n := uint8(v[0])
+		//fmt.Printf("NoteOn %v %v\n", n, vl)
+		fmt.Printf("NoteOn %v\n", n)
+		iw.wr.NoteOn(n, vl)
+		addedNotes = append(addedNotes, n)
 	case MIDICC:
 		fmt.Printf("MIDICC %v, %v\n", v[0], v[1])
 		iw.wr.ControlChange(v[0], v[1])

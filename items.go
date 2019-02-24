@@ -26,6 +26,7 @@ type DrumNote struct {
 	dynamic string
 }
 
+type MIDINote [2]int8
 type MIDICC [2]uint8
 type MIDIPitchbend int16
 type MIDIPolyAftertouch [2]uint8

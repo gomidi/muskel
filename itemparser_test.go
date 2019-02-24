@@ -24,8 +24,8 @@ func TestParseItem(t *testing.T) {
 		//		{"{kd,sn}2", NTuple{items: []interface{}{DrumNote{name: "kd"}, DrumNote{name: "sn"}}, endPos: 8}},
 		{"{a,b}2", NTuple{items: []interface{}{Note{letter: "a", octave: 1}, Note{letter: "b", octave: 1}}, endPos: 8}},
 		{"\"hiho\"", Lyric("hiho")},
-		{"Sa'", Note{letter: "a", octave: 2}},
-		{"Za'", Note{letter: "a", octave: 2}},
+		//		{"Sa'", Note{letter: "a", octave: 2}},
+		//		{"Za'", Note{letter: "a", octave: 2}},
 		{"?[30]a", &RandomProbability{prob: 30, item: Note{letter: "a", octave: 1}, itemOriginalData: "a"}},
 		{"?(a,b)", &RandomChooser{alternatives: []interface{}{Note{letter: "a", octave: 1}, Note{letter: "b", octave: 1}}, alternativesOriginalData: []string{"a", "b"}}},
 		/*

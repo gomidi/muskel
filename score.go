@@ -76,7 +76,20 @@ func (p *Score) include(file string) (*Score, error) {
 	//	wd, _ := os.Getwd()
 	//	fmt.Println(wd)
 	//	sc, err := ParseFile(filepath.Join(wd, file+".mski"))
-	sc, err := ParseFile(file + ".mski")
+
+	found, err := findInclude(file + ".mskl")
+	if err != nil {
+		return nil, fmt.Errorf("Error while including file %q: file not found", file)
+	}
+	b, err := ioutil.ReadFile(found)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error while reading include file %q: %s", file, err.Error())
+	}
+
+	var sc *Score
+	sc, err = Parse(bytes.NewReader(b), found)
+
 	if err != nil {
 		return nil, fmt.Errorf("Error while including file %q: %s", file, err.Error())
 	}

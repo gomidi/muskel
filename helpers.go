@@ -3,6 +3,8 @@ package muskel
 import (
 	"bytes"
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -23,6 +25,36 @@ func pad(s string, length int) string {
 		bf.WriteString(" ")
 	}
 	return bf.String()
+}
+
+func fileExists(file string) bool {
+	info, err := os.Stat(file)
+	if err != nil {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func findInclude(file string) (resolved string, err error) {
+	if fileExists(file) {
+		return filepath.Abs(file)
+	}
+
+	if filepath.IsAbs(file) {
+		return "", fmt.Errorf("file not found: %q", file)
+	}
+
+	try1 := filepath.Join(WORKING_DIR, file)
+	if fileExists(try1) {
+		return filepath.Abs(try1)
+	}
+
+	try2 := filepath.Join(USER_DIR, file)
+	if fileExists(try2) {
+		return filepath.Abs(try2)
+	}
+
+	return "", fmt.Errorf("file not found: %q", file)
 }
 
 // if returned vel is < 0, then it has not been set and
