@@ -204,10 +204,10 @@ func (s *ScoreUnroller) flattenInstrumentEvents() {
 	if !s.dest.isUnrolled {
 		panic("must be unrolled")
 	}
-	s.currentlyRepeatingBars = []BarEvents{}
-	s.indexWithinCurrentlyRepeatingBars = 0
 
 	for _, instr := range s.dest.Instruments {
+		s.currentlyRepeatingBars = []BarEvents{}
+		s.indexWithinCurrentlyRepeatingBars = 0
 		var events []*Event
 		for barNo, bar := range instr.events {
 			events = append(events, s.flattenInstrumentBarEvents(barNo, bar, instr)...)
