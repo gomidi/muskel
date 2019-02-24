@@ -6,6 +6,202 @@ import (
 	"testing"
 )
 
+func TestFormatterJumps(t *testing.T) {
+	//	t.Skip()
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+    2    | f      |
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+    2    | f      |
+`,
+		},
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+    2    | f      |
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+    2    | f      |
+`,
+		},
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+3/4
+    2    | f      |
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+3/4
+    2    | f      |
+`,
+		},
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+3/4@120
+    2    | f      |
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+3/4@120
+    2    | f      |
+`,
+		},
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+@120
+    2    | f      |
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+
+    1    | e      | A
+[A]
+[A]
+@120
+    2    | f      |
+`,
+		},
+	}
+
+	for i, test := range tests {
+		/*
+			if i != 0 {
+				continue
+			}
+		*/
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)))
+
+		if err != nil {
+			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		var bf bytes.Buffer
+
+		err = sc.WriteTo(&bf)
+
+		if err != nil {
+			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		result := strings.TrimSpace(bf.String())
+		expected := strings.TrimSpace(test.expected)
+
+		//		fmt.Println(result)
+
+		if result != expected {
+			t.Errorf("[%v] score\n%s\n\formatted gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, result, expected, result, expected)
+			//			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
+		}
+	}
+}
+
 func TestFormatter(t *testing.T) {
 	//	t.Skip()
 	tests := []struct {

@@ -70,8 +70,10 @@ func (p *BodyParser) parseItem(data string, posIn32th uint) (interface{}, error)
 
 // handleEmptyLine handles an empty line
 func (p *BodyParser) handleEmptyLine() error {
-	p.newBar(NewBar())
-	p.jumpInLineBefore = false
+	if !p.jumpInLineBefore {
+		p.newBar(NewBar())
+	}
+	//	p.jumpInLineBefore = false
 	return nil
 }
 
@@ -125,6 +127,7 @@ func (p *BodyParser) handleTimeSigChange(b *Bar, data string) error {
 	b.timeSigChange[1] = uint8(denom)
 
 	p.newBar(b)
+	p.jumpInLineBefore = false
 	return nil
 }
 

@@ -54,6 +54,15 @@ func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
 	return nil
 }
 
+func (p *SMFWriter) isStartOfPart(b *Bar) string {
+	for k, v := range p.score.Parts {
+		if v[0] == b.barNo {
+			return k
+		}
+	}
+	return ""
+}
+
 // writeFirstTrack writes the first track with time signature and tempo changes
 func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
 	num := uint8(4)
@@ -82,7 +91,9 @@ func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
 		*/
 		//		}
 
-		if b.timeSigChange[0] > 0 || b.tempoChange > 0 {
+		part := p.isStartOfPart(b)
+
+		if b.timeSigChange[0] > 0 || b.tempoChange > 0 || part != "" {
 			wr.Forward(uint32(b.barNo-lastBar), 0, 0)
 			lastBar = b.barNo
 		}
@@ -97,6 +108,11 @@ func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
 		if b.tempoChange > 0 {
 			wr.TempoBPM(b.tempoChange)
 			//fmt.Printf("write tempo change %v\n", b.tempoChange)
+		}
+
+		if part != "" {
+			wr.Cuepoint(part)
+			wr.Marker(part)
 		}
 		//wr.Forward(1, 0, 0)
 	}

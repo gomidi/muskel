@@ -8,8 +8,9 @@ import (
 )
 
 type Formatter struct {
-	score         *Score
-	writerSysLine int
+	score            *Score
+	writerSysLine    int
+	jumpInLineBefore bool
 }
 
 func NewFormatter(s *Score) *Formatter {
@@ -148,13 +149,9 @@ func (f *Formatter) printSorted(bf *bytes.Buffer, format string, m map[string]st
 
 func (f *Formatter) prepareBars() {
 	if f.score.isUnrolled {
-		//		f.score.Bars = f.score.un
-	}
+		for _, b := range f.score.Bars {
+			b.events = map[barEventKey]*Event{}
 
-	for _, b := range f.score.Bars {
-		b.events = map[barEventKey]*Event{}
-
-		if f.score.isUnrolled {
 			for i, instr := range f.score.Instruments {
 				for _, ev := range instr.unrolled {
 					if ev.BarNo == b.barNo {
@@ -162,28 +159,23 @@ func (f *Formatter) prepareBars() {
 					}
 				}
 			}
-		} else {
-			for i, instr := range f.score.Instruments {
-				for j, bev := range instr.events {
-					if j == b.barNo {
-						for bidx, ev := range bev {
-							//b.addInstrEvent(position, i, ev)
-							b.addInstrEvent(b.positions[bidx], i, ev)
-							//							b.events[barEventKey{instrCol: i, position: b.positions[bidx]}] = ev
-						}
+		}
+		return
+	}
+
+	// !f.score.isUnrolled
+	for _, b := range f.score.Bars {
+		b.events = map[barEventKey]*Event{}
+
+		for i, instr := range f.score.Instruments {
+			for j, bev := range instr.events {
+				if j == b.barNo {
+					for bidx, ev := range bev {
+						b.addInstrEvent(b.positions[bidx], i, ev)
 					}
 				}
 			}
 		}
-
-		/*
-			for i, pos := range b.positions {
-				if b.originalPositions[i] != pos32thToString(pos) {
-					panic(fmt.Sprintf("strange things happening in bar %v at pos %v: %v 32th distance is not %q, but %q", b.barNo, i, pos, b.originalPositions[i], pos32thToString(pos)))
-				}
-				b.originalPositions[i] = pos32thToString(pos)
-			}
-		*/
 	}
 }
 
@@ -204,6 +196,7 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 		if bar.jumpTo != "" {
 			l = fmt.Sprintf("[%s]", bar.jumpTo)
 			p.writeBodyLine(bf, l)
+			p.jumpInLineBefore = true
 			continue
 		}
 
@@ -217,7 +210,9 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 			l += fmt.Sprintf("@%g", bar.tempoChange)
 		}
 
-		p.writeBodyLine(bf, l)
+		if !p.jumpInLineBefore || l != "" {
+			p.writeBodyLine(bf, l)
+		}
 		//			fmt.Printf("bar.originalPositions: %v\n", bar.originalPositions)
 
 		for pi, pos := range bar.originalPositions {
@@ -257,7 +252,6 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 	}
 
 	lastSysLine := p.score.lastLine - p.score.lineWhereBodyStarts
-
 	missingLines := lastSysLine - p.writerSysLine
 
 	for i := 0; i < missingLines; i++ {
@@ -311,15 +305,23 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 }
 
 func (p *Formatter) writeBodyLine(bf *bytes.Buffer, line string) {
+	p._writeBodyLine(bf, line, true)
+}
+
+func (p *Formatter) _writeBodyLine(bf *bytes.Buffer, line string, lineBreak bool) {
 	// we don't write comments for unrolled scores, since the lines won't match anyway
 	if !p.score.isUnrolled {
 		if comment, has := p.score.BodyComments[p.writerSysLine]; has {
 			p.writerSysLine++
 			bf.WriteString(comment + "\n")
-			p.writeBodyLine(bf, line)
+			p._writeBodyLine(bf, line, lineBreak)
 			return
 		}
 	}
 	p.writerSysLine++
-	bf.WriteString(line + "\n")
+	if lineBreak {
+		bf.WriteString(line + "\n")
+		return
+	}
+	bf.WriteString(line)
 }
