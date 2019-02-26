@@ -186,8 +186,8 @@ func (iw *instWriter) writeIntro() {
 	iw.wr.SetChannel(uint8(iw.instr.MIDIChannel))
 	fmt.Printf("Track: %#v\n", iw.instr.Name)
 	iw.wr.Program(iw.instr.Name)
-	iw.wr.Track(iw.instr.Name)
-	iw.wr.Sequence(iw.instr.Name)
+	iw.wr.TrackSequenceName(iw.instr.Name)
+	iw.wr.Instrument(iw.instr.Name)
 
 	if iw.instr.MIDIBank >= 0 {
 		fmt.Printf("Bank: %v\n", iw.instr.MIDIBank)

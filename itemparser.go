@@ -14,7 +14,7 @@ func parseMIDINote(data string) (nt MIDINote, err error) {
 	if len(mt) < 2 {
 		return nt, fmt.Errorf("not a valid MIDINote: %q", data)
 	}
-	fmt.Printf("parse MIDInotes: %#v\n", mt)
+	//	fmt.Printf("parse MIDInotes: %#v\n", mt)
 	i, err := strconv.Atoi(mt[1])
 	if err != nil {
 		return nt, fmt.Errorf("not a valid MIDINote: %q: %s", data, err.Error())
