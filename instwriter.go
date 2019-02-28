@@ -15,11 +15,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 	switch v := item.(type) {
 	case Note:
 		stopNotes()
-		vel := int8(-1)
-		if v.dynamic != "" {
-			vel = velocityFromDynamic(v.dynamic)
-		}
-
+		vel := v.velocity
 		if vel < 0 {
 			vel = iw.prevVel
 		}
@@ -28,13 +24,16 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 		vl := uint8(vel + int8(rand.Intn(4)))
 		n := noteToMIDI(v)
-		//fmt.Printf("NoteOn %v %v\n", n, vl)
-		fmt.Printf("NoteOn %v\n", n)
+		//fmt.Printf("NoteOn %v\n", n)
 		iw.wr.NoteOn(n, vl)
-		addedNotes = append(addedNotes, n)
+		if v.dotted {
+			iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(n))
+		} else {
+			addedNotes = append(addedNotes, n)
+		}
 	case MIDINote:
 		stopNotes()
-		vel := v[1]
+		vel := v.velocity
 
 		if vel < 0 {
 			vel = iw.prevVel
@@ -43,22 +42,25 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		iw.prevVel = vel
 
 		vl := uint8(vel + int8(rand.Intn(4)))
-		n := uint8(v[0])
-		//fmt.Printf("NoteOn %v %v\n", n, vl)
-		fmt.Printf("NoteOn %v\n", n)
+		n := uint8(v.note)
+		//fmt.Printf("MIDINoteOn %v\n", n)
 		iw.wr.NoteOn(n, vl)
-		addedNotes = append(addedNotes, n)
+		if v.dotted {
+			iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(n))
+		} else {
+			addedNotes = append(addedNotes, n)
+		}
 	case MIDICC:
-		fmt.Printf("MIDICC %v, %v\n", v[0], v[1])
+		//fmt.Printf("MIDICC %v, %v\n", v[0], v[1])
 		iw.wr.ControlChange(v[0], v[1])
 	case MIDIPitchbend:
-		fmt.Printf("MIDIPitchbend %v, \n", int16(v))
+		//fmt.Printf("MIDIPitchbend %v, \n", int16(v))
 		iw.wr.Pitchbend(int16(v))
 	case MIDIPolyAftertouch:
-		fmt.Printf("MIDIPolyAftertouch %v, %v\n", v[0], v[1])
+		//fmt.Printf("MIDIPolyAftertouch %v, %v\n", v[0], v[1])
 		iw.wr.PolyAftertouch(v[0], v[1])
 	case MIDIAftertouch:
-		fmt.Printf("Aftertouch %v, \n", uint8(v))
+		//fmt.Printf("Aftertouch %v, \n", uint8(v))
 		iw.wr.Aftertouch(uint8(v))
 	case OSCMessage:
 		//	case *PatternCall:
@@ -102,7 +104,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 		length := uint32(v.endPos - iw.lastNum32)
 
-		fmt.Printf("total length: %v\n", length)
+		//fmt.Printf("total length: %v\n", length)
 
 		//lengthPerItem := uint32(4.0 * math.Round(float64(length)/float64(len(v.items))))
 		//lengthPerItem := uint32(math.Round(float64(length) / float64(len(v.items))))
@@ -114,7 +116,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 				if delta > 0 {
 					//iw.wr.Forward(0, delta, 128)
 					//iw.wr.Forward(0, delta, 32)
-					fmt.Printf("lengthPerItem: %v\n", float64(delta)/float64(uint32(len(v.items))*32))
+					//fmt.Printf("lengthPerItem: %v\n", float64(delta)/float64(uint32(len(v.items))*32))
 					iw.wr.Forward(0, delta, uint32(len(v.items))*32)
 				}
 				added := iw.writeItem(it, stopNotes)
@@ -140,8 +142,8 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 		return addedNotes
 
-	case Rest:
-		fmt.Printf("got REST\n")
+	case rest:
+		//fmt.Printf("got REST\n")
 		stopNotes()
 	case hold:
 		return nil
@@ -182,31 +184,30 @@ func newInstrumentSMFWriter(p *SMFWriter, wr *mid.SMFWriter, instr *Instrument) 
 }
 
 func (iw *instWriter) writeIntro() {
-	fmt.Printf("Channel: %v\n", iw.instr.MIDIChannel)
+	//fmt.Printf("Channel: %v\n", iw.instr.MIDIChannel)
 	iw.wr.SetChannel(uint8(iw.instr.MIDIChannel))
-	fmt.Printf("Track: %#v\n", iw.instr.Name)
+	//fmt.Printf("Track: %#v\n", iw.instr.Name)
 	iw.wr.Program(iw.instr.Name)
 	iw.wr.TrackSequenceName(iw.instr.Name)
 	iw.wr.Instrument(iw.instr.Name)
 
 	if iw.instr.MIDIBank >= 0 {
-		fmt.Printf("Bank: %v\n", iw.instr.MIDIBank)
+		//fmt.Printf("Bank: %v\n", iw.instr.MIDIBank)
 		iw.wr.ControlChange(cc.BankSelectMSB, uint8(iw.instr.MIDIBank))
 	}
 
 	if iw.instr.MIDIProgram >= 0 {
-		fmt.Printf("ProgramChange: %v\n", iw.instr.MIDIProgram)
+		//fmt.Printf("ProgramChange: %v\n", iw.instr.MIDIProgram)
 		iw.wr.ProgramChange(uint8(iw.instr.MIDIProgram))
 	}
 
 	if iw.instr.MIDIVolume >= 0 {
-		fmt.Printf("Volume: %v\n", iw.instr.MIDIVolume)
-		//iw.wr.ProgramChange(uint8(iw.instr.MIDIProgram))
+		//fmt.Printf("Volume: %v\n", iw.instr.MIDIVolume)
 		iw.wr.ControlChange(cc.VolumeMSB, uint8(iw.instr.MIDIVolume))
 	}
 }
 
-func (iw *instWriter) writeUnrolled() error {
+func (iw *instWriter) writeUnrolled() {
 	var lastEv *Event
 
 	iw.prevVel = 63
@@ -214,10 +215,9 @@ func (iw *instWriter) writeUnrolled() error {
 	stopNotes := func() {
 		for nt, isOn := range iw.noteOns {
 			if isOn {
-				fmt.Printf("NoteOff %v\n", nt)
+				//fmt.Printf("NoteOff %v\n", nt)
 				iw.wr.NoteOff(nt)
 				delete(iw.noteOns, nt)
-				//iw.noteOns[nt] = false
 			}
 		}
 	}
@@ -233,19 +233,23 @@ func (iw *instWriter) writeUnrolled() error {
 			diffBars -= lastEv.BarNo
 		}
 
+		if ev.Item == Rest && len(iw.noteOns) == 0 {
+			continue
+		}
+
 		if ev.Item != Hold {
 			if lastEv != nil && lastEv.BarNo == ev.BarNo {
 				isHolding = false
-				fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th)
+				//fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th)
 				iw.wr.Forward(0, uint32(ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th), 32)
 			} else {
 				if !isHolding && len(iw.noteOns) > 0 {
 					iw.wr.Forward(uint32(diffBars), 0, 32)
 					stopNotes()
-					fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th)
+					//fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th)
 					iw.wr.Forward(0, uint32(ev.DistanceToStartOfBarIn32th), 32)
 				} else {
-					fmt.Printf("FORWARD(%v, %v, 32)\n", diffBars, ev.DistanceToStartOfBarIn32th)
+					//fmt.Printf("FORWARD(%v, %v, 32)\n", diffBars, ev.DistanceToStartOfBarIn32th)
 					iw.wr.Forward(uint32(diffBars), uint32(ev.DistanceToStartOfBarIn32th), 32)
 				}
 				isHolding = false
@@ -253,7 +257,7 @@ func (iw *instWriter) writeUnrolled() error {
 			}
 
 			var addedNotes []uint8
-			fmt.Printf("writing item: %#v\n", ev.Item)
+			//fmt.Printf("writing item: %#v\n", ev.Item)
 			addedNotes = iw.writeItem(ev.Item, stopNotes)
 
 			for _, nt := range addedNotes {
@@ -262,169 +266,17 @@ func (iw *instWriter) writeUnrolled() error {
 			iw.lastItem = ev.Item
 			lastEv = ev
 		} else {
+			iw.wr.FinishPlanned()
 			isHolding = true
 		}
 	}
 
 	iw.wr.Forward(1, 0, 32)
+	iw.wr.FinishPlanned()
 	stopNotes()
-
-	return nil
 }
 
-/*
-func (iw *instWriter) writeBar(barNo int) error {
-	if barNo < 0 {
-		return fmt.Errorf("bars < 0 not allowed")
-	}
-	fmt.Printf("BAR: %v, IN REPETITION %v emptybars: %v\n", barNo, iw.insideRepitition, iw.emptyBars)
-	b := iw.instr.events[barNo]
-	cursorMoved := false
-
-	var num32 uint8 = 0
-	iw.lastNum32 = 0
-	var barMove uint32 = 0
-
-	if b.isEmpty() && iw.repeatingBars > 0 {
-		//		rp := iw.repeatingBars
-		//		rf := iw.repeatFrom
-		iw.currentlyRepeating = (iw.currentlyRepeating + 1) % iw.repeatingBars
-		//		cr := iw.currentlyRepeating
-		iw.insideRepitition = true
-		fmt.Printf("[1] REPEATING bar: %v\n", iw.repeatFrom+iw.currentlyRepeating)
-		err := iw.writeBar(iw.repeatFrom + iw.currentlyRepeating)
-		iw.insideRepitition = false
-		//		iw.repeatingBars = rp
-		//		iw.repeatFrom = rf
-		//		iw.currentlyRepeating = cr
-		return err
-	} else {
-		if !iw.insideRepitition {
-			fmt.Printf("NO REPITITION\n")
-			iw.repeatFrom = -1
-			iw.repeatingBars = 0
-			iw.currentlyRepeating = 0
-		}
-	}
-
-	if !iw.insideRepitition {
-
-		if nBars, untilNext := b.RepeatingBars(); nBars > 0 {
-			if untilNext {
-				iw.repeatFrom = barNo - nBars
-				iw.currentlyRepeating = 0
-				iw.repeatingBars = nBars
-				iw.insideRepitition = true
-				fmt.Printf("in barno %v [0] REPEATING bar: %v\n", barNo, iw.repeatFrom)
-				err := iw.writeBar(iw.repeatFrom)
-				iw.insideRepitition = false
-				return err
-			} else {
-				iw.insideRepitition = true
-				fmt.Printf("in barno %v [3] REPEATING bar: %v\n", barNo, barNo-1)
-				err := iw.writeBar(barNo - 1)
-				iw.insideRepitition = false
-				return err
-			}
-		}
-	}
-
-	if !iw.totalBeginning {
-		barMove = 1
-		if !b.isHolding() {
-			for nt, isOn := range iw.noteOns {
-				if isOn {
-					if !cursorMoved {
-						fmt.Printf("[0] Forward(%v, 0, 0)\n", 1+iw.emptyBars)
-						iw.wr.Forward(1+iw.emptyBars, 0, 0)
-						cursorMoved = true
-						iw.emptyBars = 0
-					}
-					fmt.Printf("[0] NoteOff %v\n", nt)
-					iw.wr.NoteOff(nt)
-					iw.noteOns[nt] = false
-				}
-			}
-		}
-
-	}
-
-	iw.totalBeginning = false
-
-	if b.isEmpty() {
-		iw.emptyBars = iw.emptyBars + 1
-		return nil
-	}
-
-	for barLine, ev := range b {
-		if ev.Item == nil || ev.Item == Hold {
-			continue
-		}
-
-		num32 = iw.p.bars[barNo].positions[barLine]
-
-		diffNum := num32 - iw.lastNum32
-		if diffNum > 0 {
-			if !cursorMoved {
-				cursorMoved = true
-				fmt.Printf("[2] wr.Forward(%v, %v, 32)\n", iw.emptyBars+barMove, uint32(diffNum))
-				iw.wr.Forward(iw.emptyBars+barMove, uint32(diffNum), 32)
-			} else {
-				fmt.Printf("[3] wr.Forward(0, %v, 32)\n", uint32(diffNum))
-				iw.wr.Forward(0, uint32(diffNum), 32)
-			}
-		} else {
-			if !cursorMoved {
-				if iw.emptyBars > 0 {
-					fmt.Printf("[4] Forward(%v, 0, 0)\n", iw.emptyBars)
-					iw.wr.Forward(iw.emptyBars, 0, 0)
-				} else {
-					if barMove > 0 {
-						fmt.Printf("[5] Forward(%v, 0, 0)\n", barMove)
-						iw.wr.Forward(barMove, 0, 0)
-					}
-				}
-				cursorMoved = true
-			}
-		}
-		iw.emptyBars = 0
-		iw.lastNum32 = num32
-		var item interface{}
-
-		switch it := ev.Item.(type) {
-		case RepeatLastEvent:
-			item = iw.lastItem
-			// TODO maybe allow dynamic override
-		default:
-			_ = it
-			item = ev.Item
-		}
-
-		stopNotes := func() {
-			for nt, isOn := range iw.noteOns {
-				if isOn {
-					fmt.Printf("[3.5] NoteOff %v\n", nt)
-					iw.wr.NoteOff(nt)
-					iw.noteOns[nt] = false
-				}
-			}
-		}
-
-		var addedNotes []uint8
-
-		addedNotes = iw.writeItem(item, stopNotes)
-		iw.lastItem = item
-
-		for _, nt := range addedNotes {
-			iw.noteOns[nt] = true
-		}
-
-	}
-	return nil
-}
-*/
-
-func (iw *instWriter) writeTrack() error {
+func (iw *instWriter) writeTrack() {
 
 	iw.writeIntro()
 	iw.prevVel = 60
@@ -433,33 +285,6 @@ func (iw *instWriter) writeTrack() error {
 	iw.lastItem = nil
 
 	iw.writeUnrolled()
-
-	/*
-		for barNo := 0; barNo < len(iw.instr.events); barNo++ {
-			iw.writeBar(barNo)
-		}
-	*/
-
-	var hasNoteOn bool
-
-	for _, isOn := range iw.noteOns {
-		if isOn {
-			hasNoteOn = true
-		}
-	}
-
-	if hasNoteOn {
-		fmt.Printf("[6] Forward(%v, 0, 0)\n", iw.emptyBars+1)
-		iw.wr.Forward(iw.emptyBars+1, 0, 0)
-		for nt, isOn := range iw.noteOns {
-			if isOn {
-				fmt.Printf("[4] NoteOff %v\n", nt)
-				iw.wr.NoteOff(nt)
-				iw.noteOns[nt] = false
-			}
-		}
-	}
-	return nil
 }
 
 type Instrument struct {

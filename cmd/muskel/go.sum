@@ -6,6 +6,14 @@ github.com/metakeule/observe v0.0.0-20170406094839-eba094fd212a h1:/k3Hx6QLkyVYM
 github.com/metakeule/observe v0.0.0-20170406094839-eba094fd212a/go.mod h1:Glid6/jlqdtVFNHa9bAJj2HPzgTc+J0VGpxGfiMNNeI=
 gitlab.com/gomidi/midi v1.8.5 h1:dEX6RpSz/LA7j8x8jaw4eDMO4BC7LwvnRIclw4cD6rE=
 gitlab.com/gomidi/midi v1.8.5/go.mod h1:Geyousi3Lg15GJRg0CnpxQMQIgDLapqJKq2Cbf7LJfs=
+gitlab.com/gomidi/midi v1.10.0 h1:zh1vPE1oAPCs1vkFwGGS8iftsQzlChjMxhIQOj9ReSE=
+gitlab.com/gomidi/midi v1.10.0/go.mod h1:Geyousi3Lg15GJRg0CnpxQMQIgDLapqJKq2Cbf7LJfs=
+gitlab.com/gomidi/midi v1.10.1 h1:zZXcb9ckRPOZaU/8gyKtzwOz7yg88jckITEkAqimMxU=
+gitlab.com/gomidi/midi v1.10.1/go.mod h1:Geyousi3Lg15GJRg0CnpxQMQIgDLapqJKq2Cbf7LJfs=
+gitlab.com/gomidi/midi v1.10.2 h1:Qy+DAUy8tfTDEEcrjZx3WYjKXzKdfnUHWDtLzqojMdw=
+gitlab.com/gomidi/midi v1.10.2/go.mod h1:Geyousi3Lg15GJRg0CnpxQMQIgDLapqJKq2Cbf7LJfs=
+gitlab.com/gomidi/midi v1.10.3 h1:vu4DpxiVnd9oiYqk+YkiV1Pqgmy9TQ/b8IISm226Y0k=
+gitlab.com/gomidi/midi v1.10.3/go.mod h1:Geyousi3Lg15GJRg0CnpxQMQIgDLapqJKq2Cbf7LJfs=
 gitlab.com/metakeule/config v1.13.0/go.mod h1:NOPjxiMU1sZhcTXUrpCtj4W2nB0mDYRIQXISM68FDlQ=
 gitlab.com/metakeule/fmtdate v1.2.0/go.mod h1:uZUf21xepWGLp6PgJGBbHeBVWO+/gsKi3Gdh0Fu4lGg=
 golang.org/x/sys v0.0.0-20190209173611-3b5209105503 h1:5SvYFrOM3W8Mexn9/oA44Ji7vhXAZQ9hiP+1Q/DMrWg=

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("*") + "]*)$")
+var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("*") + "]*)(:{0,1})$")
 
 func parseMIDINote(data string) (nt MIDINote, err error) {
 	mt := regexMIDINote.FindStringSubmatch(data)
@@ -22,8 +22,9 @@ func parseMIDINote(data string) (nt MIDINote, err error) {
 	if i < 1 && i > 128 {
 		return nt, fmt.Errorf("not a valid MIDINote: %q: must be >= 1 and <= 128", data)
 	}
-	nt[0] = int8(i)
-	nt[1] = velocityFromDynamic(mt[2])
+	nt.note = int8(i)
+	nt.velocity = velocityFromDynamic(mt[2])
+	nt.dotted = mt[3] == ":"
 	return nt, nil
 }
 
@@ -61,14 +62,18 @@ func parseNote(data string) (item interface{}, err error) {
 		return nil, fmt.Errorf("invalid note: %#v", data)
 	}
 
+	var dynamic string
+
 	for _, l := range data[1:] {
 		switch l {
+		case ':':
+			nt.dotted = true
 		case '+':
-			nt.dynamic += "+"
+			dynamic += "+"
 		case '-':
-			nt.dynamic += "-"
+			dynamic += "-"
 		case '*':
-			nt.dynamic += "*"
+			dynamic = "*"
 		case '~':
 			nt.glissandoStart = true
 		case '#':
@@ -97,6 +102,8 @@ func parseNote(data string) (item interface{}, err error) {
 			return nil, fmt.Errorf("invalid note: %#v", data)
 		}
 	}
+
+	nt.velocity = velocityFromDynamic(dynamic)
 
 	return nt, nil
 }
@@ -245,7 +252,7 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 		case '=':
 			return Hold, nil
 		case '_':
-			return Rest{}, nil
+			return Rest, nil
 		case '{':
 			return p.parseNTuple(data[1:], posIn32th)
 		case '$':

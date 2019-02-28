@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -17,9 +18,10 @@ type PatternCall struct {
 	SyncFirst    bool
 	result       string
 	//	offset       uint
-	firstPos uint
-	Events   []*positionedEvent // just a sausage of positions within one fictive infinite bar
-	getter   func(name string) *PatternDefinition
+	firstPos    uint
+	Events      []*positionedEvent // just a sausage of positions within one fictive infinite bar
+	getter      func(name string) *PatternDefinition
+	velocityAdd string
 }
 
 func (p *PatternCall) String() string {
@@ -290,6 +292,35 @@ func (p *PatternCall) parsePattern(data string, positionIn32th uint) error {
 	return p.parseEvents(p.result, positionIn32th)
 }
 
+func (p *PatternCall) addVelocity(orig int8) (vel int8) {
+	if orig == -1 {
+		return orig
+	}
+
+	if p.velocityAdd == "" {
+		return orig
+	}
+
+	if p.velocityAdd == "*" {
+		return velocityFromDynamic("*")
+	}
+
+	middle := velocityFromDynamic("*")
+
+	diff := velocityFromDynamic(p.velocityAdd) - middle
+
+	vel = orig + diff
+	if vel > 127 {
+		vel = 123
+	}
+
+	if vel < 5 {
+		vel = 5
+	}
+
+	return
+}
+
 func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 	p.Events = []*positionedEvent{}
 
@@ -317,6 +348,18 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 					return err
 				}
 				p.Events = append(p.Events, v.Events...)
+			case Note:
+				ee := e.dup()
+				nt := v.Dup()
+				nt.velocity = p.addVelocity(nt.velocity)
+				ee.item = nt
+				p.Events = append(p.Events, ee)
+			case MIDINote:
+				ee := e.dup()
+				nt := v.Dup()
+				nt.velocity = p.addVelocity(nt.velocity)
+				ee.item = nt
+				p.Events = append(p.Events, ee)
 			default:
 				p.Events = append(p.Events, e)
 			}
@@ -346,6 +389,9 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 	return p.replaceEvents(posIn32th)
 }
 
+//var regPatternCallNameDyn =
+var regPatternCallNameDyn = regexp.MustCompile("^([a-zA-Z][a-zA-Z]+)([" + regexp.QuoteMeta("-+*") + "]*)$")
+
 func (p *PatternCall) Parse(call string) error {
 	replacements := ""
 	slice := ""
@@ -366,12 +412,15 @@ func (p *PatternCall) Parse(call string) error {
 		call = call[:idx]
 	}
 
-	p.Name = call
-
-	if p.Name[0] == '!' {
+	if call[0] == '!' {
 		p.SyncFirst = true
-		p.Name = p.Name[1:]
+		call = call[1:]
 	}
+
+	mt := regPatternCallNameDyn.FindStringSubmatch(call)
+
+	p.Name = mt[1]
+	p.velocityAdd = mt[2]
 
 	if replacements != "" {
 		repl := strings.Split(replacements, " ")

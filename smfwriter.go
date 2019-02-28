@@ -1,15 +1,12 @@
 package muskel
 
 import (
-	"fmt"
-
 	"gitlab.com/gomidi/midi/mid"
 )
 
 type SMFWriter struct {
 	score *Score
-	//unrolledbars []*Bar
-	wr *mid.SMFWriter
+	wr    *mid.SMFWriter
 }
 
 func NewSMFWriter(s *Score) *SMFWriter {
@@ -17,13 +14,6 @@ func NewSMFWriter(s *Score) *SMFWriter {
 }
 
 func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
-
-	/*
-		err := p.unrollInstruments()
-		if err != nil {
-			return err
-		}
-	*/
 	err := p.writeFirstTrack(wr)
 
 	if err != nil {
@@ -39,14 +29,10 @@ func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
 		//		fmt.Println("EOT")
 		wr.EndOfTrack()
 		iw := newInstrumentSMFWriter(p, wr, instr)
-		fmt.Printf("writing MIDI for col: %v, instr: %q\n", i, instr.Name)
+		_ = i
+		//fmt.Printf("writing MIDI for col: %v, instr: %q\n", i, instr.Name)
 		iw.writeIntro()
-		err = iw.writeUnrolled()
-		//err = iw.writeTrack()
-		//		err = p.writeInstrumentTrack(wr, instr)
-		if err != nil {
-			return err
-		}
+		iw.writeUnrolled()
 	}
 
 	//	fmt.Println("EOT")
@@ -71,30 +57,11 @@ func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
 	var lastBar int
 
 	for _, b := range p.score.Bars {
-		/*
-			b.positions = make([]uint8, len(b.originalPositions))
-			var oldPos string
-
-			for pi, pos := range b.originalPositions {
-				oldPos, b.positions[pi] = positionTo32th(oldPos, pos)
-			}
-		*/
-
-		//fmt.Printf("bar %v: %#v\n", i, b)
-
-		//		if i > 0 {
-		//fmt.Printf("[firstrack] Forward(1, 0, 0)\n")
-		//			wr.Forward(1, 0, 0)
-		/*
-			fmt.Printf("Forward(0, %v, %v)\n", uint32(num), uint32(denom))
-			wr.Forward(0, uint32(num), uint32(denom))
-		*/
-		//		}
 
 		part := p.isStartOfPart(b)
 
 		if b.timeSigChange[0] > 0 || b.tempoChange > 0 || part != "" {
-			wr.Forward(uint32(b.barNo-lastBar), 0, 0)
+			wr.Forward(0, uint32(b.barNo-lastBar)*uint32(num), uint32(denom))
 			lastBar = b.barNo
 		}
 
@@ -114,7 +81,6 @@ func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
 			wr.Cuepoint(part)
 			wr.Marker(part)
 		}
-		//wr.Forward(1, 0, 0)
 	}
 
 	return nil

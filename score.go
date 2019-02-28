@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 
@@ -213,14 +212,14 @@ func (p *Score) enroll() {
 }
 
 // WriteSMF writes the score to the given SMF file
-func (s *Score) WriteSMF(midifile string) error {
+func (s *Score) WriteSMF(midifile string, debug bool) error {
 
 	if !s.isUnrolled {
 		ur, err := s.Unroll()
 		if err != nil {
 			return err
 		}
-		return ur.WriteSMF(midifile)
+		return ur.WriteSMF(midifile, debug)
 	}
 
 	numTracks := uint16(1) // first track is for tempo and time signatures
@@ -233,10 +232,23 @@ func (s *Score) WriteSMF(midifile string) error {
 
 	sw := NewSMFWriter(s)
 
+	if debug {
+		return mid.NewSMFFile(midifile, numTracks, sw.Write,
+			smfwriter.TimeFormat(smf.MetricTicks(960)),
+			smfwriter.Debug(debugLog{}),
+		)
+	}
+
 	return mid.NewSMFFile(midifile, numTracks, sw.Write,
 		smfwriter.TimeFormat(smf.MetricTicks(960)),
-		smfwriter.Debug(log.New(os.Stdout, "write MIDI", log.Lshortfile)),
 	)
+
+}
+
+type debugLog struct{}
+
+func (debugLog) Printf(format string, vals ...interface{}) {
+	fmt.Fprintf(os.Stdout, format+"\n", vals...)
 }
 
 // WriteTo writes the score to the given writer (in a formatted way)

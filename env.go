@@ -20,16 +20,16 @@ const drumnotes = `
 @partial: header
 
 // some shortcuts for drums (GM)
-kd: 1MN36
-sn: 1MN40
-ho: 1MN46
-hc: 1MN42
-rd: 1MN51
-tb: 1MN54
-tl: 1MN45
-tm: 1MN48
-th: 1MN50
-sh: 1MN49
+kd: 1MN36*:
+sn: 1MN40*:
+ho: 1MN46*:
+hc: 1MN42*:
+rd: 1MN51*:
+tb: 1MN54*:
+tl: 1MN45*:
+tm: 1MN48*:
+th: 1MN50*:
+sh: 1MN49*:
 
 =
 `

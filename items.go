@@ -14,11 +14,17 @@ package muskel
 */
 
 type Note struct {
-	letter         string
-	octave         int
-	augmenter      string
-	dynamic        string
+	letter    string
+	octave    int
+	augmenter string
+	//dynamic        string
+	velocity       int8
 	glissandoStart bool
+	dotted         bool
+}
+
+func (n Note) Dup() Note {
+	return n
 }
 
 type DrumNote struct {
@@ -26,7 +32,16 @@ type DrumNote struct {
 	dynamic string
 }
 
-type MIDINote [2]int8
+type MIDINote struct {
+	note     int8
+	velocity int8
+	dotted   bool
+}
+
+func (mn MIDINote) Dup() MIDINote {
+	return mn
+}
+
 type MIDICC [2]uint8
 type MIDIPitchbend int16
 type MIDIPolyAftertouch [2]uint8
@@ -45,7 +60,7 @@ type RepeatLastEvent struct{}
 type RepeatLastBar struct{}
 type RepeatLastBarUntilChange struct{}
 type RepeatLastNBarsUntilChange int
-type Rest struct{}
+type rest struct{}
 type hold struct{}
 type Lyric string
 
@@ -63,6 +78,7 @@ type RandomChooser struct {
 }
 
 var Hold = hold{}
+var Rest = rest{}
 
 /*
 - notes, e.g. a'

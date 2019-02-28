@@ -10,10 +10,10 @@ func TestParseItem(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{"_", Rest{}},
-		{"a'", Note{letter: "a", octave: 2}},
-		{"a'++", Note{letter: "a", octave: 2, dynamic: "++"}},
-		{"c#'--~", Note{letter: "c", octave: 2, dynamic: "--", glissandoStart: true, augmenter: "#"}},
+		{"_", Rest},
+		{"a'", Note{letter: "a", octave: 2, velocity: -1}},
+		{"a'++", Note{letter: "a", octave: 2, velocity: 93}},
+		{"c#'--~", Note{letter: "c", octave: 2, velocity: 33, glissandoStart: true, augmenter: "#"}},
 		//		{"kd", DrumNote{name: "kd"}},
 		//		{"kd+", DrumNote{name: "kd", dynamic: "+"}},
 		{"=", Hold},
@@ -22,12 +22,12 @@ func TestParseItem(t *testing.T) {
 		{".4.", RepeatLastNBarsUntilChange(4)},
 		{"%", RepeatLastEvent{}},
 		//		{"{kd,sn}2", NTuple{items: []interface{}{DrumNote{name: "kd"}, DrumNote{name: "sn"}}, endPos: 8}},
-		{"{a,b}2", NTuple{items: []interface{}{Note{letter: "a", octave: 1}, Note{letter: "b", octave: 1}}, endPos: 8}},
+		{"{a,b}2", NTuple{items: []interface{}{Note{letter: "a", octave: 1, velocity: -1}, Note{letter: "b", octave: 1, velocity: -1}}, endPos: 8}},
 		{"\"hiho\"", Lyric("hiho")},
 		//		{"Sa'", Note{letter: "a", octave: 2}},
 		//		{"Za'", Note{letter: "a", octave: 2}},
-		{"?[30]a", &RandomProbability{prob: 30, item: Note{letter: "a", octave: 1}, itemOriginalData: "a"}},
-		{"?(a,b)", &RandomChooser{alternatives: []interface{}{Note{letter: "a", octave: 1}, Note{letter: "b", octave: 1}}, alternativesOriginalData: []string{"a", "b"}}},
+		{"?[30]a", &RandomProbability{prob: 30, item: Note{letter: "a", octave: 1, velocity: -1}, itemOriginalData: "a"}},
+		{"?(a,b)", &RandomChooser{alternatives: []interface{}{Note{letter: "a", octave: 1, velocity: -1}, Note{letter: "b", octave: 1, velocity: -1}}, alternativesOriginalData: []string{"a", "b"}}},
 		/*
 			&PatternCall{Name:"pa", Params:[]string(nil), Replacements:[]string(nil), Slice:[2]int{-1, -1}, SyncFirst:false, result:"2c#", Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}}}
 			Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}

@@ -29,6 +29,7 @@ var (
 	argSleep     = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(200)))
 	argSmallCols = cfg.NewBool("small", "small columns in formatting", config.Shortflag('s'), config.Default(false))
 	argUnroll    = cfg.NewString("unroll", "unroll the source to the given file name", config.Shortflag('u'))
+	argDebug     = cfg.NewBool("debug", "print debug messages", config.Shortflag('d'))
 
 	cmdSMF  = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
 	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs audacious)")
@@ -134,7 +135,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
 		switch cfg.ActiveCommand() {
 		case cmdSMF:
-			err = sc.WriteSMF(outFile)
+			err = sc.WriteSMF(outFile, argDebug.Get())
 			if err != nil {
 				fmt.Printf("ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
@@ -144,7 +145,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 			beeep.Notify("OK MuSkeL converted to SMF", path.Base(outFile), "assets/information.png")
 			return nil
 		case cmdPlay:
-			err = sc.WriteSMF(outFile)
+			err = sc.WriteSMF(outFile, argDebug.Get())
 			if err != nil {
 				fmt.Printf("ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
