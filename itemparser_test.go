@@ -28,6 +28,11 @@ func TestParseItem(t *testing.T) {
 		//		{"Za'", Note{letter: "a", octave: 2}},
 		{"?[30]a", &RandomProbability{prob: 30, item: Note{letter: "a", octave: 1, velocity: -1}, itemOriginalData: "a"}},
 		{"?(a,b)", &RandomChooser{alternatives: []interface{}{Note{letter: "a", octave: 1, velocity: -1}, Note{letter: "b", octave: 1, velocity: -1}}, alternativesOriginalData: []string{"a", "b"}}},
+		{"CC(23,100)", MIDICC{23, 100}},
+		{"AT(54)", MIDIAftertouch(54)},
+		{"PB(-20)", MIDIPitchbend(-20)},
+		{"PB(8100)", MIDIPitchbend(8100)},
+		{"PT(c',80)", MIDIPolyAftertouch{60, 80}},
 		/*
 			&PatternCall{Name:"pa", Params:[]string(nil), Replacements:[]string(nil), Slice:[2]int{-1, -1}, SyncFirst:false, result:"2c#", Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}}}
 			Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}

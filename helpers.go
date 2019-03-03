@@ -94,7 +94,7 @@ func velocityFromDynamic(dyn string) (vel int8) {
 	return
 }
 
-func noteToMIDI(note Note) (midinote_ uint8) {
+func (note Note) toMIDI() (midinote_ uint8) {
 	midinote := 48 // c
 
 	if note.octave > 0 {

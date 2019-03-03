@@ -272,6 +272,27 @@ func (p *BodyParser) setInstrumentName(i int, instr *Instrument, name string) er
 	return nil
 }
 
+func (p *BodyParser) setInstrumentPitchbendrange(i int, instr *Instrument, data string) error {
+	rg, errC := strconv.Atoi(data)
+	if errC != nil {
+		return fmt.Errorf("%#v is not a valid MIDI pitchbendrange", data)
+	}
+	if rg > 24 || rg < 1 {
+		return fmt.Errorf("%#v is not a valid MIDI pitchbendrange", rg)
+	}
+
+	if instr.PitchbendRange == 0 {
+		instr.PitchbendRange = uint8(rg)
+		return nil
+	}
+
+	if uint8(rg) != instr.PitchbendRange {
+		return fmt.Errorf("can't set MIDI pitchbendrange for instrument in column %v to %v: MIDI pitchbendrange already set to: %v", i+1, rg, instr.PitchbendRange)
+	}
+
+	return nil
+}
+
 // setInstrumentChannel sets the MIDI channel of an instrument
 func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string) error {
 	if data == "-" {
@@ -450,6 +471,8 @@ func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 		switch strings.ToLower(firstColumn) {
 		case "":
 			err = p.setInstrumentName(i, instr, data)
+		case "pbrange":
+			err = p.setInstrumentPitchbendrange(i, instr, data)
 		case "ch", "channel":
 			err = p.setInstrumentChannel(i, instr, data)
 		case "prog", "program":

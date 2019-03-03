@@ -33,15 +33,16 @@ $include("drumnotes")
 
 
 =
-         | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
-    1    | a"  | MN36: | b"    |
-    2&   | c   | MN40: | d     |
+         | Voc | Drums  | Piano |
+Ch       | -   | -      | -     |
+Bank     | -   | -      | -     |
+Prog     | -   | -      | -     |
+Vol      | -   | -      | -     |
+PbRange  |     |        |       |
+    1    | a"  | MN36*: | b"    |
+    2&   | c   | MN40*: | d     |
 
-    1    |     | MN46: |       |
+    1    |     | MN46*: |       |
 `,
 		},
 		{
@@ -75,6 +76,7 @@ Ch       | -   | -     | -     |
 Bank     | -   | -     | -     |
 Prog     | -   | -     | -     |
 Vol      | -   | -     | -     |
+PbRange  |     |       |       |
     1    | a"  | e"    | b"    |
     2&   | c   | f"    | d     |
 
@@ -100,6 +102,7 @@ Ch       | -   | -     | -     |
 Bank     | -   | -     | -     |
 Prog     | -   | -     | -     |
 Vol      | -   | -     | -     |
+PbRange  |     |       |       |
 4/4
     1    | a"  | d     | b"    |
     2&   | c   |       | d     |
@@ -134,7 +137,7 @@ Vol      | -   | -     | -     |
 
 		var bf bytes.Buffer
 
-		err = unr.WriteTo(&bf)
+		_, err = unr.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)

@@ -252,7 +252,7 @@ func (debugLog) Printf(format string, vals ...interface{}) {
 }
 
 // WriteTo writes the score to the given writer (in a formatted way)
-func (s *Score) WriteTo(wr io.Writer) (err error) {
+func (s *Score) WriteTo(wr io.Writer) (n int64, err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -265,7 +265,7 @@ func (s *Score) WriteTo(wr io.Writer) (err error) {
 	fm := NewFormatter(s)
 	fm.Format(&bf)
 
-	_, err = bf.WriteTo(wr)
+	n, err = bf.WriteTo(wr)
 	return
 }
 
@@ -292,7 +292,7 @@ func (s *Score) WriteToFile(filepath string) (err error) {
 		os.RemoveAll(dir)
 	}()
 
-	err = s.WriteTo(f)
+	_, err = s.WriteTo(f)
 	if err != nil {
 		return
 	}

@@ -102,10 +102,9 @@ func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{},
 		return items, nil
 
 	default:
-		return p.parseItem(data, posIn32th)
 	}
+	return p.parseItem(data, posIn32th)
 
-	return
 }
 
 func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev *positionedEvent, err error) {

@@ -2,11 +2,29 @@ package muskel
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 
 	"gitlab.com/gomidi/midi/cc"
 	"gitlab.com/gomidi/midi/mid"
 )
+
+func calc32thsAdd(distance32th int64, notediff int8) float64 {
+	return float64(notediff) / float64(distance32th)
+}
+
+func halfTonesToPitchbend(halftones float64, _range uint8) int16 {
+	res := int16(math.Round(halftones * 8192.0 / float64(_range)))
+	if res < -8191 {
+		return -8191
+	}
+
+	if res > 8192 {
+		return 8192
+	}
+
+	return res
+}
 
 func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes []uint8) {
 	if item == nil {
@@ -14,7 +32,6 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 	}
 	switch v := item.(type) {
 	case Note:
-		stopNotes()
 		vel := v.velocity
 		if vel < 0 {
 			vel = iw.prevVel
@@ -23,15 +40,57 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		iw.prevVel = vel
 
 		vl := uint8(vel + int8(rand.Intn(4)))
-		n := noteToMIDI(v)
+		n := v.toMIDI()
+
+		if iw.inGlissando {
+			/*
+				1. get the distance to the previous note
+				2. calc the diff in semitones
+				3. make a line of 32ths in steps of the factor
+			*/
+			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startGlissando) / float64(iw.wr.Ticks32th())))
+			noteDiff := int8(n) - int8(iw.startGlissandoNote)
+			addStep := calc32thsAdd(distance, noteDiff)
+			iw.wr.RestoreTimeline()
+
+			for step := int64(1); step <= distance; step++ {
+				iw.wr.Forward(0, 1, 32)
+				iw.wr.Pitchbend(halfTonesToPitchbend(float64(step)*addStep, iw.instr.PitchbendRange))
+			}
+
+			delete(iw.noteOns, iw.startGlissandoNote)
+			addedNotes = append(addedNotes, iw.startGlissandoNote)
+			_ = addStep
+		}
+		stopNotes()
+
 		//fmt.Printf("NoteOn %v\n", n)
-		iw.wr.NoteOn(n, vl)
-		if v.dotted {
-			iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(n))
-		} else {
-			addedNotes = append(addedNotes, n)
+		if !iw.inGlissando {
+			if iw.startGlissandoNote != 0 {
+				iw.startGlissandoNote = 0
+				iw.wr.Pitchbend(0)
+			}
+			iw.wr.NoteOn(n, vl)
+			if v.dotted {
+				iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(n))
+			} else {
+				addedNotes = append(addedNotes, n)
+			}
+		}
+		if iw.inGlissando {
+			//  set pitchbend back to 0
+			iw.inGlissando = false
+		}
+
+		if v.glissandoStart {
+			//iw.startGlissandoDelta = iw.wr.DeltaTime()
+			iw.startGlissando = iw.wr.Position()
+			iw.startGlissandoNote = n
+			iw.inGlissando = true
+			iw.wr.BackupTimeline()
 		}
 	case MIDINote:
+		iw.inGlissando = false
 		stopNotes()
 		vel := v.velocity
 
@@ -44,6 +103,10 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		vl := uint8(vel + int8(rand.Intn(4)))
 		n := uint8(v.note)
 		//fmt.Printf("MIDINoteOn %v\n", n)
+		if iw.startGlissandoNote != 0 {
+			iw.startGlissandoNote = 0
+			iw.wr.Pitchbend(0)
+		}
 		iw.wr.NoteOn(n, vl)
 		if v.dotted {
 			iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(n))
@@ -101,6 +164,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		// the total length of the ntuple could be specified by the ending position, e.g.
 		// {a',e'',f}3&
 		// would mean: the total duration is from the current position until 3&
+		iw.inGlissando = false
 
 		length := uint32(v.endPos - iw.lastNum32)
 
@@ -144,6 +208,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 	case rest:
 		//fmt.Printf("got REST\n")
+		iw.inGlissando = false
 		stopNotes()
 	case hold:
 		return nil
@@ -158,19 +223,23 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 }
 
 type instWriter struct {
-	p                  *SMFWriter
-	wr                 *mid.SMFWriter
-	instr              *Instrument
-	emptyBars          uint32
-	lastItem           interface{}
-	prevVel            int8
-	noteOns            map[uint8]bool
-	repeatFrom         int
-	repeatingBars      int
-	currentlyRepeating int
-	totalBeginning     bool
-	insideRepitition   bool
-	lastNum32          uint
+	p                   *SMFWriter
+	wr                  *mid.SMFWriter
+	instr               *Instrument
+	emptyBars           uint32
+	lastItem            interface{}
+	prevVel             int8
+	noteOns             map[uint8]bool
+	repeatFrom          int
+	repeatingBars       int
+	currentlyRepeating  int
+	totalBeginning      bool
+	insideRepitition    bool
+	lastNum32           uint
+	inGlissando         bool
+	startGlissando      uint64
+	startGlissandoNote  uint8
+	startGlissandoDelta uint32
 }
 
 func newInstrumentSMFWriter(p *SMFWriter, wr *mid.SMFWriter, instr *Instrument) *instWriter {
@@ -205,6 +274,8 @@ func (iw *instWriter) writeIntro() {
 		//fmt.Printf("Volume: %v\n", iw.instr.MIDIVolume)
 		iw.wr.ControlChange(cc.VolumeMSB, uint8(iw.instr.MIDIVolume))
 	}
+
+	iw.wr.PitchBendSensitivityRPN(iw.instr.PitchbendRange, 0)
 }
 
 func (iw *instWriter) writeUnrolled() {
@@ -257,7 +328,7 @@ func (iw *instWriter) writeUnrolled() {
 			}
 
 			var addedNotes []uint8
-			//fmt.Printf("writing item: %#v\n", ev.Item)
+			fmt.Printf("writing item: %#v\n", ev.Item)
 			addedNotes = iw.writeItem(ev.Item, stopNotes)
 
 			for _, nt := range addedNotes {
@@ -288,25 +359,27 @@ func (iw *instWriter) writeTrack() {
 }
 
 type Instrument struct {
-	Name        string
-	MIDIChannel int8
-	MIDIProgram int8
-	MIDIVolume  int8
-	MIDIBank    int8
-	events      []BarEvents // in the order of bars
-	colWidth    int
-	unrolled    []*Event
+	Name           string
+	MIDIChannel    int8
+	MIDIProgram    int8
+	MIDIVolume     int8
+	MIDIBank       int8
+	PitchbendRange uint8
+	events         []BarEvents // in the order of bars
+	colWidth       int
+	unrolled       []*Event
 }
 
 func (i *Instrument) Dup() *Instrument {
 	return &Instrument{
-		Name:        i.Name,
-		MIDIChannel: i.MIDIChannel,
-		MIDIProgram: i.MIDIProgram,
-		MIDIVolume:  i.MIDIVolume,
-		MIDIBank:    i.MIDIBank,
-		colWidth:    i.colWidth, // ? set to 0??
-		events:      i.events,
+		Name:           i.Name,
+		MIDIChannel:    i.MIDIChannel,
+		MIDIProgram:    i.MIDIProgram,
+		MIDIVolume:     i.MIDIVolume,
+		MIDIBank:       i.MIDIBank,
+		PitchbendRange: i.PitchbendRange,
+		colWidth:       i.colWidth, // ? set to 0??
+		events:         i.events,
 	}
 }
 

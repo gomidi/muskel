@@ -31,6 +31,7 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+PbRange  |        |
     1    | e'     |
 
     1    |        |`,
@@ -53,6 +54,7 @@ Ch       | -      | -     |
 Bank     | -      | -     |
 Prog     | -      | -     |
 Vol      | -      | -     |
+PbRange  |        |       |
     3    |        |       |
      &   |        |       |
 `,
@@ -71,6 +73,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    |
 			`,
 		},
@@ -88,6 +91,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    |
      &   | c"    |
 			`,
@@ -109,6 +113,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    |
      &   | c"    |
 
@@ -131,6 +136,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    |
      &   | c"    |
 
@@ -158,6 +164,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    |
      &   | c"    |
 
@@ -196,6 +203,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    |
      &   | c"    |
 
@@ -234,6 +242,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    | A
      &   | c"    |
 
@@ -272,6 +281,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    | A
      &   | c"    |
 
@@ -310,6 +320,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    | A
      &   | c"    |
 
@@ -348,6 +359,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    | A
      &   | c"    |
 
@@ -386,6 +398,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    | A
      &   | c"    |
 
@@ -421,6 +434,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a'    | A
      &   | c"    |
 
@@ -454,6 +468,7 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
+PbRange  |       |     |
     1    | a'    | e   | A
      &   | c"    | e   |
     2    |       | f   |
@@ -495,7 +510,7 @@ Vol      | -     | -   |
 
 		var bf bytes.Buffer
 
-		err = unr.WriteTo(&bf)
+		_, err = unr.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)

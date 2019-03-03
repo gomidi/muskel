@@ -129,6 +129,29 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	}
 
 	p.writeBodyLine(bf, l)
+
+	l = "PbRange  |"
+	if p.score.SmallColumns {
+		l = "PbRange |"
+	}
+
+	for _, instr := range p.score.Instruments {
+		if instr.PitchbendRange == 0 {
+			if p.score.SmallColumns {
+				l += fmt.Sprintf("%v|", instr.pad(" "))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(" "))
+			}
+		} else {
+			if p.score.SmallColumns {
+				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.PitchbendRange)))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.PitchbendRange)))
+			}
+		}
+	}
+
+	p.writeBodyLine(bf, l)
 }
 
 func (f *Formatter) printSorted(bf *bytes.Buffer, format string, m map[string]string) {

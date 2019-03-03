@@ -143,7 +143,7 @@ func TestNoteToMIDI(t *testing.T) {
 			continue
 		}
 
-		got := noteToMIDI(nt.(Note))
+		got := nt.toMIDI()
 
 		if got != test.midinote {
 			t.Errorf("[%v] noteToMIDI(%#v) = %v // expected %v", i, test.note, got, test.midinote)

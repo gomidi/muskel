@@ -28,28 +28,89 @@ func parseMIDINote(data string) (nt MIDINote, err error) {
 	return nt, nil
 }
 
-// TODO implement parseMIDICC
 func parseMIDICC(data string) (cc MIDICC, err error) {
-	return cc, fmt.Errorf("parseMIDICC is not implemented yet")
+	dt := strings.Trim(data, "()")
+	d := strings.Split(dt, ",")
+	if len(d) != 2 {
+		err = fmt.Errorf("invalid format for MIDI CC: %#v, must be CC(nn,mm) where nn is the controller number and mm is the controler value", data)
+		return
+	}
+	var ccnum int
+	var ccval int
+	ccnum, err = strconv.Atoi(d[0])
+
+	if err != nil {
+		return
+	}
+
+	ccval, err = strconv.Atoi(d[1])
+
+	if err != nil {
+		return
+	}
+
+	cc[0] = uint8(ccnum)
+	cc[1] = uint8(ccval)
+
+	return
 }
 
-// TODO implement parseMIDIPitchbend
-func parseMIDIPitchbend(string) (pb MIDIPitchbend, err error) {
-	return pb, fmt.Errorf("parseMIDIPitchbend is not implemented yet")
+func parseMIDIPitchbend(data string) (pb MIDIPitchbend, err error) {
+	dt := strings.Trim(data, "()")
+	var val int
+	val, err = strconv.Atoi(dt)
+
+	if err != nil {
+		return
+	}
+
+	pb = MIDIPitchbend(int16(val))
+	return
 }
 
-// TODO implement parseMIDIAftertouch
-func parseMIDIAftertouch(string) (at MIDIAftertouch, err error) {
-	return at, fmt.Errorf("parseMIDIAftertouch is not implemented yet")
+func parseMIDIAftertouch(data string) (at MIDIAftertouch, err error) {
+	dt := strings.Trim(data, "()")
+	var val int
+	val, err = strconv.Atoi(dt)
+
+	if err != nil {
+		return
+	}
+
+	at = MIDIAftertouch(uint8(val))
+	return
 }
 
-// TODO implement parseMIDIPolyAftertouch
-func parseMIDIPolyAftertouch(string) (pt MIDIPolyAftertouch, err error) {
-	return pt, fmt.Errorf("parseMIDIPolyAftertouch is not implemented yet")
-}
+func parseMIDIPolyAftertouch(data string) (pt MIDIPolyAftertouch, err error) {
+	dt := strings.Trim(data, "()")
+	d := strings.Split(dt, ",")
+	if len(d) != 2 {
+		err = fmt.Errorf("invalid format for MIDI PT: %#v, must be PT(nt,mm) where nt is the note and mm is the value", data)
+		return
+	}
 
-func parseNote(data string) (item interface{}, err error) {
 	var nt Note
+	nt, err = parseNote(d[0])
+	if err != nil {
+		err = fmt.Errorf("invalid format for MIDI PT can't parse note: %s", err.Error())
+		return
+	}
+
+	var val int
+	val, err = strconv.Atoi(d[1])
+
+	if err != nil {
+		err = fmt.Errorf("invalid format for MIDI PT can't parse value: %s", err.Error())
+		return
+	}
+
+	pt[0] = nt.toMIDI()
+	pt[1] = uint8(val)
+
+	return
+}
+
+func parseNote(data string) (nt Note, err error) {
 
 	switch data[:1] {
 	case "a", "b", "c", "d", "e", "f", "g":
@@ -59,7 +120,8 @@ func parseNote(data string) (item interface{}, err error) {
 		nt.letter = strings.ToLower(data[:1])
 		nt.octave = -1
 	default:
-		return nil, fmt.Errorf("invalid note: %#v", data)
+		err = fmt.Errorf("invalid note: %#v", data)
+		return
 	}
 
 	var dynamic string
@@ -99,13 +161,14 @@ func parseNote(data string) (item interface{}, err error) {
 				nt.octave -= 1
 			}
 		default:
-			return nil, fmt.Errorf("invalid note: %#v", data)
+			err = fmt.Errorf("invalid note: %#v", data)
+			return
 		}
 	}
 
 	nt.velocity = velocityFromDynamic(dynamic)
 
-	return nt, nil
+	return
 }
 
 // TODO implement parseOSC

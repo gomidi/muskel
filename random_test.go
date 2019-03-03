@@ -25,6 +25,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a     |
 `,
 				`
@@ -34,6 +35,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | b     |
 `,
 			},
@@ -58,6 +60,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | c     |
 `,
 				`
@@ -72,6 +75,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    |       |
     2    | d     |
 `,
@@ -90,6 +94,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | a     |
 `,
 				`
@@ -99,6 +104,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    |       |
 `,
 			},
@@ -128,7 +134,7 @@ Vol      | -     |
 
 		var bf bytes.Buffer
 
-		err = unr.WriteTo(&bf)
+		_, err = unr.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)
@@ -172,6 +178,7 @@ Ch       | -     | -   |
 Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
+PbRange  |       |     |
     1    | a     |     |
 
     1    | a     |     |
@@ -189,6 +196,7 @@ Ch       | -     |
 Bank     | -     |
 Prog     | -     |
 Vol      | -     |
+PbRange  |       |
     1    | b     |
 `},
 	}
@@ -216,7 +224,7 @@ Vol      | -     |
 
 		var bf bytes.Buffer
 
-		err = unr.WriteTo(&bf)
+		_, err = unr.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)

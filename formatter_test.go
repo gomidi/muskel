@@ -33,6 +33,7 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+PbRange  |        |
     1    | e      | A
 [A]
     2    | f      |
@@ -60,6 +61,7 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+PbRange  |        |
     1    | e      | A
 [A]
 [A]
@@ -89,6 +91,7 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+PbRange  |        |
     1    | e      | A
 [A]
 [A]
@@ -119,6 +122,7 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+PbRange  |        |
     1    | e      | A
 [A]
 [A]
@@ -149,6 +153,7 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+PbRange  |        |
     1    | e      | A
 [A]
 [A]
@@ -173,7 +178,7 @@ Vol      | -      |
 
 		var bf bytes.Buffer
 
-		err = sc.WriteTo(&bf)
+		_, err = sc.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
@@ -186,7 +191,7 @@ Vol      | -      |
 		//		fmt.Println(result)
 
 		if result != expected {
-			t.Errorf("[%v] score\n%s\n\formatted gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, result, expected, result, expected)
+			t.Errorf("[%v] score\n%s\n\nformatted gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, result, expected, result, expected)
 			//			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
 		}
 	}
@@ -225,6 +230,7 @@ Ch      |1     |
 Bank    |-     |
 Prog    |-     |
 Vol     |-     |
+PbRange |      |
     1   |e'    |
     2   |f"    |
     3&  |g     |
@@ -268,6 +274,7 @@ Ch      |-    |-  |
 Bank    |-    |-  |
 Prog    |-    |-  |
 Vol     |-    |-  |
+PbRange |     |   |
     1   |a'   |a' |
     2&  |g    |f  |
 
@@ -299,7 +306,7 @@ Vol     |-    |-  |
 
 		var bf bytes.Buffer
 
-		err = unr.WriteTo(&bf)
+		_, err = unr.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)
