@@ -40,7 +40,8 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		iw.prevVel = vel
 
 		vl := uint8(vel + int8(rand.Intn(4)))
-		n := v.toMIDI()
+		// only add MIDITranspose to Notes not to MIDINotes
+		n := uint8(int8(v.toMIDI()) + iw.instr.MIDITranspose)
 
 		if iw.inGlissando {
 			/*
@@ -328,7 +329,7 @@ func (iw *instWriter) writeUnrolled() {
 			}
 
 			var addedNotes []uint8
-			fmt.Printf("writing item: %#v\n", ev.Item)
+			//fmt.Printf("writing item: %#v\n", ev.Item)
 			addedNotes = iw.writeItem(ev.Item, stopNotes)
 
 			for _, nt := range addedNotes {
@@ -364,6 +365,7 @@ type Instrument struct {
 	MIDIProgram    int8
 	MIDIVolume     int8
 	MIDIBank       int8
+	MIDITranspose  int8 // only transposes Notes not MIDINotes
 	PitchbendRange uint8
 	events         []BarEvents // in the order of bars
 	colWidth       int
@@ -378,6 +380,7 @@ func (i *Instrument) Dup() *Instrument {
 		MIDIVolume:     i.MIDIVolume,
 		MIDIBank:       i.MIDIBank,
 		PitchbendRange: i.PitchbendRange,
+		MIDITranspose:  i.MIDITranspose,
 		colWidth:       i.colWidth, // ? set to 0??
 		events:         i.events,
 	}

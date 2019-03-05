@@ -26,6 +26,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a     |
 `,
 				`
@@ -36,6 +37,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | b     |
 `,
 			},
@@ -61,6 +63,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | c     |
 `,
 				`
@@ -76,6 +79,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    |       |
     2    | d     |
 `,
@@ -95,6 +99,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a     |
 `,
 				`
@@ -105,6 +110,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    |       |
 `,
 			},
@@ -179,6 +185,7 @@ Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
 PbRange  |       |     |
+Trans    |       |     |
     1    | a     |     |
 
     1    | a     |     |
@@ -197,6 +204,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | b     |
 `},
 	}

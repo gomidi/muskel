@@ -84,6 +84,7 @@ Bank     | -      |
 Prog     | -      |
 Vol      | -      |
 PbRange  |        |
+Trans    |        |
     1    | e'     |
     2    | f"     |
     3    | g      |
@@ -116,6 +117,7 @@ Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
 PbRange  |       |     |
+Trans    |       |     |
     1    | a'    | a'  |
     2&   | g     | f   |
 
@@ -145,6 +147,7 @@ Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
 PbRange  |       |     |
+Trans    |       |     |
     1    | a'    | a'  |
     2&   | g     | f   |
 
@@ -176,6 +179,7 @@ Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
 PbRange  |       |     |
+Trans    |       |     |
     1    | a'    |     |
     2    |       | E   |
     2&   | b     |     |
@@ -208,6 +212,7 @@ Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
 PbRange  |       |     |
+Trans    |       |     |
     1    | a'    |     |
     2    |       | E   |
     2&   | b     |     |
@@ -239,6 +244,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
     2&   | b     |
 
@@ -267,6 +273,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
     2&   | b     |
 
@@ -293,6 +300,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
     2&   | b     |
 		   		   `},
@@ -320,6 +328,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
 3/4
     1    | a'    |
 
@@ -351,6 +360,7 @@ Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
 PbRange  |       |     |
+Trans    |       |     |
     1    | a'    |     |
     2    |       | a'  |
     2&   | b     |     |
@@ -382,6 +392,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     2    | a'    |
     3    | b     |
 		   `},

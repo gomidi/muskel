@@ -34,6 +34,7 @@ Bank     | -      |
 Prog     | -      |
 Vol      | -      |
 PbRange  |        |
+Trans    |        |
     1    | e      | A
 [A]
     2    | f      |
@@ -62,6 +63,7 @@ Bank     | -      |
 Prog     | -      |
 Vol      | -      |
 PbRange  |        |
+Trans    |        |
     1    | e      | A
 [A]
 [A]
@@ -92,6 +94,7 @@ Bank     | -      |
 Prog     | -      |
 Vol      | -      |
 PbRange  |        |
+Trans    |        |
     1    | e      | A
 [A]
 [A]
@@ -123,6 +126,7 @@ Bank     | -      |
 Prog     | -      |
 Vol      | -      |
 PbRange  |        |
+Trans    |        |
     1    | e      | A
 [A]
 [A]
@@ -139,6 +143,7 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+Trans    |        |
     1    | e      | A
 [A]
 [A]
@@ -154,6 +159,7 @@ Bank     | -      |
 Prog     | -      |
 Vol      | -      |
 PbRange  |        |
+Trans    |        |
     1    | e      | A
 [A]
 [A]
@@ -231,6 +237,7 @@ Bank    |-     |
 Prog    |-     |
 Vol     |-     |
 PbRange |      |
+Trans   |      |
     1   |e'    |
     2   |f"    |
     3&  |g     |
@@ -275,6 +282,7 @@ Bank    |-    |-  |
 Prog    |-    |-  |
 Vol     |-    |-  |
 PbRange |     |   |
+Trans   |     |   |
     1   |a'   |a' |
     2&  |g    |f  |
 

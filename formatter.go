@@ -152,6 +152,29 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	}
 
 	p.writeBodyLine(bf, l)
+
+	l = "Trans    |"
+	if p.score.SmallColumns {
+		l = "Trans   |"
+	}
+
+	for _, instr := range p.score.Instruments {
+		if instr.MIDITranspose == 0 {
+			if p.score.SmallColumns {
+				l += fmt.Sprintf("%v|", instr.pad(" "))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(" "))
+			}
+		} else {
+			if p.score.SmallColumns {
+				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v", instr.MIDITranspose)))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v", instr.MIDITranspose)))
+			}
+		}
+	}
+
+	p.writeBodyLine(bf, l)
 }
 
 func (f *Formatter) printSorted(bf *bytes.Buffer, format string, m map[string]string) {
@@ -218,10 +241,20 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 		prefix = " "
 	}
 
+	//fmt.Printf("len(bars) = %v\n", len(p.score.Bars))
+	// fmt.Printf("parts = %#v\n", p.score.Parts)
+
 	for _, bar := range p.score.Bars {
 
 		if bar.jumpTo != "" {
 			l = fmt.Sprintf("[%s]", bar.jumpTo)
+			p.writeBodyLine(bf, l)
+			p.jumpInLineBefore = true
+			continue
+		}
+
+		if bar.include != "" {
+			l = fmt.Sprintf("$include(%q)", bar.include)
 			p.writeBodyLine(bf, l)
 			p.jumpInLineBefore = true
 			continue
@@ -267,6 +300,8 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 					l += fmt.Sprintf(prefix+"%s"+barLine, instr.pad(""))
 				}
 			}
+
+			// fmt.Printf("bar: %v, pi: %v\n", bar.barNo, pi)
 
 			if pi == 0 {
 				for prt, br := range p.score.Parts {

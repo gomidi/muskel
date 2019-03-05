@@ -33,7 +33,7 @@ func NewParser(r io.Reader) *Parser {
 		header: &HeaderParser{sc},
 		body: &BodyParser{
 			Score:          sc,
-			currentBarNo:     -1,
+			currentBarNo:   -1,
 			numInstruments: -1,
 		},
 	}
@@ -175,6 +175,8 @@ func (p *Parser) Parse() (err error) {
 			break
 		}
 	}
+
+	p.body.finishPart(p.body.currentBarNo + 1)
 
 	if err == io.EOF {
 		return nil

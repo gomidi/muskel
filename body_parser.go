@@ -85,9 +85,11 @@ func (p *BodyParser) handleEmptyLine() error {
 func (p *BodyParser) handleJump(data string) error {
 	b := NewBar()
 	part := strings.Trim(data, "[]")
-	if _, has := p.Score.Parts[part]; !has {
-		return fmt.Errorf("could not jump to part %#v: not found", part)
-	}
+	/*
+		if _, has := p.Score.Parts[part]; !has {
+			return fmt.Errorf("could not jump to part %#v: not found", part)
+		}
+	*/
 
 	if p.inPart != "" {
 		p.Score.Parts[part] = [2]int{p.Score.Parts[part][0], p.currentBarNo}
@@ -158,9 +160,6 @@ func (p *BodyParser) includeScore(sc *Score, file string) error {
 }
 
 func (p *BodyParser) include(file string) error {
-	if p.Score.isPartial() {
-		return fmt.Errorf("can't include within a partial")
-	}
 	sc, err := p.Score.include(file)
 	if err != nil {
 		return fmt.Errorf("can't include %q in score: %s", file, err.Error())
@@ -189,12 +188,22 @@ func (p *BodyParser) parseCommand(data string) error {
 	}
 	switch c.Name {
 	case "include":
+		p.finishPart(p.currentBarNo + 1)
 		if len(c.Params) != 1 {
 			return fmt.Errorf("include command needs one parameter")
 		}
 		return p.include(strings.Trim(c.Params[0], "\""))
 	default:
 		return fmt.Errorf("unsupported command in body: %q", c.Name)
+	}
+}
+
+func (p *BodyParser) finishPart(end int) {
+	if p.inPart != "" {
+		if _, has := p.Score.Parts[p.inPart]; has {
+			p.Score.Parts[p.inPart] = [2]int{p.Score.Parts[p.inPart][0], end}
+		}
+		p.inPart = ""
 	}
 }
 
@@ -211,6 +220,7 @@ func (p *BodyParser) parseBarLine(data string) error {
 
 	// its a jump
 	if data[0] == '[' {
+		p.finishPart(p.currentBarNo + 1)
 		return p.handleJump(data)
 
 	}
@@ -273,6 +283,9 @@ func (p *BodyParser) setInstrumentName(i int, instr *Instrument, name string) er
 }
 
 func (p *BodyParser) setInstrumentPitchbendrange(i int, instr *Instrument, data string) error {
+	if len(data) == 0 {
+		return nil
+	}
 	rg, errC := strconv.Atoi(data)
 	if errC != nil {
 		return fmt.Errorf("%#v is not a valid MIDI pitchbendrange", data)
@@ -377,6 +390,26 @@ func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) 
 	return nil
 }
 
+// setInstrumentTranspose sets the MIDITranspose for an instrument
+func (p *BodyParser) setInstrumentTranspose(i int, instr *Instrument, data string) error {
+	if data == "" {
+		instr.MIDITranspose = 0
+		return nil
+	}
+	pr, err := strconv.Atoi(data)
+	if err != nil {
+		return fmt.Errorf("%#v is not a valid MIDI transpose value", data)
+	}
+	if pr >= 84 || pr <= -84 {
+		return fmt.Errorf("%#v is not a valid MIDI transpose value (must be >=-84 and <=84", pr)
+	}
+
+	tr := int8(pr)
+
+	instr.MIDITranspose = tr
+	return nil
+}
+
 // setInstrumentBank sets the MIDI bank for an instrument
 func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) error {
 	if data == "-" {
@@ -442,12 +475,11 @@ func (p *BodyParser) handleLastColumn(data string) error {
 
 	// part definition
 	if _, hasPart := p.Score.Parts[data]; hasPart {
-		return fmt.Errorf("part %#v already exists", data)
+		return nil
 	}
 
-	if p.inPart != "" {
-		p.Score.Parts[data] = [2]int{p.Score.Parts[data][0], p.currentBarNo}
-	}
+	p.finishPart(p.currentBarNo)
+
 	p.Score.Parts[data] = [2]int{p.currentBarNo, -1}
 	p.inPart = data
 	return nil
@@ -471,7 +503,7 @@ func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 		switch strings.ToLower(firstColumn) {
 		case "":
 			err = p.setInstrumentName(i, instr, data)
-		case "pbrange":
+		case "pbrange", "pitchbendrange":
 			err = p.setInstrumentPitchbendrange(i, instr, data)
 		case "ch", "channel":
 			err = p.setInstrumentChannel(i, instr, data)
@@ -479,6 +511,8 @@ func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 			err = p.setInstrumentProgram(i, instr, data)
 		case "vol", "volume":
 			err = p.setInstrumentVolume(i, instr, data)
+		case "trans", "transpose":
+			err = p.setInstrumentTranspose(i, instr, data)
 		case "bank":
 			err = p.setInstrumentBank(i, instr, data)
 		default:

@@ -32,6 +32,7 @@ Bank     | -      |
 Prog     | -      |
 Vol      | -      |
 PbRange  |        |
+Trans    |        |
     1    | e'     |
 
     1    |        |`,
@@ -55,6 +56,7 @@ Bank     | -      | -     |
 Prog     | -      | -     |
 Vol      | -      | -     |
 PbRange  |        |       |
+Trans    |        |       |
     3    |        |       |
      &   |        |       |
 `,
@@ -74,6 +76,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
 			`,
 		},
@@ -92,6 +95,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
      &   | c"    |
 			`,
@@ -114,6 +118,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
      &   | c"    |
 
@@ -137,6 +142,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
      &   | c"    |
 
@@ -165,6 +171,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
      &   | c"    |
 
@@ -204,6 +211,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    |
      &   | c"    |
 
@@ -243,6 +251,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    | A
      &   | c"    |
 
@@ -282,6 +291,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    | A
      &   | c"    |
 
@@ -321,6 +331,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    | A
      &   | c"    |
 
@@ -360,6 +371,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    | A
      &   | c"    |
 
@@ -399,6 +411,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    | A
      &   | c"    |
 
@@ -435,6 +448,7 @@ Bank     | -     |
 Prog     | -     |
 Vol      | -     |
 PbRange  |       |
+Trans    |       |
     1    | a'    | A
      &   | c"    |
 
@@ -469,6 +483,7 @@ Bank     | -     | -   |
 Prog     | -     | -   |
 Vol      | -     | -   |
 PbRange  |       |     |
+Trans    |       |     |
     1    | a'    | e   | A
      &   | c"    | e   |
     2    |       | f   |
@@ -486,11 +501,55 @@ PbRange  |       |     |
 
 		   `,
 		},
+		{
+			`
+=
+    |piano| vox |
+1   |a'   | e   | A
+ &  |c"   | %   |
+2   |     | f   |
+
+2   |d    |     | B
+[A]
+[A]
+[B]
+1&  |e    |     |
+2   |     | g   |`,
+			`
+=
+         | piano | vox |
+Ch       | -     | -   |
+Bank     | -     | -   |
+Prog     | -     | -   |
+Vol      | -     | -   |
+PbRange  |       |     |
+Trans    |       |     |
+    1    | a'    | e   | A
+     &   | c"    | e   |
+    2    |       | f   |
+
+    2    | d     |     | B
+
+    1    | a'    | e   | A
+     &   | c"    | e   |
+    2    |       | f   |
+
+    1    | a'    | e   | A
+     &   | c"    | e   |
+    2    |       | f   |
+
+    2    | d     |     | B
+
+    1&   | e     |     |
+    2    |       | g   |
+
+		   `,
+		},
 	}
 
 	for i, test := range tests {
 		/*
-			if i != 0 {
+			if i != 15 {
 				continue
 			}
 		*/
@@ -500,6 +559,8 @@ PbRange  |       |     |
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
 			continue
 		}
+
+		// fmt.Printf("parts (before unrolling): %v\n", sc.Parts)
 
 		unr, err := sc.Unroll()
 

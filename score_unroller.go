@@ -33,7 +33,7 @@ func (s *ScoreUnroller) createInstruments(instruments []*Instrument) {
 
 // unrollJump unrolls a jump
 func (s *ScoreUnroller) unrollJump(jump string) {
-	for j, bar2ndloop := range s.dest.Bars[s.dest.Parts[jump][0] : s.dest.Parts[jump][1]+1] {
+	for j, bar2ndloop := range s.dest.Bars[s.dest.Parts[jump][0]:s.dest.Parts[jump][1]] {
 
 		nub := bar2ndloop.Dup()
 		if bar2ndloop.timeSigChange[0] > 0 {
@@ -43,6 +43,7 @@ func (s *ScoreUnroller) unrollJump(jump string) {
 		//		fmt.Printf("adding new unrolled bar: %v\n", nub.barNo)
 		nub.timeSig[0] = s.num
 		nub.timeSig[1] = s.denom
+		// nub.include = ""
 		s.unrolledBars = append(s.unrolledBars, nub)
 		for _, _instr := range s.dest.Instruments {
 			//			fmt.Printf("adding bar %v => %v\n    %v\n", s.dest.Parts[jump][0]+j, s.newBarNo, _instr.events[s.dest.Parts[jump][0]+j])
@@ -61,6 +62,17 @@ func (s *ScoreUnroller) unrollInclude(sc *Score) {
 			s.num, s.denom = bar2ndloop.timeSigChange[0], bar2ndloop.timeSigChange[1]
 		}
 		nub.barNo = s.newBarNo
+		nub.originalBarNo = nub.barNo
+		for prt, pvls := range sc.Parts {
+			if pvls[0] == bar2ndloop.originalBarNo {
+				if _, has := s.dest.Parts[prt]; !has {
+					// fmt.Printf("found part %q for bar %v, setting to %v,%v\n", prt, bar2ndloop.barNo, nub.barNo, nub.barNo+pvls[1]-pvls[0])
+					s.dest.Parts[prt] = [2]int{nub.barNo, nub.barNo + pvls[1] - pvls[0]}
+				} else {
+					nub.originalBarNo = s.dest.Parts[prt][0]
+				}
+			}
+		}
 		//		fmt.Printf("adding new unrolled bar: %v\n", nub.barNo)
 		nub.timeSig[0] = s.num
 		nub.timeSig[1] = s.denom
@@ -113,15 +125,14 @@ func (s *ScoreUnroller) unrollBarsAndJumps() {
 	//for _, bar := range s.src.Bars {
 	for _, bar := range s.dest.Bars {
 		//		fmt.Printf("bar.barNo: %v, bar.originalBarNo: %v\n", bar.barNo, bar.originalBarNo)
+		if include := bar.include; include != "" {
+			s.unrollInclude(bar.includedScore)
+			continue
+		}
 
 		if jump := bar.jumpTo; jump != "" {
 			//fmt.Printf("doing the jump for bar: %v\n", bar.barNo)
 			s.unrollJump(jump)
-			continue
-		}
-
-		if include := bar.include; include != "" {
-			s.unrollInclude(bar.includedScore)
 			continue
 		}
 
