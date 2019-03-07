@@ -90,9 +90,11 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 		if err != nil {
 			return err
 		}
-		if p.Score.Meta["partial"] == "header" {
-			return io.EOF
-		}
+		/*
+			if p.Score.Meta["partial"] == "header" {
+				return io.EOF
+			}
+		*/
 		return nil
 	}
 
@@ -135,10 +137,11 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 		//		fmt.Printf("partial header: %q\n", p.Score.Meta["partial"])
 		//		fmt.Printf("meta: %v\n", p.Score.Meta)
 
-		if p.Score.Meta["partial"] == "header" {
-			return io.EOF
-		}
-
+		/*
+			if p.Score.Meta["partial"] == "header" {
+				return io.EOF
+			}
+		*/
 		err := p.body.parseLine(string(line))
 		if err != nil {
 			return fmt.Errorf("Error in line %v:\n%s\n", p.current.line+1, err.Error())

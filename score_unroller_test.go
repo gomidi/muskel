@@ -14,7 +14,6 @@ func TestUnroll(t *testing.T) {
 	}{
 		{
 			`
-test: out of range
 =
          | Vocals |
 Ch       | 1      |
@@ -36,6 +35,286 @@ Trans    |        |
     1    | e'     |
 
     1    |        |`,
+		},
+		{
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+    1    | ^2     |
+
+    1    |        |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+    1    | d      |
+
+    1    |        |`,
+		},
+		{
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | ^2     |
+
+    1    |        |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | e      |
+
+    1    |        |`,
+		},
+		{
+			`
+patt: 1^2 2&^3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | e      |
+    2&   | f      |
+
+$scale(e,dorian)
+    1    | f#     |
+    2&   | g      |`,
+		},
+		{
+			`
+patt: 1^2 2&^3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^2   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | g      |
+    2&   | a      |
+
+$scale(e,dorian)
+    1    | a      |
+    2&   | b      |`,
+		},
+		{
+			`
+patt: 1^2 2&^3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^-3   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | B      |
+    2&   | c      |
+
+$scale(e,dorian)
+    1    | c#     |
+    2&   | d      |`,
+		},
+		{
+			`
+patt: 1^2 2&^3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^3   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | f      |
+    2&   | g      |
+
+$scale(e,dorian)
+    1    | g      |
+    2&   | a      |`,
+		},
+		{
+			`
+patt: 1^2 2&^3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^-2   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | B      |
+    2&   | c      |
+
+$scale(e,dorian)
+    1    | c#     |
+    2&   | d      |`,
+		},
+		{
+			`
+patt: 1e 2&f
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^3   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | f      |
+    2&   | g      |
+
+$scale(e,dorian)
+    1    | g      |
+    2&   | a      |`,
+		},
+		{
+			`
+=
+         | Vocals | Keys |
+Ch       | 1      | -    |
+Bank     | -      | -    |
+Prog     | -      | -    |
+Vol      | -      | -    |
+4/4
+$scale(d,dorian)
+    1    | ^2     | ^3   |
+
+$scale(e,dorian)
+    1    | ^2     | ^3   |`,
+			`
+=
+         | Vocals | Keys |
+Ch       | 1      | -    |
+Bank     | -      | -    |
+Prog     | -      | -    |
+Vol      | -      | -    |
+PbRange  |        |      |
+Trans    |        |      |
+4/4
+$scale(d,dorian)
+    1    | e      | f    |
+
+$scale(e,dorian)
+    1    | f#     | g    |`,
 		},
 		{
 			`

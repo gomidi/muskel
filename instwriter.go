@@ -40,8 +40,14 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		iw.prevVel = vel
 
 		vl := uint8(vel + int8(rand.Intn(4)))
+
+		var n uint8
+
+		n = v.toMIDI()
+		//	}
+
 		// only add MIDITranspose to Notes not to MIDINotes
-		n := uint8(int8(v.toMIDI()) + iw.instr.MIDITranspose)
+		n = uint8(int8(n) + iw.instr.MIDITranspose)
 
 		if iw.inGlissando {
 			/*
@@ -122,7 +128,8 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		iw.wr.Pitchbend(int16(v))
 	case MIDIPolyAftertouch:
 		//fmt.Printf("MIDIPolyAftertouch %v, %v\n", v[0], v[1])
-		iw.wr.PolyAftertouch(v[0], v[1])
+		ki := uint8(int8(v[0]) + iw.instr.MIDITranspose)
+		iw.wr.PolyAftertouch(ki, v[1])
 	case MIDIAftertouch:
 		//fmt.Printf("Aftertouch %v, \n", uint8(v))
 		iw.wr.Aftertouch(uint8(v))
@@ -241,6 +248,7 @@ type instWriter struct {
 	startGlissando      uint64
 	startGlissandoNote  uint8
 	startGlissandoDelta uint32
+	// currentScale        *Scale
 }
 
 func newInstrumentSMFWriter(p *SMFWriter, wr *mid.SMFWriter, instr *Instrument) *instWriter {
@@ -297,9 +305,11 @@ func (iw *instWriter) writeUnrolled() {
 	isHolding := false
 
 	for _, ev := range iw.instr.unrolled {
+
 		if ev.Item == nil {
 			continue
 		}
+
 		diffBars := ev.BarNo
 		if lastEv != nil {
 			diffBars -= lastEv.BarNo
@@ -327,6 +337,8 @@ func (iw *instWriter) writeUnrolled() {
 				isHolding = false
 
 			}
+
+			// iw.scaleAt(ev.BarNo)
 
 			var addedNotes []uint8
 			//fmt.Printf("writing item: %#v\n", ev.Item)

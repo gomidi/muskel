@@ -23,7 +23,7 @@ func parseMIDINote(data string) (nt MIDINote, err error) {
 		return nt, fmt.Errorf("not a valid MIDINote: %q: must be >= 1 and <= 128", data)
 	}
 	nt.note = int8(i)
-	nt.velocity = velocityFromDynamic(mt[2])
+	nt.velocity = dynamicToVelocity(mt[2])
 	nt.dotted = mt[3] == ":"
 	return nt, nil
 }
@@ -110,6 +110,70 @@ func parseMIDIPolyAftertouch(data string) (pt MIDIPolyAftertouch, err error) {
 	return
 }
 
+var regScaleNote = regexp.MustCompile("^(-){0,1}([0-9]+)(.*)$")
+
+func parseScaleNote(data string) (nt Note, err error) {
+	mt := regScaleNote.FindStringSubmatch(data)
+	// fmt.Printf("scale note %q match: %#v\n", data, mt)
+	var i int
+	i, err = strconv.Atoi(mt[1] + mt[2])
+
+	if err != nil {
+		err = fmt.Errorf("invalid scale note: %#v", data)
+		return
+	}
+
+	nt.scaleNote = int8(i)
+
+	var dynamic string
+
+	for _, l := range mt[3] {
+		switch l {
+		case ':':
+			nt.dotted = true
+		case '+':
+			dynamic += "+"
+		case '-':
+			dynamic += "-"
+		case '*':
+			dynamic = "*"
+		case '~':
+			nt.glissandoStart = true
+		/*
+			case '#':
+				nt.augmenter = "#"
+			case '^':
+				nt.augmenter = "^"
+			case '°':
+				nt.augmenter = "°"
+			case '"':
+				if nt.octave > 0 {
+					nt.octave += 2
+				}
+
+				if nt.octave < 0 {
+					nt.octave -= 2
+				}
+			case '\'':
+				if nt.octave > 0 {
+					nt.octave += 1
+				}
+
+				if nt.octave < 0 {
+					nt.octave -= 1
+				}
+		*/
+		default:
+			err = fmt.Errorf("invalid scale note: %#v", data)
+			return
+		}
+	}
+
+	nt.velocity = dynamicToVelocity(dynamic)
+
+	return
+}
+
 func parseNote(data string) (nt Note, err error) {
 
 	switch data[:1] {
@@ -166,7 +230,7 @@ func parseNote(data string) (nt Note, err error) {
 		}
 	}
 
-	nt.velocity = velocityFromDynamic(dynamic)
+	nt.velocity = dynamicToVelocity(dynamic)
 
 	return
 }
@@ -324,6 +388,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 		//	return parseNote(data[1:])
 		//case 'Z':
 		//	return parseNote(data[1:])
+		case '^':
+			return parseScaleNote(data[1:])
 		case '?':
 			return p.parseRandom(data[1:], posIn32th)
 		//case 'O':

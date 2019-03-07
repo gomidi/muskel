@@ -2,6 +2,7 @@ package muskel
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 	//"crypto/rand"
 )
@@ -294,7 +295,7 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 	//	fmt.Printf("pattern events: %v\n", v.Events)
 
 	evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
-	unrolled = append(unrolled, s.convertEvents(ev.BarNo, evts...)...)
+	unrolled = append(unrolled, s.convertEvents(ev.BarNo, v, evts...)...)
 
 	diffBars := (len(s.dest.Bars) - 1) - ev.BarNo
 
@@ -305,12 +306,26 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 		}
 		timesig = s.dest.Bars[ev.BarNo+didx].timeSig
 		evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
-		unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, evts...)...)
+		unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, v, evts...)...)
 		didx++
 	}
 
 	//	fmt.Printf("unrolled: %v\n", unrolled)
 
+	return
+}
+
+func (s *ScoreUnroller) moveNoteAccordingToScale(sc *Scale, p *PatternCall, v Note) (abs Note) {
+	diff := int8(p.firstNoteAbsKey) - int8(sc.StepToNote(p.scaleMove))
+	abs = v.Dup()
+
+	if v.scaleNote == 0 {
+		n := int8(v.toMIDI())
+		n += diff
+
+		nn := sc.StepToNote(sc.NoteToStep(uint8(n)))
+		abs.letter, abs.augmenter, abs.octave = keyToNote(nn)
+	}
 	return
 }
 
@@ -366,7 +381,7 @@ barLoop:
 		}
 		timesig = s.dest.Bars[ev.BarNo+didx].timeSig
 		evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
-		ev2 := s.convertEvents(ev.BarNo+didx, evts...)
+		ev2 := s.convertEvents(ev.BarNo+didx, v, evts...)
 
 		for _, e2 := range ev2 {
 			if ev.BarNo+didx > nextEv.BarNo ||
@@ -402,15 +417,68 @@ barLoop:
 
 }
 
-func (s *ScoreUnroller) convertEvents(barNo int, in ...*positionedEvent) (out []*Event) {
+func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*positionedEvent) (out []*Event) {
 	out = make([]*Event, len(in))
+	sc := s.scaleAt(barNo)
 
 	for i, pev := range in {
 		ev := &Event{}
 		ev.BarNo = barNo
 		ev.DistanceToStartOfBarIn32th = pev.positionIn32ths
-		ev.Item = pev.item
-		ev.originalData = pev.originalData
+		switch v := pev.item.(type) {
+		case Note:
+			if p.scaleMoveMode == 2 && p.firstNoteIsScaleNote == -1 && v.scaleNote == 0 {
+				nnt := s.moveNoteAccordingToScale(sc, p, v)
+				ev.Item = nnt
+				ev.originalData = nnt.String()
+			} else {
+				ev.Item = pev.item
+				ev.originalData = pev.originalData
+			}
+		case MultiItem:
+			var nuMI MultiItem
+			inner := strings.Trim(pev.originalData, "()")
+			ss := strings.Split(inner, ",")
+			for idx, mi := range v {
+				switch vv := mi.(type) {
+				case Note:
+					if p.scaleMoveMode == 2 && p.firstNoteIsScaleNote == -1 && vv.scaleNote == 0 {
+						nnnt := s.moveNoteAccordingToScale(sc, p, vv)
+						nuMI = append(nuMI, nnnt)
+						ss[idx] = nnnt.String()
+					} else {
+						nuMI = append(nuMI, mi)
+					}
+				}
+			}
+
+			ev.originalData = "(" + strings.Join(ss, ",") + ")"
+			ev.Item = nuMI
+		case NTuple:
+			var nuNT NTuple
+			nuNT.endPos = v.endPos
+			inner := strings.Trim(pev.originalData, "{}")
+			ss := strings.Split(inner, ",")
+
+			for idx, mi := range v.items {
+				switch vv := mi.(type) {
+				case Note:
+					if p.scaleMoveMode == 2 && p.firstNoteIsScaleNote == -1 && vv.scaleNote == 0 {
+						nnnt := s.moveNoteAccordingToScale(sc, p, vv)
+						nuNT.items = append(nuNT.items, nnnt)
+						ss[idx] = nnnt.String()
+					} else {
+						nuNT.items = append(nuNT.items, mi)
+					}
+				}
+			}
+
+			ev.originalData = "{" + strings.Join(ss, ",") + "}"
+			ev.Item = nuNT
+		default:
+			ev.Item = pev.item
+			ev.originalData = pev.originalData
+		}
 		out[i] = ev
 	}
 
@@ -480,6 +548,115 @@ func (s *ScoreUnroller) copyBars(bars []*Bar) {
 	}
 }
 
+func (s *ScoreUnroller) scaleAt(barNo int) (scale *Scale) {
+	scale = &Scale{Mode: Ionian, BaseNote: 60}
+
+	for _, bar := range s.dest.Bars {
+		if bar.barNo > barNo {
+			return
+		}
+		if bar.scale != nil {
+			scale = bar.scale
+		}
+	}
+
+	return
+}
+
+func (s *ScoreUnroller) convertScaleNoteToAbsNote(barNo int, nt Note) (abs Note) {
+	if nt.scaleNote == 0 {
+		return nt
+	}
+	abs = nt.Dup()
+	sc := s.scaleAt(barNo)
+	sn := nt.scaleNote
+	if sn > 0 {
+		sn -= 1
+	}
+	abs.letter, abs.augmenter, abs.octave = keyToNote(sc.StepToNote(sn))
+	abs.scaleNote = 0
+	return abs
+}
+
+func (s *ScoreUnroller) replaceScaleNotes() {
+	if !s.dest.isUnrolled {
+		panic("must be unrolled")
+	}
+
+	for _, instr := range s.dest.Instruments {
+		var unrolled []*Event
+		for _, ev := range instr.unrolled {
+			switch v := ev.Item.(type) {
+			case Note:
+				switch {
+				case v.scaleNote == 0:
+					unrolled = append(unrolled, ev)
+				default:
+					nuEv := ev.Dup()
+					nt := s.convertScaleNoteToAbsNote(ev.BarNo, v)
+					ev.Item = nt
+					nuEv.originalData = nt.String()
+					unrolled = append(unrolled, nuEv)
+				}
+			case MultiItem:
+				var nuMI MultiItem
+				nuEv := ev.Dup()
+				itms := strings.Split(ev.originalData, " ")
+
+				for it_idx, it := range v {
+					switch vv := it.(type) {
+					case Note:
+						switch {
+						case vv.scaleNote == 0:
+							nuMI = append(nuMI, vv)
+						default:
+							nnt := s.convertScaleNoteToAbsNote(ev.BarNo, vv)
+							nuMI = append(nuMI, nnt)
+							itms[it_idx] = nnt.String()
+						}
+					default:
+						nuMI = append(nuMI, vv)
+					}
+				}
+
+				nuEv.Item = nuMI
+				nuEv.originalData = strings.Join(itms, " ")
+				unrolled = append(unrolled, nuEv)
+			case NTuple:
+				var nuNt NTuple
+				nuEv := ev.Dup()
+				nuNt.endPos = v.endPos
+				inner := strings.Trim(ev.originalData, "{}")
+				orig := strings.Split(inner, ",")
+
+				for it_idx, it := range v.items {
+					switch vv := it.(type) {
+					case Note:
+						switch {
+						case vv.scaleNote == 0:
+							nuNt.items = append(nuNt.items, vv)
+						default:
+							nnt := s.convertScaleNoteToAbsNote(ev.BarNo, vv)
+							nuNt.items = append(nuNt.items, nnt)
+							orig[it_idx] = nnt.String()
+						}
+					default:
+						nuNt.items = append(nuNt.items, vv)
+					}
+				}
+
+				nuEv.Item = nuNt
+				nuEv.originalData = "{" + strings.Join(orig, ",") + "}"
+				unrolled = append(unrolled, nuEv)
+			default:
+				unrolled = append(unrolled, ev)
+			}
+		}
+
+		instr.unrolled = unrolled
+	}
+}
+
 func (s *ScoreUnroller) unrollInstruments(bars []*Bar, instr []*Instrument) error {
 
 	s.copyBars(bars)
@@ -508,6 +685,9 @@ func (s *ScoreUnroller) unrollInstruments(bars []*Bar, instr []*Instrument) erro
 
 	// evalute randomness a second time, so that randomness produced by patterns can be evaluated
 	s.evalRandomItems()
+
+	// replace scale notes with absolute Notes
+	s.replaceScaleNotes()
 
 	// unfold the repeated items
 	// we don't want to repeat patterns or randomness via repeated items, because it is confusing

@@ -169,7 +169,7 @@ func TestVelocityFromDynamic(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		got := velocityFromDynamic(test.dyn)
+		got := dynamicToVelocity(test.dyn)
 
 		if got != test.vel {
 			t.Errorf("velocityFromDynamic(%#v) = %v // expected %v", test.dyn, got, test.vel)

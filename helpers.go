@@ -60,7 +60,7 @@ func findInclude(file string) (resolved string, err error) {
 // if returned vel is < 0, then it has not been set and
 // is drived from the previous velocity
 // always return such that rand.Intn(4) can be added or substracted
-func velocityFromDynamic(dyn string) (vel int8) {
+func dynamicToVelocity(dyn string) (vel int8) {
 	vel = -1
 	for _, rn := range dyn {
 		switch rn {
@@ -94,44 +94,31 @@ func velocityFromDynamic(dyn string) (vel int8) {
 	return
 }
 
-func (note Note) toMIDI() (midinote_ uint8) {
-	midinote := 48 // c
-
-	if note.octave > 0 {
-		midinote += 12 * (note.octave - 1)
+func velocityToDynamic(vel int8) (dyn string) {
+	switch vel {
+	case -1:
+		return ""
+	case 63:
+		return "*"
+	case 78:
+		return "+"
+	case 93:
+		return "++"
+	case 108:
+		return "+++"
+	case 123:
+		return "++++"
+	case 48:
+		return "-"
+	case 33:
+		return "--"
+	case 18:
+		return "---"
+	case 5:
+		return "----"
+	default:
+		panic(fmt.Sprintf("invalid value for velocity: %v", vel))
 	}
-
-	if note.octave < 0 {
-		midinote += 12 * note.octave
-	}
-
-	switch strings.ToLower(note.letter) {
-	case "c":
-		midinote += 0
-	case "d":
-		midinote += 2
-	case "e":
-		midinote += 4
-	case "f":
-		midinote += 5
-	case "g":
-		midinote += 7
-	case "a":
-		midinote += 9
-	case "b":
-		midinote += 11
-	}
-
-	switch note.augmenter {
-	case "":
-	case "#":
-		midinote += 1
-	case "^":
-	case "°":
-	}
-
-	return uint8(midinote)
-
 }
 
 type patternFragment struct {

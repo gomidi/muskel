@@ -18,10 +18,14 @@ type PatternCall struct {
 	SyncFirst    bool
 	result       string
 	//	offset       uint
-	firstPos    uint
-	Events      []*positionedEvent // just a sausage of positions within one fictive infinite bar
-	getter      func(name string) *PatternDefinition
-	velocityAdd string
+	firstPos             uint
+	Events               []*positionedEvent // just a sausage of positions within one fictive infinite bar
+	getter               func(name string) *PatternDefinition
+	velocityAdd          string
+	scaleMove            int8 // 0: force to scale (take next note in scale if not exact matching, no movement for in scale notes), n >0 || n < 0: move by n steps along the scale
+	scaleMoveMode        int8 // 0: no scale movement, 1: move only scale notes, 2: move only scale notes or non scale notes depending on the first item
+	firstNoteIsScaleNote int  // 0: not set, 1: true, 2: false
+	firstNoteAbsKey      uint8
 }
 
 func (p *PatternCall) String() string {
@@ -301,12 +305,12 @@ func (p *PatternCall) addVelocity(orig int8) (vel int8) {
 	}
 
 	if p.velocityAdd == "*" {
-		return velocityFromDynamic("*")
+		return dynamicToVelocity("*")
 	}
 
-	middle := velocityFromDynamic("*")
+	middle := dynamicToVelocity("*")
 
-	diff := velocityFromDynamic(p.velocityAdd) - middle
+	diff := dynamicToVelocity(p.velocityAdd) - middle
 
 	vel = orig + diff
 	if vel > 127 {
@@ -324,6 +328,7 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 	p.Events = []*positionedEvent{}
 
 	//fmt.Printf("parseEvents called with data: %v\n", data)
+	var firstScaleNoteDiff int8
 
 	evts := strings.Split(strings.TrimSpace(data), " ")
 
@@ -350,6 +355,70 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 			case Note:
 				ee := e.dup()
 				nt := v.Dup()
+
+				if p.firstNoteIsScaleNote == 0 {
+					if nt.scaleNote != 0 {
+						firstScaleNoteValue := nt.scaleNote
+						if firstScaleNoteValue > 0 {
+							firstScaleNoteValue -= 1
+						}
+
+						// mount mode: p.scaleMove is the mount target for the first note
+						target := p.scaleMove
+						if target > 0 {
+							target -= 1
+						}
+
+						firstScaleNoteDiff = target - firstScaleNoteValue
+						p.firstNoteIsScaleNote = 1
+					} else {
+						p.firstNoteAbsKey = nt.toMIDI()
+						p.firstNoteIsScaleNote = -1
+					}
+				}
+
+				if p.scaleMoveMode == 1 && nt.scaleNote != 0 {
+					sn := nt.scaleNote
+					if sn > 0 {
+						sn -= 1
+					}
+
+					// p.scaleMove simply shifts everything up or down (0 doesn't make any sense here)
+					sn += p.scaleMove
+
+					if sn >= 0 {
+						sn += 1
+					}
+
+					fmt.Printf("shift scale note: %v -> + %v = %v\n", nt.scaleNote, p.scaleMove, sn)
+
+					nt.scaleNote = sn
+				}
+
+				if p.scaleMoveMode == 2 {
+					if p.firstNoteIsScaleNote == -1 && nt.scaleNote == 0 {
+						// TODO that has to be done when unrolling
+					}
+					if p.firstNoteIsScaleNote == 1 && nt.scaleNote != 0 {
+						sn := nt.scaleNote
+						if sn > 0 {
+							sn -= 1
+						}
+
+						// mount mode: p.scaleMove is the mount target for the first note
+
+						sn += firstScaleNoteDiff
+
+						if sn >= 0 {
+							sn += 1
+						}
+
+						fmt.Printf("mount scale note: %v + %v = %v\n", nt.scaleNote, firstScaleNoteDiff, sn)
+
+						nt.scaleNote = sn
+					}
+				}
+
 				nt.velocity = p.addVelocity(nt.velocity)
 				ee.item = nt
 				p.Events = append(p.Events, ee)
@@ -389,7 +458,7 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 }
 
 //var regPatternCallNameDyn =
-var regPatternCallNameDyn = regexp.MustCompile("^([a-zA-Z][a-zA-Z]+)([" + regexp.QuoteMeta("-+*") + "]*)$")
+var regPatternCallNameDyn = regexp.MustCompile("^([a-zA-Z][a-zA-Z]+)(" + regexp.QuoteMeta("^") + "{1,2}[-0-9]+){0,1}([" + regexp.QuoteMeta("-+*") + "]*)$")
 
 func (p *PatternCall) Parse(call string) error {
 	replacements := ""
@@ -419,7 +488,24 @@ func (p *PatternCall) Parse(call string) error {
 	mt := regPatternCallNameDyn.FindStringSubmatch(call)
 
 	p.Name = mt[1]
-	p.velocityAdd = mt[2]
+
+	if mt[2] != "" {
+		dt := mt[2][1:]
+		p.scaleMoveMode = 1 // move only scale notes
+		if dt[0] == '^' {
+			p.scaleMoveMode = 2 // move depending on first note
+			dt = dt[1:]
+		}
+
+		si, err := strconv.Atoi(dt)
+		if err != nil {
+			return fmt.Errorf("error in scale moving of pattern %q: %q is not a number", p.Name, dt)
+		}
+
+		p.scaleMove = int8(si)
+	}
+
+	p.velocityAdd = mt[3]
 
 	if replacements != "" {
 		repl := strings.Split(replacements, " ")

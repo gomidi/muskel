@@ -187,6 +187,18 @@ func (p *BodyParser) parseCommand(data string) error {
 		return err
 	}
 	switch c.Name {
+	case "scale":
+		mod := strings.Trim(c.Params[1], "\"")
+		md, has := Modes[mod]
+		if !has {
+			return fmt.Errorf("unknown mode: %q", mod)
+		}
+		nt, err := parseNote(c.Params[0])
+		if err != nil {
+			return fmt.Errorf("invalid base note for scale: %q", c.Params[0])
+		}
+		p.Score.Bars[len(p.Score.Bars)-1].scale = &Scale{BaseNote: nt.toMIDI(), Mode: md}
+		return nil
 	case "include":
 		p.finishPart(p.currentBarNo + 1)
 		if len(c.Params) != 1 {

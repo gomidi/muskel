@@ -80,6 +80,10 @@ func (p *Score) include(file string) (*Score, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Error while including file %q: file not found", file)
 	}
+
+	if found == p.FileName {
+		return nil, fmt.Errorf("file can't include itself")
+	}
 	b, err := ioutil.ReadFile(found)
 
 	if err != nil {

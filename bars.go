@@ -19,6 +19,7 @@ type Bar struct {
 	include       string
 	includedScore *Score // must be an unrolled score
 	events        map[barEventKey]*Event
+	scale         *Scale
 }
 
 func NewBar() *Bar {
@@ -89,6 +90,7 @@ func (b *Bar) Dup() (nuB *Bar) {
 		include:           b.include,
 		events:            map[barEventKey]*Event{},
 		includedScore:     b.includedScore,
+		scale:             b.scale,
 	}
 }
 

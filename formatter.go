@@ -274,6 +274,14 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 			p.writeBodyLine(bf, l)
 		}
 
+		if bar.scale != nil {
+			var nt Note
+			nt.letter, nt.augmenter, nt.octave = keyToNote(bar.scale.BaseNote)
+			nt.velocity = -1
+			l = fmt.Sprintf("$scale(%v,%s)", nt.String(), bar.scale.Name())
+			p.writeBodyLine(bf, l)
+		}
+
 		p.jumpInLineBefore = false
 		//			fmt.Printf("bar.originalPositions: %v\n", bar.originalPositions)
 
