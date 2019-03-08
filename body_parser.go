@@ -189,7 +189,7 @@ func (p *BodyParser) parseCommand(data string) error {
 	switch c.Name {
 	case "scale":
 		if p.currentBarNo == -1 {
-			fmt.Printf("can't start with $scale command. need to start bar first")
+			return fmt.Errorf("can't start with $scale command. need to start bar first")
 		}
 		mod := strings.Trim(c.Params[1], "\"")
 		md, has := Modes[mod]
