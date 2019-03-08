@@ -99,8 +99,18 @@ var Ionian = mode{
 	steps: [7]uint8{0, 2, 4, 5, 7, 9, 11},
 }
 
+var Major = mode{
+	name:  "major",
+	steps: [7]uint8{0, 2, 4, 5, 7, 9, 11},
+}
+
 var Aeolian = mode{
 	name:  "aeolian",
+	steps: [7]uint8{0, 2, 3, 5, 7, 8, 10},
+}
+
+var Minor = mode{
+	name:  "minor",
 	steps: [7]uint8{0, 2, 3, 5, 7, 8, 10},
 }
 
@@ -142,4 +152,6 @@ var Modes = map[string]Mode{
 	"aeolian":    Aeolian,
 	"locrian":    Locrian,
 	"ionian":     Ionian,
+	"minor":      Minor,
+	"major":      Major,
 }
