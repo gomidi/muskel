@@ -121,6 +121,53 @@ Trans    |     |       |       |
 =
    | Voc | Drums | Piano |
 Ch | -   | -     | -     |
+$include("testdata/includes/score")
+1  | d   |      |       | B
+`,
+			`
+=
+         | Voc | Drums | Piano |
+Ch       | -   | -     | -     |
+Bank     | -   | -     | -     |
+Prog     | -   | -     | -     |
+Vol      | -   | -     | -     |
+PbRange  |     |       |       |
+Trans    |     |       |       |
+    1    | e"  |       | f"    | A
+    2&   | c   |       | d     |
+
+    1    | d   |       |       | B
+`,
+		},
+		{
+			`
+=
+   | Voc | Drums | Piano |
+Ch | -   | -     | -     |
+$include("testdata/includes/score")
+$include("testdata/includes/score")
+`,
+			`
+=
+         | Voc | Drums | Piano |
+Ch       | -   | -     | -     |
+Bank     | -   | -     | -     |
+Prog     | -   | -     | -     |
+Vol      | -   | -     | -     |
+PbRange  |     |       |       |
+Trans    |     |       |       |
+    1    | e"  |       | f"    | A
+    2&   | c   |       | d     |
+
+    1    | e"  |       | f"    | A
+    2&   | c   |       | d     |
+`,
+		},
+		{
+			`
+=
+   | Voc | Drums | Piano |
+Ch | -   | -     | -     |
 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |

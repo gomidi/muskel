@@ -6,12 +6,47 @@ import (
 	"testing"
 )
 
+func init() {
+	DEBUG = true
+}
+
 func TestUnroll(t *testing.T) {
 	// t.Skip()
 	tests := []struct {
 		input    string
 		expected string
 	}{
+		// should raise error therefor uncommented
+		/*
+		   		{
+		   			`
+		   =
+		            | Bass |
+		   Ch       | 3    |
+		   Bank     | -    |
+		   Prog     | -    |
+		   Vol      | -    |
+		   PbRange  |      |
+		   Trans    |      |
+		   $scale(d',ionian)
+		       1    | ^-1  |
+		       1&   | ^2   |
+		   		`,
+		   			`
+		   =
+		            | Bass |
+		   Ch       | 3    |
+		   Bank     | -    |
+		   Prog     | -    |
+		   Vol      | -    |
+		   PbRange  |      |
+		   Trans    |      |
+		   $scale(d',ionian)
+		       1    | c#'  |
+		       1&   | e'   |
+		   		`,
+		   		},
+		*/
 		{
 			`
 =

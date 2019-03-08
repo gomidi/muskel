@@ -188,6 +188,9 @@ func (p *BodyParser) parseCommand(data string) error {
 	}
 	switch c.Name {
 	case "scale":
+		if p.currentBarNo == -1 {
+			fmt.Printf("can't start with $scale command. need to start bar first")
+		}
 		mod := strings.Trim(c.Params[1], "\"")
 		md, has := Modes[mod]
 		if !has {
@@ -232,6 +235,9 @@ func (p *BodyParser) parseBarLine(data string) error {
 
 	// its a jump
 	if data[0] == '[' {
+		if p.currentBarNo == -1 {
+			return fmt.Errorf("can't start with a jump: we need bars and parts first")
+		}
 		p.finishPart(p.currentBarNo + 1)
 		return p.handleJump(data)
 
