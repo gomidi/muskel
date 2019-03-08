@@ -316,7 +316,11 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 }
 
 func (s *ScoreUnroller) moveNoteAccordingToScale(sc *Scale, p *PatternCall, v Note) (abs Note) {
-	diff := int8(p.firstNoteAbsKey) - int8(sc.StepToNote(p.scaleMove))
+	mv := p.scaleMove
+	if mv > 0 {
+		mv -= 1
+	}
+	diff := int8(sc.StepToNote(mv)) - int8(p.firstNoteAbsKey)
 	abs = v.Dup()
 
 	if v.scaleNote == 0 {
@@ -457,7 +461,9 @@ func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*position
 		case NTuple:
 			var nuNT NTuple
 			nuNT.endPos = v.endPos
-			inner := strings.Trim(pev.originalData, "{}")
+			inner := strings.Trim(pev.originalData, "{")
+			is := strings.Split(inner, "}")
+			inner = is[0]
 			ss := strings.Split(inner, ",")
 
 			for idx, mi := range v.items {
@@ -473,7 +479,7 @@ func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*position
 				}
 			}
 
-			ev.originalData = "{" + strings.Join(ss, ",") + "}"
+			ev.originalData = "{" + strings.Join(ss, ",") + "}" + pos32thToString(v.endPos)
 			ev.Item = nuNT
 		default:
 			ev.Item = pev.item
@@ -626,7 +632,9 @@ func (s *ScoreUnroller) replaceScaleNotes() {
 				var nuNt NTuple
 				nuEv := ev.Dup()
 				nuNt.endPos = v.endPos
-				inner := strings.Trim(ev.originalData, "{}")
+				inner := strings.Trim(ev.originalData, "{")
+				is := strings.Split(inner, "}")
+				inner = is[0]
 				orig := strings.Split(inner, ",")
 
 				for it_idx, it := range v.items {
@@ -646,7 +654,7 @@ func (s *ScoreUnroller) replaceScaleNotes() {
 				}
 
 				nuEv.Item = nuNt
-				nuEv.originalData = "{" + strings.Join(orig, ",") + "}"
+				nuEv.originalData = "{" + strings.Join(orig, ",") + "}" + pos32thToString(v.endPos)
 				unrolled = append(unrolled, nuEv)
 			default:
 				unrolled = append(unrolled, ev)

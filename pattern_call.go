@@ -347,6 +347,9 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 
 			switch v := e.item.(type) {
 			case *PatternCall:
+				if v.scaleMoveMode == 2 {
+					return fmt.Errorf("mounting of pattern into a scale is not allowed inside pattern definitions, only in the score")
+				}
 				err := v.parseEvents(v.result, e.positionIn32ths)
 				if err != nil {
 					return err
@@ -390,7 +393,7 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 						sn += 1
 					}
 
-					fmt.Printf("shift scale note: %v -> + %v = %v\n", nt.scaleNote, p.scaleMove, sn)
+					// fmt.Printf("shift scale note: %v -> + %v = %v\n", nt.scaleNote, p.scaleMove, sn)
 
 					nt.scaleNote = sn
 				}
@@ -413,7 +416,7 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 							sn += 1
 						}
 
-						fmt.Printf("mount scale note: %v + %v = %v\n", nt.scaleNote, firstScaleNoteDiff, sn)
+						// fmt.Printf("mount scale note: %v + %v = %v\n", nt.scaleNote, firstScaleNoteDiff, sn)
 
 						nt.scaleNote = sn
 					}
@@ -508,7 +511,7 @@ func (p *PatternCall) Parse(call string) error {
 	p.velocityAdd = mt[3]
 
 	if replacements != "" {
-		repl := strings.Split(replacements, " ")
+		repl := strings.Split(replacements, ",")
 
 		for _, rep := range repl {
 			rep = strings.TrimSpace(rep)

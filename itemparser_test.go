@@ -14,14 +14,11 @@ func TestParseItem(t *testing.T) {
 		{"a'", Note{letter: "a", octave: 2, velocity: -1}},
 		{"a'++", Note{letter: "a", octave: 2, velocity: 93}},
 		{"c#'--~", Note{letter: "c", octave: 2, velocity: 33, glissandoStart: true, augmenter: "#"}},
-		//		{"kd", DrumNote{name: "kd"}},
-		//		{"kd+", DrumNote{name: "kd", dynamic: "+"}},
 		{"=", Hold},
 		{"./.", RepeatLastBar{}},
 		{"...", RepeatLastBarUntilChange{}},
 		{".4.", RepeatLastNBarsUntilChange(4)},
 		{"%", RepeatLastEvent{}},
-		//		{"{kd,sn}2", NTuple{items: []interface{}{DrumNote{name: "kd"}, DrumNote{name: "sn"}}, endPos: 8}},
 		{"{a,b}2", NTuple{items: []interface{}{Note{letter: "a", octave: 1, velocity: -1}, Note{letter: "b", octave: 1, velocity: -1}}, endPos: 8}},
 		{"\"hiho\"", Lyric("hiho")},
 		//		{"Sa'", Note{letter: "a", octave: 2}},
@@ -33,88 +30,6 @@ func TestParseItem(t *testing.T) {
 		{"PB(-20)", MIDIPitchbend(-20)},
 		{"PB(8100)", MIDIPitchbend(8100)},
 		{"PT(c',80)", MIDIPolyAftertouch{60, 80}},
-		/*
-			&PatternCall{Name:"pa", Params:[]string(nil), Replacements:[]string(nil), Slice:[2]int{-1, -1}, SyncFirst:false, result:"2c#", Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}}}
-			Events:[][]*muskel.positionedEvent{[]*muskel.positionedEvent{(*muskel.positionedEvent)(0xc00000a800)}
-		*/
-		/*
-			{"$pa",
-				&PatternCall{
-					Name:   "pa",
-					Slice:  [2]int{-1, -1},
-					result: "2a'",
-					Events: []*positionedEvent{
-						&positionedEvent{
-							position:     "2",
-							item:         Note{letter: "a", octave: 2},
-							originalData: "a'",
-						},
-					},
-				},
-			},
-			{"$pa/3/",
-				&PatternCall{
-					Name:         "pa",
-					Replacements: []string{"3"},
-					Slice:        [2]int{-1, -1},
-					result:       "3a'",
-					Events: []*positionedEvent{
-						&positionedEvent{
-							position:     "3",
-							item:         Note{letter: "a", octave: 2},
-							originalData: "a'",
-						},
-					},
-				},
-			},
-			{"$pb(a')/: : 3&/",
-				&PatternCall{
-					Name:         "pb",
-					Replacements: []string{":", ":", "3&"},
-					Slice:        [2]int{-1, -1},
-					result:       "1a' 2a' 3&a'",
-					Params:       []string{"a'"},
-					Events: []*positionedEvent{
-						&positionedEvent{
-							position:     "1",
-							item:         Note{letter: "a", octave: 2},
-							originalData: "a'",
-						},
-						&positionedEvent{
-							position:     "2",
-							item:         Note{letter: "a", octave: 2},
-							originalData: "a'",
-						},
-						&positionedEvent{
-							position:     "3&",
-							item:         Note{letter: "a", octave: 2},
-							originalData: "a'",
-						},
-					},
-				},
-			},
-			{"$pb(a')[1:]/: 3&/",
-				&PatternCall{
-					Name:         "pb",
-					Replacements: []string{":", "3&"},
-					Slice:        [2]int{1, -1},
-					result:       "2a' 3&a'",
-					Params:       []string{"a'"},
-					Events: []*positionedEvent{
-						&positionedEvent{
-							position:     "2",
-							item:         Note{letter: "a", octave: 2},
-							originalData: "a'",
-						},
-						&positionedEvent{
-							position:     "3&",
-							item:         Note{letter: "a", octave: 2},
-							originalData: "a'",
-						},
-					},
-				},
-			},
-		*/
 		//	{"O[30]/a/b", &OSCMessage{}},
 	}
 

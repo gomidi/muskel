@@ -1,7 +1,5 @@
 package muskel
 
-import "fmt"
-
 type Mode interface {
 	Name() string
 	NoteToStep(basenote, note uint8) (step int8)
@@ -31,14 +29,18 @@ func (m mode) Name() string {
 }
 
 func (m mode) NoteToStep(basenote, note uint8) (step int8) {
-	fmt.Printf("NoteToStep(%v,%v) in mode %q\n", basenote, note, m.name)
+	// fmt.Printf("NoteToStep(%v,%v) in mode %q\n", basenote, note, m.name)
 	var diff int8
 	if basenote > note {
 		diff = int8(basenote-note) * (-1)
 	} else {
 		diff = int8(note) - int8(basenote)
 	}
+
+	diffPlusOne := diff + 1
 	octaves := diff / 12
+	octavesPlusOne := diffPlusOne / 12
+	diffPlusOne = diffPlusOne % 12
 	diff = diff % 12
 
 	if diff >= 0 {
@@ -49,26 +51,33 @@ func (m mode) NoteToStep(basenote, note uint8) (step int8) {
 		}
 
 		for i, v := range m.steps {
-			if int8(v) == diff+1 {
-				return int8(i) + octaves*7
+			if int8(v) == diffPlusOne {
+				return int8(i) + octavesPlusOne*7
 			}
 		}
 
 		panic("must not happen 1")
 	}
 
-	fmt.Printf("diff is: %v\n", diff)
+	// fmt.Printf("diff is: %v diffPlusOne is %v octavesPlusOne: %v\n", diff, diffPlusOne, octavesPlusOne)
 
 	for i, v := range m.steps {
-		fmt.Printf("[%v] step: %v\n", i, v)
-		if int8(v) == diff+12 {
+		if int8(v) == (diff+12)%12 {
+			// fmt.Printf("A [%v] step: %v\n", i, v)
+			if diff == 0 {
+				return int8(i) + octaves*7
+			}
 			return int8(i) - 7 + octaves*7
 		}
 	}
 
 	for i, v := range m.steps {
-		if int8(v) == (diff + 11) {
-			return int8(i) - 7 + octaves*7
+		if int8(v) == (diffPlusOne+12)%12 {
+			// fmt.Printf("B [%v] step: %v\n", i, v)
+			if diffPlusOne == 0 {
+				return int8(i) + octavesPlusOne*7
+			}
+			return int8(i) - 7 + octavesPlusOne*7
 		}
 	}
 	panic("must not happen 2")

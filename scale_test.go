@@ -1,6 +1,8 @@
 package muskel
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestNoteToStep(t *testing.T) {
 	var tests = []struct {
@@ -109,7 +111,7 @@ func TestNoteToStep(t *testing.T) {
 			Ionian,
 			60,
 			49,
-			-7,
+			-6,
 		},
 		{
 			Ionian,
@@ -126,13 +128,25 @@ func TestNoteToStep(t *testing.T) {
 		{
 			Dorian,
 			50,
-			49,
+			48,
 			-1,
+		},
+		{
+			Dorian,
+			50,
+			49,
+			0,
 		},
 	}
 
 	for i, test := range tests {
+		/*
+			if i != 20 {
+				continue
+			}
+		*/
 		got := test.mode.NoteToStep(test.baseNote, test.note)
+		// fmt.Printf("[%v] basenote: %v, test.note: %v: got: %v\n", i, test.baseNote, test.note, got)
 
 		if got != test.expected {
 			t.Errorf("[%v] mode(%q).NoteToStep(%v,%v) == %v // expected: %v", i, test.mode.name, test.baseNote, test.note, got, test.expected)

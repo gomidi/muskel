@@ -64,11 +64,11 @@ Ch | -   | -     | -     |
 	}
 
 	for i, test := range tests {
-
-		if i != 1 {
-			continue
-		}
-
+		/*
+			if i != 1 {
+				continue
+			}
+		*/
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "include-main")
 
 		if err != nil {

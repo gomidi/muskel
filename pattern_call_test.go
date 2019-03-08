@@ -127,7 +127,7 @@ func TestParsePattern(t *testing.T) {
 		},
 		{
 			"pattA: 1b 2a 2&#1 #2c'",
-			"pattA(e',3&)[:3]/1& d :/",
+			"pattA(e',3&)[:3]/1&,d,:/",
 			"1&b 2d 2&e'",
 			false,
 		},
@@ -257,14 +257,14 @@ func TestParseCall(t *testing.T) {
 		{"test--", PatternCall{Name: "test", Slice: [2]int{-1, -1}, velocityAdd: "--"}, false},
 		{"test[:2]", PatternCall{Name: "test", Slice: [2]int{0, 2}}, false},
 		{"test(a,b)", PatternCall{Name: "test", Slice: [2]int{-1, -1}, Params: []string{"a", "b"}}, false},
-		{"test/a : c/", PatternCall{Name: "test", Slice: [2]int{-1, -1}, Replacements: []string{"a", ":", "c"}}, false},
-		{"test(a,b)[1:]/d : f/", PatternCall{
+		{"test/a,:,c/", PatternCall{Name: "test", Slice: [2]int{-1, -1}, Replacements: []string{"a", ":", "c"}}, false},
+		{"test(a,b)[1:]/d,:,f/", PatternCall{
 			Name:         "test",
 			Slice:        [2]int{1, -1},
 			Replacements: []string{"d", ":", "f"},
 			Params:       []string{"a", "b"},
 		}, false},
-		{"!first(a,2)[1:]/d : f/", PatternCall{
+		{"!first(a,2)[1:]/d,:,f/", PatternCall{
 			Name:         "first",
 			Slice:        [2]int{1, -1},
 			Replacements: []string{"d", ":", "f"},

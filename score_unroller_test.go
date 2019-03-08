@@ -7,7 +7,7 @@ import (
 )
 
 func TestUnroll(t *testing.T) {
-	//t.Skip()
+	// t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -189,6 +189,40 @@ $scale(e,dorian)
 		},
 		{
 			`
+pattA: 1^2 2&^3
+pattB: 1pattA^-3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | pattB   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | B      |
+    2&   | c      |
+
+$scale(e,dorian)
+    1    | c#     |
+    2&   | d      |`,
+		},
+		{
+			`
 patt: 1^2 2&^3
 =
          | Vocals |
@@ -220,6 +254,43 @@ $scale(e,dorian)
     1    | g      |
     2&   | a      |`,
 		},
+		// the following is not allowed and should return an error (therefor is uncommented)
+		/*
+		   		{
+		   			`
+		   patt: 1^2 2&^3
+		   pattB: 1patt^^3
+		   =
+		            | Vocals |
+		   Ch       | 1      |
+		   Bank     | -      |
+		   Prog     | -      |
+		   Vol      | -      |
+		   4/4
+		   $scale(d,dorian)
+		       1    | pattB   |
+
+		   $scale(e,dorian)
+		       1    | ./.   |`,
+		   			`
+		   =
+		            | Vocals |
+		   Ch       | 1      |
+		   Bank     | -      |
+		   Prog     | -      |
+		   Vol      | -      |
+		   PbRange  |        |
+		   Trans    |        |
+		   4/4
+		   $scale(d,dorian)
+		       1    | f      |
+		       2&   | g      |
+
+		   $scale(e,dorian)
+		       1    | g      |
+		       2&   | a      |`,
+		   		},
+		*/
 		{
 			`
 patt: 1^2 2&^3
@@ -255,6 +326,7 @@ $scale(e,dorian)
 		},
 		{
 			`
+@test: mount to step 3
 patt: 1e 2&f
 =
          | Vocals |
@@ -269,6 +341,7 @@ $scale(d,dorian)
 $scale(e,dorian)
     1    | ./.   |`,
 			`
+@test: mount to step 3
 =
          | Vocals |
 Ch       | 1      |
@@ -285,6 +358,286 @@ $scale(d,dorian)
 $scale(e,dorian)
     1    | g      |
     2&   | a      |`,
+		},
+		{
+			`
+@test: mount to step 3
+patt: 1#1 2&f 3^1
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^3(e)   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+@test: mount to step 3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | f      |
+    2&   | g      |
+    3    | d      |
+
+$scale(e,dorian)
+    1    | g      |
+    2&   | a      |
+    3    | e      |`,
+		},
+		{
+			`
+@test: mount to step 3
+patt: 1#1 2&f 3^1
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^3(^2)   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+@test: mount to step 3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | f      |
+    2&   | f      |
+    3    | e      |
+
+$scale(e,dorian)
+    1    | g      |
+    2&   | f      |
+    3    | f#     |`,
+		},
+		{
+			`
+@test: mount to step 3
+patt: 1#1 2&f 3^1
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^3(^2)/:,^1,:/   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+@test: mount to step 3
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | f      |
+    2&   | d      |
+    3    | e      |
+
+$scale(e,dorian)
+    1    | g      |
+    2&   | e      |
+    3    | f#     |`,
+		},
+		// the following is not allowed and should return an error (therefor is uncommented)
+		/*
+		   		{
+		   			`
+		   @test: mount to step 3
+		   patt: 1e 2&f
+		   pattB: 1patt^^3
+		   =
+		            | Vocals |
+		   Ch       | 1      |
+		   Bank     | -      |
+		   Prog     | -      |
+		   Vol      | -      |
+		   4/4
+		   $scale(d,dorian)
+		       1    | pattB   |
+
+		   $scale(e,dorian)
+		       1    | ./.   |`,
+		   			`
+		   @test: mount to step 3
+		   =
+		            | Vocals |
+		   Ch       | 1      |
+		   Bank     | -      |
+		   Prog     | -      |
+		   Vol      | -      |
+		   PbRange  |        |
+		   Trans    |        |
+		   4/4
+		   $scale(d,dorian)
+		       1    | f      |
+		       2&   | g      |
+
+		   $scale(e,dorian)
+		       1    | g      |
+		       2&   | a      |`,
+		   		},
+		*/
+		{
+			`
+@test: mount to step 1
+patt: 1e 2&f
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^1   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+@test: mount to step 1
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | d      |
+    2&   | e      |
+
+$scale(e,dorian)
+    1    | e      |
+    2&   | f#     |`,
+		},
+		{
+			`
+@test: mount to step 2
+patt: 1e 2&f#
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | patt^^2   |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+@test: mount to step 2
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+4/4
+$scale(d,dorian)
+    1    | e      |
+    2&   | g      |
+
+$scale(e,dorian)
+    1    | f#     |
+    2&   | a      |`,
+		},
+		{
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | ^2  "hi" |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals   |
+Ch       | 1        |
+Bank     | -        |
+Prog     | -        |
+Vol      | -        |
+PbRange  |          |
+Trans    |          |
+4/4
+$scale(d,dorian)
+    1    | e  "hi"  |
+
+$scale(e,dorian)
+    1    | f#  "hi" |`,
+		},
+		{
+			`
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+4/4
+$scale(d,dorian)
+    1    | {^2,a,b'}2 |
+
+$scale(e,dorian)
+    1    | ./.   |`,
+			`
+=
+         | Vocals     |
+Ch       | 1          |
+Bank     | -          |
+Prog     | -          |
+Vol      | -          |
+PbRange  |            |
+Trans    |            |
+4/4
+$scale(d,dorian)
+    1    | {e,a,b'}2  |
+
+$scale(e,dorian)
+    1    | {f#,a,b'}2 |`,
 		},
 		{
 			`
@@ -828,10 +1181,12 @@ Trans    |       |     |
 
 	for i, test := range tests {
 		/*
-			if i != 15 {
+			if i != 12 {
 				continue
 			}
 		*/
+		//fmt.Printf("unroll [%v]\n", i)
+
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll")
 
 		if err != nil {
