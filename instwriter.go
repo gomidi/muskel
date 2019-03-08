@@ -41,6 +41,8 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 		vl := uint8(vel + int8(rand.Intn(4)))
 
+		// fmt.Printf("%#v\n", v)
+
 		var n uint8
 
 		n = v.toMIDI()

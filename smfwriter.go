@@ -14,6 +14,7 @@ func NewSMFWriter(s *Score) *SMFWriter {
 }
 
 func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
+	// fmt.Printf("writing score %q is unrolled: %v\n", p.score.FileName, p.score.isUnrolled)
 	err := p.writeFirstTrack(wr)
 
 	if err != nil {

@@ -600,7 +600,7 @@ func (s *ScoreUnroller) replaceScaleNotes() {
 				default:
 					nuEv := ev.Dup()
 					nt := s.convertScaleNoteToAbsNote(ev.BarNo, v)
-					ev.Item = nt
+					nuEv.Item = nt
 					nuEv.originalData = nt.String()
 					unrolled = append(unrolled, nuEv)
 				}
