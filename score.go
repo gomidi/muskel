@@ -216,14 +216,14 @@ func (p *Score) enroll() {
 }
 
 // WriteSMF writes the score to the given SMF file
-func (s *Score) WriteSMF(midifile string, debug bool) error {
+func (s *Score) WriteSMF(midifile string) error {
 
 	if !s.isUnrolled {
 		ur, err := s.Unroll()
 		if err != nil {
 			return err
 		}
-		return ur.WriteSMF(midifile, debug)
+		return ur.WriteSMF(midifile)
 	}
 
 	numTracks := uint16(1) // first track is for tempo and time signatures
@@ -236,7 +236,7 @@ func (s *Score) WriteSMF(midifile string, debug bool) error {
 
 	sw := NewSMFWriter(s)
 
-	if debug {
+	if DEBUG {
 		return mid.NewSMFFile(midifile, numTracks, sw.Write,
 			smfwriter.TimeFormat(smf.MetricTicks(960)),
 			smfwriter.Debug(debugLog{}),

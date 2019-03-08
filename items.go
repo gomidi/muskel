@@ -61,6 +61,14 @@ func (note Note) toMIDI() (midinote_ uint8) {
 	case "°":
 	}
 
+	if midinote > 127 {
+		midinote = 127
+	}
+
+	if midinote < 0 {
+		midinote = 0
+	}
+
 	return uint8(midinote)
 
 }
@@ -69,7 +77,13 @@ func keyToNote(key uint8) (letter, augmenter string, octave int) {
 	nt := key % 12
 	octave = int(key) / 12
 	//midinote := 48 // c
-	octave -= 4
+	if octave >= 4 {
+		octave -= 3
+	} else {
+		octave -= 4
+	}
+
+	// octave -= 3
 	if octave > 10 {
 		octave = 10
 	}
@@ -129,7 +143,11 @@ func (n Note) String() string {
 			bf.WriteString("\"")
 		case -2, 2:
 			bf.WriteString("'")
-		case 0, 1, -1:
+		case 1:
+			// do nothing
+		case 0:
+			panic("invalid octave")
+		case -1:
 			// do nothing
 		case 6:
 			bf.WriteString("\"\"'")

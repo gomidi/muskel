@@ -52,6 +52,10 @@ func fileCheckSum(file string) string {
 
 func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
+	if argDebug.Get() {
+		muskel.DEBUG = true
+	}
+
 	inFile := argFile.Get()
 	outFile := inFile
 	if argOutFile.IsSet() {
@@ -135,7 +139,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
 		switch cfg.ActiveCommand() {
 		case cmdSMF:
-			err = sc.WriteSMF(outFile, argDebug.Get())
+			err = sc.WriteSMF(outFile)
 			if err != nil {
 				fmt.Printf("ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
@@ -145,7 +149,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 			beeep.Notify("OK MuSkeL converted to SMF", path.Base(outFile), "assets/information.png")
 			return nil
 		case cmdPlay:
-			err = sc.WriteSMF(outFile, argDebug.Get())
+			err = sc.WriteSMF(outFile)
 			if err != nil {
 				fmt.Printf("ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")

@@ -56,7 +56,7 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-    1    | d      |
+    1    | d'     |
 
     1    |        |`,
 		},
