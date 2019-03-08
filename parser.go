@@ -50,15 +50,18 @@ func ParseFile(filepath string) (sc *Score, err error) {
 	return Parse(bytes.NewReader(b), filepath)
 }
 
+var DEBUG bool
+
 // Parse reads from the given reader and returns the resulting Score
 func Parse(rd io.Reader, filepath string) (sc *Score, err error) {
-	/*
-		defer func() {
+	defer func() {
+		if !DEBUG {
 			if r := recover(); r != nil {
 				err = fmt.Errorf("%v", r)
 			}
-		}()
-	*/
+		}
+	}()
+
 	ps := NewParser(rd)
 	ps.Score.FileName = filepath
 	err = ps.Parse()
