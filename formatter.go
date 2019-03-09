@@ -270,15 +270,14 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 			l += fmt.Sprintf("@%g", bar.tempoChange)
 		}
 
-		if !p.jumpInLineBefore || l != "" {
-			p.writeBodyLine(bf, l)
-		}
-
 		if bar.scale != nil {
 			var nt Note
 			nt.letter, nt.augmenter, nt.octave = keyToNote(bar.scale.BaseNote)
 			nt.velocity = -1
-			l = fmt.Sprintf("$scale(%v,%s)", nt.String(), bar.scale.Name())
+			l += fmt.Sprintf("\\%s^%v", bar.scale.Name(), nt.String())
+		}
+
+		if !p.jumpInLineBefore || l != "" {
 			p.writeBodyLine(bf, l)
 		}
 

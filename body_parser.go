@@ -180,6 +180,25 @@ func (p *BodyParser) include(file string) error {
 	return nil
 }
 
+func (p *BodyParser) parseScale(data string, b *Bar) error {
+	idx := strings.Index(data, "^")
+	if idx < 1 {
+		return fmt.Errorf("invalid scale syntax: \\%s", data)
+	}
+
+	mod := data[:idx]
+	md, has := Modes[mod]
+	if !has {
+		return fmt.Errorf("unknown mode: %q", mod)
+	}
+	nt, err := parseNote(data[idx+1:])
+	if err != nil {
+		return fmt.Errorf("invalid base note for scale: %q", data[idx+1:])
+	}
+	b.scale = &Scale{BaseNote: nt.toMIDI(), Mode: md}
+	return nil
+}
+
 func (p *BodyParser) parseCommand(data string) error {
 	var c CommandCall
 	err := c.Parse(data)
@@ -187,21 +206,6 @@ func (p *BodyParser) parseCommand(data string) error {
 		return err
 	}
 	switch c.Name {
-	case "scale":
-		if p.currentBarNo == -1 {
-			return fmt.Errorf("can't start with $scale command. need to start bar first")
-		}
-		mod := strings.Trim(c.Params[1], "\"")
-		md, has := Modes[mod]
-		if !has {
-			return fmt.Errorf("unknown mode: %q", mod)
-		}
-		nt, err := parseNote(c.Params[0])
-		if err != nil {
-			return fmt.Errorf("invalid base note for scale: %q", c.Params[0])
-		}
-		p.Score.Bars[len(p.Score.Bars)-1].scale = &Scale{BaseNote: nt.toMIDI(), Mode: md}
-		return nil
 	case "include":
 		p.finishPart(p.currentBarNo + 1)
 		if len(c.Params) != 1 {
@@ -244,6 +248,20 @@ func (p *BodyParser) parseBarLine(data string) error {
 	}
 	var b = NewBar()
 	p.jumpInLineBefore = false
+
+	if idx := strings.Index(data, "\\"); idx >= 0 {
+		err := p.parseScale(data[idx+1:], b)
+		if err != nil {
+			return err
+		}
+		data = strings.TrimSpace(data[:idx])
+		if data == "" {
+			// add bar
+			//			fmt.Println("new bar added based on tempo change")
+			p.newBar(b)
+			return nil
+		}
+	}
 
 	if idx := strings.Index(data, "@"); idx >= 0 {
 		err := p.handleTempoChange(b, data[idx+1:])

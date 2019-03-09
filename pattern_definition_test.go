@@ -15,9 +15,9 @@ func TestParseDefinition(t *testing.T) {
 		// the prefix $ has already been handled before
 		{"test : 2a' &kd", PatternDefinition{Name: "test", Original: "2a' &kd"}, false},
 		{"test  2a' &kd", PatternDefinition{}, true},
-		{"test : 2#1 &kd", PatternDefinition{Name: "test", Original: "2#1 &kd", NumParams: 1}, false},
+		{"test~ : 2#1 &kd", PatternDefinition{Name: "test~", Original: "2#1 &kd", NumParams: 1}, false},
 		{"test : 2#1 #2kd", PatternDefinition{Name: "test", Original: "2#1 #2kd", NumParams: 2}, false},
-		{"test : 2#1 &#1", PatternDefinition{Name: "test", Original: "2#1 &#1", NumParams: 1}, false},
+		{"test~~ : 2#1 &#1", PatternDefinition{Name: "test~~", Original: "2#1 &#1", NumParams: 1}, false},
 	}
 
 	for i, test := range tests {

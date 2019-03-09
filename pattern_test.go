@@ -95,10 +95,10 @@ Trans    |        |
 		{
 			`
 aa: 1a' 2&#1 5&c"
-bb: 1aa(#1) 5aa(d)
+bb~: 1aa(#1) 5aa(d)
 =
   | piano | vox |
-1 | aa(g) | bb(f)   |
+1 | aa(g) | bb~(f)   |
 
 1 | ./.   |    |
 `, `
@@ -106,7 +106,7 @@ bb: 1aa(#1) 5aa(d)
 
 
 aa:             1a' 2&#1 5&c"
-bb:             1aa(#1) 5aa(d)
+bb~:            1aa(#1) 5aa(d)
 
 
 

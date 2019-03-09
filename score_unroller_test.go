@@ -103,8 +103,7 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | ^2     |
 
     1    |        |`,
@@ -117,8 +116,7 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | e      |
 
     1    |        |`,
@@ -132,11 +130,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -147,12 +143,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | e      |
     2&   | f      |
-
-$scale(e,dorian)
+\dorian^e
     1    | f#     |
     2&   | g      |`,
 		},
@@ -165,11 +159,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^2   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -180,12 +172,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | g      |
     2&   | a      |
-
-$scale(e,dorian)
+\dorian^e
     1    | a      |
     2&   | b      |`,
 		},
@@ -198,11 +188,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^-3   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -213,12 +201,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | B      |
     2&   | c      |
-
-$scale(e,dorian)
+\dorian^e
     1    | c#     |
     2&   | d      |`,
 		},
@@ -232,11 +218,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | pattB   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -247,12 +231,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | B      |
     2&   | c      |
-
-$scale(e,dorian)
+\dorian^e
     1    | c#     |
     2&   | d      |`,
 		},
@@ -265,11 +247,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^3   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -280,12 +260,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | f      |
     2&   | g      |
-
-$scale(e,dorian)
+\dorian^e
     1    | g      |
     2&   | a      |`,
 		},
@@ -335,11 +313,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^-2   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -350,12 +326,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | B      |
     2&   | c      |
-
-$scale(e,dorian)
+\dorian^e
     1    | c#     |
     2&   | d      |`,
 		},
@@ -369,11 +343,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^3   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 @test: mount to step 3
@@ -385,12 +357,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | f      |
     2&   | g      |
-
-$scale(e,dorian)
+\dorian^e
     1    | g      |
     2&   | a      |`,
 		},
@@ -404,11 +374,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^3(e)   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 @test: mount to step 3
@@ -420,13 +388,11 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | f      |
     2&   | g      |
     3    | d      |
-
-$scale(e,dorian)
+\dorian^e
     1    | g      |
     2&   | a      |
     3    | e      |`,
@@ -441,11 +407,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^3(^2)   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 @test: mount to step 3
@@ -457,13 +421,11 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | f      |
     2&   | f      |
     3    | e      |
-
-$scale(e,dorian)
+\dorian^e
     1    | g      |
     2&   | f      |
     3    | f#     |`,
@@ -478,11 +440,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^3(^2)/:,^1,:/   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 @test: mount to step 3
@@ -494,13 +454,11 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | f      |
     2&   | d      |
     3    | e      |
-
-$scale(e,dorian)
+\dorian^e
     1    | g      |
     2&   | e      |
     3    | f#     |`,
@@ -554,11 +512,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^1   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 @test: mount to step 1
@@ -570,12 +526,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | d      |
     2&   | e      |
-
-$scale(e,dorian)
+\dorian^e
     1    | e      |
     2&   | f#     |`,
 		},
@@ -589,11 +543,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | patt^^2   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 @test: mount to step 2
@@ -605,12 +557,10 @@ Prog     | -      |
 Vol      | -      |
 PbRange  |        |
 Trans    |        |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | e      |
     2&   | g      |
-
-$scale(e,dorian)
+\dorian^e
     1    | f#     |
     2&   | a      |`,
 		},
@@ -622,11 +572,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | ^2  "hi" |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -637,11 +585,9 @@ Prog     | -        |
 Vol      | -        |
 PbRange  |          |
 Trans    |          |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | e  "hi"  |
-
-$scale(e,dorian)
+\dorian^e
     1    | f#  "hi" |`,
 		},
 		{
@@ -652,11 +598,9 @@ Ch       | 1      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | {^2,a,b'}2 |
-
-$scale(e,dorian)
+\dorian^e
     1    | ./.   |`,
 			`
 =
@@ -667,11 +611,9 @@ Prog     | -          |
 Vol      | -          |
 PbRange  |            |
 Trans    |            |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | {e,a,b'}2  |
-
-$scale(e,dorian)
+\dorian^e
     1    | {f#,a,b'}2 |`,
 		},
 		{
@@ -682,11 +624,9 @@ Ch       | 1      | -    |
 Bank     | -      | -    |
 Prog     | -      | -    |
 Vol      | -      | -    |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | ^2     | ^3   |
-
-$scale(e,dorian)
+\dorian^e
     1    | ^2     | ^3   |`,
 			`
 =
@@ -697,11 +637,9 @@ Prog     | -      | -    |
 Vol      | -      | -    |
 PbRange  |        |      |
 Trans    |        |      |
-4/4
-$scale(d,dorian)
+4/4\dorian^d
     1    | e      | f    |
-
-$scale(e,dorian)
+\dorian^e
     1    | f#     | g    |`,
 		},
 		{
