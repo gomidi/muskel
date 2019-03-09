@@ -189,6 +189,7 @@ func parseNote(data string) (nt Note, err error) {
 	}
 
 	var dynamic string
+	var gliss int
 
 	for _, l := range data[1:] {
 		switch l {
@@ -201,7 +202,7 @@ func parseNote(data string) (nt Note, err error) {
 		case '*':
 			dynamic = "*"
 		case '~':
-			nt.glissandoStart = true
+			gliss++
 		case '#':
 			nt.augmenter = "#"
 		case '^':
@@ -228,6 +229,14 @@ func parseNote(data string) (nt Note, err error) {
 			err = fmt.Errorf("invalid note: %#v", data)
 			return
 		}
+	}
+
+	if gliss > 0 {
+		nt.glissandoStart = true
+	}
+
+	if gliss > 1 {
+		nt.glissandoExp = true
 	}
 
 	nt.velocity = dynamicToVelocity(dynamic)
@@ -363,6 +372,17 @@ func (p *itemParser) parseCommand(data string, posIn32th uint) (interface{}, err
 	panic("TODO implement")
 }
 
+func (p *itemParser) parseGlissando(data string, posIn32th uint) (interface{}, error) {
+	if data == "" {
+		return GlissandoLinear, nil
+	}
+
+	if data == "~" {
+		return GlissandoExponential, nil
+	}
+	return nil, fmt.Errorf("invalid glissando: \"~%s\"", data)
+}
+
 func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error) {
 	data = strings.TrimSpace(data)
 	//	fmt.Printf("parseItem called with %q\n", data)
@@ -372,6 +392,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 	default:
 		//fmt.Printf("data[0]: %#v\n", string(data[0]))
 		switch data[0] {
+		case '~':
+			return p.parseGlissando(data[1:], posIn32th)
 		case '"':
 			return Lyric(strings.Trim(data, `"`)), nil
 		case '%':

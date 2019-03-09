@@ -21,6 +21,7 @@ type Note struct {
 	augmenter      string
 	velocity       int8
 	glissandoStart bool
+	glissandoExp   bool
 	dotted         bool
 	scaleNote      int8
 }
@@ -177,6 +178,10 @@ func (n Note) String() string {
 	if n.glissandoStart {
 		bf.WriteString("~")
 	}
+	
+	if n.glissandoExp {
+		bf.WriteString("~")
+	}
 
 	return bf.String()
 }
@@ -215,6 +220,7 @@ type RepeatLastBarUntilChange struct{}
 type RepeatLastNBarsUntilChange int
 type rest struct{}
 type hold struct{}
+type glissStart bool
 type Lyric string
 
 type RandomProbability struct {
@@ -232,6 +238,8 @@ type RandomChooser struct {
 
 var Hold = hold{}
 var Rest = rest{}
+var GlissandoLinear = glissStart(false)
+var GlissandoExponential = glissStart(true)
 
 /*
 - notes, e.g. a'

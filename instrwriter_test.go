@@ -19,7 +19,7 @@ func TestCalc32thsAdd(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		got := calc32thsAdd(test.distance32th, test.notediff)
+		got := calcAdd(test.distance32th, test.notediff)
 
 		if got != test.expected {
 			t.Errorf("[%v] calc32thsAdd(%v, %v) == %v // expected %v", i, test.distance32th, test.notediff, got, test.expected)

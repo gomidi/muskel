@@ -48,7 +48,9 @@ func (s *ScoreUnroller) unrollJump(jump string) {
 		s.unrolledBars = append(s.unrolledBars, nub)
 		for _, _instr := range s.dest.Instruments {
 			//			fmt.Printf("adding bar %v => %v\n    %v\n", s.dest.Parts[jump][0]+j, s.newBarNo, _instr.events[s.dest.Parts[jump][0]+j])
-			s.instrBarevents[_instr.Name] = append(s.instrBarevents[_instr.Name], _instr.events[s.dest.Parts[jump][0]+j])
+			if _, has := s.instrBarevents[_instr.Name]; has {
+				s.instrBarevents[_instr.Name] = append(s.instrBarevents[_instr.Name], _instr.events[s.dest.Parts[jump][0]+j])
+			}
 		}
 		s.newBarNo++
 	}

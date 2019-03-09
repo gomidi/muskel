@@ -30,6 +30,8 @@ func TestParseItem(t *testing.T) {
 		{"PB(-20)", MIDIPitchbend(-20)},
 		{"PB(8100)", MIDIPitchbend(8100)},
 		{"PT(c',80)", MIDIPolyAftertouch{60, 80}},
+		{"~", GlissandoLinear},
+		{"~~", GlissandoExponential},
 		//	{"O[30]/a/b", &OSCMessage{}},
 	}
 

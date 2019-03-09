@@ -9,8 +9,12 @@ import (
 	"gitlab.com/gomidi/midi/mid"
 )
 
-func calc32thsAdd(distance32th int64, notediff int8) float64 {
-	return float64(notediff) / float64(distance32th)
+func calcAdd(distance int64, notediff int8) float64 {
+	return float64(notediff) / float64(distance)
+}
+
+func calcAdd2(distance int64, notediff int8) float64 {
+	return float64(notediff) / (float64(distance) * float64(distance))
 }
 
 func halfTonesToPitchbend(halftones float64, _range uint8) int16 {
@@ -26,11 +30,69 @@ func halfTonesToPitchbend(halftones float64, _range uint8) int16 {
 	return res
 }
 
+func (iw *instWriter) linearGlissando(distance int64, noteDiff int8) {
+
+	// pitch0      = f(0)        =  note0
+	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance * step
+	// pitchTarget = f(distance) =  note0 + (noteTarget-note0)/distance * distance = note0 + noteTarget - note0 = noteTarget
+	// y             f(x)        =  a     +      m                      * x
+	// m                         =  (noteTarget-note0)/distance
+
+	m := calcAdd(distance, noteDiff)
+	//fmt.Printf("linearGlissando: m = %0.5f\n", m)
+	iw.wr.RestoreTimeline()
+	var pb int16
+
+	for step := int64(1); step <= distance; step++ {
+		//iw.wr.Forward(0, 1, 32)
+		iw.wr.Forward(0, 1, 64)
+		pb = halfTonesToPitchbend(m*float64(step), iw.instr.PitchbendRange)
+		iw.wr.Pitchbend(pb)
+	}
+
+	iw.prevPitchbend = pb
+}
+
+func (iw *instWriter) exponentialGlissando(distance int64, noteDiff int8) {
+	// y             f(x)        =  a     +      m                       * x²
+	// pitch0      = f(0)        =  note0
+	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance² * step²
+	// pitchTarget = f(distance) =  note0 + (noteTarget-note0)/distance² * distance² = note0 + noteTarget - note0 = noteTarget
+	// m                         =  (noteTarget-note0)/distance²
+
+	m := calcAdd2(distance, noteDiff)
+	iw.wr.RestoreTimeline()
+	var pb int16
+
+	for step := int64(1); step <= distance; step++ {
+		//iw.wr.Forward(0, 1, 32)
+		iw.wr.Forward(0, 1, 64)
+		pb = halfTonesToPitchbend(m*float64(step)*float64(step), iw.instr.PitchbendRange)
+		iw.wr.Pitchbend(pb)
+	}
+
+	iw.prevPitchbend = pb
+}
+
 func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes []uint8) {
 	if item == nil {
 		return nil
 	}
 	switch v := item.(type) {
+	case glissStart:
+		iw.startGlissandoNote = iw.prevKey
+		delete(iw.noteOns, iw.startGlissandoNote)
+		stopNotes()
+		iw.wr.Pitchbend(0)
+		iw.startGlissando = iw.wr.Position()
+		iw.inGlissando = true
+		iw.wr.BackupTimeline()
+		iw.glissandoFunc = iw.linearGlissando
+		if v == GlissandoExponential {
+			iw.glissandoFunc = iw.exponentialGlissando
+		}
+
+		addedNotes = append(addedNotes, iw.startGlissandoNote)
 	case Note:
 		vel := v.velocity
 		if vel < 0 {
@@ -50,6 +112,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 		// only add MIDITranspose to Notes not to MIDINotes
 		n = uint8(int8(n) + iw.instr.MIDITranspose)
+		iw.prevKey = n
 
 		if iw.inGlissando {
 			/*
@@ -57,19 +120,22 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 				2. calc the diff in semitones
 				3. make a line of 32ths in steps of the factor
 			*/
-			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startGlissando) / float64(iw.wr.Ticks32th())))
+			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startGlissando) / float64(iw.wr.Ticks32th())))
+			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startGlissando) / float64(iw.wr.Ticks64th())))
 			noteDiff := int8(n) - int8(iw.startGlissandoNote)
-			addStep := calc32thsAdd(distance, noteDiff)
-			iw.wr.RestoreTimeline()
 
-			for step := int64(1); step <= distance; step++ {
-				iw.wr.Forward(0, 1, 32)
-				iw.wr.Pitchbend(halfTonesToPitchbend(float64(step)*addStep, iw.instr.PitchbendRange))
-			}
+			iw.glissandoFunc(distance, noteDiff)
+			/*
+				addStep := calc32thsAdd(distance, noteDiff)
+				iw.wr.RestoreTimeline()
+
+				for step := int64(1); step <= distance; step++ {
+					iw.wr.Forward(0, 1, 32)
+					iw.wr.Pitchbend(halfTonesToPitchbend(float64(step)*addStep, iw.instr.PitchbendRange))
+				}
+			*/
 
 			delete(iw.noteOns, iw.startGlissandoNote)
-			addedNotes = append(addedNotes, iw.startGlissandoNote)
-			_ = addStep
 		}
 		stopNotes()
 
@@ -78,6 +144,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			if iw.startGlissandoNote != 0 {
 				iw.startGlissandoNote = 0
 				iw.wr.Pitchbend(0)
+				iw.prevPitchbend = 0
 			}
 			iw.wr.NoteOn(n, vl)
 			if v.dotted {
@@ -89,6 +156,13 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		if iw.inGlissando {
 			//  set pitchbend back to 0
 			iw.inGlissando = false
+			if v.dotted {
+				iw.wr.Pitchbend(iw.prevPitchbend)
+				iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(iw.startGlissandoNote))
+				//iw.wr.NoteOff(iw.startGlissandoNote)
+			} else {
+				addedNotes = append(addedNotes, iw.startGlissandoNote)
+			}
 		}
 
 		if v.glissandoStart {
@@ -96,6 +170,10 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			iw.startGlissando = iw.wr.Position()
 			iw.startGlissandoNote = n
 			iw.inGlissando = true
+			iw.glissandoFunc = iw.linearGlissando
+			if v.glissandoExp {
+				iw.glissandoFunc = iw.exponentialGlissando
+			}
 			iw.wr.BackupTimeline()
 		}
 	case MIDINote:
@@ -250,6 +328,9 @@ type instWriter struct {
 	startGlissando      uint64
 	startGlissandoNote  uint8
 	startGlissandoDelta uint32
+	prevKey             uint8
+	glissandoFunc       func(distance int64, noteDiff int8)
+	prevPitchbend       int16
 	// currentScale        *Scale
 }
 
@@ -286,7 +367,12 @@ func (iw *instWriter) writeIntro() {
 		iw.wr.ControlChange(cc.VolumeMSB, uint8(iw.instr.MIDIVolume))
 	}
 
-	iw.wr.PitchBendSensitivityRPN(iw.instr.PitchbendRange, 0)
+	pitchBendRange := uint8(2)
+	if iw.instr.PitchbendRange > 0 {
+		pitchBendRange = iw.instr.PitchbendRange
+	}
+
+	iw.wr.PitchBendSensitivityRPN(pitchBendRange, 0)
 }
 
 func (iw *instWriter) writeUnrolled() {

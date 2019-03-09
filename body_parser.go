@@ -263,7 +263,8 @@ func (p *BodyParser) parseBarLine(data string) error {
 }
 
 func (p *BodyParser) getInstrData(tabs []string) (instrData []string) {
-	instrData = tabs[1 : len(tabs)-1]
+	//instrData = tabs[1 : len(tabs)-1]
+	instrData = tabs[1 : p.numInstruments+1]
 
 	if missingTabs := p.numInstruments - (len(tabs) - 2); missingTabs > 0 {
 		for mt := 0; mt < missingTabs; mt++ {
@@ -326,7 +327,7 @@ func (p *BodyParser) setInstrumentPitchbendrange(i int, instr *Instrument, data 
 
 // setInstrumentChannel sets the MIDI channel of an instrument
 func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string) error {
-	if data == "-" {
+	if len(data) == 0 || data == "-" {
 		instr.MIDIChannel = -1
 		return nil
 	}
@@ -354,7 +355,7 @@ func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string)
 
 // setInstrumentProgram sets the MIDI program value of an instrument
 func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string) error {
-	if data == "-" {
+	if len(data) == 0 || data == "-" {
 		instr.MIDIProgram = -1
 		return nil
 	}
@@ -382,7 +383,7 @@ func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string)
 
 // setInstrumentVolume sets the MIDI volume of an instrument
 func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) error {
-	if data == "-" {
+	if len(data) == 0 || data == "-" {
 		instr.MIDIVolume = -1
 		return nil
 	}
@@ -410,7 +411,7 @@ func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) 
 
 // setInstrumentTranspose sets the MIDITranspose for an instrument
 func (p *BodyParser) setInstrumentTranspose(i int, instr *Instrument, data string) error {
-	if data == "" {
+	if len(data) == 0 || data == "" {
 		instr.MIDITranspose = 0
 		return nil
 	}
@@ -430,7 +431,7 @@ func (p *BodyParser) setInstrumentTranspose(i int, instr *Instrument, data strin
 
 // setInstrumentBank sets the MIDI bank for an instrument
 func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) error {
-	if data == "-" {
+	if len(data) == 0 || data == "-" {
 		instr.MIDIBank = -1
 		return nil
 	}
@@ -511,10 +512,16 @@ func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 		p.numInstruments = len(tabs) - 2
 	}
 
+	// fmt.Printf("num instruments: %v\n", p.numInstruments)
+
 	instrData := p.getInstrData(tabs)
 	firstColumn := strings.TrimSpace(tabs[0])
 
 	for i, data := range instrData {
+		if i >= p.numInstruments || i >= len(tabs)-2 {
+			break
+		}
+		// fmt.Printf("column: %v\n", i)
 		instr := p.getInstrument(i)
 		data = strings.TrimSpace(data)
 
