@@ -81,7 +81,7 @@ func (p *HeaderParser) include(file string) error {
 
 func (p *HeaderParser) parseCommand(data string) error {
 	var c CommandCall
-	err := c.Parse(data)
+	err := c.Parse(strings.TrimSpace(data))
 	if err != nil {
 		return err
 	}

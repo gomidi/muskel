@@ -216,7 +216,7 @@ func (p *Score) enroll() {
 }
 
 // WriteSMF writes the score to the given SMF file
-func (s *Score) WriteSMF(midifile string) error {
+func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) error {
 
 	if !s.isUnrolled {
 		ur, err := s.Unroll()
@@ -236,16 +236,16 @@ func (s *Score) WriteSMF(midifile string) error {
 
 	sw := NewSMFWriter(s)
 
-	if DEBUG {
-		return mid.NewSMFFile(midifile, numTracks, sw.Write,
+	options = append(
+		[]smfwriter.Option{
 			smfwriter.TimeFormat(smf.MetricTicks(960)),
-			smfwriter.Debug(debugLog{}),
-		)
+		}, options...)
+
+	if DEBUG {
+		options = append(options, smfwriter.Debug(debugLog{}))
 	}
 
-	return mid.NewSMFFile(midifile, numTracks, sw.Write,
-		smfwriter.TimeFormat(smf.MetricTicks(960)),
-	)
+	return mid.NewSMFFile(midifile, numTracks, sw.Write, options...)
 
 }
 
@@ -278,14 +278,14 @@ func (s *Score) WriteTo(wr io.Writer) (n int64, err error) {
 func (s *Score) WriteToFile(filepath string) (err error) {
 	dir, err := ioutil.TempDir(".", "muskel-fmt")
 	if err != nil {
-		return err
+		return fmt.Errorf("can't create tempdir: %v", err)
 	}
 
 	base := path.Base(filepath)
 
 	f, err := os.Create(path.Join(dir, base))
 	if err != nil {
-		return err
+		return fmt.Errorf("can't create tempdir: %v", err)
 	}
 
 	defer func() {
@@ -300,8 +300,14 @@ func (s *Score) WriteToFile(filepath string) (err error) {
 	if err != nil {
 		return
 	}
-	f.Close()
+	err = f.Close()
+	if err != nil {
+		return fmt.Errorf("can't close file %q: %v", path.Join(dir, base), err)
+	}
 
 	err = os.Rename(path.Join(dir, base), filepath)
+	if err != nil {
+		err = fmt.Errorf("can't move %q to %q", path.Join(dir, base), filepath)
+	}
 	return
 }

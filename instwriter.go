@@ -623,7 +623,10 @@ func (iw *instWriter) writeUnrolled() {
 	}
 
 	lastBar := iw.p.score.Bars[len(iw.p.score.Bars)-1]
-	barDiff := lastBar.barNo - lastEv.BarNo
+	barDiff := lastBar.barNo
+	if lastEv != nil {
+		barDiff -= lastEv.BarNo
+	}
 	if barDiff > 0 {
 		iw.wr.Forward(uint32(barDiff), 0, 32)
 	}
