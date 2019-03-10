@@ -72,13 +72,12 @@ func (p *BodyParser) parseItem(data string, posIn32th uint) (interface{}, error)
 }
 
 // handleEmptyLine handles an empty line
-func (p *BodyParser) handleEmptyLine() error {
+func (p *BodyParser) handleEmptyLine() {
 	if !p.jumpInLineBefore {
 		//		fmt.Println("new bar added in empty line")
 		p.newBar(NewBar())
 	}
-	//	p.jumpInLineBefore = false
-	return nil
+	// p.jumpInLineBefore = false
 }
 
 // handleJump handles a jump
@@ -104,6 +103,11 @@ func (p *BodyParser) handleJump(data string) error {
 
 // handleTempoChange handles a tempo change
 func (p *BodyParser) handleTempoChange(b *Bar, data string) error {
+	if idx := strings.Index(data, "~"); idx > 0 {
+		b.tilde = data[idx:]
+		data = data[:idx]
+	}
+
 	bpm, err := strconv.ParseFloat(data, 64)
 	if err != nil {
 		return fmt.Errorf("error in tempo change %#v. must be a number", data)
@@ -230,7 +234,8 @@ func (p *BodyParser) finishPart(end int) {
 func (p *BodyParser) parseBarLine(data string) error {
 
 	if strings.TrimSpace(data) == "" {
-		return p.handleEmptyLine()
+		p.handleEmptyLine()
+		return nil
 	}
 
 	if data[0] == '$' {
@@ -245,6 +250,22 @@ func (p *BodyParser) parseBarLine(data string) error {
 		p.finishPart(p.currentBarNo + 1)
 		return p.handleJump(data)
 
+	}
+
+	if data[0] == '_' {
+		num, err := strconv.Atoi(data[1:])
+		if err != nil {
+			return err
+		}
+		for n := 0; n < num-1; n++ {
+			b := NewBar()
+			b.isEmpty = true
+			p.newBar(b)
+		}
+		p.jumpInLineBefore = false
+
+		p.newBar(NewBar())
+		return nil
 	}
 	var b = NewBar()
 	p.jumpInLineBefore = false

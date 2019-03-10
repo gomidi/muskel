@@ -9,7 +9,7 @@ import "testing"
 func TestCalc32thsAdd(t *testing.T) {
 	tests := []struct {
 		distance32th int64
-		notediff     int8
+		notediff     int64
 		expected     float64
 	}{
 		{32, 32, 1},
@@ -19,7 +19,7 @@ func TestCalc32thsAdd(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		got := calcAdd(test.distance32th, test.notediff)
+		got := calcAdd(test.distance32th, float64(test.notediff))
 
 		if got != test.expected {
 			t.Errorf("[%v] calc32thsAdd(%v, %v) == %v // expected %v", i, test.distance32th, test.notediff, got, test.expected)

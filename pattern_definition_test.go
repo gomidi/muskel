@@ -14,6 +14,7 @@ func TestParseDefinition(t *testing.T) {
 	}{
 		// the prefix $ has already been handled before
 		{"test : 2a' &kd", PatternDefinition{Name: "test", Original: "2a' &kd"}, false},
+		{"test : a' &kd", PatternDefinition{Name: "test", Original: "a' &kd"}, false},
 		{"test  2a' &kd", PatternDefinition{}, true},
 		{"test~ : 2#1 &kd", PatternDefinition{Name: "test~", Original: "2#1 &kd", NumParams: 1}, false},
 		{"test : 2#1 #2kd", PatternDefinition{Name: "test", Original: "2#1 #2kd", NumParams: 2}, false},
@@ -49,6 +50,7 @@ func TestCallDefinition(t *testing.T) {
 	}{
 		// the prefix $ has already been handled before
 		{"test: 2#1 &kd", []string{"a'"}, "2a' &kd", false},
+		{"test: #1 &kd", []string{"a'"}, "a' &kd", false},
 		{"test: 2#1 &kd", []string{"a'", "b"}, "", true},
 		{"test: 2#1 &#2", []string{"a'", "b"}, "2a' &b", false},
 		{"test: 2#1 &#2 3$x(#1,#2)", []string{"a'", "b"}, "2a' &b 3$x(a',b)", false},

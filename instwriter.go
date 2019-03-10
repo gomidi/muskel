@@ -9,12 +9,12 @@ import (
 	"gitlab.com/gomidi/midi/mid"
 )
 
-func calcAdd(distance int64, notediff int8) float64 {
-	return float64(notediff) / float64(distance)
+func calcAdd(distance int64, diff float64) float64 {
+	return diff / float64(distance)
 }
 
-func calcAdd2(distance int64, notediff int8) float64 {
-	return float64(notediff) / (float64(distance) * float64(distance))
+func calcAdd2(distance int64, diff float64) float64 {
+	return diff / (float64(distance) * float64(distance))
 }
 
 func halfTonesToPitchbend(halftones float64, _range uint8) int16 {
@@ -30,7 +30,7 @@ func halfTonesToPitchbend(halftones float64, _range uint8) int16 {
 	return res
 }
 
-func (iw *instWriter) linearGlissando(distance int64, noteDiff int8) {
+func linearGlissando(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64)) {
 
 	// pitch0      = f(0)        =  note0
 	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance * step
@@ -38,40 +38,42 @@ func (iw *instWriter) linearGlissando(distance int64, noteDiff int8) {
 	// y             f(x)        =  a     +      m                      * x
 	// m                         =  (noteTarget-note0)/distance
 
-	m := calcAdd(distance, noteDiff)
+	m := calcAdd(distance, float64(noteDiff))
 	//fmt.Printf("linearGlissando: m = %0.5f\n", m)
-	iw.wr.RestoreTimeline()
-	var pb int16
+	wr.RestoreTimeline()
+	//var pb int16
 
 	for step := int64(1); step <= distance; step++ {
 		//iw.wr.Forward(0, 1, 32)
-		iw.wr.Forward(0, 1, 64)
-		pb = halfTonesToPitchbend(m*float64(step), iw.instr.PitchbendRange)
-		iw.wr.Pitchbend(pb)
+		wr.Forward(0, 1, 64)
+		callback(m * float64(step))
+		//pb = halfTonesToPitchbend(m*float64(step), iw.instr.PitchbendRange)
+		//iw.wr.Pitchbend(pb)
 	}
 
-	iw.prevPitchbend = pb
+	//iw.prevPitchbend = pb
 }
 
-func (iw *instWriter) exponentialGlissando(distance int64, noteDiff int8) {
+func exponentialGlissando(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64)) {
 	// y             f(x)        =  a     +      m                       * x²
 	// pitch0      = f(0)        =  note0
 	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance² * step²
 	// pitchTarget = f(distance) =  note0 + (noteTarget-note0)/distance² * distance² = note0 + noteTarget - note0 = noteTarget
 	// m                         =  (noteTarget-note0)/distance²
 
-	m := calcAdd2(distance, noteDiff)
-	iw.wr.RestoreTimeline()
-	var pb int16
+	m := calcAdd2(distance, float64(noteDiff))
+	wr.RestoreTimeline()
+	//var pb int16
 
 	for step := int64(1); step <= distance; step++ {
 		//iw.wr.Forward(0, 1, 32)
-		iw.wr.Forward(0, 1, 64)
-		pb = halfTonesToPitchbend(m*float64(step)*float64(step), iw.instr.PitchbendRange)
-		iw.wr.Pitchbend(pb)
+		wr.Forward(0, 1, 64)
+		callback(m * float64(step) * float64(step))
+		//pb = halfTonesToPitchbend(m*float64(step)*float64(step), iw.instr.PitchbendRange)
+		//iw.wr.Pitchbend(pb)
 	}
 
-	iw.prevPitchbend = pb
+	//iw.prevPitchbend = pb
 }
 
 func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes []uint8) {
@@ -87,9 +89,9 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		iw.startGlissando = iw.wr.Position()
 		iw.inGlissando = true
 		iw.wr.BackupTimeline()
-		iw.glissandoFunc = iw.linearGlissando
+		iw.glissandoFunc = linearGlissando
 		if v == GlissandoExponential {
-			iw.glissandoFunc = iw.exponentialGlissando
+			iw.glissandoFunc = exponentialGlissando
 		}
 
 		addedNotes = append(addedNotes, iw.startGlissandoNote)
@@ -122,9 +124,16 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			*/
 			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startGlissando) / float64(iw.wr.Ticks32th())))
 			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startGlissando) / float64(iw.wr.Ticks64th())))
-			noteDiff := int8(n) - int8(iw.startGlissandoNote)
+			noteDiff := int64(n) - int64(iw.startGlissandoNote)
 
-			iw.glissandoFunc(distance, noteDiff)
+			var pb int16
+
+			iw.glissandoFunc(iw.wr, distance, noteDiff, func(vl float64) {
+				pb = halfTonesToPitchbend(vl, iw.instr.PitchbendRange)
+				iw.wr.Pitchbend(pb)
+			})
+
+			iw.prevPitchbend = pb
 			/*
 				addStep := calc32thsAdd(distance, noteDiff)
 				iw.wr.RestoreTimeline()
@@ -170,9 +179,9 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			iw.startGlissando = iw.wr.Position()
 			iw.startGlissandoNote = n
 			iw.inGlissando = true
-			iw.glissandoFunc = iw.linearGlissando
+			iw.glissandoFunc = linearGlissando
 			if v.glissandoExp {
-				iw.glissandoFunc = iw.exponentialGlissando
+				iw.glissandoFunc = exponentialGlissando
 			}
 			iw.wr.BackupTimeline()
 		}
@@ -202,17 +211,165 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 	case MIDICC:
 		//fmt.Printf("MIDICC %v, %v\n", v[0], v[1])
-		iw.wr.ControlChange(v[0], v[1])
+
+		if iw.inCCGlissando && v.controller == iw.CCGlissandoController {
+			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startCCGlissando) / float64(iw.wr.Ticks32th())))
+			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startCCGlissando) / float64(iw.wr.Ticks64th())))
+			diff := int64(v.value) - int64(iw.startCCGlissandoValue)
+
+			iw.CCglissandoFunc(iw.wr, distance, diff, func(vl float64) {
+				vll := math.Round(vl + float64(iw.startCCGlissandoValue))
+				if vll > 127 {
+					vll = 127
+				}
+
+				if vll < 0 {
+					vll = 0
+				}
+
+				iw.wr.ControlChange(iw.CCGlissandoController, uint8(vll))
+			})
+			iw.inCCGlissando = false
+		}
+
+		iw.wr.ControlChange(v.controller, v.value)
+
+		if len(v.tilde) > 0 {
+			iw.CCGlissandoController = v.controller
+			iw.startCCGlissando = iw.wr.Position()
+			iw.startCCGlissandoValue = v.value
+			iw.inCCGlissando = true
+			iw.CCglissandoFunc = linearGlissando
+			if v.tilde == "~~" {
+				iw.CCglissandoFunc = exponentialGlissando
+			}
+			iw.wr.BackupTimeline()
+		}
+
+		if v.dotted && v.value > 0 {
+			iw.wr.Plan(0, 3, 128, iw.wr.Channel.ControlChange(v.controller, 0))
+		}
+
 	case MIDIPitchbend:
+		if iw.inPBGlissando {
+			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startPBGlissando) / float64(iw.wr.Ticks32th())))
+			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startPBGlissando) / float64(iw.wr.Ticks64th())))
+			diff := int64(v.value+8191) - int64(iw.startPBGlissandoValue+8191)
+			// fmt.Printf("%v - %v = pb diff: %v\n", int8(v.value+8191), int8(iw.startPBGlissandoValue+8191), diff)
+
+			iw.PBglissandoFunc(iw.wr, distance, diff, func(vl float64) {
+				vll := math.Round(vl + float64(iw.startPBGlissandoValue))
+				// fmt.Printf("gliss raw: %0.2f\n", vll)
+				if vll > 8192 {
+					vll = 8192
+				}
+
+				if vll < -8191 {
+					vll = -8191
+				}
+
+				// fmt.Printf("gliss normalized: %v\n", int16(vll))
+
+				iw.wr.Pitchbend(int16(vll))
+			})
+			iw.inPBGlissando = false
+		}
 		//fmt.Printf("MIDIPitchbend %v, \n", int16(v))
-		iw.wr.Pitchbend(int16(v))
+		iw.wr.Pitchbend(v.value)
+
+		if len(v.tilde) > 0 {
+			iw.startPBGlissando = iw.wr.Position()
+			iw.startPBGlissandoValue = v.value
+			iw.inPBGlissando = true
+			iw.PBglissandoFunc = linearGlissando
+			if v.tilde == "~~" {
+				iw.PBglissandoFunc = exponentialGlissando
+			}
+			iw.wr.BackupTimeline()
+		}
+
+		if v.dotted && v.value != 0 {
+			iw.wr.Plan(0, 3, 128, iw.wr.Channel.Pitchbend(0))
+		}
 	case MIDIPolyAftertouch:
 		//fmt.Printf("MIDIPolyAftertouch %v, %v\n", v[0], v[1])
-		ki := uint8(int8(v[0]) + iw.instr.MIDITranspose)
-		iw.wr.PolyAftertouch(ki, v[1])
+		ki := uint8(int8(v.key) + iw.instr.MIDITranspose)
+
+		if iw.inPATGlissando && v.key == iw.PATGlissandoKey {
+			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startPATGlissando) / float64(iw.wr.Ticks32th())))
+			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startPATGlissando) / float64(iw.wr.Ticks64th())))
+			diff := int64(v.value) - int64(iw.startPATGlissandoValue)
+
+			iw.PATglissandoFunc(iw.wr, distance, diff, func(vl float64) {
+				vll := math.Round(vl + float64(iw.startPATGlissandoValue))
+				if vll > 127 {
+					vll = 127
+				}
+
+				if vll < 0 {
+					vll = 0
+				}
+
+				iw.wr.PolyAftertouch(iw.PATGlissandoKey, uint8(vll))
+			})
+			iw.inPATGlissando = false
+		}
+
+		iw.wr.PolyAftertouch(ki, v.value)
+
+		if len(v.tilde) > 0 {
+			iw.PATGlissandoKey = ki
+			iw.startPATGlissando = iw.wr.Position()
+			iw.startPATGlissandoValue = v.value
+			iw.inPATGlissando = true
+			iw.PATglissandoFunc = linearGlissando
+			if v.tilde == "~~" {
+				iw.PATglissandoFunc = exponentialGlissando
+			}
+			iw.wr.BackupTimeline()
+		}
+
+		if v.dotted && v.value != 0 {
+			iw.wr.Plan(0, 3, 128, iw.wr.Channel.PolyAftertouch(ki, 0))
+		}
 	case MIDIAftertouch:
 		//fmt.Printf("Aftertouch %v, \n", uint8(v))
-		iw.wr.Aftertouch(uint8(v))
+		if iw.inATGlissando {
+			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startCCGlissando) / float64(iw.wr.Ticks32th())))
+			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startATGlissando) / float64(iw.wr.Ticks64th())))
+			diff := int64(v.value) - int64(iw.startATGlissandoValue)
+
+			iw.ATglissandoFunc(iw.wr, distance, diff, func(vl float64) {
+				vll := math.Round(vl + float64(iw.startATGlissandoValue))
+				if vll > 127 {
+					vll = 127
+				}
+
+				if vll < 0 {
+					vll = 0
+				}
+
+				iw.wr.Aftertouch(uint8(vll))
+			})
+			iw.inATGlissando = false
+		}
+
+		iw.wr.Aftertouch(v.value)
+
+		if len(v.tilde) > 0 {
+			iw.startATGlissando = iw.wr.Position()
+			iw.startATGlissandoValue = v.value
+			iw.inATGlissando = true
+			iw.ATglissandoFunc = linearGlissando
+			if v.tilde == "~~" {
+				iw.ATglissandoFunc = exponentialGlissando
+			}
+			iw.wr.BackupTimeline()
+		}
+
+		if v.dotted && v.value > 0 {
+			iw.wr.Plan(0, 3, 128, iw.wr.Channel.Aftertouch(0))
+		}
 	case OSCMessage:
 		//	case *PatternCall:
 		/*
@@ -311,26 +468,48 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 }
 
 type instWriter struct {
-	p                   *SMFWriter
-	wr                  *mid.SMFWriter
-	instr               *Instrument
-	emptyBars           uint32
-	lastItem            interface{}
-	prevVel             int8
-	noteOns             map[uint8]bool
-	repeatFrom          int
-	repeatingBars       int
-	currentlyRepeating  int
-	totalBeginning      bool
-	insideRepitition    bool
-	lastNum32           uint
-	inGlissando         bool
-	startGlissando      uint64
-	startGlissandoNote  uint8
-	startGlissandoDelta uint32
-	prevKey             uint8
-	glissandoFunc       func(distance int64, noteDiff int8)
-	prevPitchbend       int16
+	p                  *SMFWriter
+	wr                 *mid.SMFWriter
+	instr              *Instrument
+	emptyBars          uint32
+	lastItem           interface{}
+	prevVel            int8
+	noteOns            map[uint8]bool
+	repeatFrom         int
+	repeatingBars      int
+	currentlyRepeating int
+	totalBeginning     bool
+	insideRepitition   bool
+	lastNum32          uint
+	inGlissando        bool
+	startGlissando     uint64
+	startGlissandoNote uint8
+	prevKey            uint8
+	glissandoFunc      func(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64))
+	prevPitchbend      int16
+
+	CCGlissandoController uint8
+	startCCGlissando      uint64
+	startCCGlissandoValue uint8
+	inCCGlissando         bool
+	CCglissandoFunc       func(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64))
+
+	PATGlissandoKey        uint8
+	startPATGlissando      uint64
+	startPATGlissandoValue uint8
+	inPATGlissando         bool
+	PATglissandoFunc       func(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64))
+
+	startATGlissando      uint64
+	startATGlissandoValue uint8
+	inATGlissando         bool
+	ATglissandoFunc       func(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64))
+
+	startPBGlissando      uint64
+	startPBGlissandoValue int16
+	inPBGlissando         bool
+	PBglissandoFunc       func(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64))
+
 	// currentScale        *Scale
 }
 

@@ -49,6 +49,34 @@ Ch       | -      |
 Bank     | -      |
 Prog     | -      |
 Vol      | -      |
+    1    | e      |  A
+_2
+    2    | f      |
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+    1    | e      | A
+_2
+    2    | f      |
+`,
+		},
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
     1    | e      | A
 [A]
 [A]
@@ -132,6 +160,66 @@ Trans    |        |
 [A]
 3/4@120
     2    | f      |
+`,
+		},
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+    1    | e      | 
+3/4@120~
+    2    | f      |
+@100
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+    1    | e      |
+3/4@120~
+    2    | f      |
+@100
+`,
+		},
+		{
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+    1    | e      | 
+@120~~\major^d
+    2    | f      |
+@100
+`,
+			`
+
+=
+         | Vocals |
+Ch       | -      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+    1    | e      |
+@120~~\major^d
+    2    | f      |
+@100
 `,
 		},
 		{
@@ -247,6 +335,39 @@ Trans   |      |
     3&  |g     |
 
     1   |g     |`,
+		},
+		{
+			`
+aa:             1f" 2&g
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+    1    | e'     |
+    2    | aa     |
+_3
+    1    |f"     |`,
+			`
+aa:             1f" 2&g
+
+
+
+=
+        |Vocals|
+Ch      |1     |
+Bank    |-     |
+Prog    |-     |
+Vol     |-     |
+PbRange |      |
+Trans   |      |
+    1   |e'    |
+    2   |f"    |
+    3&  |g     |
+_3
+    1   |f"    |`,
 		},
 		{
 			`

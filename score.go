@@ -226,7 +226,7 @@ func (s *Score) WriteSMF(midifile string) error {
 		return ur.WriteSMF(midifile)
 	}
 
-	numTracks := uint16(1) // first track is for tempo and time signatures
+	numTracks := uint16(2) // first track is for time signatures, second track is for tempo changes
 
 	for _, instr := range s.Instruments {
 		if instr.MIDIChannel >= 0 {

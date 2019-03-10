@@ -57,6 +57,77 @@ func TestUnrollPattern(t *testing.T) {
 		expected string
 	}{
 		{`
+a_a:           f" 2g
+
+
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+    1    | e'     |
+    2    | a_a     |
+
+    1    | %      |
+`,
+			`
+a_a:            f" 2g
+
+
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+    1    | e'     |
+    2    | f"     |
+    3    | g      |
+
+    1    | g      |
+`,
+		},
+		{`
+aa:           f" 2g
+
+
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+    1    | aa     |
+
+    1    | ./.    |
+`,
+			`
+aa:             f" 2g
+
+
+
+=
+         | Vocals |
+Ch       | 1      |
+Bank     | -      |
+Prog     | -      |
+Vol      | -      |
+PbRange  |        |
+Trans    |        |
+    1    | f"     |
+    2    | g      |
+
+    1    | f"     |
+    2    | g      |
+`,
+		},
+		{`
 aa:           1f" 2g
 
 

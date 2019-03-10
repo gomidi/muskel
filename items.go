@@ -178,7 +178,7 @@ func (n Note) String() string {
 	if n.glissandoStart {
 		bf.WriteString("~")
 	}
-	
+
 	if n.glissandoExp {
 		bf.WriteString("~")
 	}
@@ -200,10 +200,28 @@ func (mn MIDINote) Dup() MIDINote {
 	return mn
 }
 
-type MIDICC [2]uint8
-type MIDIPitchbend int16
-type MIDIPolyAftertouch [2]uint8
-type MIDIAftertouch uint8
+type MIDICC struct {
+	controller uint8
+	value      uint8
+	dotted     bool
+	tilde      string
+}
+type MIDIPitchbend struct {
+	value  int16
+	dotted bool
+	tilde  string
+}
+type MIDIPolyAftertouch struct {
+	key    uint8
+	value  uint8
+	dotted bool
+	tilde  string
+}
+type MIDIAftertouch struct {
+	value  uint8
+	dotted bool
+	tilde  string
+}
 
 type OSCMessage struct {
 	Path string

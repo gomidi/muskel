@@ -241,10 +241,24 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 		prefix = " "
 	}
 
+	emptyBarCounter := 0
+
 	//fmt.Printf("len(bars) = %v\n", len(p.score.Bars))
 	// fmt.Printf("parts = %#v\n", p.score.Parts)
 
 	for _, bar := range p.score.Bars {
+
+		if bar.isEmpty {
+			emptyBarCounter++
+			continue
+		}
+
+		if emptyBarCounter > 0 {
+			l = fmt.Sprintf("_%v", emptyBarCounter+1)
+			p.writeBodyLine(bf, l)
+			p.jumpInLineBefore = true
+			emptyBarCounter = 0
+		}
 
 		if bar.jumpTo != "" {
 			l = fmt.Sprintf("[%s]", bar.jumpTo)
@@ -268,6 +282,9 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 
 		if bar.tempoChange > 0 {
 			l += fmt.Sprintf("@%g", bar.tempoChange)
+			if len(bar.tilde) > 0 {
+				l += bar.tilde
+			}
 		}
 
 		if bar.scale != nil {
@@ -320,6 +337,12 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 			p.writeBodyLine(bf, l)
 		}
 
+	}
+
+	if emptyBarCounter > 0 {
+		l = fmt.Sprintf("_%v", emptyBarCounter)
+		p.writeBodyLine(bf, l)
+		emptyBarCounter = 0
 	}
 
 	lastSysLine := p.score.lastLine - p.score.lineWhereBodyStarts

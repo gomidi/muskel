@@ -303,7 +303,7 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 
 	// for each following empty bar
 	for didx := 1; didx <= diffBars; didx++ {
-		if positionOfNextBar == -1 {
+		if positionOfNextBar == -1 || s.dest.Bars[ev.BarNo+didx].isEmpty {
 			break
 		}
 		timesig = s.dest.Bars[ev.BarNo+didx].timeSig
@@ -382,7 +382,7 @@ func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Inst
 	var didx int
 barLoop:
 	for {
-		if positionOfNextBar == -1 {
+		if positionOfNextBar == -1 || s.dest.Bars[ev.BarNo+didx].isEmpty {
 			break
 		}
 		timesig = s.dest.Bars[ev.BarNo+didx].timeSig

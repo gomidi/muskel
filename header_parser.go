@@ -52,7 +52,7 @@ func (p *HeaderParser) parseMetaLine(line string) error {
 	return nil
 }
 
-var regExPattern = regexp.MustCompile("^([a-zA-Z][a-zA-Z]+).*")
+var regExPattern = regexp.MustCompile("^([a-zA-Z][_a-zA-Z]+).*")
 
 func (p *HeaderParser) includeScore(sc *Score) error {
 	//panic("implement")

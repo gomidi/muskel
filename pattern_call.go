@@ -18,14 +18,15 @@ type PatternCall struct {
 	SyncFirst    bool
 	result       string
 	//	offset       uint
-	firstPos             uint
-	Events               []*positionedEvent // just a sausage of positions within one fictive infinite bar
-	getter               func(name string) *PatternDefinition
-	velocityAdd          string
-	scaleMove            int8 // 0: force to scale (take next note in scale if not exact matching, no movement for in scale notes), n >0 || n < 0: move by n steps along the scale
-	scaleMoveMode        int8 // 0: no scale movement, 1: move only scale notes, 2: move only scale notes or non scale notes depending on the first item
-	firstNoteIsScaleNote int  // 0: not set, 1: true, 2: false
-	firstNoteAbsKey      uint8
+	firstPos                          uint
+	Events                            []*positionedEvent // just a sausage of positions within one fictive infinite bar
+	getter                            func(name string) *PatternDefinition
+	velocityAdd                       string
+	scaleMove                         int8 // 0: force to scale (take next note in scale if not exact matching, no movement for in scale notes), n >0 || n < 0: move by n steps along the scale
+	scaleMoveMode                     int8 // 0: no scale movement, 1: move only scale notes, 2: move only scale notes or non scale notes depending on the first item
+	firstNoteIsScaleNote              int  // 0: not set, 1: true, 2: false
+	firstNoteAbsKey                   uint8
+	syncFirstThroughPatternDefinition bool
 }
 
 func (p *PatternCall) String() string {
@@ -121,7 +122,7 @@ func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev 
 	ev.originalData = data
 	item, err := p.parseItems(ev.originalData, posIn32th)
 	ev.item = item
-	if p.SyncFirst {
+	if p.SyncFirst || p.syncFirstThroughPatternDefinition {
 		//		fmt.Printf("removing %v from %v\n", p.firstPos, ev.positionIn32ths)
 		ev.positionIn32ths -= p.firstPos
 	}
@@ -165,9 +166,15 @@ func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *posi
 
 	pos := positionBf.String()
 	if idx == 0 {
-		_, p.firstPos, err = positionTo32th("", pos)
-		if err != nil {
-			return nil, err
+		if pos == "" {
+			p.syncFirstThroughPatternDefinition = true
+			p.firstPos = 0
+			pos = "1"
+		} else {
+			_, p.firstPos, err = positionTo32th("", pos)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -326,6 +333,7 @@ func (p *PatternCall) addVelocity(orig int8) (vel int8) {
 
 func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
 	p.Events = []*positionedEvent{}
+	p.syncFirstThroughPatternDefinition = false
 
 	//fmt.Printf("parseEvents called with data: %v\n", data)
 	var firstScaleNoteDiff int8

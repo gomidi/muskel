@@ -29,17 +29,47 @@ func parseMIDINote(data string) (nt MIDINote, err error) {
 }
 
 func parseMIDICC(data string) (cc MIDICC, err error) {
+	var ccval int = -1
+
+	if len(data) > 2 {
+		if strings.ToLower(data[0:2]) == "on" {
+			ccval = 127
+			data = data[2:]
+		}
+
+		if strings.ToLower(data[0:3]) == "off" {
+			ccval = 0
+			data = data[3:]
+		}
+	}
+
+	if idx := strings.Index(data, "~"); idx > -1 {
+		cc.tilde = data[idx:]
+		data = data[:idx]
+	}
+
+	if idx := strings.Index(data, ":"); idx > -1 {
+		cc.dotted = true
+		data = data[:idx]
+	}
+
 	dt := strings.Trim(data, "()")
 	d := strings.Split(dt, ",")
-	if len(d) != 2 {
+	if ccval == -1 && len(d) != 2 {
 		err = fmt.Errorf("invalid format for MIDI CC: %#v, must be CC(nn,mm) where nn is the controller number and mm is the controler value", data)
 		return
 	}
+
 	var ccnum int
-	var ccval int
 	ccnum, err = strconv.Atoi(d[0])
 
 	if err != nil {
+		return
+	}
+
+	if ccval > -1 {
+		cc.controller = uint8(ccnum)
+		cc.value = uint8(ccval)
 		return
 	}
 
@@ -49,13 +79,23 @@ func parseMIDICC(data string) (cc MIDICC, err error) {
 		return
 	}
 
-	cc[0] = uint8(ccnum)
-	cc[1] = uint8(ccval)
+	cc.controller = uint8(ccnum)
+	cc.value = uint8(ccval)
 
 	return
 }
 
 func parseMIDIPitchbend(data string) (pb MIDIPitchbend, err error) {
+	if idx := strings.Index(data, "~"); idx > -1 {
+		pb.tilde = data[idx:]
+		data = data[:idx]
+	}
+
+	if idx := strings.Index(data, ":"); idx > -1 {
+		pb.dotted = true
+		data = data[:idx]
+	}
+
 	dt := strings.Trim(data, "()")
 	var val int
 	val, err = strconv.Atoi(dt)
@@ -64,11 +104,23 @@ func parseMIDIPitchbend(data string) (pb MIDIPitchbend, err error) {
 		return
 	}
 
-	pb = MIDIPitchbend(int16(val))
+	// fmt.Printf("parsing pitchbend %q: %v, normalized: %v\n", dt, val, int16(val))
+
+	pb.value = int16(val)
 	return
 }
 
 func parseMIDIAftertouch(data string) (at MIDIAftertouch, err error) {
+	if idx := strings.Index(data, "~"); idx > -1 {
+		at.tilde = data[idx:]
+		data = data[:idx]
+	}
+
+	if idx := strings.Index(data, ":"); idx > -1 {
+		at.dotted = true
+		data = data[:idx]
+	}
+
 	dt := strings.Trim(data, "()")
 	var val int
 	val, err = strconv.Atoi(dt)
@@ -77,11 +129,21 @@ func parseMIDIAftertouch(data string) (at MIDIAftertouch, err error) {
 		return
 	}
 
-	at = MIDIAftertouch(uint8(val))
+	at.value = uint8(val)
 	return
 }
 
 func parseMIDIPolyAftertouch(data string) (pt MIDIPolyAftertouch, err error) {
+	if idx := strings.Index(data, "~"); idx > -1 {
+		pt.tilde = data[idx:]
+		data = data[:idx]
+	}
+
+	if idx := strings.Index(data, ":"); idx > -1 {
+		pt.dotted = true
+		data = data[:idx]
+	}
+
 	dt := strings.Trim(data, "()")
 	d := strings.Split(dt, ",")
 	if len(d) != 2 {
@@ -104,8 +166,8 @@ func parseMIDIPolyAftertouch(data string) (pt MIDIPolyAftertouch, err error) {
 		return
 	}
 
-	pt[0] = nt.toMIDI()
-	pt[1] = uint8(val)
+	pt.key = nt.toMIDI()
+	pt.value = uint8(val)
 
 	return
 }

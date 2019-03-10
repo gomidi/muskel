@@ -20,6 +20,8 @@ type Bar struct {
 	includedScore *Score // must be an unrolled score
 	events        map[barEventKey]*Event
 	scale         *Scale
+	isEmpty       bool
+	tilde         string
 }
 
 func NewBar() *Bar {
@@ -91,6 +93,8 @@ func (b *Bar) Dup() (nuB *Bar) {
 		events:            map[barEventKey]*Event{},
 		includedScore:     b.includedScore,
 		scale:             b.scale,
+		isEmpty:           b.isEmpty,
+		tilde:             b.tilde,
 	}
 }
 
