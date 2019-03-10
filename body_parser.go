@@ -370,7 +370,7 @@ func (p *BodyParser) setInstrumentPitchbendrange(i int, instr *Instrument, data 
 
 // setInstrumentChannel sets the MIDI channel of an instrument
 func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string) error {
-	if len(data) == 0 || data == "-" {
+	if len(data) == 0  {
 		instr.MIDIChannel = -1
 		return nil
 	}
@@ -384,7 +384,7 @@ func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string)
 
 	ch := int8(cc - 1)
 
-	if instr.MIDIChannel == -1 && data != "-" {
+	if instr.MIDIChannel == -1 && data != "" {
 		instr.MIDIChannel = ch
 		return nil
 	}
@@ -398,7 +398,7 @@ func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string)
 
 // setInstrumentProgram sets the MIDI program value of an instrument
 func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string) error {
-	if len(data) == 0 || data == "-" {
+	if len(data) == 0  {
 		instr.MIDIProgram = -1
 		return nil
 	}
@@ -412,7 +412,7 @@ func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string)
 
 	prog := int8(pr - 1)
 
-	if instr.MIDIProgram == -1 && data != "-" {
+	if instr.MIDIProgram == -1 && data != "" {
 		instr.MIDIProgram = prog
 		return nil
 	}
@@ -426,7 +426,7 @@ func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string)
 
 // setInstrumentVolume sets the MIDI volume of an instrument
 func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) error {
-	if len(data) == 0 || data == "-" {
+	if len(data) == 0  {
 		instr.MIDIVolume = -1
 		return nil
 	}
@@ -440,7 +440,7 @@ func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) 
 
 	vol := int8(pr - 1)
 
-	if instr.MIDIVolume == -1 && data != "-" {
+	if instr.MIDIVolume == -1 && data != "" {
 		instr.MIDIVolume = vol
 		return nil
 	}
@@ -474,7 +474,7 @@ func (p *BodyParser) setInstrumentTranspose(i int, instr *Instrument, data strin
 
 // setInstrumentBank sets the MIDI bank for an instrument
 func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) error {
-	if len(data) == 0 || data == "-" {
+	if len(data) == 0  {
 		instr.MIDIBank = -1
 		return nil
 	}
@@ -488,7 +488,7 @@ func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) er
 
 	bank := int8(pr - 1)
 
-	if instr.MIDIBank == -1 && data != "-" {
+	if instr.MIDIBank == -1 && data != "" {
 		instr.MIDIBank = bank
 		return nil
 	}

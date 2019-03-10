@@ -45,10 +45,10 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIChannel == -1 {
 			if p.score.SmallColumns {
-				l += fmt.Sprintf("%v|", instr.pad("-"))
+				l += fmt.Sprintf("%v|", instr.pad(" "))
 			} else {
 
-				l += fmt.Sprintf(" %v |", instr.pad("-"))
+				l += fmt.Sprintf(" %v |", instr.pad(" "))
 			}
 		} else {
 			if p.score.SmallColumns {
@@ -69,9 +69,9 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIBank == -1 {
 			if p.score.SmallColumns {
-				l += fmt.Sprintf("%v|", instr.pad("-"))
+				l += fmt.Sprintf("%v|", instr.pad(" "))
 			} else {
-				l += fmt.Sprintf(" %v |", instr.pad("-"))
+				l += fmt.Sprintf(" %v |", instr.pad(" "))
 			}
 		} else {
 			if p.score.SmallColumns {
@@ -92,9 +92,9 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIProgram == -1 {
 			if p.score.SmallColumns {
-				l += fmt.Sprintf("%v|", instr.pad("-"))
+				l += fmt.Sprintf("%v|", instr.pad(" "))
 			} else {
-				l += fmt.Sprintf(" %v |", instr.pad("-"))
+				l += fmt.Sprintf(" %v |", instr.pad(" "))
 			}
 		} else {
 			if p.score.SmallColumns {
@@ -115,9 +115,9 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	for _, instr := range p.score.Instruments {
 		if instr.MIDIVolume == -1 {
 			if p.score.SmallColumns {
-				l += fmt.Sprintf("%v|", instr.pad("-"))
+				l += fmt.Sprintf("%v|", instr.pad(" "))
 			} else {
-				l += fmt.Sprintf(" %v |", instr.pad("-"))
+				l += fmt.Sprintf(" %v |", instr.pad(" "))
 			}
 		} else {
 			if p.score.SmallColumns {

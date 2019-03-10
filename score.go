@@ -39,17 +39,17 @@ func (s *Score) AddMissingProperties() {
 		return
 	}
 	prefill := map[string]string{
-		"composer":  "[insert composer here]",
-		"title":     "[insert title here]",
-		"date":      "[insert date here]",
-		"version":   "[insert version here]",
-		"copyright": "[insert copyright/license notice here]",
-		"genre":     "[insert genre here]",
-		"tags":      "[insert tags here] (comma separated)",
+		"composer":  "",
+		"title":     "",
+		"date":      "",
+		"version":   "",
+		"copyright": "",
+		"genre":     "",
+		"tags":      "",
 	}
 
 	for k, v := range prefill {
-		if s.Meta[k] == "" {
+		if _, has := s.Meta[k]; !has {
 			s.Meta[k] = v
 		}
 	}
@@ -216,7 +216,14 @@ func (p *Score) enroll() {
 }
 
 // WriteSMF writes the score to the given SMF file
-func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) error {
+func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) (err error) {
+	defer func() {
+		if !DEBUG {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("%v", r)
+			}
+		}
+	}()
 
 	if !s.isUnrolled {
 		ur, err := s.Unroll()

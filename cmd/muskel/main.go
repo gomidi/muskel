@@ -25,15 +25,16 @@ import (
 var (
 	cfg = config.MustNew("muskel", "0.9.0", "muskel is a musical sketch language")
 
-	argFile      = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
-	argFmt       = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
-	argWatch     = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
-	argDir       = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
-	argOutFile   = cfg.NewString("out", "path of the output file (SMF)", config.Shortflag('o'))
-	argSleep     = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(100)))
-	argSmallCols = cfg.NewBool("small", "small columns in formatting", config.Shortflag('s'), config.Default(false))
-	argUnroll    = cfg.NewString("unroll", "unroll the source to the given file name", config.Shortflag('u'))
-	argDebug     = cfg.NewBool("debug", "print debug messages")
+	argFile       = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
+	argFmt        = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
+	argAddMissing = cfg.NewBool("addprops", "add missing properties")
+	argWatch      = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
+	argDir        = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
+	argOutFile    = cfg.NewString("out", "path of the output file (SMF)", config.Shortflag('o'))
+	argSleep      = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(100)))
+	argSmallCols  = cfg.NewBool("small", "small columns in formatting", config.Shortflag('s'), config.Default(false))
+	argUnroll     = cfg.NewString("unroll", "unroll the source to the given file name", config.Shortflag('u'))
+	argDebug      = cfg.NewBool("debug", "print debug messages")
 
 	cmdSMF      = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
 	argSMFTicks = cmdSMF.NewInt32("ticks", "resolution of SMF file in ticks", config.Default(int32(960)))
@@ -70,7 +71,7 @@ func fmtFile(file string) error {
 		sc.SmallColumns = true
 	}
 
-	sc.AddMissingProperties()
+	//sc.AddMissingProperties()
 
 	err = sc.WriteToFile(file)
 	if err != nil {
@@ -193,7 +194,9 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 			sc.SmallColumns = true
 		}
 
-		sc.AddMissingProperties()
+		if argAddMissing.Get() {
+			sc.AddMissingProperties()
+		}
 
 		if argUnroll.IsSet() {
 			var ur *muskel.Score
