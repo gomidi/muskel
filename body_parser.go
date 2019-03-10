@@ -303,7 +303,11 @@ func (p *BodyParser) parseBarLine(data string) error {
 
 func (p *BodyParser) getInstrData(tabs []string) (instrData []string) {
 	//instrData = tabs[1 : len(tabs)-1]
-	instrData = tabs[1 : p.numInstruments+1]
+	to := p.numInstruments + 1
+	if len(tabs)-1 < to {
+		to = len(tabs) - 1
+	}
+	instrData = tabs[1:to]
 
 	if missingTabs := p.numInstruments - (len(tabs) - 2); missingTabs > 0 {
 		for mt := 0; mt < missingTabs; mt++ {

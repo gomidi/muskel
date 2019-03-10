@@ -622,7 +622,11 @@ func (iw *instWriter) writeUnrolled() {
 		}
 	}
 
-	iw.wr.Forward(1, 0, 32)
+	lastBar := iw.p.score.Bars[len(iw.p.score.Bars)-1]
+	barDiff := lastBar.barNo - lastEv.BarNo
+	if barDiff > 0 {
+		iw.wr.Forward(uint32(barDiff), 0, 32)
+	}
 	iw.wr.FinishPlanned()
 	stopNotes()
 }
