@@ -454,7 +454,7 @@ func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*position
 		case MultiItem:
 			var nuMI MultiItem
 			//inner := strings.Trim(pev.originalData, "()")
-			ss := strings.Split(pev.originalData, "=")
+			ss := strings.Split(pev.originalData[1:], "=")
 			for idx, mi := range v {
 				switch vv := mi.(type) {
 				case Note:
@@ -468,7 +468,7 @@ func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*position
 				}
 			}
 
-			ev.originalData = strings.Join(ss, "=")
+			ev.originalData = "=" + strings.Join(ss, "=")
 			ev.Item = nuMI
 		case NTuple:
 			var nuNT NTuple
@@ -619,7 +619,7 @@ func (s *ScoreUnroller) replaceScaleNotes() {
 			case MultiItem:
 				var nuMI MultiItem
 				nuEv := ev.Dup()
-				itms := strings.Split(ev.originalData, "=")
+				itms := strings.Split(ev.originalData[1:], "=")
 
 				for it_idx, it := range v {
 					switch vv := it.(type) {
@@ -638,7 +638,7 @@ func (s *ScoreUnroller) replaceScaleNotes() {
 				}
 
 				nuEv.Item = nuMI
-				nuEv.originalData = strings.Join(itms, "=")
+				nuEv.originalData = "=" + strings.Join(itms, "=")
 				unrolled = append(unrolled, nuEv)
 			case NTuple:
 				var nuNt NTuple

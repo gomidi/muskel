@@ -86,9 +86,9 @@ func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{},
 
 	//	fmt.Printf("PatternCall#parseItems called with %q\n", data)
 
-	if strings.Index(data, "=") > -1 {
+	if data[0] == '=' {
 		var items MultiItem
-		its := strings.Split(data, "=")
+		its := strings.Split(data[1:], "=")
 
 		for _, it := range its {
 			it = strings.TrimSpace(it)

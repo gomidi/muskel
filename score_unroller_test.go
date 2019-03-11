@@ -573,22 +573,22 @@ Bank     |        |
 Prog     |        |
 Vol      |        |
 4/4\dorian^d
-    1    | ^2="hi" |
+    1    | =^2="hi" |
 \dorian^e
     1    | ./.   |`,
 			`
 =
-         | Vocals  |
-Ch       | 1       |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
+         | Vocals   |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | e="hi"  |
+    1    | =e="hi"  |
 \dorian^e
-    1    | f#="hi" |`,
+    1    | =f#="hi" |`,
 		},
 		{
 			`

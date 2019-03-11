@@ -467,13 +467,45 @@ Trans    |       |
     2    | a'    |
     3    | b     |
 		   `},
+		{
+			`
+chords:         chords_swing(#1,#2)/:,=#1:=#2:,:,_,:,:/
+chords_swing:   1&=#1:=#2: 2&=#1=#2   2&._ 2&.;=#1:=#2: 3&=#1:=#2: 4&=#1:=#2:
+=
+  | piano |
+1 | chords(^1,^3) |
+`, `
+
+
+
+chords:         chords_swing(#1,#2)/:,=#1:=#2:,:,_,:,:/
+chords_swing:   1&=#1:=#2: 2&=#1=#2   2&._ 2&.;=#1:=#2: 3&=#1:=#2: 4&=#1:=#2:
+
+
+
+=
+         | piano    |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    |          |
+    1&   | =c':=e': |
+    2&   | =c':=e': |
+    2&.  | _        |
+    2&.; | _        |
+    3&   | =c':=e': |
+    4&   | =c':=e': |
+		   `},
 	}
 
 	for i, test := range tests {
-
-		//		if i != 0 {
-		//			continue
-		//		}
+		// fmt.Printf("[%v]\n", i)
+		if i != 13 {
+			continue
+		}
 
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll pattern")
 
