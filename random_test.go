@@ -21,10 +21,10 @@ func TestRandom2(t *testing.T) {
 `, [2]string{`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a     |
@@ -32,10 +32,10 @@ Trans    |       |
 				`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | b     |
@@ -58,10 +58,10 @@ bb:             2d
 
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | c     |
@@ -74,10 +74,10 @@ bb:             2d
 
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    |       |
@@ -94,10 +94,10 @@ Trans    |       |
 `, [2]string{`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a     |
@@ -105,10 +105,10 @@ Trans    |       |
 				`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    |       |
@@ -180,10 +180,10 @@ func TestRandom1(t *testing.T) {
 `, `
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a     |     |
@@ -199,10 +199,10 @@ Trans    |       |     |
 `, `
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | b     |

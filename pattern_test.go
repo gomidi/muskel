@@ -64,9 +64,9 @@ a_a:           f" 2g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e'     |
     2    | a_a     |
 
@@ -80,9 +80,9 @@ a_a:            f" 2g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e'     |
@@ -100,9 +100,9 @@ aa:           f" 2g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | aa     |
 
     1    | ./.    |
@@ -115,9 +115,9 @@ aa:             f" 2g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | f"     |
@@ -135,9 +135,9 @@ aa:           1f" 2g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e'     |
     2    | aa     |
 
@@ -151,9 +151,9 @@ aa:             1f" 2g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e'     |
@@ -183,10 +183,10 @@ bb~:            1aa(#1) 5aa(d)
 
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a'    | a'  |
@@ -213,10 +213,10 @@ aa:             1a' 2&#1 5&c"
 
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a'    | a'  |
@@ -245,10 +245,10 @@ aa:             1a' 2&b 5&c"
 
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a'    |     |
@@ -278,10 +278,10 @@ aa:             1a' 2&b 5&c"
 
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a'    |     |
@@ -310,10 +310,10 @@ aa:             1a' 2&b 5g
 
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -339,10 +339,10 @@ aa:             1a' 2&b 5g
 
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -366,10 +366,10 @@ aa:             1a' 2&b 5g
 
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -394,10 +394,10 @@ aa:             1a' 4&b 5&c"
 
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
 3/4
@@ -426,10 +426,10 @@ aa:             1a' 2&b 5&c"
 
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a'    |     |
@@ -458,10 +458,10 @@ aa:             1a' 2b
 
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     2    | a'    |
@@ -475,7 +475,7 @@ Trans    |       |
 		//			continue
 		//		}
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll-pattern")
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll pattern")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)

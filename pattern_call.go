@@ -86,11 +86,9 @@ func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{},
 
 	//	fmt.Printf("PatternCall#parseItems called with %q\n", data)
 
-	switch data[0] {
-	case '(':
+	if strings.Index(data, "=") > -1 {
 		var items MultiItem
-		data = strings.Trim(data, "()")
-		its := strings.Split(data, ",")
+		its := strings.Split(data, "=")
 
 		for _, it := range its {
 			it = strings.TrimSpace(it)
@@ -105,9 +103,8 @@ func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{},
 		}
 
 		return items, nil
-
-	default:
 	}
+
 	return p.parseItem(data, posIn32th)
 
 }

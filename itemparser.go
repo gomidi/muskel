@@ -266,11 +266,11 @@ func parseNote(data string) (nt Note, err error) {
 		case '~':
 			gliss++
 		case '#':
-			nt.augmenter = "#"
+			nt.augmenter += "#"
 		case '^':
-			nt.augmenter = "^"
+			nt.augmenter += "^"
 		case '°':
-			nt.augmenter = "°"
+			nt.augmenter += "°"
 		case '"':
 			if nt.octave > 0 {
 				nt.octave += 2
@@ -460,7 +460,7 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			return Lyric(strings.Trim(data, `"`)), nil
 		case '%':
 			return RepeatLastEvent{}, nil
-		case '=':
+		case ':':
 			return Hold, nil
 		case '_':
 			return Rest, nil
@@ -468,6 +468,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			return p.parseNTuple(data[1:], posIn32th)
 		case '$':
 			return p.parseCommand(data[1:], posIn32th)
+		case '=':
+			return nil, fmt.Errorf("deprecated syntax: use  : instead to create a hold")
 		//case 'S':
 		//	return parseNote(data[1:])
 		//case 'Z':

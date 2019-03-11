@@ -17,10 +17,10 @@ func TestFormatterJumps(t *testing.T) {
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e      | A
 [A]
     2    | f      |
@@ -29,10 +29,10 @@ Vol      | -      |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      | A
@@ -45,10 +45,10 @@ Trans    |        |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e      |  A
 _2
     2    | f      |
@@ -57,10 +57,10 @@ _2
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      | A
@@ -73,10 +73,10 @@ _2
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e      | A
 [A]
 [A]
@@ -86,10 +86,10 @@ Vol      | -      |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      | A
@@ -103,10 +103,10 @@ Trans    |        |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e      | A
 [A]
 [A]
@@ -117,10 +117,10 @@ Vol      | -      |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      | A
@@ -135,10 +135,10 @@ Trans    |        |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e      | A
 [A]
 [A]
@@ -149,10 +149,10 @@ Vol      | -      |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      | A
@@ -167,10 +167,10 @@ Trans    |        |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e      | 
 3/4@120~
     2    | f      |
@@ -180,10 +180,10 @@ Vol      | -      |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      |
@@ -197,10 +197,10 @@ Trans    |        |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e      | 
 @120~~\major^d
     2    | f      |
@@ -210,10 +210,10 @@ Vol      | -      |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      |
@@ -227,10 +227,10 @@ Trans    |        |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 Trans    |        |
     1    | e      | A
 [A]
@@ -242,10 +242,10 @@ Trans    |        |
 
 =
          | Vocals |
-Ch       | -      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Ch       |        |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e      | A
@@ -263,7 +263,7 @@ Trans    |        |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter-jumps")
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter jumps")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -304,9 +304,9 @@ aa:             1f" 2&g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e'     |
     2    | aa     |
 
@@ -321,9 +321,9 @@ aa:             1f" 2&g
 =
         |Vocals|
 Ch      |1     |
-Bank    |-     |
-Prog    |-     |
-Vol     |-     |
+Bank    |      |
+Prog    |      |
+Vol     |      |
 PbRange |      |
 Trans   |      |
     1   |e'    |
@@ -343,9 +343,9 @@ aa:             1f" 2&g
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e'     |
     2    | aa     |
 _3
@@ -358,9 +358,9 @@ aa:             1f" 2&g
 =
         |Vocals|
 Ch      |1     |
-Bank    |-     |
-Prog    |-     |
-Vol     |-     |
+Bank    |      |
+Prog    |      |
+Vol     |      |
 PbRange |      |
 Trans   |      |
     1   |e'    |
@@ -398,10 +398,10 @@ bb:             1aa(#1) 5aa(d)
 
 =
         |piano|vox|
-Ch      |-    |-  |
-Bank    |-    |-  |
-Prog    |-    |-  |
-Vol     |-    |-  |
+Ch      |     |   |
+Bank    |     |   |
+Prog    |     |   |
+Vol     |     |   |
 PbRange |     |   |
 Trans   |     |   |
     1   |a'   |a' |

@@ -47,15 +47,9 @@ func (p *BodyParser) parseItem(data string, posIn32th uint) (interface{}, error)
 	case data[0] == '"':
 		return Lyric(strings.Trim(data, `"`)), nil
 	default:
-		d := strings.Split(data, " ")
-		switch len(d) {
-		case 0:
-			return nil, nil
-		case 1:
-			return p.parseSingleItem(d[0], posIn32th)
-		default:
+		if strings.Index(data, "=") > -1 {
 			var m MultiItem
-
+			d := strings.Split(data, "=")
 			for _, dd := range d {
 				it, err := p.parseSingleItem(dd, posIn32th)
 
@@ -67,7 +61,7 @@ func (p *BodyParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			}
 			return m, nil
 		}
-
+		return p.parseSingleItem(data, posIn32th)
 	}
 }
 
@@ -370,7 +364,7 @@ func (p *BodyParser) setInstrumentPitchbendrange(i int, instr *Instrument, data 
 
 // setInstrumentChannel sets the MIDI channel of an instrument
 func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string) error {
-	if len(data) == 0  {
+	if len(data) == 0 {
 		instr.MIDIChannel = -1
 		return nil
 	}
@@ -398,7 +392,7 @@ func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string)
 
 // setInstrumentProgram sets the MIDI program value of an instrument
 func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string) error {
-	if len(data) == 0  {
+	if len(data) == 0 {
 		instr.MIDIProgram = -1
 		return nil
 	}
@@ -426,7 +420,7 @@ func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string)
 
 // setInstrumentVolume sets the MIDI volume of an instrument
 func (p *BodyParser) setInstrumentVolume(i int, instr *Instrument, data string) error {
-	if len(data) == 0  {
+	if len(data) == 0 {
 		instr.MIDIVolume = -1
 		return nil
 	}
@@ -474,7 +468,7 @@ func (p *BodyParser) setInstrumentTranspose(i int, instr *Instrument, data strin
 
 // setInstrumentBank sets the MIDI bank for an instrument
 func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) error {
-	if len(data) == 0  {
+	if len(data) == 0 {
 		instr.MIDIBank = -1
 		return nil
 	}

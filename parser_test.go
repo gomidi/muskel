@@ -14,7 +14,7 @@ func TestParserBarLength(t *testing.T) {
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 1  | a"  | d"   | b"    |
 2& | c   |     | d     |
 
@@ -26,7 +26,7 @@ Ch | -   | -     | -     |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
@@ -39,7 +39,7 @@ Ch | -   | -     | -     |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 4/4@140
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
@@ -52,7 +52,7 @@ Ch | -   | -     | -     |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 @100
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
@@ -69,7 +69,7 @@ Ch | -   | -     | -     |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "include-main")
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "include main")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)

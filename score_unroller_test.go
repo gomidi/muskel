@@ -23,9 +23,9 @@ func TestUnroll(t *testing.T) {
 		   =
 		            | Bass |
 		   Ch       | 3    |
-		   Bank     | -    |
-		   Prog     | -    |
-		   Vol      | -    |
+		   Bank     |      |
+		   Prog     |      |
+		   Vol      |      |
 		   PbRange  |      |
 		   Trans    |      |
 		   $scale(d',ionian)
@@ -36,9 +36,9 @@ func TestUnroll(t *testing.T) {
 		   =
 		            | Bass |
 		   Ch       | 3    |
-		   Bank     | -    |
-		   Prog     | -    |
-		   Vol      | -    |
+		   Bank     |      |
+		   Prog     |      |
+		   Vol      |      |
 		   PbRange  |      |
 		   Trans    |      |
 		   $scale(d',ionian)
@@ -52,9 +52,9 @@ func TestUnroll(t *testing.T) {
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | e'     |
 
     1    |        |`,
@@ -62,9 +62,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | e'     |
@@ -76,9 +76,9 @@ Trans    |        |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
     1    | ^2     |
 
     1    |        |`,
@@ -86,9 +86,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
     1    | d'     |
@@ -100,9 +100,9 @@ Trans    |        |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | ^2     |
 
@@ -111,9 +111,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -127,9 +127,9 @@ patt: 1^2 2&^3
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt   |
 \dorian^e
@@ -138,9 +138,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -156,9 +156,9 @@ patt: 1^2 2&^3
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^2   |
 \dorian^e
@@ -167,9 +167,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -185,9 +185,9 @@ patt: 1^2 2&^3
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^-3   |
 \dorian^e
@@ -196,9 +196,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -215,9 +215,9 @@ pattB: 1pattA^-3
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | pattB   |
 \dorian^e
@@ -226,9 +226,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -244,9 +244,9 @@ patt: 1^2 2&^3
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^3   |
 \dorian^e
@@ -255,9 +255,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -276,9 +276,9 @@ Trans    |        |
 		   =
 		            | Vocals |
 		   Ch       | 1      |
-		   Bank     | -      |
-		   Prog     | -      |
-		   Vol      | -      |
+		   Bank     |        |
+		   Prog     |        |
+		   Vol      |        |
 		   4/4
 		   $scale(d,dorian)
 		       1    | pattB   |
@@ -289,9 +289,9 @@ Trans    |        |
 		   =
 		            | Vocals |
 		   Ch       | 1      |
-		   Bank     | -      |
-		   Prog     | -      |
-		   Vol      | -      |
+		   Bank     |        |
+		   Prog     |        |
+		   Vol      |        |
 		   PbRange  |        |
 		   Trans    |        |
 		   4/4
@@ -310,9 +310,9 @@ patt: 1^2 2&^3
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^-2   |
 \dorian^e
@@ -321,9 +321,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -340,9 +340,9 @@ patt: 1e 2&f
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^3   |
 \dorian^e
@@ -352,9 +352,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -371,9 +371,9 @@ patt: 1#1 2&f 3^1
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^3(e)   |
 \dorian^e
@@ -383,9 +383,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -404,9 +404,9 @@ patt: 1#1 2&f 3^1
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^3(^2)   |
 \dorian^e
@@ -416,9 +416,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -437,9 +437,9 @@ patt: 1#1 2&f 3^1
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^3(^2)/:,^1,:/   |
 \dorian^e
@@ -449,9 +449,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -473,9 +473,9 @@ Trans    |        |
 		   =
 		            | Vocals |
 		   Ch       | 1      |
-		   Bank     | -      |
-		   Prog     | -      |
-		   Vol      | -      |
+		   Bank     |        |
+		   Prog     |        |
+		   Vol      |        |
 		   4/4
 		   $scale(d,dorian)
 		       1    | pattB   |
@@ -487,9 +487,9 @@ Trans    |        |
 		   =
 		            | Vocals |
 		   Ch       | 1      |
-		   Bank     | -      |
-		   Prog     | -      |
-		   Vol      | -      |
+		   Bank     |        |
+		   Prog     |        |
+		   Vol      |        |
 		   PbRange  |        |
 		   Trans    |        |
 		   4/4
@@ -509,9 +509,9 @@ patt: 1e 2&f
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^1   |
 \dorian^e
@@ -521,9 +521,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -540,9 +540,9 @@ patt: 1e 2&f#
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | patt^^2   |
 \dorian^e
@@ -552,9 +552,9 @@ Vol      | -      |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 PbRange  |        |
 Trans    |        |
 4/4\dorian^d
@@ -569,35 +569,35 @@ Trans    |        |
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
-    1    | ^2  "hi" |
+    1    | ^2="hi" |
 \dorian^e
     1    | ./.   |`,
 			`
 =
-         | Vocals   |
-Ch       | 1        |
-Bank     | -        |
-Prog     | -        |
-Vol      | -        |
-PbRange  |          |
-Trans    |          |
+         | Vocals  |
+Ch       | 1       |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
 4/4\dorian^d
-    1    | e  "hi"  |
+    1    | e="hi"  |
 \dorian^e
-    1    | f#  "hi" |`,
+    1    | f#="hi" |`,
 		},
 		{
 			`
 =
          | Vocals |
 Ch       | 1      |
-Bank     | -      |
-Prog     | -      |
-Vol      | -      |
+Bank     |        |
+Prog     |        |
+Vol      |        |
 4/4\dorian^d
     1    | {^2,a,b'}2 |
 \dorian^e
@@ -606,9 +606,9 @@ Vol      | -      |
 =
          | Vocals     |
 Ch       | 1          |
-Bank     | -          |
-Prog     | -          |
-Vol      | -          |
+Bank     |            |
+Prog     |            |
+Vol      |            |
 PbRange  |            |
 Trans    |            |
 4/4\dorian^d
@@ -620,10 +620,10 @@ Trans    |            |
 			`
 =
          | Vocals | Keys |
-Ch       | 1      | -    |
-Bank     | -      | -    |
-Prog     | -      | -    |
-Vol      | -      | -    |
+Ch       | 1      |      |
+Bank     |        |      |
+Prog     |        |      |
+Vol      |        |      |
 4/4\dorian^d
     1    | ^2     | ^3   |
 \dorian^e
@@ -631,10 +631,10 @@ Vol      | -      | -    |
 			`
 =
          | Vocals | Keys |
-Ch       | 1      | -    |
-Bank     | -      | -    |
-Prog     | -      | -    |
-Vol      | -      | -    |
+Ch       | 1      |      |
+Bank     |        |      |
+Prog     |        |      |
+Vol      |        |      |
 PbRange  |        |      |
 Trans    |        |      |
 4/4\dorian^d
@@ -646,20 +646,20 @@ Trans    |        |      |
 			`
 =
          | Vocals | Piano | 
-Ch       | -      | -     |
-Bank     | -      | -     |
-Prog     | -      | -     |
-Vol      | -      | -     |
+Ch       |        |       |
+Bank     |        |       |
+Prog     |        |       |
+Vol      |        |       |
     3    |        |       |
      &   |        |       |
 `,
 			`
 =
          | Vocals | Piano |
-Ch       | -      | -     |
-Bank     | -      | -     |
-Prog     | -      | -     |
-Vol      | -      | -     |
+Ch       |        |       |
+Bank     |        |       |
+Prog     |        |       |
+Vol      |        |       |
 PbRange  |        |       |
 Trans    |        |       |
     3    |        |       |
@@ -676,10 +676,10 @@ Trans    |        |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -695,10 +695,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -718,10 +718,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -742,10 +742,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -771,10 +771,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -811,10 +811,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    |
@@ -851,10 +851,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    | A
@@ -891,10 +891,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    | A
@@ -931,10 +931,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    | A
@@ -971,10 +971,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    | A
@@ -1011,10 +1011,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    | A
@@ -1048,10 +1048,10 @@ Trans    |       |
 			`
 =
          | piano |
-Ch       | -     |
-Bank     | -     |
-Prog     | -     |
-Vol      | -     |
+Ch       |       |
+Bank     |       |
+Prog     |       |
+Vol      |       |
 PbRange  |       |
 Trans    |       |
     1    | a'    | A
@@ -1083,10 +1083,10 @@ Trans    |       |
 			`
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a'    | e   | A
@@ -1123,10 +1123,10 @@ Trans    |       |     |
 			`
 =
          | piano | vox |
-Ch       | -     | -   |
-Bank     | -     | -   |
-Prog     | -     | -   |
-Vol      | -     | -   |
+Ch       |       |     |
+Bank     |       |     |
+Prog     |       |     |
+Vol      |       |     |
 PbRange  |       |     |
 Trans    |       |     |
     1    | a'    | e   | A

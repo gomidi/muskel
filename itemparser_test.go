@@ -14,7 +14,7 @@ func TestParseItem(t *testing.T) {
 		{"a'", Note{letter: "a", octave: 2, velocity: -1}},
 		{"a'++", Note{letter: "a", octave: 2, velocity: 93}},
 		{"c#'--~", Note{letter: "c", octave: 2, velocity: 33, glissandoStart: true, augmenter: "#"}},
-		{"=", Hold},
+		{":", Hold},
 		{"./.", RepeatLastBar{}},
 		{"...", RepeatLastBarUntilChange{}},
 		{".4.", RepeatLastNBarsUntilChange(4)},

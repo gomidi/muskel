@@ -17,7 +17,7 @@ $include("drumnotes")
 
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
 
@@ -34,10 +34,10 @@ $include("drumnotes")
 
 =
          | Voc | Drums  | Piano |
-Ch       | -   | -      | -     |
-Bank     | -   | -      | -     |
-Prog     | -   | -      | -     |
-Vol      | -   | -      | -     |
+Ch       |     |        |       |
+Bank     |     |        |       |
+Prog     |     |        |       |
+Vol      |     |        |       |
 PbRange  |     |        |       |
 Trans    |     |        |       |
     1    | a"  | MN36*: | b"    |
@@ -54,7 +54,7 @@ hu: 1sn 2kd
 
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
 
@@ -73,10 +73,10 @@ hu:             1sn 2kd
 
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
     1    | a"  | e"    | b"    |
@@ -90,7 +90,7 @@ Trans    |     |       |       |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
@@ -100,10 +100,10 @@ $include("testdata/includes/score")
 			`
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
 4/4
@@ -120,17 +120,17 @@ Trans    |     |       |       |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 $include("testdata/includes/score")
 1  | d   |      |       | B
 `,
 			`
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
     1    | e"  |       | f"    | A
@@ -143,17 +143,17 @@ Trans    |     |       |       |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 $include("testdata/includes/score")
 $include("testdata/includes/score")
 `,
 			`
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
     1    | e"  |       | f"    | A
@@ -167,7 +167,7 @@ Trans    |     |       |       |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
@@ -178,10 +178,10 @@ $include("testdata/includes/score")
 			`
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
 4/4
@@ -257,7 +257,7 @@ $include("drumnotes")
 
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
 
@@ -274,10 +274,10 @@ $include("drumnotes")
 
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
     1    | a"  | kd    | b"    |
@@ -294,7 +294,7 @@ hu: 1sn 2kd
 
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
 
@@ -313,10 +313,10 @@ hu:             1sn 2kd
 
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
     1    | a"  | kd    | b"    |
@@ -329,7 +329,7 @@ Trans    |     |       |       |
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
@@ -339,10 +339,10 @@ $include("testdata/includes/score")
 			`
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
 4/4
@@ -356,7 +356,7 @@ $include("testdata/includes/score")
 			`
 =
    | Voc | Drums | Piano |
-Ch | -   | -     | -     |
+Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
@@ -367,10 +367,10 @@ $include("testdata/includes/score")
 			`
 =
          | Voc | Drums | Piano |
-Ch       | -   | -     | -     |
-Bank     | -   | -     | -     |
-Prog     | -   | -     | -     |
-Vol      | -   | -     | -     |
+Ch       |     |       |       |
+Bank     |     |       |       |
+Prog     |     |       |       |
+Vol      |     |       |       |
 PbRange  |     |       |       |
 Trans    |     |       |       |
 4/4
@@ -389,7 +389,7 @@ $include("testdata/includes/score")
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "include-main")
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "include main")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
