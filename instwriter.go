@@ -677,7 +677,7 @@ func (i *Instrument) pad(s string) string {
 }
 
 func (i *Instrument) calcColWidth(unrolled bool) {
-	i.colWidth = len(i.Name)
+	i.colWidth = len(i.Name) + 2
 
 	if unrolled {
 		for _, ev := range i.unrolled {

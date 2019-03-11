@@ -591,7 +591,14 @@ func (s *ScoreUnroller) convertScaleNoteToAbsNote(barNo int, nt Note) (abs Note)
 	if sn > 0 {
 		sn -= 1
 	}
-	abs.letter, abs.augmenter, abs.octave = keyToNote(sc.StepToNote(sn))
+	key := sc.StepToNote(sn)
+
+	for _, aug := range nt.augmenter {
+		if aug == '#' {
+			key += 1
+		}
+	}
+	abs.letter, abs.augmenter, abs.octave = keyToNote(key)
 	abs.scaleNote = 0
 	return abs
 }

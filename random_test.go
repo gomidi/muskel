@@ -15,30 +15,30 @@ func TestRandom2(t *testing.T) {
 		{
 			`
 =
-  | piano |
+  | <piano> |
 1 | ?(a,b) | 
 
 `, [2]string{`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a       |
 `,
 				`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | b     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | b       |
 `,
 			},
 		},
@@ -47,7 +47,7 @@ Trans    |       |
 aa: 1c
 bb: 2d
 =
-  | piano |
+  | <piano> |
 1 | ?(aa,bb) | 
 
 `, [2]string{`
@@ -57,14 +57,14 @@ bb:             2d
 
 
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | c     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | c       |
 `,
 				`
 aa:             1c
@@ -73,45 +73,45 @@ bb:             2d
 
 
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    |       |
-    2    | d     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    |         |
+    2    | d       |
 `,
 			},
 		},
 		{
 			`
 =
-  | piano |
+  | <piano> |
 1 | ?[50]a | 
 
 `, [2]string{`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a       |
 `,
 				`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    |       |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    |         |
 `,
 			},
 		},
@@ -173,39 +173,39 @@ func TestRandom1(t *testing.T) {
 		{
 			`
 =
-  | piano | vox |
+  | <piano> | <vox> |
 1 | ?[100]a | ?[0]c   |
 
 1 | ./.   |    |
 `, `
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a     |     |
+         | <piano> | <vox> |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a       |       |
 
-    1    | a     |     |
+    1    | a       |       |
 `},
 		{
 			`
 =
-  | piano |
+  | <piano> |
 1 | ?(b) | 
 
 `, `
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | b     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | b       |
 `},
 	}
 

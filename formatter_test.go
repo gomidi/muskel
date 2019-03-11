@@ -16,11 +16,11 @@ func TestFormatterJumps(t *testing.T) {
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e      | A
 [A]
     2    | f      |
@@ -28,27 +28,27 @@ Vol      |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      | A
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        | A
 [A]
-    2    | f      |
+    2    | f        |
 `,
 		},
 		{
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e      |  A
 _2
     2    | f      |
@@ -56,27 +56,27 @@ _2
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      | A
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        | A
 _2
-    2    | f      |
+    2    | f        |
 `,
 		},
 		{
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e      | A
 [A]
 [A]
@@ -85,28 +85,28 @@ Vol      |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      | A
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        | A
 [A]
 [A]
-    2    | f      |
+    2    | f        |
 `,
 		},
 		{
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e      | A
 [A]
 [A]
@@ -116,29 +116,29 @@ Vol      |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      | A
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        | A
 [A]
 [A]
 3/4
-    2    | f      |
+    2    | f        |
 `,
 		},
 		{
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e      | A
 [A]
 [A]
@@ -148,29 +148,29 @@ Vol      |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      | A
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        | A
 [A]
 [A]
 3/4@120
-    2    | f      |
+    2    | f        |
 `,
 		},
 		{
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e      | 
 3/4@120~
     2    | f      |
@@ -179,16 +179,16 @@ Vol      |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        |
 3/4@120~
-    2    | f      |
+    2    | f        |
 @100
 `,
 		},
@@ -196,11 +196,11 @@ Trans    |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e      | 
 @120~~\major^d
     2    | f      |
@@ -209,16 +209,16 @@ Vol      |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        |
 @120~~\major^d
-    2    | f      |
+    2    | f        |
 @100
 `,
 		},
@@ -226,11 +226,11 @@ Trans    |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
 Trans    |        |
     1    | e      | A
 [A]
@@ -241,18 +241,18 @@ Trans    |        |
 			`
 
 =
-         | Vocals |
-Ch       |        |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e      | A
+         | <Vocals> |
+Ch       |          |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e        | A
 [A]
 [A]
 @120
-    2    | f      |
+    2    | f        |
 `,
 		},
 	}
@@ -263,7 +263,7 @@ Trans    |        |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter jumps")
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter   jumps")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -302,11 +302,11 @@ func TestFormatter(t *testing.T) {
 aa:             1f" 2&g
 
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e'     |
     2    | aa     |
 
@@ -319,33 +319,33 @@ aa:             1f" 2&g
 
 
 =
-        |Vocals|
-Ch      |1     |
-Bank    |      |
-Prog    |      |
-Vol     |      |
-PbRange |      |
-Trans   |      |
-    1   |e'    |
-    2   |f"    |
-    3&  |g     |
+        |<Vocals>|
+Ch      |1       |
+Bank    |        |
+Prog    |        |
+Vol     |        |
+PbRange |        |
+Trans   |        |
+    1   |e'      |
+    2   |f"      |
+    3&  |g       |
 
-    1   |e'    |
-    2   |f"    |
-    3&  |g     |
+    1   |e'      |
+    2   |f"      |
+    3&  |g       |
 
-    1   |g     |`,
+    1   |g       |`,
 		},
 		{
 			`
 aa:             1f" 2&g
 
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
     1    | e'     |
     2    | aa     |
 _3
@@ -356,18 +356,18 @@ aa:             1f" 2&g
 
 
 =
-        |Vocals|
-Ch      |1     |
-Bank    |      |
-Prog    |      |
-Vol     |      |
-PbRange |      |
-Trans   |      |
-    1   |e'    |
-    2   |f"    |
-    3&  |g     |
+        |<Vocals>|
+Ch      |1       |
+Bank    |        |
+Prog    |        |
+Vol     |        |
+PbRange |        |
+Trans   |        |
+    1   |e'      |
+    2   |f"      |
+    3&  |g       |
 _3
-    1   |f"    |`,
+    1   |f"      |`,
 		},
 		{
 			`
@@ -397,18 +397,18 @@ bb:             1aa(#1) 5aa(d)
 
 
 =
-        |piano|vox|
-Ch      |     |   |
-Bank    |     |   |
-Prog    |     |   |
-Vol     |     |   |
-PbRange |     |   |
-Trans   |     |   |
-    1   |a'   |a' |
-    2&  |g    |f  |
+        |<piano>|<vox>|
+Ch      |       |     |
+Bank    |       |     |
+Prog    |       |     |
+Vol     |       |     |
+PbRange |       |     |
+Trans   |       |     |
+    1   |a'     |a'   |
+    2&  |g      |f    |
 
-    1   |a'   |a' |
-    2&  |g    |d  |
+    1   |a'     |a'   |
+    2&  |g      |d    |
 			`},
 	}
 

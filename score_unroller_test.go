@@ -50,7 +50,7 @@ func TestUnroll(t *testing.T) {
 		{
 			`
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -60,21 +60,21 @@ Vol      |        |
     1    |        |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e'     |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e'       |
 
-    1    |        |`,
+    1    |          |`,
 		},
 		{
 			`
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -84,21 +84,21 @@ Vol      |        |
     1    |        |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | d'     |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | d'       |
 
-    1    |        |`,
+    1    |          |`,
 		},
 		{
 			`
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -109,23 +109,23 @@ Vol      |        |
     1    |        |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | e      |
+    1    | e        |
 
-    1    |        |`,
+    1    |          |`,
 		},
 		{
 			`
 patt: 1^2 2&^3
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -136,25 +136,25 @@ Vol      |        |
     1    | ./.   |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | e      |
-    2&   | f      |
+    1    | e        |
+    2&   | f        |
 \dorian^e
-    1    | f#     |
-    2&   | g      |`,
+    1    | f#       |
+    2&   | g        |`,
 		},
 		{
 			`
 patt: 1^2 2&^3
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -165,25 +165,25 @@ Vol      |        |
     1    | ./.   |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | g      |
-    2&   | a      |
+    1    | g        |
+    2&   | a        |
 \dorian^e
-    1    | a      |
-    2&   | b      |`,
+    1    | a        |
+    2&   | b        |`,
 		},
 		{
 			`
 patt: 1^2 2&^3
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -194,26 +194,26 @@ Vol      |        |
     1    | ./.   |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | B      |
-    2&   | c      |
+    1    | B        |
+    2&   | c        |
 \dorian^e
-    1    | c#     |
-    2&   | d      |`,
+    1    | c#       |
+    2&   | d        |`,
 		},
 		{
 			`
 pattA: 1^2 2&^3
 pattB: 1pattA^-3
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -224,25 +224,25 @@ Vol      |        |
     1    | ./.   |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | B      |
-    2&   | c      |
+    1    | B        |
+    2&   | c        |
 \dorian^e
-    1    | c#     |
-    2&   | d      |`,
+    1    | c#       |
+    2&   | d        |`,
 		},
 		{
 			`
 patt: 1^2 2&^3
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -253,19 +253,19 @@ Vol      |        |
     1    | ./.   |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | f      |
-    2&   | g      |
+    1    | f        |
+    2&   | g        |
 \dorian^e
-    1    | g      |
-    2&   | a      |`,
+    1    | g        |
+    2&   | a        |`,
 		},
 		// the following is not allowed and should return an error (therefor is uncommented)
 		/*
@@ -274,7 +274,7 @@ Trans    |        |
 		   patt: 1^2 2&^3
 		   pattB: 1patt^^3
 		   =
-		            | Vocals |
+		            | <Vocals> |
 		   Ch       | 1      |
 		   Bank     |        |
 		   Prog     |        |
@@ -287,7 +287,7 @@ Trans    |        |
 		       1    | ./.   |`,
 		   			`
 		   =
-		            | Vocals |
+		            | <Vocals> |
 		   Ch       | 1      |
 		   Bank     |        |
 		   Prog     |        |
@@ -308,7 +308,7 @@ Trans    |        |
 			`
 patt: 1^2 2&^3
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -319,26 +319,26 @@ Vol      |        |
     1    | ./.   |`,
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | B      |
-    2&   | c      |
+    1    | B        |
+    2&   | c        |
 \dorian^e
-    1    | c#     |
-    2&   | d      |`,
+    1    | c#       |
+    2&   | d        |`,
 		},
 		{
 			`
 @test: mount to step 3
 patt: 1e 2&f
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -350,30 +350,30 @@ Vol      |        |
 			`
 @test: mount to step 3
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | f      |
-    2&   | g      |
+    1    | f        |
+    2&   | g        |
 \dorian^e
-    1    | g      |
-    2&   | a      |`,
+    1    | g        |
+    2&   | a        |`,
 		},
 		{
 			`
 @test: mount to step 3
 patt: 1#1 2&f 3^1
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
 4/4\dorian^d
     1    | patt^^3(e)   |
 \dorian^e
@@ -381,28 +381,28 @@ Vol      |        |
 			`
 @test: mount to step 3
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | f      |
-    2&   | g      |
-    3    | d      |
+    1    | f        |
+    2&   | g        |
+    3    | d        |
 \dorian^e
-    1    | g      |
-    2&   | a      |
-    3    | e      |`,
+    1    | g        |
+    2&   | a        |
+    3    | e        |`,
 		},
 		{
 			`
 @test: mount to step 3
 patt: 1#1 2&f 3^1
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -414,28 +414,28 @@ Vol      |        |
 			`
 @test: mount to step 3
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | f      |
-    2&   | f      |
-    3    | e      |
+    1    | f        |
+    2&   | f        |
+    3    | e        |
 \dorian^e
-    1    | g      |
-    2&   | f      |
-    3    | f#     |`,
+    1    | g        |
+    2&   | f        |
+    3    | f#       |`,
 		},
 		{
 			`
 @test: mount to step 3
 patt: 1#1 2&f 3^1
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -447,21 +447,21 @@ Vol      |        |
 			`
 @test: mount to step 3
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | f      |
-    2&   | d      |
-    3    | e      |
+    1    | f        |
+    2&   | d        |
+    3    | e        |
 \dorian^e
-    1    | g      |
-    2&   | e      |
-    3    | f#     |`,
+    1    | g        |
+    2&   | e        |
+    3    | f#       |`,
 		},
 		// the following is not allowed and should return an error (therefor is uncommented)
 		/*
@@ -471,7 +471,7 @@ Trans    |        |
 		   patt: 1e 2&f
 		   pattB: 1patt^^3
 		   =
-		            | Vocals |
+		            | <Vocals> |
 		   Ch       | 1      |
 		   Bank     |        |
 		   Prog     |        |
@@ -485,7 +485,7 @@ Trans    |        |
 		   			`
 		   @test: mount to step 3
 		   =
-		            | Vocals |
+		            | <Vocals> |
 		   Ch       | 1      |
 		   Bank     |        |
 		   Prog     |        |
@@ -507,7 +507,7 @@ Trans    |        |
 @test: mount to step 1
 patt: 1e 2&f
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -519,26 +519,26 @@ Vol      |        |
 			`
 @test: mount to step 1
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | d      |
-    2&   | e      |
+    1    | d        |
+    2&   | e        |
 \dorian^e
-    1    | e      |
-    2&   | f#     |`,
+    1    | e        |
+    2&   | f#       |`,
 		},
 		{
 			`
 @test: mount to step 2
 patt: 1e 2&f#
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -550,24 +550,24 @@ Vol      |        |
 			`
 @test: mount to step 2
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
 4/4\dorian^d
-    1    | e      |
-    2&   | g      |
+    1    | e        |
+    2&   | g        |
 \dorian^e
-    1    | f#     |
-    2&   | a      |`,
+    1    | f#       |
+    2&   | a        |`,
 		},
 		{
 			`
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -578,7 +578,7 @@ Vol      |        |
     1    | ./.   |`,
 			`
 =
-         | Vocals   |
+         | <Vocals> |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -593,18 +593,18 @@ Trans    |          |
 		{
 			`
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
 4/4\dorian^d
     1    | {^2,a,b'}2 |
 \dorian^e
     1    | ./.   |`,
 			`
 =
-         | Vocals     |
+         | <Vocals>   |
 Ch       | 1          |
 Bank     |            |
 Prog     |            |
@@ -619,97 +619,123 @@ Trans    |            |
 		{
 			`
 =
-         | Vocals | Keys |
-Ch       | 1      |      |
-Bank     |        |      |
-Prog     |        |      |
-Vol      |        |      |
+         | <Vocals> | <Keys> |
+Ch       | 1        |        |
+Bank     |          |        |
+Prog     |          |        |
+Vol      |          |        |
 4/4\dorian^d
-    1    | ^2     | ^3   |
+    1    | ^2       | ^3     |
 \dorian^e
-    1    | ^2     | ^3   |`,
+    1    | ^2       | ^3     |`,
 			`
 =
-         | Vocals | Keys |
-Ch       | 1      |      |
-Bank     |        |      |
-Prog     |        |      |
-Vol      |        |      |
-PbRange  |        |      |
-Trans    |        |      |
+         | <Vocals> | <Keys> |
+Ch       | 1        |        |
+Bank     |          |        |
+Prog     |          |        |
+Vol      |          |        |
+PbRange  |          |        |
+Trans    |          |        |
 4/4\dorian^d
-    1    | e      | f    |
+    1    | e        | f      |
 \dorian^e
-    1    | f#     | g    |`,
+    1    | f#       | g      |`,
 		},
 		{
 			`
 =
-         | Vocals | Piano | 
-Ch       |        |       |
-Bank     |        |       |
-Prog     |        |       |
-Vol      |        |       |
-    3    |        |       |
-     &   |        |       |
+         | <Vocals> | <Keys> |
+Ch       | 1      |      |
+Bank     |        |      |
+Prog     |        |      |
+Vol      |        |      |
+4/4\dorian^d
+    1    | ^2     | ^3#  |
+\dorian^e
+    1    | ^2     | ^3## |`,
+			`
+=
+         | <Vocals> | <Keys> |
+Ch       | 1        |        |
+Bank     |          |        |
+Prog     |          |        |
+Vol      |          |        |
+PbRange  |          |        |
+Trans    |          |        |
+4/4\dorian^d
+    1    | e        | f#     |
+\dorian^e
+    1    | f#       | a      |`,
+		},
+		{
+			`
+=
+         | <Vocals> | <Piano> | 
+Ch       |          |         |
+Bank     |          |         |
+Prog     |          |         |
+Vol      |          |         |
+    3    |          |         |
+     &   |          |         |
 `,
 			`
 =
-         | Vocals | Piano |
-Ch       |        |       |
-Bank     |        |       |
-Prog     |        |       |
-Vol      |        |       |
-PbRange  |        |       |
-Trans    |        |       |
-    3    |        |       |
-     &   |        |       |
+         | <Vocals> | <Piano> |
+Ch       |          |         |
+Bank     |          |         |
+Prog     |          |         |
+Vol      |          |         |
+PbRange  |          |         |
+Trans    |          |         |
+    3    |          |         |
+     &   |          |         |
 `,
 		},
 
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   |
 						`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
 			`,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   |
 &  |c"|
 						`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+     &   | c"      |
 			`,
 		},
 
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   |
 &  |c"|
 
@@ -717,23 +743,23 @@ Trans    |       |
 						`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 			`,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   |
 &  |c"|
 
@@ -741,24 +767,24 @@ Trans    |       |
 						`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+     &   | c"      |
 
-    1    | a'    |
-    1&   | c"    |
+    1    | a'      |
+    1&   | c"      |
 			`,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   |
 &  |c"|
 
@@ -770,30 +796,30 @@ Trans    |       |
 						`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+     &   | c"      |
 
-    1    | a'    |
-    1&   | c"    |
+    1    | a'      |
+    1&   | c"      |
 
-    1    | a'    |
-    1&   | c"    |
+    1    | a'      |
+    1&   | c"      |
 
-    1    | b     |
+    1    | b       |
 			`,
 		},
 
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   |
 &  |c"|
 
@@ -810,36 +836,36 @@ Trans    |       |
 		   		   		   			`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+     &   | c"      |
 
-    1    | d'    |
-    2&   | e"    |
+    1    | d'      |
+    2&   | e"      |
 
-    1    | a'    |
-    1&   | c"    |
+    1    | a'      |
+    1&   | c"      |
 
-    1    | d'    |
-    2&   | e"    |
+    1    | d'      |
+    2&   | e"      |
 
-    1    | a'    |
-    1&   | c"    |
+    1    | a'      |
+    1&   | c"      |
 
-    1    | b     |
+    1    | b       |
 		   		   		   `,
 		},
 
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   | A
 &  |c"|
 
@@ -850,35 +876,35 @@ Trans    |       |
 					   		   			`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    | A
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | f"    |
+    1    | f"      |
 					   		   `,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   | A
 &  |c"|
 
@@ -890,35 +916,35 @@ Trans    |       |
 					   		   			`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    | A
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 3/4
-    1    | f"    |
+    1    | f"      |
 					   		   `,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   | A
 &  |c"|
 
@@ -930,35 +956,35 @@ Trans    |       |
 					   		   			`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    | A
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 3/4@120
-    1    | f"    |
+    1    | f"      |
 					   		   `,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   | A
 &  |c"|
 
@@ -970,35 +996,35 @@ Trans    |       |
 					   		   			`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    | A
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 @100
-    1    | f"    |
+    1    | f"      |
 					   		   `,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   | A
 &  |c"|
 
@@ -1010,35 +1036,35 @@ Trans    |       |
 					   		   			`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    | A
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | f"    |
+    1    | f"      |
 					   		   `,
 		},
 		{
 			`
 =
-   |piano|
+   |<piano>|
 1  |a'   | A
 &  |c"|
 
@@ -1047,31 +1073,31 @@ Trans    |       |
 1&  |e |`,
 			`
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    | A
-     &   | c"    |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1    | a'    | A
-     &   | c"    |
+    1    | a'      | A
+     &   | c"      |
 
-    2    | d     |
+    2    | d       |
 
-    1&   | e     |
+    1&   | e       |
 
 		   `,
 		},
 		{
 			`
 =
-    |piano| vox |
+    |<piano>| <vox> |
 1   |a'   | e   | A
  &  |c"   | %   |
 2   |     | f   |
@@ -1082,34 +1108,34 @@ Trans    |       |
 2   |     | g   |`,
 			`
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a'    | e   | A
-     &   | c"    | e   |
-    2    |       | f   |
+         | <piano> | <vox> |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a'      | e     | A
+     &   | c"      | e     |
+    2    |         | f     |
 
-    2    | d     |     |
+    2    | d       |       |
 
-    1    | a'    | e   | A
-     &   | c"    | e   |
-    2    |       | f   |
+    1    | a'      | e     | A
+     &   | c"      | e     |
+    2    |         | f     |
 
-    2    | d     |     |
+    2    | d       |       |
 
-    1&   | e     |     |
-    2    |       | g   |
+    1&   | e       |       |
+    2    |         | g     |
 
 		   `,
 		},
 		{
 			`
 =
-    |piano| vox |
+    |<piano>| <vox> |
 1   |a'   | e   | A
  &  |c"   | %   |
 2   |     | f   |
@@ -1122,31 +1148,31 @@ Trans    |       |     |
 2   |     | g   |`,
 			`
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a'    | e   | A
-     &   | c"    | e   |
-    2    |       | f   |
+         | <piano> | <vox> |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a'      | e     | A
+     &   | c"      | e     |
+    2    |         | f     |
 
-    2    | d     |     | B
+    2    | d       |       | B
 
-    1    | a'    | e   | A
-     &   | c"    | e   |
-    2    |       | f   |
+    1    | a'      | e     | A
+     &   | c"      | e     |
+    2    |         | f     |
 
-    1    | a'    | e   | A
-     &   | c"    | e   |
-    2    |       | f   |
+    1    | a'      | e     | A
+     &   | c"      | e     |
+    2    |         | f     |
 
-    2    | d     |     | B
+    2    | d       |       | B
 
-    1&   | e     |     |
-    2    |       | g   |
+    1&   | e       |       |
+    2    |         | g     |
 
 		   `,
 		},

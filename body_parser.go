@@ -325,6 +325,7 @@ func (p *BodyParser) getInstrument(i int) (instr *Instrument) {
 
 // setInstrumentName sets the name of an instrument
 func (p *BodyParser) setInstrumentName(i int, instr *Instrument, name string) error {
+	name = strings.Trim(name, "<>")
 	if instr.Name == "" {
 		instr.Name = name
 		return nil

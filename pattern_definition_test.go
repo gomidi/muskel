@@ -50,6 +50,7 @@ func TestCallDefinition(t *testing.T) {
 	}{
 		// the prefix $ has already been handled before
 		{"test: 2#1 &kd", []string{"a'"}, "2a' &kd", false},
+		{"test1: 2#1 &kd", []string{"a'"}, "2a' &kd", false},
 		{"test: #1 &kd", []string{"a'"}, "a' &kd", false},
 		{"test: 2#1 &kd", []string{"a'", "b"}, "", true},
 		{"test: 2#1 &#2", []string{"a'", "b"}, "2a' &b", false},

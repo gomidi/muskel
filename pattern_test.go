@@ -62,7 +62,7 @@ a_a:           f" 2g
 
 
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -78,18 +78,18 @@ a_a:            f" 2g
 
 
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e'     |
-    2    | f"     |
-    3    | g      |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e'       |
+    2    | f"       |
+    3    | g        |
 
-    1    | g      |
+    1    | g        |
 `,
 		},
 		{`
@@ -98,7 +98,7 @@ aa:           f" 2g
 
 
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -113,18 +113,18 @@ aa:             f" 2g
 
 
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | f"     |
-    2    | g      |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | f"       |
+    2    | g        |
 
-    1    | f"     |
-    2    | g      |
+    1    | f"       |
+    2    | g        |
 `,
 		},
 		{`
@@ -133,7 +133,7 @@ aa:           1f" 2g
 
 
 =
-         | Vocals |
+         | <Vocals> |
 Ch       | 1      |
 Bank     |        |
 Prog     |        |
@@ -149,18 +149,18 @@ aa:             1f" 2g
 
 
 =
-         | Vocals |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
-PbRange  |        |
-Trans    |        |
-    1    | e'     |
-    2    | f"     |
-    3    | g      |
+         | <Vocals> |
+Ch       | 1        |
+Bank     |          |
+Prog     |          |
+Vol      |          |
+PbRange  |          |
+Trans    |          |
+    1    | e'       |
+    2    | f"       |
+    3    | g        |
 
-    1    | g      |
+    1    | g        |
 `,
 		},
 		{
@@ -168,7 +168,7 @@ Trans    |        |
 aa: 1a' 2&#1 5&c"
 bb~: 1aa(#1) 5aa(d)
 =
-  | piano | vox |
+  | <piano> | <vox> |
 1 | aa(g) | bb~(f)   |
 
 1 | ./.   |    |
@@ -182,24 +182,24 @@ bb~:            1aa(#1) 5aa(d)
 
 
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a'    | a'  |
-    2&   | g     | f   |
+         | <piano> | <vox> |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a'      | a'    |
+    2&   | g       | f     |
 
-    1    | a'    | a'  |
-    2&   | g     | d   |
+    1    | a'      | a'    |
+    2&   | g       | d     |
 			`},
 		{
 			`
 aa:  1a' 2&#1 5&c"
 =
-  | piano | vox |
+  | <piano> | <vox> |
 1 | aa(g) | aa(f)   |
 
 1 | ./.   |    |
@@ -212,25 +212,25 @@ aa:             1a' 2&#1 5&c"
 
 
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a'    | a'  |
-    2&   | g     | f   |
+         | <piano> | <vox> |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a'      | a'    |
+    2&   | g       | f     |
 
-    1    | a'    |     |
-    1&   |       | c"  |
-    2&   | g     |     |
+    1    | a'      |       |
+    1&   |         | c"    |
+    2&   | g       |       |
 			`},
 		{
 			`
 aa:  1a' 2&b 5&c"
 =
-  | piano | vox |
+  | <piano> | <vox> |
 1 | aa |    |
 2 |    |  E  |
 
@@ -244,26 +244,26 @@ aa:             1a' 2&b 5&c"
 
 
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a'    |     |
-    2    |       | E   |
-    2&   | b     |     |
+         | <piano> | <vox> |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a'      |       |
+    2    |         | E     |
+    2&   | b       |       |
 
-    1    | a'    | F   |
-    2&   | b     |     |
+    1    | a'      | F     |
+    2&   | b       |       |
 			`},
 
 		{
 			`
 aa:  1a' 2&b 5&c"
 =
-  | piano | vox |
+  | <piano> | <vox> |
 1 | aa |    |
 2 |    |  E  |
 
@@ -277,26 +277,26 @@ aa:             1a' 2&b 5&c"
 
 
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a'    |     |
-    2    |       | E   |
-    2&   | b     |     |
+         | <piano> | <vox> |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a'      |       |
+    2    |         | E     |
+    2&   | b       |       |
 
-    1    |       | F   |
-    1&   | c"    |     |
+    1    |         | F     |
+    1&   | c"      |       |
 			`},
 
 		{
 			`
 aa:  1a' 2&b 5g
 =
-  | piano |
+  | <piano> |
 1 | aa |
 
 1 |  |
@@ -309,23 +309,23 @@ aa:             1a' 2&b 5g
 
 
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-    2&   | b     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+    2&   | b       |
 
-    1    | g     |
+    1    | g       |
 		   		   `},
 		{
 			`
 aa:  1a' 2&b 5g
 =
-  | piano |
+  | <piano> |
 1 | aa |
 
 1 | e |
@@ -338,23 +338,23 @@ aa:             1a' 2&b 5g
 
 
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-    2&   | b     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+    2&   | b       |
 
-    1    | e     |
+    1    | e       |
 		   `},
 		{
 			`
 aa:  1a' 2&b 5g
 =
-  | piano |
+  | <piano> |
 1 | aa |
 `, `
 
@@ -365,21 +365,21 @@ aa:             1a' 2&b 5g
 
 
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    1    | a'    |
-    2&   | b     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    1    | a'      |
+    2&   | b       |
 		   		   `},
 		{
 			`
 aa:  1a' 4&b 5&c"
 =
-  | piano |
+  | <piano> |
 3/4
 1 | aa |
 
@@ -393,25 +393,25 @@ aa:             1a' 4&b 5&c"
 
 
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
 3/4
-    1    | a'    |
+    1    | a'      |
 
-    1&   | b     |
-    2&   | c"    |
+    1&   | b       |
+    2&   | c"      |
 		   `},
 
 		{
 			`
 aa:  1a' 2&b 5&c"
 =
-  | piano | vox |
+  | <piano> | <vox> |
 1 | aa |   |
 2 |    | aa |
 
@@ -425,28 +425,28 @@ aa:             1a' 2&b 5&c"
 
 
 =
-         | piano | vox |
-Ch       |       |     |
-Bank     |       |     |
-Prog     |       |     |
-Vol      |       |     |
-PbRange  |       |     |
-Trans    |       |     |
-    1    | a'    |     |
-    2    |       | a'  |
-    2&   | b     |     |
-    3&   |       | b   |
+         | <piano> | <vox> |
+Ch       |         |     |
+Bank     |         |     |
+Prog     |         |     |
+Vol      |         |     |
+PbRange  |         |     |
+Trans    |         |     |
+    1    | a'      |     |
+    2    |         | a'  |
+    2&   | b       |     |
+    3&   |         | b   |
 
-    1    |       |     |
-    1&   | c"    |     |
-    2&   |       | c"  |
+    1    |         |     |
+    1&   | c"      |     |
+    2&   |         | c"  |
 		   		   `},
 
 		{
 			`
 aa:  1a' 2b
 =
-  | piano |
+  | <piano> |
 2 | aa |
 `, `
 
@@ -457,22 +457,22 @@ aa:             1a' 2b
 
 
 =
-         | piano |
-Ch       |       |
-Bank     |       |
-Prog     |       |
-Vol      |       |
-PbRange  |       |
-Trans    |       |
-    2    | a'    |
-    3    | b     |
+         | <piano> |
+Ch       |         |
+Bank     |         |
+Prog     |         |
+Vol      |         |
+PbRange  |         |
+Trans    |         |
+    2    | a'      |
+    3    | b       |
 		   `},
 		{
 			`
 chords:         chords_swing(#1,#2)/:,=#1:=#2:,:,_,:,:/
 chords_swing:   1&=#1:=#2: 2&=#1=#2   2&._ 2&.;=#1:=#2: 3&=#1:=#2: 4&=#1:=#2:
 =
-  | piano |
+  | <piano> |
 1 | chords(^1,^3) |
 `, `
 
@@ -484,7 +484,7 @@ chords_swing:   1&=#1:=#2: 2&=#1=#2   2&._ 2&.;=#1:=#2: 3&=#1:=#2: 4&=#1:=#2:
 
 
 =
-         | piano    |
+         | <piano>  |
 Ch       |          |
 Bank     |          |
 Prog     |          |

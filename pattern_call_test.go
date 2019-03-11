@@ -248,6 +248,7 @@ func TestParseCall(t *testing.T) {
 	}{
 		// the prefix $ has already been handled before
 		{"test", PatternCall{Name: "test", Slice: [2]int{-1, -1}}, false},
+		{"test1", PatternCall{Name: "test1", Slice: [2]int{-1, -1}}, false},
 		{"te_st", PatternCall{Name: "te_st", Slice: [2]int{-1, -1}}, false},
 		{"test^2", PatternCall{Name: "test", Slice: [2]int{-1, -1}, scaleMove: 2, scaleMoveMode: 1}, false},
 		{"test^^-11", PatternCall{Name: "test", Slice: [2]int{-1, -1}, scaleMove: -11, scaleMoveMode: 2}, false},

@@ -16,7 +16,7 @@ func TestInclude(t *testing.T) {
 $include("drumnotes")
 
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
@@ -33,17 +33,17 @@ $include("drumnotes")
 
 
 =
-         | Voc | Drums  | Piano |
-Ch       |     |        |       |
-Bank     |     |        |       |
-Prog     |     |        |       |
-Vol      |     |        |       |
-PbRange  |     |        |       |
-Trans    |     |        |       |
-    1    | a"  | MN36*: | b"    |
-    2&   | c   | MN40*: | d     |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
+    1    | a"    | MN36*:  | b"      |
+    2&   | c     | MN40*:  | d       |
 
-    1    |     | MN46*: |       |
+    1    |       | MN46*:  |         |
 `,
 		},
 		{
@@ -53,7 +53,7 @@ $include("testdata/includes/header")
 hu: 1sn 2kd
 
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
@@ -72,24 +72,24 @@ hu:             1sn 2kd
 
 
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
-    1    | a"  | e"    | b"    |
-    2&   | c   | f"    | d     |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
+    1    | a"    | e"      | b"      |
+    2&   | c     | f"      | d       |
 
-    1    |     | f"    |       |
-    2    |     | e"    |       |
+    1    |       | f"      |         |
+    2    |       | e"      |         |
 `,
 		},
 		{
 			`
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
@@ -99,74 +99,74 @@ $include("testdata/includes/score")
 `,
 			`
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
 4/4
-    1    | a"  | d     | b"    |
-    2&   | c   |       | d     |
+    1    | a"    | d       | b"      |
+    2&   | c     |         | d       |
 
-    1    | e"  |       | f"    | A
-    2&   | c   |       | d     |
+    1    | e"    |         | f"      | A
+    2&   | c     |         | d       |
 
-    1    | d   |       |       | B
+    1    | d     |         |         | B
 `,
 		},
 		{
 			`
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 $include("testdata/includes/score")
 1  | d   |      |       | B
 `,
 			`
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
-    1    | e"  |       | f"    | A
-    2&   | c   |       | d     |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
+    1    | e"    |         | f"      | A
+    2&   | c     |         | d       |
 
-    1    | d   |       |       | B
+    1    | d     |         |         | B
 `,
 		},
 		{
 			`
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 $include("testdata/includes/score")
 $include("testdata/includes/score")
 `,
 			`
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
-    1    | e"  |       | f"    | A
-    2&   | c   |       | d     |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
+    1    | e"    |         | f"      | A
+    2&   | c     |         | d       |
 
-    1    | e"  |       | f"    | A
-    2&   | c   |       | d     |
+    1    | e"    |         | f"      | A
+    2&   | c     |         | d       |
 `,
 		},
 		{
 			`
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
@@ -177,24 +177,24 @@ $include("testdata/includes/score")
 `,
 			`
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
 4/4
-    1    | a"  | d     | b"    |
-    2&   | c   |       | d     |
+    1    | a"    | d       | b"      |
+    2&   | c     |         | d       |
 
-    1    | e"  |       | f"    | A
-    2&   | c   |       | d     |
+    1    | e"    |         | f"      | A
+    2&   | c     |         | d       |
 
-    1    | e"  |       | f"    | A
-    2&   | c   |       | d     |
+    1    | e"    |         | f"      | A
+    2&   | c     |         | d       |
 
-    1    | d   |       |       | B
+    1    | d     |         |         | B
 `,
 		},
 	}
@@ -256,7 +256,7 @@ func TestInclude2(t *testing.T) {
 $include("drumnotes")
 
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
@@ -273,17 +273,17 @@ $include("drumnotes")
 
 
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
-    1    | a"  | kd    | b"    |
-    2&   | c   | sn    | d     |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
+    1    | a"    | kd      | b"      |
+    2&   | c     | sn      | d       |
 
-    1    |     | ho    |       |
+    1    |       | ho      |         |
 `,
 		},
 		{
@@ -293,7 +293,7 @@ $include("testdata/includes/header")
 hu: 1sn 2kd
 
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 1  | a"  | kd    | b"    |
 2& | c   | sn    | d     |
@@ -312,23 +312,23 @@ hu:             1sn 2kd
 
 
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
-    1    | a"  | kd    | b"    |
-    2&   | c   | sn    | d     |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
+    1    | a"    | kd      | b"      |
+    2&   | c     | sn      | d       |
 
-    1    |     | hu    |       |
+    1    |       | hu      |         |
 `,
 		},
 		{
 			`
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
@@ -338,24 +338,24 @@ $include("testdata/includes/score")
 `,
 			`
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
 4/4
-    1    | a"  | d     | b"    |
-    2&   | c   |       | d     |
+    1    | a"    | d       | b"      |
+    2&   | c     |         | d       |
 $include("testdata/includes/score")
-    1    | d   |       |       |
+    1    | d     |         |         |
 `,
 		},
 		{
 			`
 =
-   | Voc | Drums | Piano |
+   | <Voc> | <Drums> | <Piano> |
 Ch |     |       |       |
 4/4
 1  | a"  | d    | b"    |
@@ -366,19 +366,19 @@ $include("testdata/includes/score")
 `,
 			`
 =
-         | Voc | Drums | Piano |
-Ch       |     |       |       |
-Bank     |     |       |       |
-Prog     |     |       |       |
-Vol      |     |       |       |
-PbRange  |     |       |       |
-Trans    |     |       |       |
+         | <Voc> | <Drums> | <Piano> |
+Ch       |       |         |         |
+Bank     |       |         |         |
+Prog     |       |         |         |
+Vol      |       |         |         |
+PbRange  |       |         |         |
+Trans    |       |         |         |
 4/4
-    1    | a"  | d     | b"    |
-    2&   | c   |       | d     |
+    1    | a"    | d       | b"      |
+    2&   | c     |         | d       |
 $include("testdata/includes/score")
 $include("testdata/includes/score")
-    1    | d   |       |       |
+    1    | d     |         |         |
 `,
 		},
 	}

@@ -28,10 +28,10 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 		instr.calcColWidth(p.score.isUnrolled)
 		//instrColWidths[i] = instr.colWidth
 		if p.score.SmallColumns {
-			l += fmt.Sprintf("%s|", instr.pad(instr.Name))
+			l += fmt.Sprintf("%s|", instr.pad("<"+instr.Name+">"))
 		} else {
 
-			l += fmt.Sprintf(" %s |", instr.pad(instr.Name))
+			l += fmt.Sprintf(" %s |", instr.pad("<"+instr.Name+">"))
 		}
 	}
 

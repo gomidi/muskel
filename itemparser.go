@@ -201,6 +201,12 @@ func parseScaleNote(data string) (nt Note, err error) {
 			dynamic = "*"
 		case '~':
 			nt.glissandoStart = true
+		case '#':
+			nt.augmenter += "#"
+		case '^':
+			nt.augmenter += "^"
+		case '°':
+			nt.augmenter += "°"
 		/*
 			case '#':
 				nt.augmenter = "#"
