@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
+	"time"
 
 	"gitlab.com/gomidi/midi/mid"
 	"gitlab.com/gomidi/midi/smf"
@@ -159,7 +161,132 @@ func (s *Score) Unroll() (dest *Score, err error) {
 	return ur.dest, err
 }
 
+func NewInstrument(name string) *Instrument {
+	instr := &Instrument{}
+	instr.MIDIProgram = -1
+	instr.MIDIChannel = -1
+	instr.MIDIVolume = -1
+	instr.MIDIBank = -1
+	return instr
+}
+
+func (s *Score) RmInstrument(name string) error {
+	var instrs []*Instrument
+
+	name = strings.TrimSpace(name)
+	var found bool
+
+	for _, instr := range s.Instruments {
+		if instr.Name != name {
+			instrs = append(instrs, instr)
+		} else {
+			found = true
+		}
+	}
+
+	if found {
+		s.Instruments = instrs
+		return nil
+	}
+
+	return fmt.Errorf("could not find instrument %q", name)
+}
+
+func (s *Score) getInstrument(name string) *Instrument {
+	for _, instr := range s.Instruments {
+		if instr.Name == name {
+			return instr
+		}
+	}
+	return nil
+}
+
+func (s *Score) RenameInstrument(old, nu string) error {
+	in := s.getInstrument(old)
+	if in == nil {
+		return fmt.Errorf("instrument with name %q could not be found")
+	}
+
+	in.Name = nu
+	err := s.WriteToFile(s.FileName)
+
+	var includes = map[string]bool{}
+	for _, b := range s.Bars {
+		if b.include != "" {
+
+			if includes[b.include] {
+				continue
+			}
+
+			target, err := s.include(b.include)
+			if err != nil {
+				return err
+			}
+
+			includes[b.include] = true
+
+			target.RenameInstrument(old, nu)
+		}
+	}
+	return err
+}
+
+func (s *Score) SyncInstruments() error {
+	var includes = map[string]bool{}
+	for _, b := range s.Bars {
+		if b.include != "" {
+
+			if includes[b.include] {
+				continue
+			}
+
+			target, err := s.include(b.include)
+			if err != nil {
+				return err
+			}
+
+			includes[b.include] = true
+
+			var changed bool
+
+			for _, instr := range s.Instruments {
+				if !target.hasInstrument(instr.Name) {
+					target.AddInstrument(instr)
+					changed = true
+				} else {
+					ti := target.getInstrument(instr.Name)
+
+					if ti == nil {
+						return fmt.Errorf("could not get instrument %q from include %q although it says, is has this instrument", instr.Name, b.include)
+					}
+
+					ti.MIDIBank = instr.MIDIBank
+					ti.MIDIChannel = instr.MIDIChannel
+					ti.MIDIProgram = instr.MIDIProgram
+					ti.MIDITranspose = instr.MIDITranspose
+					ti.MIDIVolume = instr.MIDIVolume
+					ti.PitchbendRange = instr.PitchbendRange
+					changed = true
+				}
+			}
+
+			if changed {
+				target.WriteToFile(target.FileName)
+			}
+
+			err = target.SyncInstruments()
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 func (s *Score) AddInstrument(i *Instrument) error {
+	i.Name = strings.TrimSpace(i.Name)
 	if s.hasInstrument(i.Name) {
 		return fmt.Errorf("instrument %q already defined", i.Name)
 	}
@@ -280,15 +407,153 @@ func (s *Score) WriteTo(wr io.Writer) (n int64, err error) {
 	return
 }
 
+func tempDir(prefix string) (dir string, err error) {
+	dir = fmt.Sprintf("%s-%v", prefix, time.Now().Unix())
+	err = os.Mkdir(dir, 0775)
+	return
+}
+
+func (s *Score) renamePatternInCalls(old, nu string) (err error) {
+	for _, instr := range s.Instruments {
+		for ii, bev := range instr.events {
+			for i, ev := range bev {
+				switch v := ev.Item.(type) {
+				case *PatternCall:
+					if v.Name == old {
+						v.Name = nu
+					}
+					ev.Item = v
+					ev.originalData = strings.Replace(ev.originalData, old, nu, 1)
+					bev[i] = ev
+				}
+			}
+
+			instr.events[ii] = bev
+		}
+	}
+
+	return nil
+
+}
+
+func (s *Score) hasPattern(name string) bool {
+	_, hasOwn := s.PatternDefinitions[name]
+	_, hasIncluded := s.IncludedPatternDefinitions[name]
+
+	return hasOwn || hasIncluded
+}
+
+func (s *Score) renamePatternDefinition(old, nu string) error {
+	_, hasOwn := s.PatternDefinitions[old]
+	_, hasIncluded := s.IncludedPatternDefinitions[old]
+
+	if !s.hasPattern(old) {
+		return fmt.Errorf("could not find a pattern with the name %q", old)
+	}
+
+	if s.hasPattern(nu) {
+		return fmt.Errorf("a pattern with name %q already exists", nu)
+	}
+
+	if hasOwn {
+		pt := s.PatternDefinitions[old]
+
+		delete(s.PatternDefinitions, old)
+
+		pt.Name = nu
+
+		s.PatternDefinitions[nu] = pt
+		return s.renamePatternInCalls(old, nu)
+	}
+
+	if hasIncluded {
+		pt := s.IncludedPatternDefinitions[old]
+
+		delete(s.IncludedPatternDefinitions, old)
+
+		pt.Name = nu
+
+		s.IncludedPatternDefinitions[nu] = pt
+	}
+
+	return nil
+}
+
+func (s *Score) RenamePattern(old, nu string) (err error) {
+	err = s.renamePatternDefinition(old, nu)
+
+	if err != nil {
+		return
+	}
+
+	var includes = map[string]bool{}
+
+	for _, b := range s.Bars {
+		if b.include != "" {
+
+			if includes[b.include] {
+				continue
+			}
+
+			target, err := s.include(b.include)
+			if err != nil {
+				return err
+			}
+
+			target.RenamePattern(old, nu)
+			//target.WriteToFile(target.FileName)
+
+			includes[b.include] = true
+		}
+	}
+
+	s.renamePatternInCalls(old, nu)
+
+	for _, patt := range s.PatternDefinitions {
+		it := strings.Split(patt.Original, " ")
+
+		var changed bool = false
+
+		for i, thing := range it {
+			stripped := strings.TrimSpace(thing)
+			stripped = strings.TrimRight(stripped, ":")
+			stripped = strings.TrimRight(stripped, "+")
+			stripped = strings.TrimRight(stripped, "+")
+			stripped = strings.TrimRight(stripped, "+")
+			stripped = strings.TrimRight(stripped, "-")
+			stripped = strings.TrimRight(stripped, "-")
+			stripped = strings.TrimRight(stripped, "-")
+			stripped = strings.TrimRight(stripped, "*")
+			stripped = strings.TrimLeft(stripped, "1234567890")
+			stripped = strings.TrimLeft(stripped, "1234567890")
+			stripped = strings.TrimLeft(stripped, "!")
+
+			if stripped == old {
+				it[i] = strings.Replace(thing, old, nu, 1)
+				changed = true
+			}
+		}
+
+		if changed {
+			patt.Original = strings.Join(it, " ")
+		}
+	}
+
+	return s.WriteToFile(s.FileName)
+
+}
+
 // WriteTo writes the score to the given file (in a formatted way)
 // It only writes to the file if the formatting was successful
-func (s *Score) WriteToFile(filepath string) (err error) {
-	dir, err := ioutil.TempDir(".", "muskel-fmt")
+func (s *Score) WriteToFile(filep string) (err error) {
+
+	// dir, err := ioutil.TempDir(".", "muskel-fmt")
+	dir, err := tempDir("muskel-fmt")
 	if err != nil {
 		return fmt.Errorf("can't create tempdir: %v", err)
 	}
 
-	base := path.Base(filepath)
+	base := path.Base(filep)
 
 	f, err := os.Create(path.Join(dir, base))
 	if err != nil {
@@ -312,9 +577,9 @@ func (s *Score) WriteToFile(filepath string) (err error) {
 		return fmt.Errorf("can't close file %q: %v", path.Join(dir, base), err)
 	}
 
-	err = os.Rename(path.Join(dir, base), filepath)
+	err = os.Rename(path.Join(dir, base), filep)
 	if err != nil {
-		err = fmt.Errorf("can't move %q to %q", path.Join(dir, base), filepath)
+		err = fmt.Errorf("can't move %q to %q", path.Join(dir, base), filep)
 	}
 	return
 }

@@ -39,6 +39,22 @@ var (
 	cmdSMF      = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
 	argSMFTicks = cmdSMF.NewInt32("ticks", "resolution of SMF file in ticks", config.Default(int32(960)))
 
+	cmdAddInstr     = cfg.MustCommand("addinstr", "add an instrument")
+	argAddInstrName = cmdAddInstr.NewString("name", "name of the instrument", config.Required)
+
+	cmdRenamePattern    = cfg.MustCommand("renamepattern", "rename a pattern")
+	argRenamePatternOld = cmdRenamePattern.NewString("old", "old name of the pattern", config.Required)
+	argRenamePatternNew = cmdRenamePattern.NewString("new", "new name of the pattern", config.Required)
+
+	cmdRenameInstr    = cfg.MustCommand("renameinstr", "rename an instrument")
+	argRenameInstrOld = cmdRenameInstr.NewString("old", "old name of the instrument", config.Required)
+	argRenameInstrNew = cmdRenameInstr.NewString("new", "new name of the instrument", config.Required)
+
+	cmdRmInstr     = cfg.MustCommand("rminstr", "remove an instrument")
+	argRmInstrName = cmdRmInstr.NewString("name", "name of the instrument that should be removed", config.Required)
+
+	cmdSyncInstr = cfg.MustCommand("syncinstr", "sync instruments in iclude files to the instruments within the main file")
+
 	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs audacious)")
 )
 
@@ -79,12 +95,146 @@ func fmtFile(file string) error {
 		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
 		return err
 	}
-	fmt.Printf(".")
+
+	if argWatch.Get() {
+		fmt.Printf(".")
+	}
 	return nil
 	//beeep.Notify("OK MuSkeL formatted:", "", "assets/information.png")
 }
 
 var lock sync.RWMutex
+
+func runAddInstrument() error {
+	inFile := argFile.Get()
+
+	sc, err := muskel.ParseFile(inFile)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while parsing MuSkeL: %s\n", err.Error())
+		beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+		beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	name := strings.TrimSpace(argAddInstrName.Get())
+
+	if name == "" {
+		return fmt.Errorf("empty name is not allowed")
+	}
+	instr := muskel.NewInstrument(name)
+
+	sc.AddInstrument(instr)
+
+	err = sc.WriteToFile(inFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
+		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	return nil
+}
+
+func runRmInstrument() error {
+	inFile := argFile.Get()
+
+	sc, err := muskel.ParseFile(inFile)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while parsing MuSkeL: %s\n", err.Error())
+		beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+		beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	name := strings.TrimSpace(argRmInstrName.Get())
+	sc.RmInstrument(name)
+
+	err = sc.WriteToFile(inFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
+		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	return nil
+}
+
+func runSyncInstruments() error {
+	inFile := argFile.Get()
+
+	sc, err := muskel.ParseFile(inFile)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while parsing MuSkeL: %s\n", err.Error())
+		beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+		beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	return sc.SyncInstruments()
+}
+
+// RenameInstrument(old, nu string)
+func runRenameInstrument() error {
+	inFile := argFile.Get()
+
+	sc, err := muskel.ParseFile(inFile)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while parsing MuSkeL: %s\n", err.Error())
+		beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+		beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	old := strings.TrimSpace(argRenameInstrOld.Get())
+	nu := strings.TrimSpace(argRenameInstrNew.Get())
+
+	if nu == "" {
+		return fmt.Errorf("empty name is not allowed")
+	}
+
+	err = sc.RenameInstrument(old, nu)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
+		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	return nil
+}
+
+// RenameInstrument(old, nu string)
+func runRenamePattern() error {
+	inFile := argFile.Get()
+
+	sc, err := muskel.ParseFile(inFile)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while parsing MuSkeL: %s\n", err.Error())
+		beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
+		beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	old := strings.TrimSpace(argRenamePatternOld.Get())
+	nu := strings.TrimSpace(argRenamePatternNew.Get())
+
+	if nu == "" {
+		return fmt.Errorf("empty name is not allowed")
+	}
+
+	err = sc.RenamePattern(old, nu)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
+		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
+		return err
+	}
+
+	return nil
+}
 
 func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
@@ -239,7 +389,9 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 				return err
 			}
 
-			fmt.Fprint(os.Stdout, ".")
+			if argWatch.Get() {
+				fmt.Fprint(os.Stdout, ".")
+			}
 			beeep.Notify("OK MuSkeL converted to SMF", path.Base(outFile), "assets/information.png")
 			return nil
 		case cmdPlay:
@@ -250,7 +402,9 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 				return err
 			}
 
-			fmt.Fprint(os.Stdout, ".")
+			if argWatch.Get() {
+				fmt.Fprint(os.Stdout, ".")
+			}
 			beeep.Notify("OK MuSkeL converted to SMF", path.Base(outFile), "assets/information.png")
 			if audacious != "" {
 				go func() {
@@ -318,9 +472,21 @@ func run() error {
 
 		os.Exit(0)
 		return nil
-	} else {
-		return cmd(dir, file)
 	}
+
+	switch cfg.ActiveCommand() {
+	case cmdAddInstr:
+		return runAddInstrument()
+	case cmdRmInstr:
+		return runRmInstrument()
+	case cmdSyncInstr:
+		return runSyncInstruments()
+	case cmdRenameInstr:
+		return runRenameInstrument()
+	case cmdRenamePattern:
+		return runRenamePattern()
+	}
+	return cmd(dir, file)
 
 }
 

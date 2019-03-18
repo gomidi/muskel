@@ -144,7 +144,7 @@ func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *posi
 		}
 
 		switch {
-		case strings.IndexRune("123456789&;:.", rn) >= 0:
+		case strings.IndexRune("1234567890&;:.", rn) >= 0:
 			if !positionFound {
 				positionBf.WriteRune(rn)
 			} else {

@@ -312,11 +312,7 @@ func (p *BodyParser) getInstrData(tabs []string) (instrData []string) {
 
 func (p *BodyParser) getInstrument(i int) (instr *Instrument) {
 	if i > len(p.Score.Instruments)-1 {
-		instr = &Instrument{}
-		instr.MIDIProgram = -1
-		instr.MIDIChannel = -1
-		instr.MIDIVolume = -1
-		instr.MIDIBank = -1
+		instr = NewInstrument("")
 		p.Score.AddInstrument(instr)
 		return
 	}
