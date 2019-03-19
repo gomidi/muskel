@@ -386,6 +386,11 @@ func (p *BodyParser) setInstrumentChannel(i int, instr *Instrument, data string)
 	return nil
 }
 
+func (p *BodyParser) setInstrumentFileGroup(i int, instr *Instrument, data string) error {
+	instr.FileGroup = strings.TrimSpace(data)
+	return nil
+}
+
 // setInstrumentProgram sets the MIDI program value of an instrument
 func (p *BodyParser) setInstrumentProgram(i int, instr *Instrument, data string) error {
 	if len(data) == 0 {
@@ -573,6 +578,8 @@ func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 			err = p.setInstrumentTranspose(i, instr, data)
 		case "bank":
 			err = p.setInstrumentBank(i, instr, data)
+		case "file":
+			err = p.setInstrumentFileGroup(i, instr, data)
 		default:
 			if p.jumpInLineBefore { //&& p.firstBarSet {
 				//				fmt.Println("new bar in parse events")

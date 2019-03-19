@@ -204,7 +204,7 @@ func (s *Score) getInstrument(name string) *Instrument {
 func (s *Score) RenameInstrument(old, nu string) error {
 	in := s.getInstrument(old)
 	if in == nil {
-		return fmt.Errorf("instrument with name %q could not be found")
+		return fmt.Errorf("instrument with name %q could not be found", old)
 	}
 
 	in.Name = nu
@@ -360,15 +360,56 @@ func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) (err erro
 		return ur.WriteSMF(midifile)
 	}
 
+	hasPlaceholder := strings.Index(midifile, "%s") > -1
+
+	if !hasPlaceholder {
+		return s.writeToFile(midifile, "*", options...)
+	}
+
+	var fileGroups = map[string]string{}
+	for _, instr := range s.Instruments {
+		fileGroups[instr.FileGroup] = fmt.Sprintf(midifile, instr.FileGroup)
+	}
+
+	var errs errors
+
+	for grp, fl := range fileGroups {
+		err := s.writeToFile(fl, grp, options...)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+type errors []error
+
+func (e errors) Error() string {
+	var bf bytes.Buffer
+	bf.WriteString("The following errors happened:\n")
+	for _, err := range e {
+		bf.WriteString(err.Error() + "\n")
+	}
+
+	return bf.String()
+}
+
+func (s *Score) writeToFile(midifile, filegroup string, options ...smfwriter.Option) error {
+
 	numTracks := uint16(2) // first track is for time signatures, second track is for tempo changes
 
 	for _, instr := range s.Instruments {
-		if instr.MIDIChannel >= 0 {
+		if instr.MIDIChannel >= 0 && (filegroup == "*" || instr.FileGroup == filegroup) {
 			numTracks++
 		}
 	}
 
-	sw := NewSMFWriter(s)
+	sw := NewSMFWriter(s, filegroup)
 
 	options = append(
 		[]smfwriter.Option{
@@ -380,7 +421,6 @@ func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) (err erro
 	}
 
 	return mid.NewSMFFile(midifile, numTracks, sw.Write, options...)
-
 }
 
 type debugLog struct{}

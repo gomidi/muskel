@@ -7,12 +7,13 @@ import (
 )
 
 type SMFWriter struct {
-	score *Score
-	wr    *mid.SMFWriter
+	score     *Score
+	fileGroup string
+	wr        *mid.SMFWriter
 }
 
-func NewSMFWriter(s *Score) *SMFWriter {
-	return &SMFWriter{score: s}
+func NewSMFWriter(s *Score, filegroup string) *SMFWriter {
+	return &SMFWriter{score: s, fileGroup: filegroup}
 }
 
 func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
@@ -31,6 +32,10 @@ func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
 	}
 
 	for i, instr := range p.score.Instruments {
+		if p.fileGroup != "*" && instr.FileGroup != p.fileGroup {
+			continue
+		}
+
 		// ignore instruments without a MIDIchannel
 		if instr.MIDIChannel < 0 {
 			continue

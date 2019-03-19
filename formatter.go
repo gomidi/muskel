@@ -37,6 +37,22 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 
 	p.writeBodyLine(bf, l)
 
+	l = "File     |"
+	if p.score.SmallColumns {
+		l = "File    |"
+	}
+
+	for _, instr := range p.score.Instruments {
+		if p.score.SmallColumns {
+			l += fmt.Sprintf("%v|", instr.pad(instr.FileGroup))
+		} else {
+
+			l += fmt.Sprintf(" %v |", instr.pad(instr.FileGroup))
+		}
+	}
+
+	p.writeBodyLine(bf, l)
+
 	l = "Ch       |"
 	if p.score.SmallColumns {
 		l = "Ch      |"

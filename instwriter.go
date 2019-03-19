@@ -656,6 +656,7 @@ type Instrument struct {
 	events         []BarEvents // in the order of bars
 	colWidth       int
 	unrolled       []*Event
+	FileGroup      string
 }
 
 func (i *Instrument) Dup() *Instrument {
@@ -669,6 +670,7 @@ func (i *Instrument) Dup() *Instrument {
 		MIDITranspose:  i.MIDITranspose,
 		colWidth:       i.colWidth, // ? set to 0??
 		events:         i.events,
+		FileGroup:      i.FileGroup,
 	}
 }
 
