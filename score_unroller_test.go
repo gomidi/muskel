@@ -61,6 +61,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -85,6 +86,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -110,6 +112,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -137,6 +140,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -166,6 +170,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -195,6 +200,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -225,6 +231,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -254,6 +261,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -320,6 +328,7 @@ Vol      |        |
 			`
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -351,6 +360,7 @@ Vol      |        |
 @test: mount to step 3
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -370,6 +380,7 @@ Trans    |          |
 patt: 1#1 2&f 3^1
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -382,6 +393,7 @@ Vol      |          |
 @test: mount to step 3
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -415,6 +427,7 @@ Vol      |        |
 @test: mount to step 3
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -448,6 +461,7 @@ Vol      |        |
 @test: mount to step 3
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -520,6 +534,7 @@ Vol      |        |
 @test: mount to step 1
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -551,6 +566,7 @@ Vol      |        |
 @test: mount to step 2
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -573,22 +589,23 @@ Bank     |        |
 Prog     |        |
 Vol      |        |
 4/4\dorian^d
-    1    | =^2="hi" |
+    1    | _^2_"hi"_ |
 \dorian^e
     1    | ./.   |`,
 			`
 =
-         | <Vocals> |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
+         | <Vocals>  |
+File     |           |
+Ch       | 1         |
+Bank     |           |
+Prog     |           |
+Vol      |           |
+PbRange  |           |
+Trans    |           |
 4/4\dorian^d
-    1    | =e="hi"  |
+    1    | _e_"hi"_  |
 \dorian^e
-    1    | =f#="hi" |`,
+    1    | _f#_"hi"_ |`,
 		},
 		{
 			`
@@ -605,6 +622,7 @@ Vol      |          |
 			`
 =
          | <Vocals>   |
+File     |            |
 Ch       | 1          |
 Bank     |            |
 Prog     |            |
@@ -631,6 +649,7 @@ Vol      |          |        |
 			`
 =
          | <Vocals> | <Keys> |
+File     |          |        |
 Ch       | 1        |        |
 Bank     |          |        |
 Prog     |          |        |
@@ -657,6 +676,7 @@ Vol      |        |      |
 			`
 =
          | <Vocals> | <Keys> |
+File     |          |        |
 Ch       | 1        |        |
 Bank     |          |        |
 Prog     |          |        |
@@ -672,6 +692,7 @@ Trans    |          |        |
 			`
 =
          | <Vocals> | <Piano> | 
+File     |          |         |
 Ch       |          |         |
 Bank     |          |         |
 Prog     |          |         |
@@ -682,6 +703,7 @@ Vol      |          |         |
 			`
 =
          | <Vocals> | <Piano> |
+File     |          |         |
 Ch       |          |         |
 Bank     |          |         |
 Prog     |          |         |
@@ -702,6 +724,7 @@ Trans    |          |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -721,6 +744,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -744,6 +768,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -768,6 +793,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -797,6 +823,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -837,6 +864,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -877,6 +905,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -917,6 +946,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -957,6 +987,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -997,6 +1028,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -1037,6 +1069,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -1074,6 +1107,7 @@ Trans    |         |
 			`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -1109,6 +1143,7 @@ Trans    |         |
 			`
 =
          | <piano> | <vox> |
+File     |         |       |
 Ch       |         |       |
 Bank     |         |       |
 Prog     |         |       |
@@ -1149,6 +1184,7 @@ Trans    |         |       |
 			`
 =
          | <piano> | <vox> |
+File     |         |       |
 Ch       |         |       |
 Bank     |         |       |
 Prog     |         |       |

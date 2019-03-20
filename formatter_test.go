@@ -29,6 +29,7 @@ Vol      |          |
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -57,6 +58,7 @@ _2
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -86,6 +88,7 @@ Vol      |          |
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -117,6 +120,7 @@ Vol      |          |
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -149,6 +153,7 @@ Vol      |          |
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -180,6 +185,7 @@ Vol      |          |
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -210,6 +216,7 @@ Vol      |          |
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -242,6 +249,7 @@ Trans    |        |
 
 =
          | <Vocals> |
+File     |          |
 Ch       |          |
 Bank     |          |
 Prog     |          |
@@ -320,6 +328,7 @@ aa:             1f" 2&g
 
 =
         |<Vocals>|
+File    |        |
 Ch      |1       |
 Bank    |        |
 Prog    |        |
@@ -357,6 +366,7 @@ aa:             1f" 2&g
 
 =
         |<Vocals>|
+File    |        |
 Ch      |1       |
 Bank    |        |
 Prog    |        |
@@ -398,6 +408,7 @@ bb:             1aa(#1) 5aa(d)
 
 =
         |<piano>|<vox>|
+File    |       |     |
 Ch      |       |     |
 Bank    |       |     |
 Prog    |       |     |

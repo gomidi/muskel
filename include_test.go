@@ -34,6 +34,7 @@ $include("drumnotes")
 
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -73,6 +74,7 @@ hu:             1sn 2kd
 
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -100,6 +102,7 @@ $include("testdata/includes/score")
 			`
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -127,6 +130,7 @@ $include("testdata/includes/score")
 			`
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -150,6 +154,7 @@ $include("testdata/includes/score")
 			`
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -178,6 +183,7 @@ $include("testdata/includes/score")
 			`
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -274,6 +280,7 @@ $include("drumnotes")
 
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -313,6 +320,7 @@ hu:             1sn 2kd
 
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -339,6 +347,7 @@ $include("testdata/includes/score")
 			`
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |
@@ -367,6 +376,7 @@ $include("testdata/includes/score")
 			`
 =
          | <Voc> | <Drums> | <Piano> |
+File     |       |         |         |
 Ch       |       |         |         |
 Bank     |       |         |         |
 Prog     |       |         |         |

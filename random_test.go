@@ -21,6 +21,7 @@ func TestRandom2(t *testing.T) {
 `, [2]string{`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -32,6 +33,7 @@ Trans    |         |
 				`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -58,6 +60,7 @@ bb:             2d
 
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -74,6 +77,7 @@ bb:             2d
 
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -94,6 +98,7 @@ Trans    |         |
 `, [2]string{`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -105,6 +110,7 @@ Trans    |         |
 				`
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -180,6 +186,7 @@ func TestRandom1(t *testing.T) {
 `, `
 =
          | <piano> | <vox> |
+File     |         |       |
 Ch       |         |       |
 Bank     |         |       |
 Prog     |         |       |
@@ -199,6 +206,7 @@ Trans    |         |       |
 `, `
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |

@@ -43,25 +43,7 @@ func (p *BodyParser) parseItem(data string, posIn32th uint) (interface{}, error)
 		return nil, nil
 	}
 
-	switch {
-	case data[0] == '"':
-		return Lyric(strings.Trim(data, `"`)), nil
-	case data[0] == '=':
-		var m MultiItem
-		d := strings.Split(data[1:], "=")
-		for _, dd := range d {
-			it, err := p.parseSingleItem(dd, posIn32th)
-
-			if err != nil {
-				return nil, err
-			}
-
-			m = append(m, it)
-		}
-		return m, nil
-	default:
-		return p.parseSingleItem(data, posIn32th)
-	}
+	return p.parseSingleItem(data, posIn32th)
 }
 
 // handleEmptyLine handles an empty line

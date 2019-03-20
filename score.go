@@ -231,6 +231,48 @@ func (s *Score) RenameInstrument(old, nu string) error {
 	return err
 }
 
+func (s *Score) syncInclude(include string) error {
+
+	target, err := s.include(include)
+	if err != nil {
+		// fmt.Printf("ERROR while including %q\n", include)
+		return err
+	}
+
+	// fmt.Printf("including %q\n", include)
+
+	var changed bool
+
+	for _, instr := range s.Instruments {
+		if !target.hasInstrument(instr.Name) {
+			target.AddInstrument(instr)
+			changed = true
+		} else {
+			ti := target.getInstrument(instr.Name)
+
+			if ti == nil {
+				return fmt.Errorf("could not get instrument %q from include %q although it says, is has this instrument", instr.Name, include)
+			}
+
+			ti.MIDIBank = instr.MIDIBank
+			ti.MIDIChannel = instr.MIDIChannel
+			ti.MIDIProgram = instr.MIDIProgram
+			ti.MIDITranspose = instr.MIDITranspose
+			ti.MIDIVolume = instr.MIDIVolume
+			ti.FileGroup = instr.FileGroup
+			ti.PitchbendRange = instr.PitchbendRange
+			changed = true
+		}
+	}
+
+	if changed {
+		// fmt.Printf("writing include %q to %q\n", include, target.FileName)
+		target.WriteToFile(target.FileName)
+	}
+
+	return target.SyncInstruments()
+}
+
 func (s *Score) SyncInstruments() error {
 	var includes = map[string]bool{}
 	for _, b := range s.Bars {
@@ -240,48 +282,15 @@ func (s *Score) SyncInstruments() error {
 				continue
 			}
 
-			target, err := s.include(b.include)
-			if err != nil {
-				return err
-			}
-
 			includes[b.include] = true
 
-			var changed bool
-
-			for _, instr := range s.Instruments {
-				if !target.hasInstrument(instr.Name) {
-					target.AddInstrument(instr)
-					changed = true
-				} else {
-					ti := target.getInstrument(instr.Name)
-
-					if ti == nil {
-						return fmt.Errorf("could not get instrument %q from include %q although it says, is has this instrument", instr.Name, b.include)
-					}
-
-					ti.MIDIBank = instr.MIDIBank
-					ti.MIDIChannel = instr.MIDIChannel
-					ti.MIDIProgram = instr.MIDIProgram
-					ti.MIDITranspose = instr.MIDITranspose
-					ti.MIDIVolume = instr.MIDIVolume
-					ti.PitchbendRange = instr.PitchbendRange
-					changed = true
-				}
-			}
-
-			if changed {
-				target.WriteToFile(target.FileName)
-			}
-
-			err = target.SyncInstruments()
+			err := s.syncInclude(b.include)
 
 			if err != nil {
 				return err
 			}
 		}
 	}
-
 	return nil
 }
 

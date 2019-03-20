@@ -51,7 +51,7 @@ func TestParseFragment(t *testing.T) {
 }
 
 func TestUnrollPattern(t *testing.T) {
-	//t.Skip()
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -79,6 +79,7 @@ a_a:            f" 2g
 
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -114,6 +115,7 @@ aa:             f" 2g
 
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -150,6 +152,7 @@ aa:             1f" 2g
 
 =
          | <Vocals> |
+File     |          |
 Ch       | 1        |
 Bank     |          |
 Prog     |          |
@@ -183,6 +186,7 @@ bb~:            1aa(#1) 5aa(d)
 
 =
          | <piano> | <vox> |
+File     |         |       |
 Ch       |         |       |
 Bank     |         |       |
 Prog     |         |       |
@@ -213,6 +217,7 @@ aa:             1a' 2&#1 5&c"
 
 =
          | <piano> | <vox> |
+File     |         |       |
 Ch       |         |       |
 Bank     |         |       |
 Prog     |         |       |
@@ -245,6 +250,7 @@ aa:             1a' 2&b 5&c"
 
 =
          | <piano> | <vox> |
+File     |         |       |
 Ch       |         |       |
 Bank     |         |       |
 Prog     |         |       |
@@ -278,6 +284,7 @@ aa:             1a' 2&b 5&c"
 
 =
          | <piano> | <vox> |
+File     |         |       |
 Ch       |         |       |
 Bank     |         |       |
 Prog     |         |       |
@@ -310,6 +317,7 @@ aa:             1a' 2&b 5g
 
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -339,6 +347,7 @@ aa:             1a' 2&b 5g
 
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -366,6 +375,7 @@ aa:             1a' 2&b 5g
 
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -394,6 +404,7 @@ aa:             1a' 4&b 5&c"
 
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -426,20 +437,21 @@ aa:             1a' 2&b 5&c"
 
 =
          | <piano> | <vox> |
-Ch       |         |     |
-Bank     |         |     |
-Prog     |         |     |
-Vol      |         |     |
-PbRange  |         |     |
-Trans    |         |     |
-    1    | a'      |     |
-    2    |         | a'  |
-    2&   | b       |     |
-    3&   |         | b   |
+File     |         |       |
+Ch       |         |       |
+Bank     |         |       |
+Prog     |         |       |
+Vol      |         |       |
+PbRange  |         |       |
+Trans    |         |       |
+    1    | a'      |       |
+    2    |         | a'    |
+    2&   | b       |       |
+    3&   |         | b     |
 
-    1    |         |     |
-    1&   | c"      |     |
-    2&   |         | c"  |
+    1    |         |       |
+    1&   | c"      |       |
+    2&   |         | c"    |
 		   		   `},
 
 		{
@@ -458,6 +470,7 @@ aa:             1a' 2b
 
 =
          | <piano> |
+File     |         |
 Ch       |         |
 Bank     |         |
 Prog     |         |
@@ -469,8 +482,8 @@ Trans    |         |
 		   `},
 		{
 			`
-chords:         chords_swing(#1,#2)/:,=#1:=#2:,:,_,:,:/
-chords_swing:   1&=#1:=#2: 2&=#1=#2   2&._ 2&.;=#1:=#2: 3&=#1:=#2: 4&=#1:=#2:
+chords:         chords_swing(#1,#2)/:,_#1:_#2:_,:,*,:,:/
+chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2:_
 =
   | <piano> |
 1 | chords(^1,^3) |
@@ -478,34 +491,37 @@ chords_swing:   1&=#1:=#2: 2&=#1=#2   2&._ 2&.;=#1:=#2: 3&=#1:=#2: 4&=#1:=#2:
 
 
 
-chords:         chords_swing(#1,#2)/:,=#1:=#2:,:,_,:,:/
-chords_swing:   1&=#1:=#2: 2&=#1=#2   2&._ 2&.;=#1:=#2: 3&=#1:=#2: 4&=#1:=#2:
+chords:         chords_swing(#1,#2)/:,_#1:_#2:_,:,*,:,:/
+chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2:_
 
 
 
 =
-         | <piano>  |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
-    1    |          |
-    1&   | =c':=e': |
-    2&   | =c':=e': |
-    2&.  | _        |
-    2&.; | _        |
-    3&   | =c':=e': |
-    4&   | =c':=e': |
+         | <piano>   |
+File     |           |
+Ch       |           |
+Bank     |           |
+Prog     |           |
+Vol      |           |
+PbRange  |           |
+Trans    |           |
+    1    |           |
+    1&   | _c':_e':_ |
+    2&   | _c':_e':_ |
+    2&.  | *         |
+    2&.; | *         |
+    3&   | _c':_e':_ |
+    4&   | _c':_e':_ |
 		   `},
 	}
 
 	for i, test := range tests {
 		// fmt.Printf("[%v]\n", i)
-		if i != 13 {
-			continue
-		}
+		/*
+			if i != 13 {
+				continue
+			}
+		*/
 
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll pattern")
 

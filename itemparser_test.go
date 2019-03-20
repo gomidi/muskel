@@ -10,7 +10,7 @@ func TestParseItem(t *testing.T) {
 		input    string
 		expected interface{}
 	}{
-		{"_", Rest},
+		{"*", Rest},
 		{"a'", Note{letter: "a", octave: 2, velocity: -1}},
 		{"a'++", Note{letter: "a", octave: 2, velocity: 93}},
 		{"^2", Note{velocity: -1, scaleNote: 2}},

@@ -453,10 +453,27 @@ func (p *itemParser) parseGlissando(data string, posIn32th uint) (interface{}, e
 
 func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error) {
 	data = strings.TrimSpace(data)
-	//	fmt.Printf("parseItem called with %q\n", data)
+	// fmt.Printf("parseItem called with %q\n", data)
 	switch len(data) {
 	case 0:
 		return nil, nil
+	case 1:
+		switch data[0] {
+		case '%':
+			return RepeatLastEvent{}, nil
+		case ':':
+			return Hold, nil
+		case '*':
+			return Rest, nil
+		case '~':
+			return p.parseGlissando("", posIn32th)
+		default:
+			res, err := parseNote(data)
+			if err != nil {
+				return nil, fmt.Errorf("unknown item: %#v", data)
+			}
+			return res, nil
+		}
 	default:
 		//fmt.Printf("data[0]: %#v\n", string(data[0]))
 		switch data[0] {
@@ -464,18 +481,32 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 			return p.parseGlissando(data[1:], posIn32th)
 		case '"':
 			return Lyric(strings.Trim(data, `"`)), nil
-		case '%':
-			return RepeatLastEvent{}, nil
-		case ':':
-			return Hold, nil
-		case '_':
-			return Rest, nil
 		case '{':
 			return p.parseNTuple(data[1:], posIn32th)
 		case '$':
 			return p.parseCommand(data[1:], posIn32th)
-		case '=':
-			return nil, fmt.Errorf("deprecated syntax: use  : instead to create a hold")
+		case '_':
+			endIdx := strings.LastIndex(data, "_")
+			if endIdx < 4 {
+				return nil, fmt.Errorf("invalid MultiItem: %q must start and end with underscore _", data)
+			}
+
+			if endIdx != len(data)-1 {
+				return nil, fmt.Errorf("invalid MultiItem: %q must start and end with underscore _", data)
+			}
+			var m MultiItem
+			d := strings.Split(data[1:endIdx], "_")
+			for _, dd := range d {
+				it, err := p.parseItem(dd, posIn32th)
+
+				if err != nil {
+					return nil, err
+				}
+
+				m = append(m, it)
+			}
+			return m, nil
+			//return nil, fmt.Errorf("deprecated syntax: use  : instead to create a hold")
 		//case 'S':
 		//	return parseNote(data[1:])
 		//case 'Z':
@@ -500,23 +531,21 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 				return RepeatLastNBarsUntilChange(n), err
 			}
 		default:
-			if len(data) > 1 {
-				switch data[0:2] {
-				case "MN":
-					return parseMIDINote(data[2:])
-				case "CC":
-					return parseMIDICC(data[2:])
-				case "PB":
-					return parseMIDIPitchbend(data[2:])
-				case "AT":
-					return parseMIDIAftertouch(data[2:])
-				case "PT":
-					return parseMIDIPolyAftertouch(data[2:])
-				default:
-					if regExPattern.MatchString(data) {
-						return p.parsePattern(data, posIn32th)
-					}
-				}
+			switch data[0:2] {
+			case "MN":
+				return parseMIDINote(data[2:])
+			case "CC":
+				return parseMIDICC(data[2:])
+			case "PB":
+				return parseMIDIPitchbend(data[2:])
+			case "AT":
+				return parseMIDIAftertouch(data[2:])
+			case "PT":
+				return parseMIDIPolyAftertouch(data[2:])
+			}
+
+			if regExPattern.MatchString(data) {
+				return p.parsePattern(data, posIn32th)
 			}
 			res, err := parseNote(data)
 			if err != nil {
