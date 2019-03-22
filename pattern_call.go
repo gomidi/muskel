@@ -280,11 +280,11 @@ func (p *PatternCall) addVelocity(orig int8) (vel int8) {
 		return orig
 	}
 
-	if p.velocityAdd == "*" {
-		return dynamicToVelocity("*")
+	if p.velocityAdd == "=" {
+		return dynamicToVelocity("=")
 	}
 
-	middle := dynamicToVelocity("*")
+	middle := dynamicToVelocity("=")
 
 	diff := dynamicToVelocity(p.velocityAdd) - middle
 
@@ -319,7 +319,21 @@ func (p *PatternCall) __parseEvent(idx int, ev string, posIn32th uint, firstScal
 		if err != nil {
 			return firstScaleNoteDiff, err
 		}
-		p.Events = append(p.Events, v.Events...)
+
+		for _, evv := range v.Events {
+			switch vv := evv.item.(type) {
+			case Note:
+				vv.velocity = p.addVelocity(vv.velocity)
+				evv.originalData = vv.String()
+				evv.item = vv
+			case MIDINote:
+				vv.velocity = p.addVelocity(vv.velocity)
+				evv.originalData = vv.String()
+				evv.item = vv
+			}
+			p.Events = append(p.Events, evv)
+		}
+		//p.Events = append(p.Events, v.Events...)
 	case Note:
 		ee := e.dup()
 		nt := v.Dup()
@@ -389,12 +403,14 @@ func (p *PatternCall) __parseEvent(idx int, ev string, posIn32th uint, firstScal
 
 		nt.velocity = p.addVelocity(nt.velocity)
 		ee.item = nt
+		ee.originalData = nt.String()
 		p.Events = append(p.Events, ee)
 	case MIDINote:
 		ee := e.dup()
 		nt := v.Dup()
 		nt.velocity = p.addVelocity(nt.velocity)
 		ee.item = nt
+		ee.originalData = nt.String()
 		p.Events = append(p.Events, ee)
 	default:
 		p.Events = append(p.Events, e)

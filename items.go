@@ -191,6 +191,15 @@ type MIDINote struct {
 	dotted   bool
 }
 
+func (m MIDINote) String() string {
+	vel := velocityToDynamic(m.velocity)
+	dotted := ""
+	if m.dotted {
+		dotted = ":"
+	}
+	return fmt.Sprintf("MN%v%s%s", m.note, vel, dotted)
+}
+
 func (mn MIDINote) Dup() MIDINote {
 	return mn
 }
