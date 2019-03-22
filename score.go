@@ -37,11 +37,9 @@ type Score struct {
 }
 
 func (s *Score) AddMissingProperties() {
-	if s.isPartial() {
-		return
-	}
 	prefill := map[string]string{
 		"composer":  "",
+		"artist":    "",
 		"title":     "",
 		"date":      "",
 		"version":   "",
@@ -67,10 +65,6 @@ func NewScore() *Score {
 		isUnrolled:                 false,
 		IncludedPatternDefinitions: map[string]*PatternDefinition{},
 	}
-}
-
-func (s *Score) isPartial() bool {
-	return s.Meta["partial"] != ""
 }
 
 func (p *Score) include(file string) (*Score, error) {
@@ -399,7 +393,7 @@ func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) (err erro
 type errors []error
 
 func (e errors) Error() string {
-	var bf bytes.Buffer
+	var bf strings.Builder
 	bf.WriteString("The following errors happened:\n")
 	for _, err := range e {
 		bf.WriteString(err.Error() + "\n")
@@ -438,8 +432,12 @@ func (debugLog) Printf(format string, vals ...interface{}) {
 	fmt.Fprintf(os.Stdout, format+"\n", vals...)
 }
 
+func (s *Score) Formatter() *Formatter {
+	return NewFormatter(s)
+}
+
 // WriteTo writes the score to the given writer (in a formatted way)
-func (s *Score) WriteTo(wr io.Writer) (n int64, err error) {
+func (s *Score) WriteTo(wr io.Writer) (err error) {
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -447,13 +445,10 @@ func (s *Score) WriteTo(wr io.Writer) (n int64, err error) {
 		}
 	}()
 
-	var bf bytes.Buffer
+	fm := s.Formatter()
+	fm.WriteTo(wr)
 
-	fm := NewFormatter(s)
-	fm.Format(&bf)
-
-	n, err = bf.WriteTo(wr)
-	return
+	return nil
 }
 
 func tempDir(prefix string) (dir string, err error) {
@@ -617,7 +612,7 @@ func (s *Score) WriteToFile(filep string) (err error) {
 		os.RemoveAll(dir)
 	}()
 
-	_, err = s.WriteTo(f)
+	err = s.WriteTo(f)
 	if err != nil {
 		return
 	}

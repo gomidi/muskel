@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
@@ -124,7 +123,7 @@ func keyToNote(key uint8) (letter, augmenter string, octave int) {
 }
 
 func (n Note) String() string {
-	var bf bytes.Buffer
+	var bf strings.Builder
 
 	if n.scaleNote == 0 {
 		letter := n.letter

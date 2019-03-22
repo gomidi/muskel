@@ -2,7 +2,6 @@ package muskel
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"io"
 	"regexp"
@@ -30,7 +29,7 @@ type PatternCall struct {
 }
 
 func (p *PatternCall) String() string {
-	var bf bytes.Buffer
+	var bf strings.Builder
 
 	//	fmt.Printf("len events: %v\n", len(p.Events))
 
@@ -108,8 +107,8 @@ func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev 
 
 func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *positionedEvent, err error) {
 
-	var positionBf bytes.Buffer
-	var bf bytes.Buffer
+	var positionBf strings.Builder
+	var bf strings.Builder
 	rd := bufio.NewReader(strings.NewReader(strings.TrimSpace(data)))
 	_ = rd
 	positionFound := false

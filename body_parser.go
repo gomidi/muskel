@@ -144,14 +144,6 @@ func (p *BodyParser) include(file string) error {
 		return fmt.Errorf("can't include %q in score: %s", file, err.Error())
 	}
 
-	if !sc.isPartial() {
-		return fmt.Errorf("can't include %q: it is no partial", file)
-	}
-
-	if sc.Meta["partial"] != "score" {
-		return fmt.Errorf("can't include %q in score: it must be partial \"score\" but is %q", file, sc.Meta["partial"])
-	}
-
 	err = p.includeScore(sc, file)
 	if err != nil {
 		return fmt.Errorf("can't include %q in score: %s", file, err.Error())
@@ -227,7 +219,7 @@ func (p *BodyParser) parseBarLine(data string) error {
 
 	}
 
-	if data[0] == '_' {
+	if data[0] == '*' {
 		num, err := strconv.Atoi(data[1:])
 		if err != nil {
 			return err
@@ -606,6 +598,6 @@ func (p *BodyParser) parseLine(line string) error {
 }
 
 // addComment adds a comment to the body
-func (p *BodyParser) addComment(relLine int, line []byte) {
-	p.Score.BodyComments[relLine] = string(line)
+func (p *BodyParser) addComment(relLine int, line string) {
+	p.Score.BodyComments[relLine] = line
 }

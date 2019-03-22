@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 )
@@ -225,9 +224,9 @@ Trans    |       |         |         |
 			continue
 		}
 
-		var bf bytes.Buffer
+		var bf strings.Builder
 
-		_, err = unr.WriteTo(&bf)
+		err = unr.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)
@@ -406,9 +405,9 @@ $include("testdata/includes/score")
 			continue
 		}
 
-		var bf bytes.Buffer
+		var bf strings.Builder
 
-		_, err = sc.WriteTo(&bf)
+		err = sc.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)

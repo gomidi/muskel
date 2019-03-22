@@ -1,43 +1,26 @@
 package muskel
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 )
 
 type Formatter struct {
-	score            *Score
-	writerSysLine    int
-	jumpInLineBefore bool
+	score               *Score
+	writerSysLine       int
+	jumpInLineBefore    bool
+	hideInstrumentProps bool
+	hideHeader          bool
 }
 
 func NewFormatter(s *Score) *Formatter {
 	return &Formatter{score: s}
 }
 
-func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
-	// 9 whitespace to first pipe
-	l := "         |"
-	if p.score.SmallColumns {
-		l = "        |"
-	}
-
-	for _, instr := range p.score.Instruments {
-		instr.calcColWidth(p.score.isUnrolled)
-		//instrColWidths[i] = instr.colWidth
-		if p.score.SmallColumns {
-			l += fmt.Sprintf("%s|", instr.pad("<"+instr.Name+">"))
-		} else {
-
-			l += fmt.Sprintf(" %s |", instr.pad("<"+instr.Name+">"))
-		}
-	}
-
-	p.writeBodyLine(bf, l)
-
-	l = "File     |"
+func (p *Formatter) writeInstrumentProps(bf io.Writer) {
+	l := "File     |"
 	if p.score.SmallColumns {
 		l = "File    |"
 	}
@@ -193,7 +176,32 @@ func (p *Formatter) writeInstrumentLines(bf *bytes.Buffer) {
 	p.writeBodyLine(bf, l)
 }
 
-func (f *Formatter) printSorted(bf *bytes.Buffer, format string, m map[string]string) {
+func (p *Formatter) writeInstrumentLines(bf io.Writer) {
+	// 9 whitespace to first pipe
+	l := "         |"
+	if p.score.SmallColumns {
+		l = "        |"
+	}
+
+	for _, instr := range p.score.Instruments {
+		instr.calcColWidth(p.score.isUnrolled)
+		//instrColWidths[i] = instr.colWidth
+		if p.score.SmallColumns {
+			l += fmt.Sprintf("%s|", instr.pad("<"+instr.Name+">"))
+		} else {
+
+			l += fmt.Sprintf(" %s |", instr.pad("<"+instr.Name+">"))
+		}
+	}
+
+	p.writeBodyLine(bf, l)
+
+	if !p.hideInstrumentProps {
+		p.writeInstrumentProps(bf)
+	}
+}
+
+func (f *Formatter) printSorted(bf io.Writer, format string, m map[string]string) {
 	var keys = make([]string, len(m))
 
 	var i int
@@ -241,7 +249,7 @@ func (f *Formatter) prepareBars() {
 	}
 }
 
-func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
+func (p *Formatter) printBody(bf io.Writer, barLine string) {
 	var l string
 	p.jumpInLineBefore = true
 	p.writeInstrumentLines(bf)
@@ -270,7 +278,7 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 		}
 
 		if emptyBarCounter > 0 {
-			l = fmt.Sprintf("_%v", emptyBarCounter+1)
+			l = fmt.Sprintf("*%v", emptyBarCounter+1)
 			p.writeBodyLine(bf, l)
 			p.jumpInLineBefore = true
 			emptyBarCounter = 0
@@ -366,13 +374,14 @@ func (p *Formatter) printBody(bf *bytes.Buffer, barLine string) {
 
 	for i := 0; i < missingLines; i++ {
 		if comment, has := p.score.BodyComments[p.writerSysLine+i]; has {
-			bf.WriteString(comment + "\n")
+			fmt.Fprint(bf, comment+"\n")
+			// bf.WriteString(comment + "\n")
 		}
 	}
 
 }
 
-func (p *Formatter) printHeader(bf *bytes.Buffer) {
+func (p *Formatter) printHeader(bf io.Writer) {
 	metaMap := map[string]string{}
 
 	for k, v := range p.score.Meta {
@@ -381,14 +390,16 @@ func (p *Formatter) printHeader(bf *bytes.Buffer) {
 
 	p.printSorted(bf, "%s %s\n", metaMap)
 
-	bf.WriteString("\n\n")
+	fmt.Fprint(bf, "\n\n")
+	// bf.WriteString("\n\n")
 
 	for _, incl := range p.score.HeaderIncludes {
 		fmt.Fprintf(bf, "$include(%q)\n", incl)
 	}
 
 	p.printSorted(bf, "/%s/%s\n", p.score.Temperament)
-	bf.WriteString("\n\n")
+	fmt.Fprint(bf, "\n\n")
+	// bf.WriteString("\n\n")
 
 	pattDefMap := map[string]string{}
 
@@ -398,17 +409,22 @@ func (p *Formatter) printHeader(bf *bytes.Buffer) {
 
 	p.printSorted(bf, "%s %s\n", pattDefMap)
 
-	bf.WriteString("\n\n")
+	fmt.Fprint(bf, "\n\n")
+	//bf.WriteString("\n\n")
 
 	for _, comment := range p.score.HeaderComments {
-		bf.WriteString(comment + "\n")
+		fmt.Fprint(bf, comment+"\n")
+		// bf.WriteString(comment + "\n")
 	}
 }
 
-func (p *Formatter) Format(bf *bytes.Buffer) {
-	p.printHeader(bf)
+func (p *Formatter) WriteTo(bf io.Writer) {
 
-	bf.WriteString("\n=\n")
+	if !p.hideHeader {
+		p.printHeader(bf)
+		fmt.Fprint(bf, "\n=\n")
+		//bf.WriteString("\n=\n")
+	}
 
 	barLine := " |"
 	if p.score.SmallColumns {
@@ -418,24 +434,27 @@ func (p *Formatter) Format(bf *bytes.Buffer) {
 	p.printBody(bf, barLine)
 }
 
-func (p *Formatter) writeBodyLine(bf *bytes.Buffer, line string) {
+func (p *Formatter) writeBodyLine(bf io.Writer, line string) {
 	p._writeBodyLine(bf, line, true)
 }
 
-func (p *Formatter) _writeBodyLine(bf *bytes.Buffer, line string, lineBreak bool) {
+func (p *Formatter) _writeBodyLine(bf io.Writer, line string, lineBreak bool) {
 	// we don't write comments for unrolled scores, since the lines won't match anyway
 	if !p.score.isUnrolled {
 		if comment, has := p.score.BodyComments[p.writerSysLine]; has {
 			p.writerSysLine++
-			bf.WriteString(comment + "\n")
+			fmt.Fprint(bf, comment+"\n")
+			// bf.WriteString(comment + "\n")
 			p._writeBodyLine(bf, line, lineBreak)
 			return
 		}
 	}
 	p.writerSysLine++
 	if lineBreak {
-		bf.WriteString(line + "\n")
+		fmt.Fprint(bf, line+"\n")
+		//bf.WriteString(line + "\n")
 		return
 	}
-	bf.WriteString(line)
+	fmt.Fprint(bf, line)
+	//bf.WriteString(line)
 }

@@ -17,8 +17,6 @@ func init() {
 }
 
 const drumnotes = `
-@partial: header
-
 // some shortcuts for drums (GM)
 kd: 1MN36*:
 sn: 1MN40*:

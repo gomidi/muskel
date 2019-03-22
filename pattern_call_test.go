@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"bytes"
 	"reflect"
 	"strings"
 	"testing"
@@ -74,7 +73,7 @@ func TestSpread(t *testing.T) {
 
 		positionOfNextBar = newPositionOfNextBar
 
-		var bf bytes.Buffer
+		var bf strings.Builder
 
 		for _, event := range events {
 			bf.WriteString(event.String() + " ")

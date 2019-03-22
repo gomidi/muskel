@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 )
@@ -19,27 +18,11 @@ func TestRandom2(t *testing.T) {
 1 | ?(a,b) | 
 
 `, [2]string{`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a       |
 `,
 				`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | b       |
 `,
 			},
@@ -53,37 +36,11 @@ bb: 2d
 1 | ?(aa,bb) | 
 
 `, [2]string{`
-aa:             1c
-bb:             2d
-
-
-
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | c       |
 `,
 				`
-aa:             1c
-bb:             2d
-
-
-
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    |         |
     2    | d       |
 `,
@@ -96,27 +53,11 @@ Trans    |         |
 1 | ?[50]a | 
 
 `, [2]string{`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a       |
 `,
 				`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    |         |
 `,
 			},
@@ -144,14 +85,11 @@ Trans    |         |
 			continue
 		}
 
-		var bf bytes.Buffer
-
-		_, err = unr.WriteTo(&bf)
-
-		if err != nil {
-			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)
-			continue
-		}
+		var bf strings.Builder
+		fm := unr.Formatter()
+		fm.hideInstrumentProps = true
+		fm.hideHeader = true
+		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())
 
@@ -160,12 +98,9 @@ Trans    |         |
 		expected[0] = strings.TrimSpace(test.expected[0])
 		expected[1] = strings.TrimSpace(test.expected[1])
 
-		//		fmt.Println(result)
-
 		if result != expected[0] && result != expected[1] {
 			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%s\n\nbut one of these were expected:\n%s\n%s\n", i, test.input, result, expected[0], expected[1])
 			t.Errorf("[%v] score\n%q\n\nunrolled gives \n%q\n\nbut one of these were expected:\n%q\n%q\n", i, test.input, result, expected[0], expected[1])
-			//			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
 		}
 	}
 }
@@ -186,13 +121,6 @@ func TestRandom1(t *testing.T) {
 `, `
 =
          | <piano> | <vox> |
-File     |         |       |
-Ch       |         |       |
-Bank     |         |       |
-Prog     |         |       |
-Vol      |         |       |
-PbRange  |         |       |
-Trans    |         |       |
     1    | a       |       |
 
     1    | a       |       |
@@ -206,13 +134,6 @@ Trans    |         |       |
 `, `
 =
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | b       |
 `},
 	}
@@ -238,23 +159,16 @@ Trans    |         |
 			continue
 		}
 
-		var bf bytes.Buffer
-
-		_, err = unr.WriteTo(&bf)
-
-		if err != nil {
-			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)
-			continue
-		}
+		var bf strings.Builder
+		fm := unr.Formatter()
+		fm.hideInstrumentProps = true
+		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())
 		expected := strings.TrimSpace(test.expected)
 
-		//		fmt.Println(result)
-
 		if result != expected {
 			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, result, expected, result, expected)
-			//			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
 		}
 	}
 }

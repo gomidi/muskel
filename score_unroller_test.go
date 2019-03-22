@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 )
@@ -16,58 +15,15 @@ func TestUnroll(t *testing.T) {
 		input    string
 		expected string
 	}{
-		// should raise error therefor uncommented
-		/*
-		   		{
-		   			`
-		   =
-		            | Bass |
-		   Ch       | 3    |
-		   Bank     |      |
-		   Prog     |      |
-		   Vol      |      |
-		   PbRange  |      |
-		   Trans    |      |
-		   $scale(d',ionian)
-		       1    | ^-1  |
-		       1&   | ^2   |
-		   		`,
-		   			`
-		   =
-		            | Bass |
-		   Ch       | 3    |
-		   Bank     |      |
-		   Prog     |      |
-		   Vol      |      |
-		   PbRange  |      |
-		   Trans    |      |
-		   $scale(d',ionian)
-		       1    | c#'  |
-		       1&   | e'   |
-		   		`,
-		   		},
-		*/
 		{
 			`
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
     1    | e'     |
 
     1    |        |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e'       |
 
     1    |          |`,
@@ -76,23 +32,11 @@ Trans    |          |
 			`
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
     1    | ^2     |
 
     1    |        |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | d'       |
 
     1    |          |`,
@@ -101,24 +45,12 @@ Trans    |          |
 			`
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | ^2     |
 
     1    |        |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | e        |
 
@@ -129,24 +61,12 @@ Trans    |          |
 patt: 1^2 2&^3
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt   |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | e        |
     2&   | f        |
@@ -159,24 +79,12 @@ Trans    |          |
 patt: 1^2 2&^3
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^2   |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | g        |
     2&   | a        |
@@ -189,24 +97,12 @@ Trans    |          |
 patt: 1^2 2&^3
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^-3   |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | B        |
     2&   | c        |
@@ -220,24 +116,12 @@ pattA: 1^2 2&^3
 pattB: 1pattA^-3
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | pattB   |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | B        |
     2&   | c        |
@@ -250,24 +134,12 @@ Trans    |          |
 patt: 1^2 2&^3
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^^3   |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | f        |
     2&   | g        |
@@ -275,66 +147,17 @@ Trans    |          |
     1    | g        |
     2&   | a        |`,
 		},
-		// the following is not allowed and should return an error (therefor is uncommented)
-		/*
-		   		{
-		   			`
-		   patt: 1^2 2&^3
-		   pattB: 1patt^^3
-		   =
-		            | <Vocals> |
-		   Ch       | 1      |
-		   Bank     |        |
-		   Prog     |        |
-		   Vol      |        |
-		   4/4
-		   $scale(d,dorian)
-		       1    | pattB   |
-
-		   $scale(e,dorian)
-		       1    | ./.   |`,
-		   			`
-		   =
-		            | <Vocals> |
-		   Ch       | 1      |
-		   Bank     |        |
-		   Prog     |        |
-		   Vol      |        |
-		   PbRange  |        |
-		   Trans    |        |
-		   4/4
-		   $scale(d,dorian)
-		       1    | f      |
-		       2&   | g      |
-
-		   $scale(e,dorian)
-		       1    | g      |
-		       2&   | a      |`,
-		   		},
-		*/
 		{
 			`
 patt: 1^2 2&^3
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^^-2   |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | B        |
     2&   | c        |
@@ -344,29 +167,15 @@ Trans    |          |
 		},
 		{
 			`
-@test: mount to step 3
 patt: 1e 2&f
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^^3   |
 \dorian^e
     1    | ./.   |`,
 			`
-@test: mount to step 3
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | f        |
     2&   | g        |
@@ -376,30 +185,15 @@ Trans    |          |
 		},
 		{
 			`
-@test: mount to step 3
 patt: 1#1 2&f 3^1
 =
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
 4/4\dorian^d
     1    | patt^^3(e)   |
 \dorian^e
     1    | ./.   |`,
 			`
-@test: mount to step 3
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | f        |
     2&   | g        |
@@ -411,29 +205,15 @@ Trans    |          |
 		},
 		{
 			`
-@test: mount to step 3
 patt: 1#1 2&f 3^1
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^^3(^2)   |
 \dorian^e
     1    | ./.   |`,
 			`
-@test: mount to step 3
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | f        |
     2&   | f        |
@@ -449,25 +229,12 @@ Trans    |          |
 patt: 1#1 2&f 3^1
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^^3(^2)/:,^1,:/   |
 \dorian^e
     1    | ./.   |`,
 			`
-@test: mount to step 3
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | f        |
     2&   | d        |
@@ -477,70 +244,17 @@ Trans    |          |
     2&   | e        |
     3    | f#       |`,
 		},
-		// the following is not allowed and should return an error (therefor is uncommented)
-		/*
-		   		{
-		   			`
-		   @test: mount to step 3
-		   patt: 1e 2&f
-		   pattB: 1patt^^3
-		   =
-		            | <Vocals> |
-		   Ch       | 1      |
-		   Bank     |        |
-		   Prog     |        |
-		   Vol      |        |
-		   4/4
-		   $scale(d,dorian)
-		       1    | pattB   |
-
-		   $scale(e,dorian)
-		       1    | ./.   |`,
-		   			`
-		   @test: mount to step 3
-		   =
-		            | <Vocals> |
-		   Ch       | 1      |
-		   Bank     |        |
-		   Prog     |        |
-		   Vol      |        |
-		   PbRange  |        |
-		   Trans    |        |
-		   4/4
-		   $scale(d,dorian)
-		       1    | f      |
-		       2&   | g      |
-
-		   $scale(e,dorian)
-		       1    | g      |
-		       2&   | a      |`,
-		   		},
-		*/
 		{
 			`
-@test: mount to step 1
 patt: 1e 2&f
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^^1   |
 \dorian^e
     1    | ./.   |`,
 			`
-@test: mount to step 1
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | d        |
     2&   | e        |
@@ -550,29 +264,15 @@ Trans    |          |
 		},
 		{
 			`
-@test: mount to step 2
 patt: 1e 2&f#
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | patt^^2   |
 \dorian^e
     1    | ./.   |`,
 			`
-@test: mount to step 2
-=
          | <Vocals> |
-File     |          |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
 4/4\dorian^d
     1    | e        |
     2&   | g        |
@@ -584,24 +284,12 @@ Trans    |          |
 			`
 =
          | <Vocals> |
-Ch       | 1      |
-Bank     |        |
-Prog     |        |
-Vol      |        |
 4/4\dorian^d
     1    | _^2_"hi"_ |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals>  |
-File     |           |
-Ch       | 1         |
-Bank     |           |
-Prog     |           |
-Vol      |           |
-PbRange  |           |
-Trans    |           |
 4/4\dorian^d
     1    | _e_"hi"_  |
 \dorian^e
@@ -611,24 +299,12 @@ Trans    |           |
 			`
 =
          | <Vocals> |
-Ch       | 1        |
-Bank     |          |
-Prog     |          |
-Vol      |          |
 4/4\dorian^d
     1    | {^2,a,b'}2 |
 \dorian^e
     1    | ./.   |`,
 			`
-=
          | <Vocals>   |
-File     |            |
-Ch       | 1          |
-Bank     |            |
-Prog     |            |
-Vol      |            |
-PbRange  |            |
-Trans    |            |
 4/4\dorian^d
     1    | {e,a,b'}2  |
 \dorian^e
@@ -638,24 +314,12 @@ Trans    |            |
 			`
 =
          | <Vocals> | <Keys> |
-Ch       | 1        |        |
-Bank     |          |        |
-Prog     |          |        |
-Vol      |          |        |
 4/4\dorian^d
     1    | ^2       | ^3     |
 \dorian^e
     1    | ^2       | ^3     |`,
 			`
-=
          | <Vocals> | <Keys> |
-File     |          |        |
-Ch       | 1        |        |
-Bank     |          |        |
-Prog     |          |        |
-Vol      |          |        |
-PbRange  |          |        |
-Trans    |          |        |
 4/4\dorian^d
     1    | e        | f      |
 \dorian^e
@@ -665,24 +329,12 @@ Trans    |          |        |
 			`
 =
          | <Vocals> | <Keys> |
-Ch       | 1      |      |
-Bank     |        |      |
-Prog     |        |      |
-Vol      |        |      |
 4/4\dorian^d
     1    | ^2     | ^3#  |
 \dorian^e
     1    | ^2     | ^3## |`,
 			`
-=
          | <Vocals> | <Keys> |
-File     |          |        |
-Ch       | 1        |        |
-Bank     |          |        |
-Prog     |          |        |
-Vol      |          |        |
-PbRange  |          |        |
-Trans    |          |        |
 4/4\dorian^d
     1    | e        | f#     |
 \dorian^e
@@ -692,24 +344,11 @@ Trans    |          |        |
 			`
 =
          | <Vocals> | <Piano> | 
-File     |          |         |
-Ch       |          |         |
-Bank     |          |         |
-Prog     |          |         |
-Vol      |          |         |
     3    |          |         |
      &   |          |         |
 `,
 			`
-=
          | <Vocals> | <Piano> |
-File     |          |         |
-Ch       |          |         |
-Bank     |          |         |
-Prog     |          |         |
-Vol      |          |         |
-PbRange  |          |         |
-Trans    |          |         |
     3    |          |         |
      &   |          |         |
 `,
@@ -722,15 +361,7 @@ Trans    |          |         |
 1  |a'   |
 						`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      |
 			`,
 		},
@@ -742,15 +373,7 @@ Trans    |         |
 &  |c"|
 						`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      |
      &   | c"      |
 			`,
@@ -766,15 +389,7 @@ Trans    |         |
 2  |d |
 						`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      |
      &   | c"      |
 
@@ -791,15 +406,7 @@ Trans    |         |
 1  |./. |
 						`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      |
      &   | c"      |
 
@@ -821,15 +428,7 @@ Trans    |         |
 1  |b |
 						`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      |
      &   | c"      |
 
@@ -862,15 +461,7 @@ Trans    |         |
 1  |b |
 		   		   		   			`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      |
      &   | c"      |
 
@@ -903,15 +494,7 @@ Trans    |         |
 1 |f"|
 					   		   			`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      | A
      &   | c"      |
 
@@ -944,15 +527,7 @@ Trans    |         |
 1 |f"|
 					   		   			`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      | A
      &   | c"      |
 
@@ -985,15 +560,7 @@ Trans    |         |
 1 |f"|
 					   		   			`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      | A
      &   | c"      |
 
@@ -1026,15 +593,7 @@ Trans    |         |
 1 |f"|
 					   		   			`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      | A
      &   | c"      |
 
@@ -1067,15 +626,7 @@ Trans    |         |
 1 |f"|
 					   		   			`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      | A
      &   | c"      |
 
@@ -1105,15 +656,7 @@ Trans    |         |
 [A]
 1&  |e |`,
 			`
-=
          | <piano> |
-File     |         |
-Ch       |         |
-Bank     |         |
-Prog     |         |
-Vol      |         |
-PbRange  |         |
-Trans    |         |
     1    | a'      | A
      &   | c"      |
 
@@ -1141,15 +684,7 @@ Trans    |         |
 1&  |e    |     |
 2   |     | g   |`,
 			`
-=
          | <piano> | <vox> |
-File     |         |       |
-Ch       |         |       |
-Bank     |         |       |
-Prog     |         |       |
-Vol      |         |       |
-PbRange  |         |       |
-Trans    |         |       |
     1    | a'      | e     | A
      &   | c"      | e     |
     2    |         | f     |
@@ -1182,15 +717,7 @@ Trans    |         |       |
 1&  |e    |     |
 2   |     | g   |`,
 			`
-=
          | <piano> | <vox> |
-File     |         |       |
-Ch       |         |       |
-Bank     |         |       |
-Prog     |         |       |
-Vol      |         |       |
-PbRange  |         |       |
-Trans    |         |       |
     1    | a'      | e     | A
      &   | c"      | e     |
     2    |         | f     |
@@ -1220,7 +747,6 @@ Trans    |         |       |
 				continue
 			}
 		*/
-		//fmt.Printf("unroll [%v]\n", i)
 
 		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll")
 
@@ -1229,8 +755,6 @@ Trans    |         |       |
 			continue
 		}
 
-		// fmt.Printf("parts (before unrolling): %v\n", sc.Parts)
-
 		unr, err := sc.Unroll()
 
 		if err != nil {
@@ -1238,28 +762,23 @@ Trans    |         |       |
 			continue
 		}
 
-		var bf bytes.Buffer
+		var bf strings.Builder
 
-		_, err = unr.WriteTo(&bf)
+		fm := unr.Formatter()
+		fm.hideInstrumentProps = true
+		fm.hideHeader = true
+		fm.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)
 			continue
 		}
 
-		result := bf.String()
-
-		//		fmt.Println(result)
-
-		res := strings.Split(result, "=\n")
-		exp := strings.Split(test.expected, "=\n")
-
-		got := strings.TrimSpace(res[1])
-		wanted := strings.TrimSpace(exp[1])
+		got := strings.TrimSpace(bf.String())
+		wanted := strings.TrimSpace(test.expected)
 
 		if got != wanted {
 			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, got, wanted, got, wanted)
-			//			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
 		}
 	}
 }

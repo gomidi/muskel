@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"bytes"
 	"strings"
 	"testing"
 )
@@ -17,10 +16,6 @@ func TestFormatterJumps(t *testing.T) {
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
     1    | e      | A
 [A]
     2    | f      |
@@ -29,13 +24,6 @@ Vol      |          |
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        | A
 [A]
     2    | f        |
@@ -46,27 +34,16 @@ Trans    |          |
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
     1    | e      |  A
-_2
+*2
     2    | f      |
 `,
 			`
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        | A
-_2
+*2
     2    | f        |
 `,
 		},
@@ -75,10 +52,6 @@ _2
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
     1    | e      | A
 [A]
 [A]
@@ -88,13 +61,6 @@ Vol      |          |
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        | A
 [A]
 [A]
@@ -106,10 +72,6 @@ Trans    |          |
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
     1    | e      | A
 [A]
 [A]
@@ -120,13 +82,6 @@ Vol      |          |
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        | A
 [A]
 [A]
@@ -139,10 +94,6 @@ Trans    |          |
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
     1    | e      | A
 [A]
 [A]
@@ -153,13 +104,6 @@ Vol      |          |
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        | A
 [A]
 [A]
@@ -172,10 +116,6 @@ Trans    |          |
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
     1    | e      | 
 3/4@120~
     2    | f      |
@@ -185,13 +125,6 @@ Vol      |          |
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        |
 3/4@120~
     2    | f        |
@@ -203,10 +136,6 @@ Trans    |          |
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
     1    | e      | 
 @120~~\major^d
     2    | f      |
@@ -216,13 +145,6 @@ Vol      |          |
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        |
 @120~~\major^d
     2    | f        |
@@ -234,11 +156,6 @@ Trans    |          |
 
 =
          | <Vocals> |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-Trans    |        |
     1    | e      | A
 [A]
 [A]
@@ -249,13 +166,6 @@ Trans    |        |
 
 =
          | <Vocals> |
-File     |          |
-Ch       |          |
-Bank     |          |
-Prog     |          |
-Vol      |          |
-PbRange  |          |
-Trans    |          |
     1    | e        | A
 [A]
 [A]
@@ -267,7 +177,7 @@ Trans    |          |
 
 	for i, test := range tests {
 		/*
-			if i != 0 {
+			if i != 1 {
 				continue
 			}
 		*/
@@ -278,14 +188,11 @@ Trans    |          |
 			continue
 		}
 
-		var bf bytes.Buffer
+		var bf strings.Builder
 
-		_, err = sc.WriteTo(&bf)
-
-		if err != nil {
-			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
-			continue
-		}
+		fm := sc.Formatter()
+		fm.hideInstrumentProps = true
+		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())
 		expected := strings.TrimSpace(test.expected)
@@ -357,7 +264,7 @@ Prog     |          |
 Vol      |          |
     1    | e'     |
     2    | aa     |
-_3
+*3
     1    |f"     |`,
 			`
 aa:             1f" 2&g
@@ -376,7 +283,7 @@ Trans   |        |
     1   |e'      |
     2   |f"      |
     3&  |g       |
-_3
+*3
     1   |f"      |`,
 		},
 		{
@@ -444,9 +351,9 @@ Trans   |       |     |
 			continue
 		}
 
-		var bf bytes.Buffer
+		var bf strings.Builder
 
-		_, err = unr.WriteTo(&bf)
+		err = unr.WriteTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)

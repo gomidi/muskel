@@ -1,7 +1,6 @@
 package muskel
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,7 +16,7 @@ func pad(s string, length int) string {
 	}
 
 	diff := length - len(s)
-	var bf bytes.Buffer
+	var bf strings.Builder
 
 	bf.WriteString(s)
 
@@ -191,7 +190,7 @@ func pos32thToString(pos uint) string {
 	qn := pos / 8
 	rest := pos % 8
 
-	var bf bytes.Buffer
+	var bf strings.Builder
 	fmt.Fprintf(&bf, "%v", qn+1)
 
 	eights := rest / 4

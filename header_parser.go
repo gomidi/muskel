@@ -10,8 +10,8 @@ type HeaderParser struct {
 	*Score
 }
 
-func (p *HeaderParser) addComment(line []byte) {
-	p.Score.HeaderComments = append(p.Score.HeaderComments, string(line))
+func (p *HeaderParser) addComment(line string) {
+	p.Score.HeaderComments = append(p.Score.HeaderComments, line)
 }
 
 // parseTemperamentLine parses a line of temperament definition (in the header)

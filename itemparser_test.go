@@ -23,6 +23,7 @@ func TestParseItem(t *testing.T) {
 		{".4.", RepeatLastNBarsUntilChange(4)},
 		{"%", RepeatLastEvent{}},
 		{"{a,b}2", NTuple{items: []interface{}{Note{letter: "a", octave: 1, velocity: -1}, Note{letter: "b", octave: 1, velocity: -1}}, endPos: 8}},
+		{"{a,b,*}2", NTuple{items: []interface{}{Note{letter: "a", octave: 1, velocity: -1}, Note{letter: "b", octave: 1, velocity: -1}, Rest}, endPos: 8}},
 		{"\"hiho\"", Lyric("hiho")},
 		//		{"Sa'", Note{letter: "a", octave: 2}},
 		//		{"Za'", Note{letter: "a", octave: 2}},

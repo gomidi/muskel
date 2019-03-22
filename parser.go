@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"strings"
 )
 
 type Parser struct {
@@ -14,7 +15,8 @@ type Parser struct {
 	header *HeaderParser
 	body   *BodyParser
 
-	input *bufio.Reader
+	//input *bufio.Reader
+	input *bufio.Scanner
 
 	current struct {
 		isComment bool // track, if we are currently inside a comment
@@ -28,8 +30,9 @@ type Parser struct {
 func NewParser(r io.Reader) *Parser {
 	sc := NewScore()
 	return &Parser{
-		Score:  sc,
-		input:  bufio.NewReader(r),
+		Score: sc,
+		//input:  bufio.NewReader(r),
+		input:  bufio.NewScanner(r),
 		header: &HeaderParser{sc},
 		body: &BodyParser{
 			Score:          sc,
@@ -75,7 +78,7 @@ func Parse(rd io.Reader, filepath string) (sc *Score, err error) {
 
 // addComment adds a comment to the header or body, depending on whether we are currently inside the header
 // or the body
-func (p *Parser) addComment(line []byte) {
+func (p *Parser) addComment(line string) {
 	if p.current.isHeader {
 		p.header.addComment(line)
 		return
@@ -84,20 +87,15 @@ func (p *Parser) addComment(line []byte) {
 }
 
 // parseLine parses a line
-func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
+func (p *Parser) parseLine(header *strings.Builder, line string) error {
 
-	if len(line) > 0 && string(line[0]) == "=" {
+	if len(line) > 0 && strings.HasPrefix(line, "=") {
 		p.current.isHeader = false
 		p.Score.lineWhereBodyStarts = p.current.line + 1
 		err := p.header.parseHeader(header.String())
 		if err != nil {
 			return err
 		}
-		/*
-			if p.Score.Meta["partial"] == "header" {
-				return io.EOF
-			}
-		*/
 		return nil
 	}
 
@@ -116,7 +114,15 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 		return nil
 	}
 
-	switch string(line[0:2]) {
+	var start string
+
+	if len(line) > 1 {
+		start = string(line[0:2])
+	}
+
+	// fmt.Printf("%q %v\n", line, len(line))
+
+	switch start {
 	case "//":
 		p.addComment(line)
 	case "/*":
@@ -132,20 +138,11 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 		}
 
 		if p.current.isHeader {
-			header.Write(line)
-			header.WriteString("\n")
+			header.WriteString(line + "\n")
 			return nil
 		}
 
-		//		fmt.Printf("partial header: %q\n", p.Score.Meta["partial"])
-		//		fmt.Printf("meta: %v\n", p.Score.Meta)
-
-		/*
-			if p.Score.Meta["partial"] == "header" {
-				return io.EOF
-			}
-		*/
-		err := p.body.parseLine(string(line))
+		err := p.body.parseLine(line)
 		if err != nil {
 			return fmt.Errorf("Error in line %v:\n%s\n", p.current.line+1, err.Error())
 		}
@@ -153,20 +150,8 @@ func (p *Parser) parseLine(header *bytes.Buffer, line []byte) error {
 	return nil
 }
 
-func (p *Parser) readLine(header *bytes.Buffer) error {
-	p.current.line++
-	line, _, err := p.input.ReadLine()
-
-	if err != nil {
-		return err
-	}
-	p.Score.lastLine++
-
-	return p.parseLine(header, line)
-}
-
 func (p *Parser) Parse() (err error) {
-	var header = &bytes.Buffer{}
+	var header strings.Builder
 
 	p.current.isHeader = true
 	p.current.isComment = false
@@ -174,8 +159,16 @@ func (p *Parser) Parse() (err error) {
 	p.Score.lineWhereBodyStarts = 0
 	p.body.jumpInLineBefore = true
 
-	for {
-		err = p.readLine(header)
+	for p.input.Scan() {
+		p.current.line++
+
+		err = p.input.Err()
+		if err != nil {
+			break
+		}
+		p.Score.lastLine++
+
+		err = p.parseLine(&header, p.input.Text())
 
 		if err != nil {
 			break
