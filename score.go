@@ -366,7 +366,7 @@ func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) (err erro
 	hasPlaceholder := strings.Index(midifile, "%s") > -1
 
 	if !hasPlaceholder {
-		return s.writeToFile(midifile, "*", options...)
+		return s.writeSMFToFile(midifile, "*", options...)
 	}
 
 	var fileGroups = map[string]string{}
@@ -377,7 +377,7 @@ func (s *Score) WriteSMF(midifile string, options ...smfwriter.Option) (err erro
 	var errs errors
 
 	for grp, fl := range fileGroups {
-		err := s.writeToFile(fl, grp, options...)
+		err := s.writeSMFToFile(fl, grp, options...)
 		if err != nil {
 			errs = append(errs, err)
 		}
@@ -402,8 +402,7 @@ func (e errors) Error() string {
 	return bf.String()
 }
 
-func (s *Score) writeToFile(midifile, filegroup string, options ...smfwriter.Option) error {
-
+func (s *Score) writeSMFTo(wr io.Writer, filegroup string, options ...smfwriter.Option) error {
 	numTracks := uint16(2) // first track is for time signatures, second track is for tempo changes
 
 	for _, instr := range s.Instruments {
@@ -423,7 +422,43 @@ func (s *Score) writeToFile(midifile, filegroup string, options ...smfwriter.Opt
 		options = append(options, smfwriter.Debug(debugLog{}))
 	}
 
-	return mid.NewSMFFile(midifile, numTracks, sw.Write, options...)
+	mwr := mid.NewSMF(wr, numTracks, options...)
+	return sw.Write(mwr)
+}
+
+func (s *Score) writeSMFToFile(midifile, filegroup string, options ...smfwriter.Option) error {
+	f, err := os.Create(midifile)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	return s.writeSMFTo(f, filegroup)
+
+	/*
+
+		numTracks := uint16(2) // first track is for time signatures, second track is for tempo changes
+
+		for _, instr := range s.Instruments {
+			if instr.MIDIChannel >= 0 && (filegroup == "*" || instr.FileGroup == filegroup) {
+				numTracks++
+			}
+		}
+
+		sw := NewSMFWriter(s, filegroup)
+
+		options = append(
+			[]smfwriter.Option{
+				smfwriter.TimeFormat(smf.MetricTicks(960)),
+			}, options...)
+
+		if DEBUG {
+			options = append(options, smfwriter.Debug(debugLog{}))
+		}
+
+		return mid.NewSMFFile(midifile, numTracks, sw.Write, options...)
+	*/
 }
 
 type debugLog struct{}

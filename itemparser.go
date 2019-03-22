@@ -345,13 +345,11 @@ func (p *itemParser) parseNTuple(data string, posIn32th uint) (nt NTuple, err er
 		return
 	}
 
-	completedEndPos, endPos, err := positionTo32th("", dd[1])
+	_, endPos, err := positionTo32th("", dd[1])
 
 	if err != nil {
 		return nt, err
 	}
-
-	_ = completedEndPos
 
 	data = strings.TrimSpace(dd[0])
 
@@ -384,37 +382,9 @@ func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{},
 		return nil, fmt.Errorf("invalid random value: ?%s", data)
 	}
 
-	switch data[0] {
-	case '[':
-		idx := strings.Index(data, "]")
-		if idx < 0 {
-			return nil, fmt.Errorf("invalid random value: ?%s", data)
-		}
+	// strings.IndexAny()
 
-		num := data[1:idx]
-
-		var rp RandomProbability
-		var n int
-		n, err = strconv.Atoi(num)
-
-		if err != nil {
-			return nil, fmt.Errorf("invalid random value: ?%s, syntax must be [n] where n is a number between 0 and 100", data)
-		}
-
-		rp.prob = uint8(n)
-
-		if rp.prob < 0 || rp.prob > 100 {
-			return nil, fmt.Errorf("invalid random value: ?%s, syntax must be [n] where n is a number between 0 and 100", data)
-		}
-
-		rp.item, err = p.parseItem(data[idx+1:], posIn32th)
-
-		if err != nil {
-			return nil, fmt.Errorf("invalid random value item: ?%s", data)
-		}
-		rp.itemOriginalData = data[idx+1:]
-		return &rp, nil
-	case '(':
+	if data[0] == '(' {
 		alternatives := strings.Trim(data, "()")
 		alt := strings.Split(alternatives, ",")
 		var r RandomChooser
@@ -431,9 +401,37 @@ func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{},
 			}
 		}
 		return &r, nil
-	default:
+	}
+
+	idx := strings.Index(data, "%")
+	if idx < 0 {
 		return nil, fmt.Errorf("invalid random value: ?%s", data)
 	}
+
+	num := data[:idx]
+
+	var rp RandomProbability
+	var n int
+	n, err = strconv.Atoi(num)
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid random value: ?%s, syntax must be ?n%% where n is a number between 0 and 100", data)
+	}
+
+	rp.prob = uint8(n)
+
+	if rp.prob < 0 || rp.prob > 100 {
+		return nil, fmt.Errorf("invalid random value: ?%s, syntax must be ?n%% where n is a number between 0 and 100, but number is %v", data, rp.prob)
+	}
+
+	rp.item, err = p.parseItem(data[idx+1:], posIn32th)
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid random value item: ?%s", data)
+	}
+	rp.itemOriginalData = data[idx+1:]
+	return &rp, nil
+
 }
 
 func (p *itemParser) parseCommand(data string, posIn32th uint) (interface{}, error) {

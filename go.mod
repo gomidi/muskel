@@ -1,3 +1,3 @@
 module gitlab.com/gomidi/muskel
 
-require gitlab.com/gomidi/midi v1.11.1
+require gitlab.com/gomidi/midi v1.12.0

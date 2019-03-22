@@ -73,18 +73,12 @@ func (p PatternEvents) Spread(start int, num, denom uint8) (barEvents []*positio
 }
 
 func (p *PatternCall) parseItem(data string, posIn32th uint) (item interface{}, err error) {
-	ip := &itemParser{}
-	ip.GetDefinition = p.getter
-	return ip.parseItem(data, posIn32th)
-}
-
-func (p *PatternCall) parseItems(data string, posIn32th uint) (item interface{}, err error) {
 	if len(data) == 0 {
 		return nil, nil
 	}
-
-	return p.parseItem(data, posIn32th)
-
+	ip := &itemParser{}
+	ip.GetDefinition = p.getter
+	return ip.parseItem(data, posIn32th)
 }
 
 func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev *positionedEvent, err error) {
@@ -95,7 +89,7 @@ func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev 
 	}
 	ev.positionIn32ths += posIn32th
 	ev.originalData = data
-	item, err := p.parseItems(ev.originalData, posIn32th)
+	item, err := p.parseItem(ev.originalData, posIn32th)
 	ev.item = item
 	if p.SyncFirst || p.syncFirstThroughPatternDefinition {
 		//		fmt.Printf("removing %v from %v\n", p.firstPos, ev.positionIn32ths)
@@ -306,119 +300,127 @@ func (p *PatternCall) addVelocity(orig int8) (vel int8) {
 	return
 }
 
-func (p *PatternCall) parseEvents(data string, posIn32th uint) error {
+func (p *PatternCall) __parseEvent(idx int, ev string, posIn32th uint, firstScaleNoteDiff int8) (newDiff int8, err error) {
+	e, err := p.parseEvent(idx, ev, posIn32th)
+	if err != nil {
+		return firstScaleNoteDiff, fmt.Errorf("could not parse event %q: %s", ev, err.Error())
+	}
+
+	//			fmt.Printf("e: %#v\n", e)
+
+	//p.Events = append(p.Events, e)
+
+	switch v := e.item.(type) {
+	case *PatternCall:
+		if v.scaleMoveMode == 2 {
+			return firstScaleNoteDiff, fmt.Errorf("mounting of pattern into a scale is not allowed inside pattern definitions, only in the score")
+		}
+		err := v.parseEvents(v.result, e.positionIn32ths)
+		if err != nil {
+			return firstScaleNoteDiff, err
+		}
+		p.Events = append(p.Events, v.Events...)
+	case Note:
+		ee := e.dup()
+		nt := v.Dup()
+
+		if p.firstNoteIsScaleNote == 0 {
+			if nt.scaleNote != 0 {
+				firstScaleNoteValue := nt.scaleNote
+				if firstScaleNoteValue > 0 {
+					firstScaleNoteValue -= 1
+				}
+
+				// mount mode: p.scaleMove is the mount target for the first note
+				target := p.scaleMove
+				if target > 0 {
+					target -= 1
+				}
+
+				firstScaleNoteDiff = target - firstScaleNoteValue
+				p.firstNoteIsScaleNote = 1
+			} else {
+				p.firstNoteAbsKey = nt.toMIDI()
+				p.firstNoteIsScaleNote = -1
+			}
+		}
+
+		if p.scaleMoveMode == 1 && nt.scaleNote != 0 {
+			sn := nt.scaleNote
+			if sn > 0 {
+				sn -= 1
+			}
+
+			// p.scaleMove simply shifts everything up or down (0 doesn't make any sense here)
+			sn += p.scaleMove
+
+			if sn >= 0 {
+				sn += 1
+			}
+
+			// fmt.Printf("shift scale note: %v -> + %v = %v\n", nt.scaleNote, p.scaleMove, sn)
+
+			nt.scaleNote = sn
+		}
+
+		if p.scaleMoveMode == 2 {
+			if p.firstNoteIsScaleNote == -1 && nt.scaleNote == 0 {
+				// TODO that has to be done when unrolling
+			}
+			if p.firstNoteIsScaleNote == 1 && nt.scaleNote != 0 {
+				sn := nt.scaleNote
+				if sn > 0 {
+					sn -= 1
+				}
+
+				// mount mode: p.scaleMove is the mount target for the first note
+
+				sn += firstScaleNoteDiff
+
+				if sn >= 0 {
+					sn += 1
+				}
+
+				// fmt.Printf("mount scale note: %v + %v = %v\n", nt.scaleNote, firstScaleNoteDiff, sn)
+
+				nt.scaleNote = sn
+			}
+		}
+
+		nt.velocity = p.addVelocity(nt.velocity)
+		ee.item = nt
+		p.Events = append(p.Events, ee)
+	case MIDINote:
+		ee := e.dup()
+		nt := v.Dup()
+		nt.velocity = p.addVelocity(nt.velocity)
+		ee.item = nt
+		p.Events = append(p.Events, ee)
+	default:
+		p.Events = append(p.Events, e)
+	}
+
+	return firstScaleNoteDiff, nil
+}
+
+func (p *PatternCall) parseEvents(data string, posIn32th uint) (err error) {
 	p.Events = []*positionedEvent{}
 	p.syncFirstThroughPatternDefinition = false
 
 	//fmt.Printf("parseEvents called with data: %v\n", data)
 	var firstScaleNoteDiff int8
 
-	evts := strings.Split(strings.TrimSpace(data), " ")
+	sc := bufio.NewScanner(strings.NewReader(data))
+	sc.Split(bufio.ScanWords)
 
-	for idx, ev := range evts {
-		ev = strings.TrimSpace(ev)
+	var idx int
 
+	for sc.Scan() {
+		ev := sc.Text()
 		if ev != "" {
-			e, err := p.parseEvent(idx, ev, posIn32th)
-			if err != nil {
-				return fmt.Errorf("could not parse event %q: %s", ev, err.Error())
-			}
-
-			//			fmt.Printf("e: %#v\n", e)
-
-			//p.Events = append(p.Events, e)
-
-			switch v := e.item.(type) {
-			case *PatternCall:
-				if v.scaleMoveMode == 2 {
-					return fmt.Errorf("mounting of pattern into a scale is not allowed inside pattern definitions, only in the score")
-				}
-				err := v.parseEvents(v.result, e.positionIn32ths)
-				if err != nil {
-					return err
-				}
-				p.Events = append(p.Events, v.Events...)
-			case Note:
-				ee := e.dup()
-				nt := v.Dup()
-
-				if p.firstNoteIsScaleNote == 0 {
-					if nt.scaleNote != 0 {
-						firstScaleNoteValue := nt.scaleNote
-						if firstScaleNoteValue > 0 {
-							firstScaleNoteValue -= 1
-						}
-
-						// mount mode: p.scaleMove is the mount target for the first note
-						target := p.scaleMove
-						if target > 0 {
-							target -= 1
-						}
-
-						firstScaleNoteDiff = target - firstScaleNoteValue
-						p.firstNoteIsScaleNote = 1
-					} else {
-						p.firstNoteAbsKey = nt.toMIDI()
-						p.firstNoteIsScaleNote = -1
-					}
-				}
-
-				if p.scaleMoveMode == 1 && nt.scaleNote != 0 {
-					sn := nt.scaleNote
-					if sn > 0 {
-						sn -= 1
-					}
-
-					// p.scaleMove simply shifts everything up or down (0 doesn't make any sense here)
-					sn += p.scaleMove
-
-					if sn >= 0 {
-						sn += 1
-					}
-
-					// fmt.Printf("shift scale note: %v -> + %v = %v\n", nt.scaleNote, p.scaleMove, sn)
-
-					nt.scaleNote = sn
-				}
-
-				if p.scaleMoveMode == 2 {
-					if p.firstNoteIsScaleNote == -1 && nt.scaleNote == 0 {
-						// TODO that has to be done when unrolling
-					}
-					if p.firstNoteIsScaleNote == 1 && nt.scaleNote != 0 {
-						sn := nt.scaleNote
-						if sn > 0 {
-							sn -= 1
-						}
-
-						// mount mode: p.scaleMove is the mount target for the first note
-
-						sn += firstScaleNoteDiff
-
-						if sn >= 0 {
-							sn += 1
-						}
-
-						// fmt.Printf("mount scale note: %v + %v = %v\n", nt.scaleNote, firstScaleNoteDiff, sn)
-
-						nt.scaleNote = sn
-					}
-				}
-
-				nt.velocity = p.addVelocity(nt.velocity)
-				ee.item = nt
-				p.Events = append(p.Events, ee)
-			case MIDINote:
-				ee := e.dup()
-				nt := v.Dup()
-				nt.velocity = p.addVelocity(nt.velocity)
-				ee.item = nt
-				p.Events = append(p.Events, ee)
-			default:
-				p.Events = append(p.Events, e)
-			}
-
+			firstScaleNoteDiff, err = p.__parseEvent(idx, ev, posIn32th, firstScaleNoteDiff)
 		}
+		idx++
 	}
 
 	ev := []*positionedEvent{}

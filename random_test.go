@@ -50,7 +50,7 @@ bb: 2d
 			`
 =
   | <piano> |
-1 | ?[50]a | 
+1 | ?50%a | 
 
 `, [2]string{`
          | <piano> |
@@ -115,7 +115,7 @@ func TestRandom1(t *testing.T) {
 			`
 =
   | <piano> | <vox> |
-1 | ?[100]a | ?[0]c   |
+1 | ?100%a | ?0%c   |
 
 1 | ./.   |    |
 `, `

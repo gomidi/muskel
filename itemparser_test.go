@@ -27,7 +27,7 @@ func TestParseItem(t *testing.T) {
 		{"\"hiho\"", Lyric("hiho")},
 		//		{"Sa'", Note{letter: "a", octave: 2}},
 		//		{"Za'", Note{letter: "a", octave: 2}},
-		{"?[30]a", &RandomProbability{prob: 30, item: Note{letter: "a", octave: 1, velocity: -1}, itemOriginalData: "a"}},
+		{"?30%a", &RandomProbability{prob: 30, item: Note{letter: "a", octave: 1, velocity: -1}, itemOriginalData: "a"}},
 		{"?(a,b)", &RandomChooser{alternatives: []interface{}{Note{letter: "a", octave: 1, velocity: -1}, Note{letter: "b", octave: 1, velocity: -1}}, alternativesOriginalData: []string{"a", "b"}}},
 		{"CC(23,100)", MIDICC{controller: 23, value: 100}},
 		{"AT(54)", MIDIAftertouch{value: 54}},

@@ -498,9 +498,12 @@ Diese Notation wir auch nicht komplizierter, wenn wir sie mit komplexeren Dauern
 
 =
       |piano         | 
-    2&|{*,f,g,*,g}3&.|
+    2&|{*,f,g,*,g}6&  |
 
-Hier hat die N-Tole eine 5-Teilung und dauert von 2& bis 3&.
+Hier hat die N-Tole eine 5-Teilung und dauert von 2& bis über den 4/4 Takt hinaus: Die 6& ist das gedachte Weiterzählen in Schlägen und wir enden auf der 2& des nächsten Taktes (beim 4/4 Takt).
+Diese Form des "über den Takt hinauszählens" wird uns bei den Templates wieder begegnen. Daher können N-Tolen
+auch gut mit Templates kombiniert werden, da bei taktunabhängig sind.
+
 Wenn es auch schwierig ist, sich vorzustellen, zu welchen Zeiten konkret die einzelnen Töne hier erscheinen,
 Anfang und Ende sind einfach abzählbar und in der westlichen Standardnotation wäre eine solche Zeitaufteilung 
 nicht notierbar, geweige denn lesbar.
@@ -510,13 +513,11 @@ Felder für Experimente, wenn man das Urteil dem Ohr überlässt.
 
 Folgende wichtigen Regeln müssen beim Umgang mit N-Tolen beachtet werden:
 
-1. Das Ende einer N-Tole kann nicht über den nächsten Takt hinausgehen. Gegebenenfalls muss der Takt vergrößert werden. Dennoch wird die letzte Note der N-Tole in den folgenden Takt übergebunden, wenn dieser mit einem : startet.
+1. Die Endposition der N-Tole darf nicht vor der Startposition liegen.
 
-2. Die Endposition der N-Tole darf nicht vor der Startposition liegen.
+2. Es darf in der gleichen Spur kein weiteres Ereignis zwischen Start- und Endposition der N-Tole liegen.
 
-3. Es darf in der gleichen Spur kein weiteres Ereignis zwischen Start- und Endposition der N-Tole liegen.
-
-4. Eine Endposition muss immer angegeben werden, muss valide sein und innerhalb des Taktes liegen.
+3. Eine Endposition muss immer angegeben werden und valide sein.
  
 # Zufallselemente
 
@@ -527,16 +528,15 @@ In MuSkel gibt es zwei Möglichkeiten, Zufälligkeit ins Spiel zu bringen:
 ## Wahrscheinlichkeit
 
 Die Wahrscheinlichkeit, dass ein Ereignis kommt, wird notiert, indem ein Fragezeichen, gefolgt von einer
-Prozentzahl in eckigen Klammern notiert wird und dem Ereignis, welches mit dieser Wahrscheinlichkeit ausgelöst
-wird vorangestellt wird.
+Prozentzahl, gefolgt von dem Prozentzeichen % notiert wird und dem Ereignis, welches mit dieser Wahrscheinlichkeit ausgelöst wird, vorangestellt wird.
 
 Beispiel:
 
 =
     | piano  | flute  | 
 1   | c      |        |
-2   | ?[30]d | e      |
-3   |        | ?[80]f |
+2   | ?30%d  | e      |
+3   |        | ?80%f  |
 
 Hier wird in piano auf Schlag mit 30%iger Wahrscheinlichkeit die Note d gespielt.
 Interessanterweise wird das vorangegangene c nur dann auf Schlag 2 enden, wenn das d folgt, ansonsten

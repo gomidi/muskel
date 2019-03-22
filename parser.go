@@ -15,7 +15,6 @@ type Parser struct {
 	header *HeaderParser
 	body   *BodyParser
 
-	//input *bufio.Reader
 	input *bufio.Scanner
 
 	current struct {
@@ -23,15 +22,12 @@ type Parser struct {
 		isHeader  bool // track, if we are currently inside a header
 		line      int
 	}
-
-	//	lineWhereBodyStarts int
 }
 
 func NewParser(r io.Reader) *Parser {
 	sc := NewScore()
 	return &Parser{
 		Score: sc,
-		//input:  bufio.NewReader(r),
 		input:  bufio.NewScanner(r),
 		header: &HeaderParser{sc},
 		body: &BodyParser{

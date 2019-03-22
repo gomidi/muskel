@@ -1,6 +1,7 @@
 package muskel
 
 import (
+	"bufio"
 	"fmt"
 	"regexp"
 	"strings"
@@ -39,7 +40,7 @@ func (p *HeaderParser) parsePatternDefinitionLine(line string) error {
 // parseMetaLine parses a line in the header that contains a meta property
 func (p *HeaderParser) parseMetaLine(line string) error {
 	//	fmt.Printf("parsing meta line %q\n", line)
-	keyVal := strings.Split(line, ":")
+	keyVal := strings.SplitN(line, ":", 2)
 	if len(keyVal) != 2 {
 		return fmt.Errorf("invalid header line %#v, format must be key: value", line)
 	}
@@ -119,11 +120,20 @@ func (p *HeaderParser) parseHeaderLine(line string) error {
 
 // parseHeader parses the header (everything up to the  =)
 func (p *HeaderParser) parseHeader(data string) error {
-	//	fmt.Printf("parsing header line: %q\n", data)
-	lines := strings.Split(data, "\n")
 
-	for _, line := range lines {
-		err := p.parseHeaderLine(line)
+	sc := bufio.NewScanner(strings.NewReader(data))
+	//	fmt.Printf("parsing header line: %q\n", data)
+	//lines := strings.Split(data, "\n")
+
+	for sc.Scan() {
+		err := sc.Err()
+
+		if err != nil {
+			return err
+		}
+
+		err = p.parseHeaderLine(sc.Text())
+
 		if err != nil {
 			return err
 		}

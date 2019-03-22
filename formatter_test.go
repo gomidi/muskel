@@ -214,6 +214,7 @@ func TestFormatter(t *testing.T) {
 	}{
 		{
 			`
+@prop: this is a: value
 aa:             1f" 2&g
 
 =
@@ -229,6 +230,11 @@ Vol      |          |
 
     1    | %      |`,
 			`
+@prop:          this is a: value
+
+
+
+
 aa:             1f" 2&g
 
 

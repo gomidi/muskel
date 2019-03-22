@@ -6,11 +6,7 @@ import (
 )
 
 // TODO see the following list
-
 /*
-+ accel. decel. cresc. descr. (wahrscheinlich mit Volume CC)
-- temperaments
-- ggf. Chords
 - translate augmentation symbols like ^ and ° to pitchbend messages
 */
 
@@ -257,17 +253,5 @@ var Hold = hold{}
 var Rest = rest{}
 var GlissandoLinear = glissStart(false)
 var GlissandoExponential = glissStart(true)
-
-/*
-- notes, e.g. a'
-- drumnotes e.g. sn
-- motivs e.g. $a
-- MIDI controller events e.g. PB200
-- rests e.g. _
-- samples with a timespan e.g. Sa
-- samples with no timespan ("oneshot") e.g. Za
-- repitition of last event e.g. %
-- multiitems, consisting of several items happening at the same time. e.g. (a',PB200)
-*/
 
 type MultiItem []interface{}
