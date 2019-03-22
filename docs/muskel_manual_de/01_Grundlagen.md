@@ -339,7 +339,7 @@ c++++  extrem laut       (fortississimo)
 c+++   sehr laut         (fortissimo)
 c++    laut              (forte)
 c+     etwas laut        (mezzoforte)
-c*     normal
+c=     normal
 c-     etwas leise       (mezzopiano)
 c--    leise             (piano)
 c---   sehr leise        (pianissimo)
@@ -356,7 +356,7 @@ davor. Gab es noch keine Note mit einer angegebenen Anschlagsstärke, so hat sie
      &|f--  |
 
     1 |g    |
-     &|a*   |
+     &|a=   |
     4 |d#'  |
      &|f#   |
 
@@ -455,7 +455,7 @@ Man kann dies Nutzen, um einzelne Stellen eines Stücks zu "deaktivieren" bzw. i
 //     &|f--  |
 
     1 |g    |
-     &|a*   |
+     &|a=   |
     4 |d#'  |
      &|f#   |
 
@@ -475,7 +475,7 @@ Selbstverständlich kann man Kommentare auch verwenden, um Hinweise und Notizen 
      &|f--  |
 
     1 |g    |
-     &|a*   |
+     &|a=   |
     4 |d#'  |
      &|f#   |
 
@@ -494,7 +494,7 @@ und endet mit der Zeile, die mit Sternchen und Querstrich beginnt */
      &|f--  |
 
     1 |g    |
-     &|a*   |
+     &|a=   |
 */
     4 |d#'  |
      &|f#   |
@@ -521,7 +521,7 @@ folgt der Wert der Eigenschaft. Hier ein Beispiel:
      &|f--  |
 
     1 |g    |
-     &|a*   |
+     &|a=   |
     4 |d#'  |
      &|f#   |
 

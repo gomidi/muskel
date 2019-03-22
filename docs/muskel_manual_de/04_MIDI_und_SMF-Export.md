@@ -53,7 +53,7 @@ Dynamikwerte werden in Velocitywerte von NoteOn messages umgewandelt. Hierbei gi
 +++   108
 ++     93
 +      78
-*      63
+=      63
 -      48
 --     33
 ---    18

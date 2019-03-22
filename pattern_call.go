@@ -446,7 +446,7 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) (err error) {
 }
 
 //var regPatternCallNameDyn =
-var regPatternCallNameDyn = regexp.MustCompile("^([a-zA-Z][_~a-zA-Z0-9]+)(" + regexp.QuoteMeta("^") + "{1,2}[-0-9]+){0,1}([" + regexp.QuoteMeta("-+*") + "]*)$")
+var regPatternCallNameDyn = regexp.MustCompile("^([a-zA-Z][_~a-zA-Z0-9]+)(" + regexp.QuoteMeta("^") + "{1,2}[-0-9]+){0,1}([" + regexp.QuoteMeta("-+=") + "]*)$")
 
 func (p *PatternCall) Parse(call string) error {
 	replacements := ""

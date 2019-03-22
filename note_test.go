@@ -17,8 +17,8 @@ func TestScaleNote(t *testing.T) {
 		"^10--",
 		"^10---",
 		"^10----",
-		"^10*",
-		"^10*:~",
+		"^10=",
+		"^10=:~",
 	}
 
 	for _, test := range tests {
@@ -50,8 +50,8 @@ func TestNote(t *testing.T) {
 		"C\"'--",
 		"C\"'---",
 		"C#\"'----",
-		"C#\"'*",
-		"C#\"'*:~",
+		"C#\"'=",
+		"C#\"'=:~",
 	}
 
 	for _, test := range tests {

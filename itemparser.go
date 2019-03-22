@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("*") + "]*)(:{0,1})$")
+var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("=") + "]*)(:{0,1})$")
 
 func parseMIDINote(data string) (nt MIDINote, err error) {
 	mt := regexMIDINote.FindStringSubmatch(data)
@@ -197,8 +197,8 @@ func parseScaleNote(data string) (nt Note, err error) {
 			dynamic += "+"
 		case '-':
 			dynamic += "-"
-		case '*':
-			dynamic = "*"
+		case '=':
+			dynamic = "="
 		case '~':
 			nt.glissandoStart = true
 		case '#':
@@ -267,8 +267,8 @@ func parseNote(data string) (nt Note, err error) {
 			dynamic += "+"
 		case '-':
 			dynamic += "-"
-		case '*':
-			dynamic = "*"
+		case '=':
+			dynamic = "="
 		case '~':
 			gliss++
 		case '#':

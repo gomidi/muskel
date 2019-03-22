@@ -73,7 +73,7 @@ func dynamicToVelocity(dyn string) (vel int8) {
 				vel = 63
 			}
 			vel -= 15
-		case '*': // reset
+		case '=': // reset
 			vel = 63
 		}
 	}
@@ -98,7 +98,7 @@ func velocityToDynamic(vel int8) (dyn string) {
 	case -1:
 		return ""
 	case 63:
-		return "*"
+		return "="
 	case 78:
 		return "+"
 	case 93:

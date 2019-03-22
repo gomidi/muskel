@@ -143,7 +143,7 @@ resultiert in:
 
 4. Es kann die Dynamik verändert werden z.B.
 
-ah_ja:  1a- 2&g'+ 3&g'++ 5c*
+ah_ja:  1a- 2&g'+ 3&g'++ 5c=
 
 =
       |piano |
@@ -158,7 +158,7 @@ resultiert in:
 =
       |piano|
 3/4 
-    1 |a*   |
+    1 |a=   |
     2&|g'++ |
     3&|g'+++|
 
@@ -169,7 +169,7 @@ bei Skalennoten auch in die Skala (s.u.)
 
 Alle diese Varianten können auch kombiniert werden:
 
-ah_ja:  1a- 2&#1+ 3&#1++ 5#2*
+ah_ja:  1a- 2&#1+ 3&#1++ 5#2=
 
 =
       |piano                   |
@@ -191,7 +191,7 @@ resultiert in:
 
 Und diese Aufrufformen können auch in einem Templateinhalt stehen:
 
-ah_ja:  1a- 2&#1+ 3&#1++ 5#2* 
+ah_ja:  1a- 2&#1+ 3&#1++ 5#2= 
 ah_ne:  1ah_ja+(d',f)[1:4]/:,:,6/
 
 
@@ -265,7 +265,7 @@ Skaleneigene Note gesetzt.
 
 die volle Syntax für einen patterncall lautet (wenn alle Optionen genutzt werden können)
 
-?[50]!name^^3++(^2,a")[3:5]/:,2,:/
+?50%!name^^3++(^2,a")[3:5]/:,2,:/
 
 Die Werte, die als Parameter übergeben werden, werden angewendet, bevor das einhängen stattfindet.
 (das Slicen und Ersetzen findet aber nach dem Einhängen statt)

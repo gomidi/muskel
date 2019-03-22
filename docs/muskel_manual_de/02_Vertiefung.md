@@ -437,7 +437,7 @@ Auch in der Skalennotation stehen die gewohnten Dynamik und Stakkato, sowie Glis
     1 |^1++~~     |  "Al-"     |
      &|^2+:       |  "-le"     |
     2 |^3--~      |  "mei-"    |
-     &|^4*:       |  "-ne"     |
+     &|^4=:       |  "-ne"     |
     3 |^5         |  "Ent-"    |
     4 |^5         |  "-chen"   |
     

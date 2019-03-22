@@ -34,9 +34,9 @@ Ch |1  |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 0 key 72 dyn *
+[0] channel.NoteOn channel 0 key 72 dyn =
 [960] channel.NoteOff channel 0 key 72
-[0] channel.NoteOn channel 0 key 50 dyn *
+[0] channel.NoteOn channel 0 key 50 dyn =
 [2880] channel.NoteOff channel 0 key 50
 `,
 		},
@@ -51,11 +51,11 @@ Ch |1  |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 0 key 48 dyn *
+[0] channel.NoteOn channel 0 key 48 dyn =
 [320] channel.NoteOff channel 0 key 48
-[0] channel.NoteOn channel 0 key 52 dyn *
+[0] channel.NoteOn channel 0 key 52 dyn =
 [320] channel.NoteOff channel 0 key 52
-[0] channel.NoteOn channel 0 key 56 dyn *
+[0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
 `,
 		},
@@ -70,7 +70,7 @@ Ch |1  |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 0 key 48 dyn *
+[0] channel.NoteOn channel 0 key 48 dyn =
 [3840] channel.NoteOff channel 0 key 48
 `,
 		},
@@ -85,11 +85,11 @@ Ch |1  |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 0 key 48 dyn *
+[0] channel.NoteOn channel 0 key 48 dyn =
 [1280] channel.NoteOff channel 0 key 48
-[0] channel.NoteOn channel 0 key 52 dyn *
+[0] channel.NoteOn channel 0 key 52 dyn =
 [1280] channel.NoteOff channel 0 key 52
-[0] channel.NoteOn channel 0 key 56 dyn *
+[0] channel.NoteOn channel 0 key 56 dyn =
 [1280] channel.NoteOff channel 0 key 56
 `,
 		},
@@ -107,7 +107,7 @@ Ch |1  |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 0 key 48 dyn *
+[0] channel.NoteOn channel 0 key 48 dyn =
 [4800] channel.NoteOff channel 0 key 48
 `,
 		},
@@ -125,11 +125,11 @@ Ch |1  |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 0 key 48 dyn *
+[0] channel.NoteOn channel 0 key 48 dyn =
 [1600] channel.NoteOff channel 0 key 48
-[0] channel.NoteOn channel 0 key 52 dyn *
+[0] channel.NoteOn channel 0 key 52 dyn =
 [1600] channel.NoteOff channel 0 key 52
-[0] channel.NoteOn channel 0 key 56 dyn *
+[0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
 `,
 		},
@@ -191,7 +191,7 @@ func _velocityToDynamic(vel uint8) (dyn string) {
 	case vel >= 74:
 		return "+"
 	case vel >= 59:
-		return "*"
+		return "="
 	case vel >= 44:
 		return "-"
 	case vel >= 29:

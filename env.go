@@ -18,16 +18,16 @@ func init() {
 
 const drumnotes = `
 // some shortcuts for drums (GM)
-kd: 1MN36*:
-sn: 1MN40*:
-ho: 1MN46*:
-hc: 1MN42*:
-rd: 1MN51*:
-tb: 1MN54*:
-tl: 1MN45*:
-tm: 1MN48*:
-th: 1MN50*:
-sh: 1MN49*:
+kd: MN36=:
+sn: MN40=:
+ho: MN46=:
+hc: MN42=:
+rd: MN51=:
+tb: MN54=:
+tl: MN45=:
+tm: MN48=:
+th: MN50=:
+sh: MN49=:
 
 =
 `

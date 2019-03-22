@@ -253,7 +253,7 @@ func TestParseCall(t *testing.T) {
 		{"test^^-11", PatternCall{Name: "test", Slice: [2]int{-1, -1}, scaleMove: -11, scaleMoveMode: 2}, false},
 		{"test~+", PatternCall{Name: "test~", Slice: [2]int{-1, -1}, velocityAdd: "+"}, false},
 		{"test++", PatternCall{Name: "test", Slice: [2]int{-1, -1}, velocityAdd: "++"}, false},
-		{"test~~*", PatternCall{Name: "test~~", Slice: [2]int{-1, -1}, velocityAdd: "*"}, false},
+		{"test~~=", PatternCall{Name: "test~~", Slice: [2]int{-1, -1}, velocityAdd: "="}, false},
 		{"test-", PatternCall{Name: "test", Slice: [2]int{-1, -1}, velocityAdd: "-"}, false},
 		{"test--", PatternCall{Name: "test", Slice: [2]int{-1, -1}, velocityAdd: "--"}, false},
 		{"test[:2]", PatternCall{Name: "test", Slice: [2]int{0, 2}}, false},
