@@ -248,6 +248,7 @@ Prog    |        |
 Vol     |        |
 PbRange |        |
 Trans   |        |
+Delay   |        |
     1   |e'      |
     2   |f"      |
     3&  |g       |
@@ -286,6 +287,7 @@ Prog    |        |
 Vol     |        |
 PbRange |        |
 Trans   |        |
+Delay   |        |
     1   |e'      |
     2   |f"      |
     3&  |g       |
@@ -328,6 +330,7 @@ Prog    |       |     |
 Vol     |       |     |
 PbRange |       |     |
 Trans   |       |     |
+Delay   |       |     |
     1   |a'     |a'   |
     2&  |g      |f    |
 

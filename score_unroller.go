@@ -474,6 +474,7 @@ func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*position
 		case NTuple:
 			var nuNT NTuple
 			nuNT.endPos = v.endPos
+			nuNT.posShift = v.posShift
 			inner := strings.Trim(pev.originalData, "{")
 			is := strings.Split(inner, "}")
 			inner = is[0]
@@ -492,7 +493,17 @@ func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*position
 				}
 			}
 
-			ev.originalData = "{" + strings.Join(ss, ",") + "}" + pos32thToString(v.endPos)
+			posShift := ""
+
+			if v.posShift == 1 {
+				posShift = ">"
+			}
+
+			if v.posShift == -1 {
+				posShift = "<"
+			}
+
+			ev.originalData = "{" + strings.Join(ss, ",") + "}" + pos32thToString(v.endPos) + posShift
 			ev.Item = nuNT
 		default:
 			ev.Item = pev.item
@@ -653,6 +664,7 @@ func (s *ScoreUnroller) replaceScaleNotes() {
 				var nuNt NTuple
 				nuEv := ev.Dup()
 				nuNt.endPos = v.endPos
+				nuNt.posShift = v.posShift
 				inner := strings.Trim(ev.originalData, "{")
 				is := strings.Split(inner, "}")
 				inner = is[0]
@@ -674,8 +686,18 @@ func (s *ScoreUnroller) replaceScaleNotes() {
 					}
 				}
 
+				posShift := ""
+
+				if v.posShift == 1 {
+					posShift = ">"
+				}
+
+				if v.posShift == -1 {
+					posShift = "<"
+				}
+
 				nuEv.Item = nuNt
-				nuEv.originalData = "{" + strings.Join(orig, ",") + "}" + pos32thToString(v.endPos)
+				nuEv.originalData = "{" + strings.Join(orig, ",") + "}" + pos32thToString(v.endPos) + posShift
 				unrolled = append(unrolled, nuEv)
 			default:
 				unrolled = append(unrolled, ev)

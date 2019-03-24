@@ -19,6 +19,7 @@ type Note struct {
 	glissandoExp   bool
 	dotted         bool
 	scaleNote      int8
+	posShift       int // 0 = no, 1 = laidback, -1 = ahead of time
 }
 
 func (note Note) toMIDI() (midinote_ uint8) {
@@ -178,6 +179,14 @@ func (n Note) String() string {
 		bf.WriteString("~")
 	}
 
+	if n.posShift == 1 {
+		bf.WriteString(">")
+	}
+
+	if n.posShift == -1 {
+		bf.WriteString("<")
+	}
+
 	return bf.String()
 }
 
@@ -189,6 +198,7 @@ type MIDINote struct {
 	note     int8
 	velocity int8
 	dotted   bool
+	posShift int // 0 = no, 1 = laidback, -1 = ahead of time
 }
 
 func (m MIDINote) String() string {
@@ -197,7 +207,18 @@ func (m MIDINote) String() string {
 	if m.dotted {
 		dotted = ":"
 	}
-	return fmt.Sprintf("MN%v%s%s", m.note, vel, dotted)
+
+	posShift := ""
+
+	if m.posShift == 1 {
+		posShift = ">"
+	}
+
+	if m.posShift == -1 {
+		posShift = "<"
+	}
+
+	return fmt.Sprintf("MN%v%s%s%s", m.note, vel, dotted, posShift)
 }
 
 func (mn MIDINote) Dup() MIDINote {
@@ -233,8 +254,9 @@ type OSCMessage struct {
 }
 
 type NTuple struct {
-	endPos uint // 32th in bar from the beginning
-	items  []interface{}
+	endPos   uint // 32th in bar from the beginning
+	items    []interface{}
+	posShift int // 0 = no, 1 = laidback, -1 = ahead of time
 }
 type RepeatLastEvent struct{}
 type RepeatLastBar struct{}

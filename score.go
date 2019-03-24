@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/gomidi/midi/mid"
 	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 )
@@ -411,19 +410,20 @@ func (s *Score) writeSMFTo(wr io.Writer, filegroup string, options ...smfwriter.
 		}
 	}
 
-	sw := NewSMFWriter(s, filegroup)
-
 	options = append(
 		[]smfwriter.Option{
 			smfwriter.TimeFormat(smf.MetricTicks(960)),
+			smfwriter.NumTracks(numTracks),
 		}, options...)
 
 	if DEBUG {
 		options = append(options, smfwriter.Debug(debugLog{}))
 	}
 
-	mwr := mid.NewSMF(wr, numTracks, options...)
-	return sw.Write(mwr)
+	sw := NewSMFWriter(s, filegroup)
+
+	// mwr := mid.NewSMF(wr, numTracks, options...)
+	return sw.Write(smfwriter.New(wr, options...))
 }
 
 func (s *Score) writeSMFToFile(midifile, filegroup string, options ...smfwriter.Option) error {

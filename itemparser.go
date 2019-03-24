@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("=") + "]*)(:{0,1})$")
+var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("=") + "]*)(:{0,1})([<>]{0,1})$")
 
 func parseMIDINote(data string) (nt MIDINote, err error) {
 	mt := regexMIDINote.FindStringSubmatch(data)
@@ -25,6 +25,14 @@ func parseMIDINote(data string) (nt MIDINote, err error) {
 	nt.note = int8(i)
 	nt.velocity = dynamicToVelocity(mt[2])
 	nt.dotted = mt[3] == ":"
+
+	if mt[4] == ">" {
+		nt.posShift = 1
+	}
+
+	if mt[4] == "<" {
+		nt.posShift = -1
+	}
 	return nt, nil
 }
 
@@ -207,6 +215,10 @@ func parseScaleNote(data string) (nt Note, err error) {
 			nt.augmenter += "^"
 		case '°':
 			nt.augmenter += "°"
+		case '>':
+			nt.posShift = 1
+		case '<':
+			nt.posShift = -1
 		/*
 			case '#':
 				nt.augmenter = "#"
@@ -271,6 +283,10 @@ func parseNote(data string) (nt Note, err error) {
 			dynamic = "="
 		case '~':
 			gliss++
+		case '>':
+			nt.posShift = 1
+		case '<':
+			nt.posShift = -1
 		case '#':
 			nt.augmenter += "#"
 		case '^':
@@ -331,6 +347,7 @@ func (p *itemParser) parsePattern(data string, positionIn32th uint) (pc *Pattern
 // where 3& is the ending position that defines the total length
 func (p *itemParser) parseNTuple(data string, posIn32th uint) (nt NTuple, err error) {
 
+	var ntp NTuple
 	orig := data
 
 	dd := strings.Split(data, "}")
@@ -340,12 +357,24 @@ func (p *itemParser) parseNTuple(data string, posIn32th uint) (nt NTuple, err er
 
 	pos := strings.TrimSpace(dd[1])
 
+	if strings.HasSuffix(pos, ">") {
+		ntp.posShift = 1
+		pos = strings.TrimRight(pos, ">")
+	}
+
+	if strings.HasSuffix(pos, "<") {
+		ntp.posShift = -1
+		pos = strings.TrimRight(pos, "<")
+	}
+
+	// fmt.Printf("pos: %q postShift: %v\n", pos, ntp.posShift)
+
 	if len(pos) == 0 {
 		err = fmt.Errorf("invalid n-tuple %#v: position missing", "{"+orig)
 		return
 	}
 
-	_, endPos, err := positionTo32th("", dd[1])
+	_, endPos, err := positionTo32th("", pos)
 
 	if err != nil {
 		return nt, err
@@ -360,13 +389,12 @@ func (p *itemParser) parseNTuple(data string, posIn32th uint) (nt NTuple, err er
 		return
 	}
 
-	var ntp NTuple
 	ntp.endPos = endPos
 
-	for pos, it := range d {
+	for ppos, it := range d {
 		itt, err := p.parseItem(it, posIn32th)
 		if err != nil {
-			return nt, fmt.Errorf("ERROR invalid n-tuple at position %v: %#v: %s", pos, it, err)
+			return nt, fmt.Errorf("ERROR invalid n-tuple at position %v: %#v: %s", ppos, it, err)
 		}
 		ntp.items = append(ntp.items, itt)
 	}

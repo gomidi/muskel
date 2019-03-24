@@ -27,13 +27,16 @@ werden und es keine Taktarten und Taktwechsel gibt.
 
 Klingt verwirrend? Hier ein Beispiel
 
+```
 ah_ja:  1a 2&g' 3&g' 5c
+```
 
 Hier ist der Name des Templates ah_ja und der Inhalt 1a 2&g' 3&g' 5c
 Wir haben also 4 Ereignisse: auf der 1 die note a auf 2& g' auf der 3& g' und auf der 5c
 Aber wir haben keinen Taktwechsel. Wenn wir dieses Template in einen 4/4 Takt einbetten, landet
 das c auf der 1 des nächsten Taktes:
 
+```
 ah_ja:  1a 2&g' 3&g' 5c
 
 =
@@ -42,9 +45,11 @@ ah_ja:  1a 2&g' 3&g' 5c
     1 |ah_ja|
 
     1 |     |
+```
 
 resultiert in:
 
+```
 =
       |piano|
 4/4 
@@ -53,9 +58,11 @@ resultiert in:
     3&|g'   |
 
     1 |c    |
+```
 
 oder beim 3/4 Takt
 
+```
 ah_ja:  1a 2&g' 3&g' 5c
 
 =
@@ -64,9 +71,11 @@ ah_ja:  1a 2&g' 3&g' 5c
     1 |ah_ja|
 
     1 |     |
+```
 
 resultiert in:
 
+```
 =
       |piano|
 3/4 
@@ -75,12 +84,14 @@ resultiert in:
     3&|g'   |
 
     2 |c    |
+```
 
 Hier sehen wir, dass Templates unabhängig von der Spur (und damit dem Instrument) und
 vom Takt sind.
 
 Sie laufen solange, bis in der Spur etwas anderes kommt:
 
+```
 ah_ja:  1a 2&g' 3&g' 5c
 
 =
@@ -89,9 +100,11 @@ ah_ja:  1a 2&g' 3&g' 5c
     1 |ah_ja|
 
     1 |d'    |
+```
 
 resultiert in:
 
+```
 =
       |piano|
 3/4 
@@ -100,7 +113,7 @@ resultiert in:
     3&|g'   |
 
     1 |d'   |
-
+```
 
 
 ## Aufruf eine Templates
@@ -120,6 +133,7 @@ des Templates. Allerdings gibt es dabei noch ein paar Optionen:
    beim Aufruf werden diese dann ersetzt.
    z.B.
 
+```
 ah_ja:  1a 2&#1 3&#1 5#2
 
 =
@@ -128,10 +142,11 @@ ah_ja:  1a 2&#1 3&#1 5#2
     1 |ah_ja(d',f)|
 
     1 |           |
-
+```
 
 resultiert in:
 
+```
 =
       |piano|
 3/4 
@@ -140,9 +155,11 @@ resultiert in:
     3&|d'   |
 
     1 |f    |
+```
 
 4. Es kann die Dynamik verändert werden z.B.
 
+```
 ah_ja:  1a- 2&g'+ 3&g'++ 5c=
 
 =
@@ -151,10 +168,11 @@ ah_ja:  1a- 2&g'+ 3&g'++ 5c=
     1 |ah_ja+|
 
     1 |      |
-
+```
 
 resultiert in:
 
+```
 =
       |piano|
 3/4 
@@ -163,12 +181,14 @@ resultiert in:
     3&|g'+++|
 
     1 |c+   |
+```
 
 Außerdem können Templates noch auf zwei Weisen in die Zeitachse eingehängt werden und
 bei Skalennoten auch in die Skala (s.u.)
 
 Alle diese Varianten können auch kombiniert werden:
 
+```
 ah_ja:  1a- 2&#1+ 3&#1++ 5#2=
 
 =
@@ -177,10 +197,11 @@ ah_ja:  1a- 2&#1+ 3&#1++ 5#2=
     1 |ah_ja+(d',f)[1:4]/:,:,6/|
 
     1 |                        |
-
+```
 
 resultiert in:
 
+```
 =
       |piano|
 3/4 
@@ -188,12 +209,14 @@ resultiert in:
     3&|d'+++|
 
     2 |f+   |
+```
 
 Und diese Aufrufformen können auch in einem Templateinhalt stehen:
 
+```
 ah_ja:  1a- 2&#1+ 3&#1++ 5#2= 
 ah_ne:  1ah_ja+(d',f)[1:4]/:,:,6/
-
+```
 
 ### Einhängen in die Zeitachse
 
@@ -202,17 +225,20 @@ ah_ne:  1ah_ja+(d',f)[1:4]/:,:,6/
 
 Als Alternative zu absoluten Noten mit a" usw. kann man Stufen einer Skala wählen.
 
+```
 ^0 nicht definiert
 ^1  Nullpunkt der Skala (1.Stufe)
 ^2  eine Stufe aufwärts vom Nullpunkt der Skala (2. Stufe)
 ^-3 drei Stufen abwärts vom Nullpunkt der Skala (3. Unterstufe)
-
+```
 
 Die aktuelle Scala wird im Score mit einem $scale() command gesetzt.
 Der erste Wert ist der absolute Referenzton (Nullpunkt) der Skala und der zweite Wert ist der Name der
 Skala, z.B.
 
+```
 $scale(a", minor)
+```
 
 Ist eine Taktangabe und setzt die aktuelle Scala auf a-Moll, wobei der Nullpunkt die Note a" ist.
 Scalen sind zunächst fest im Code definiert. Als Ausgangspunkt starten wir mit

@@ -14,30 +14,37 @@ Die eingebundenen Dateien müssen entweder im gleichen Ordner wie die Hauptdatei
 Beispiel:
 Inhalt der Hauptdatei main.mskl
 
+```
 =
     | piano    | flute        |
 $include("verse1")
 $include("chorus")
+```
 
 Inhalt von verse1.mskl
 
+```
 =
     | piano    | flute        | 
 4/4@100
 1   | c        |              |
 2   | d        | e            |
 3   |          | f            |
+```
 
 Inhalt von chorus.mskl
 
+```
 =
     | piano    | flute        | 
 1   | f        |              |
 2   | f        | d            |
 3   |          | d            |
+```
 
 Ergebnis:
 
+```
 =
     | piano    | flute        | 
 4/4@100
@@ -48,7 +55,7 @@ Ergebnis:
 1   | f        |              |
 2   | f        | d            |
 3   |          | d            |
-
+```
 
 Im Konfigurationsverzeichnis von muskel ist eine Datei vorinstalliert, die Templates für die gängigen GM-kompatiblen Schlagzeugsound beinhaltet und mit 
 
@@ -85,7 +92,7 @@ Es bietet die folgende Unterstützung:
 - Löschen, Umbenennen und Synchronisieren von Spuren auch in eingebundenen Dateien
 - Umbenennen von Templates in Definition und Benutzung, auch in eingebundenen Dateien
 - automatisches Abspielen der exportierten SMF-Datei auf manchen Plattformen (erfordert GM-kompatiblen Player)
-- lauffähig unter Linux, Android, MS Windows, MacosX, *BSD, 32bit und 64bit
+- lauffähig unter Linux, Android, MS Windows, MacosX, `*BSD`, 32bit und 64bit
 
 ## Installation
 
@@ -103,13 +110,17 @@ heruntergeladen werden
 Für alle anderen Systeme ist es nötig, Go version 1.12 oder höher zu installieren und dann folgenden
 Befehl auszuführen:
 
+```
 go install gitlab.com/gomidi/muskel/cmd/muskel
+```
 
 ## Nutzung
 
 Der Befehl 
 
+```
 muskel help
+```
 
 listet die verschiedenen Optionen und Funktionen auf.
 

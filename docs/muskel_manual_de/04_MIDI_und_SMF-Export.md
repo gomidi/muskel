@@ -49,6 +49,7 @@ FileGroup ermöglicht beim Export das gleichzeitige exportieren in verschiedene 
 
 Dynamikwerte werden in Velocitywerte von NoteOn messages umgewandelt. Hierbei gilt folgende Umrechnung:
 
+```
 ++++  123
 +++   108
 ++     93
@@ -58,6 +59,7 @@ Dynamikwerte werden in Velocitywerte von NoteOn messages umgewandelt. Hierbei gi
 --     33
 ---    18
 ----    5
+```
 
 auf diesen Wert wird für jede Note eine Zufallszahl zwischen 0 und 4 aufaddiert, um das Spiel etwas
 weniger statisch zu gestalten.

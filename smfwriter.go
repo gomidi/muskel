@@ -4,28 +4,34 @@ import (
 	"math"
 
 	"gitlab.com/gomidi/midi/mid"
+	"gitlab.com/gomidi/midi/smf"
 )
 
 type SMFWriter struct {
 	score     *Score
 	fileGroup string
 	wr        *mid.SMFWriter
+	iw        *instrSMFWriter
 }
 
 func NewSMFWriter(s *Score, filegroup string) *SMFWriter {
 	return &SMFWriter{score: s, fileGroup: filegroup}
 }
 
-func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
+func (p *SMFWriter) Write(wr smf.Writer) error {
+
+	p.iw = &instrSMFWriter{Writer: wr, instrNo: -1}
+	p.wr = mid.NewSMFWriter(p.iw)
+
 	// fmt.Printf("writing score %q is unrolled: %v\n", p.score.FileName, p.score.isUnrolled)
-	err := p.writeFirstTrack(wr)
+	err := p.writeFirstTrack()
 
 	if err != nil {
 		return err
 	}
 
-	wr.EndOfTrack()
-	err = p.writeTempoTrack(wr)
+	p.wr.EndOfTrack()
+	err = p.writeTempoTrack()
 
 	if err != nil {
 		return err
@@ -42,8 +48,16 @@ func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
 		}
 
 		//		fmt.Println("EOT")
-		wr.EndOfTrack()
-		iw := newInstrumentSMFWriter(p, wr, instr)
+		p.wr.EndOfTrack()
+		p.iw.firstDeltaSet = false
+		p.iw.instrNo = i
+		// fmt.Printf("instr %q  delay %v\n", instr.Name, instr.Delay)
+		p.iw.setDelay(instr.Delay[0], instr.Delay[1])
+		p.iw.setStraight()
+
+		// TODO implement offset
+
+		iw := newInstrumentSMFWriter(p, p.wr, instr)
 		_ = i
 		//fmt.Printf("writing MIDI for col: %v, instr: %q\n", i, instr.Name)
 		iw.writeIntro()
@@ -51,7 +65,7 @@ func (p *SMFWriter) Write(wr *mid.SMFWriter) error {
 	}
 
 	//	fmt.Println("EOT")
-	wr.EndOfTrack()
+	p.wr.EndOfTrack()
 	return nil
 }
 
@@ -111,7 +125,7 @@ func exponentialTempoChange(wr *mid.SMFWriter, distance int64, diff float64, cal
 }
 
 // writeFirstTrack writes the first track with time signature and tempo changes
-func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
+func (p *SMFWriter) writeFirstTrack() error {
 	num := uint8(4)
 	denom := uint8(4)
 
@@ -121,32 +135,32 @@ func (p *SMFWriter) writeFirstTrack(wr *mid.SMFWriter) error {
 		part := p.isStartOfPart(b)
 
 		if b.timeSigChange[0] > 0 || part != "" {
-			wr.Forward(0, uint32(b.barNo-lastBar)*uint32(num), uint32(denom))
+			p.wr.Forward(0, uint32(b.barNo-lastBar)*uint32(num), uint32(denom))
 			lastBar = b.barNo
 		}
 
 		if b.timeSigChange[0] > 0 {
 			num = b.timeSigChange[0]
 			denom = b.timeSigChange[1]
-			wr.Meter(num, denom)
+			p.wr.Meter(num, denom)
 		}
 		//fmt.Printf("write meter %v/%v\n", num, denom)
 
 		if part != "" {
-			wr.Cuepoint(part)
-			wr.Marker(part)
+			p.wr.Cuepoint(part)
+			p.wr.Marker(part)
 		}
 	}
 
-	wr.Forward(0, uint32(p.score.Bars[len(p.score.Bars)-1].barNo-lastBar)*uint32(num), uint32(denom))
-	wr.Meter(num, denom)
+	p.wr.Forward(0, uint32(p.score.Bars[len(p.score.Bars)-1].barNo-lastBar)*uint32(num), uint32(denom))
+	p.wr.Meter(num, denom)
 
 	return nil
 }
 
-func (p *SMFWriter) writeTempoTrack(wr *mid.SMFWriter) error {
+func (p *SMFWriter) writeTempoTrack() error {
 	// iw.wr.Program(iw.instr.Name)
-	wr.TrackSequenceName("BPM")
+	p.wr.TrackSequenceName("BPM")
 	// iw.wr.Instrument(iw.instr.Name)
 
 	var lastBar int
@@ -158,33 +172,33 @@ func (p *SMFWriter) writeTempoTrack(wr *mid.SMFWriter) error {
 	for _, b := range p.score.Bars {
 
 		if b.tempoChange > 0 {
-			wr.Forward(uint32(b.barNo-lastBar), 0, 0)
+			p.wr.Forward(uint32(b.barNo-lastBar), 0, 0)
 			lastBar = b.barNo
 
 			if inTempoGlissando {
-				distance := int64(math.Round(float64(wr.Position()+uint64(wr.Delta())-startTempoGlissando) / float64(wr.Ticks16th())))
+				distance := int64(math.Round(float64(p.wr.Position()+uint64(p.wr.Delta())-startTempoGlissando) / float64(p.wr.Ticks16th())))
 				diff := b.tempoChange - startTempoGlissandoValue
 
-				tempoglissandoFunc(wr, distance, diff, func(vl float64) {
+				tempoglissandoFunc(p.wr, distance, diff, func(vl float64) {
 					vll := vl + startTempoGlissandoValue
-					wr.TempoBPM(vll)
+					p.wr.TempoBPM(vll)
 					// wr.Text(fmt.Sprintf("%0.2f BPM", vll))
 				})
 				inTempoGlissando = false
 			}
 
-			wr.TempoBPM(b.tempoChange)
+			p.wr.TempoBPM(b.tempoChange)
 			// wr.Text(fmt.Sprintf("%0.2f BPM", b.tempoChange))
 
 			if len(b.tilde) > 0 {
-				startTempoGlissando = wr.Position()
+				startTempoGlissando = p.wr.Position()
 				startTempoGlissandoValue = b.tempoChange
 				inTempoGlissando = true
 				tempoglissandoFunc = linearTempoChange
 				if b.tilde == "~~" {
 					tempoglissandoFunc = exponentialTempoChange
 				}
-				wr.BackupTimeline()
+				p.wr.BackupTimeline()
 			}
 			//fmt.Printf("write tempo change %v\n", b.tempoChange)
 		}

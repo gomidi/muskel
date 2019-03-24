@@ -40,6 +40,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
     1    | a"    | MN36=:  | b"      |
     2&   | c     | MN40=:  | d       |
 
@@ -80,6 +81,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
     1    | a"    | e"      | b"      |
     2&   | c     | f"      | d       |
 
@@ -108,6 +110,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
 4/4
     1    | a"    | d       | b"      |
     2&   | c     |         | d       |
@@ -136,6 +139,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
     1    | e"    |         | f"      | A
     2&   | c     |         | d       |
 
@@ -160,6 +164,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
     1    | e"    |         | f"      | A
     2&   | c     |         | d       |
 
@@ -189,6 +194,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
 4/4
     1    | a"    | d       | b"      |
     2&   | c     |         | d       |
@@ -286,6 +292,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
     1    | a"    | kd      | b"      |
     2&   | c     | sn      | d       |
 
@@ -326,6 +333,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
     1    | a"    | kd      | b"      |
     2&   | c     | sn      | d       |
 
@@ -353,6 +361,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
 4/4
     1    | a"    | d       | b"      |
     2&   | c     |         | d       |
@@ -382,6 +391,7 @@ Prog     |       |         |         |
 Vol      |       |         |         |
 PbRange  |       |         |         |
 Trans    |       |         |         |
+Delay    |       |         |         |
 4/4
     1    | a"    | d       | b"      |
     2&   | c     |         | d       |

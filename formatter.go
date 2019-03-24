@@ -174,6 +174,30 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 	}
 
 	p.writeBodyLine(bf, l)
+
+	l = "Delay    |"
+	if p.score.SmallColumns {
+		l = "Delay   |"
+	}
+
+	for _, instr := range p.score.Instruments {
+		if instr.Delay[0] == 0 {
+			if p.score.SmallColumns {
+				l += fmt.Sprintf("%v|", instr.pad(" "))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(" "))
+			}
+		} else {
+			if p.score.SmallColumns {
+				l += fmt.Sprintf("%v|", instr.pad(fmt.Sprintf("%v/%v", instr.Delay[0], instr.Delay[1])))
+			} else {
+				l += fmt.Sprintf(" %v |", instr.pad(fmt.Sprintf("%v/%v", instr.Delay[0], instr.Delay[1])))
+			}
+		}
+	}
+
+	p.writeBodyLine(bf, l)
+
 }
 
 func (p *Formatter) writeInstrumentLines(bf io.Writer) {

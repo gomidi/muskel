@@ -23,6 +23,7 @@ func TestSMFWriter(t *testing.T) {
 		expected             string
 	}{
 		{
+			// 0
 			`
 =
    |<p>|
@@ -41,6 +42,7 @@ Ch |1  |
 `,
 		},
 		{
+			// 1
 			`
 =
    |<p>|
@@ -60,6 +62,7 @@ Ch |1  |
 `,
 		},
 		{
+			// 2
 			`
 =
    |<p>|
@@ -75,6 +78,7 @@ Ch |1  |
 `,
 		},
 		{
+			// 3
 			`
 =
    |<p>|
@@ -94,6 +98,7 @@ Ch |1  |
 `,
 		},
 		{
+			// 4
 			`
 =
    |<p>|
@@ -112,6 +117,7 @@ Ch |1  |
 `,
 		},
 		{
+			// 5
 			`
 =
    |<p>|
@@ -133,9 +139,346 @@ Ch |1  |
 [1600] channel.NoteOff channel 0 key 56
 `,
 		},
+		{
+			// 6
+			`
+=
+   |<p>|
+Ch |1  |
+Delay|1/32|
+1  |{c,e,g#}6 |
+
+1  |:|
+2  |*|
+			`,
+			2,
+			false,
+			false,
+			`
+[120] channel.NoteOn channel 0 key 48 dyn =
+[1600] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[1600] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[1600] channel.NoteOff channel 0 key 56
+`,
+		},
+		{
+			// 7
+			`
+=
+   |<p>|
+Ch |1  |
+Delay|-1/32|
+1  | |
+
+1  |{c,e,g#}6 |
+
+1  |:|
+2  |*|
+			`,
+			2,
+			false,
+			false,
+			`
+[3720] channel.NoteOn channel 0 key 48 dyn =
+[1600] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[1600] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[1600] channel.NoteOff channel 0 key 56
+`,
+		},
+		{
+			// 8
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c |
+2  |d |
+3  |e |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[960] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 9
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c> |
+2  |d |
+3  |e |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[30] channel.NoteOn channel 0 key 48 dyn =
+[930] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 10
+			`
+=
+   |<p>|
+Ch |1  |
+1  |MN48> |
+2  |MN50 |
+3  |MN52 |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[30] channel.NoteOn channel 0 key 48 dyn =
+[930] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 11
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c |
+2  |d> |
+3  |e |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[990] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[930] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 12
+			`
+=
+   |<p>|
+Ch |1  |
+1  |MN48 |
+2  |MN50> |
+3  |MN52 |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[990] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[930] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 13
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c |
+2  |d |
+3  |e> |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[960] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[990] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[930] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 14
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c |
+2  |d< |
+3  |e |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[930] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[990] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 15
+			`
+=
+   |<p>|
+Ch |1  |
+1  |MN48 |
+2  |MN50< |
+3  |MN52 |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[930] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[990] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 16
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c |
+2  |d |
+3  |e< |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[960] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[930] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[990] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 17
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c< |
+2  |d |
+3  |e |
+4  |* |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[960] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 18
+			`
+=
+   |<p>|
+Ch |1  |
+1  | |
+
+1  |{c,e,g#}6> |
+
+1  |:|
+2  |*|
+			`,
+			2,
+			false,
+			false,
+			`
+[3870] channel.NoteOn channel 0 key 48 dyn =
+[1600] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[1600] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[1570] channel.NoteOff channel 0 key 56
+`,
+		},
+		{
+			// 19
+			`
+=
+   |<p>|
+Ch |1  |
+1  | |
+
+1  |{c,e,g#}6< |
+
+1  |:|
+2  |*|
+			`,
+			2,
+			false,
+			false,
+			`
+[3810] channel.NoteOn channel 0 key 48 dyn =
+[1600] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[1600] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[1630] channel.NoteOff channel 0 key 56
+`,
+		},
 	}
 
 	for i, test := range tests {
+
+		/*
+			if i != 18 {
+				continue
+			}
+		*/
+
 		sc, err := Parse(strings.NewReader(test.input), fmt.Sprintf("test-%v", i))
 
 		if err != nil {

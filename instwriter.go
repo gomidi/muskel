@@ -5,9 +5,140 @@ import (
 	"math"
 	"math/rand"
 
+	"gitlab.com/gomidi/midi"
 	"gitlab.com/gomidi/midi/cc"
 	"gitlab.com/gomidi/midi/mid"
+	"gitlab.com/gomidi/midi/midimessage/channel"
+	"gitlab.com/gomidi/midi/smf"
 )
+
+type instrSMFWriter struct {
+	instrNo               int
+	firstDeltaSet         bool
+	delayTicks            int32
+	deltaCached           int32
+	noteDelay             int32
+	noteDelayCompensation int32
+	tempoBPM              float64
+	resolution            smf.MetricTicks
+
+	smf.Writer
+}
+
+func (i *instrSMFWriter) setDelay(num, denom int) {
+	// fmt.Printf("#0 setting delay to %v/%v\n", num, denom)
+	if num == 0 {
+		i.delayTicks = 0
+		// fmt.Printf("#1 setting delay to %v\n", i.delayTicks)
+		return
+	}
+	i.delayTicks = int32(math.Round(float64(i.resolution.Ticks4th()) * 4 * float64(num) / float64(denom)))
+	// fmt.Printf("#2 setting delay to %v\n", i.delayTicks)
+}
+
+func calcNoteDelay(resolution smf.MetricTicks) (delay int32) {
+	return int32(math.Round(float64(resolution.Ticks4th()) * 4 / 128))
+}
+
+func (i *instrSMFWriter) setlaidBack() {
+	// fmt.Println("setlaidBack")
+	i.noteDelay = calcNoteDelay(i.resolution)
+	i.deltaCached += i.noteDelay
+}
+
+func (i *instrSMFWriter) setAhead() {
+	// fmt.Println("setAhead")
+	i.noteDelay = calcNoteDelay(i.resolution) * (-1)
+	i.deltaCached += i.noteDelay
+}
+
+func (i *instrSMFWriter) setStraight() {
+	// fmt.Println("setStraight")
+	i.noteDelay = 0
+}
+
+func (i *instrSMFWriter) Write(msg midi.Message) error {
+	if i.instrNo < 0 {
+		return i.Writer.Write(msg)
+	}
+
+	delta := i.deltaCached
+
+	switch msg.(type) {
+	case channel.NoteOn, channel.NoteOff, channel.NoteOffVelocity:
+		// don't return but continue in this function
+		// fmt.Printf("deltaCached is: %v noteDelayCompensation is: %v\n", i.deltaCached, i.noteDelayCompensation)
+	default:
+		if delta < 0 {
+			delta = 0
+		}
+		i.Writer.SetDelta(uint32(delta))
+		i.deltaCached = 0
+		return i.Writer.Write(msg)
+	}
+
+	if !i.firstDeltaSet {
+		delta += i.delayTicks
+		i.firstDeltaSet = true
+	}
+
+	if delta > 0 && i.noteDelayCompensation != 0 {
+		delta += i.noteDelayCompensation
+		i.noteDelayCompensation = 0
+	}
+
+	if delta < 0 {
+		delta = 0
+	}
+
+	// fmt.Printf("setting real delta to %v before writing %s\n", delta, msg)
+	i.Writer.SetDelta(uint32(delta))
+	i.deltaCached = 0
+	if i.noteDelay != 0 {
+		// remove noteDelayCompensation when we have a negative noteDelay at the start of the piece
+		if delta == 0 {
+			// fmt.Printf("reset noteDelayCompensation caused by delta == 0\n")
+			i.noteDelayCompensation = 0
+		} else {
+			i.noteDelayCompensation -= i.noteDelay
+			// fmt.Printf("setting noteDelayCompensation to %v\n", i.noteDelayCompensation)
+		}
+		i.noteDelay = 0
+	}
+	return i.Writer.Write(msg)
+}
+
+func (i *instrSMFWriter) SetDelta(ticks uint32) {
+	if i.instrNo < 0 {
+		i.Writer.SetDelta(ticks)
+		return
+	}
+	t := int32(ticks)
+
+	i.deltaCached = t
+
+	/*
+		fmt.Printf("SetDelta(%v) noteDelay: %v, noteDelayComp: %v\n", ticks, i.noteDelay, i.noteDelayCompensation)
+		//panic(ticks)
+
+		if t > 0 && i.noteDelayCompensation != 0 {
+			t += i.noteDelayCompensation
+			i.noteDelayCompensation = 0
+		}
+
+		if i.noteDelay != 0 {
+			t += i.noteDelay
+			i.noteDelayCompensation -= i.noteDelay
+			i.noteDelay = 0
+		}
+
+		if t < 0 {
+			t = 0
+		}
+
+		i.Writer.SetDelta(uint32(t))
+	*/
+}
 
 func calcAdd(distance int64, diff float64) float64 {
 	return diff / float64(distance)
@@ -108,8 +239,17 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		// fmt.Printf("%#v\n", v)
 
 		var n uint8
-
 		n = v.toMIDI()
+
+		switch v.posShift {
+		case 0:
+			iw.p.iw.setStraight()
+		case 1:
+			iw.p.iw.setlaidBack()
+		case -1:
+			iw.p.iw.setAhead()
+		}
+
 		//	}
 
 		// only add MIDITranspose to Notes not to MIDINotes
@@ -186,6 +326,15 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			iw.wr.BackupTimeline()
 		}
 	case MIDINote:
+		switch v.posShift {
+		case 0:
+			iw.p.iw.setStraight()
+		case 1:
+			iw.p.iw.setlaidBack()
+		case -1:
+			iw.p.iw.setAhead()
+		}
+
 		iw.inGlissando = false
 		stopNotes()
 		vel := v.velocity
@@ -409,6 +558,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		// the total length of the ntuple could be specified by the ending position, e.g.
 		// {a',e'',f}3&
 		// would mean: the total duration is from the current position until 3&
+
 		iw.inGlissando = false
 
 		length := uint32(v.endPos - iw.lastNum32)
@@ -417,6 +567,15 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 		//lengthPerItem := uint32(4.0 * math.Round(float64(length)/float64(len(v.items))))
 		//lengthPerItem := uint32(math.Round(float64(length) / float64(len(v.items))))
+		// fmt.Printf("posShift: %v\n", v.posShift)
+		switch v.posShift {
+		case 0:
+			iw.p.iw.setStraight()
+		case 1:
+			iw.p.iw.setlaidBack()
+		case -1:
+			iw.p.iw.setAhead()
+		}
 
 		var delta uint32
 
@@ -438,6 +597,15 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			delta += length // lengthPerItem
 		}
 		iw.wr.Forward(0, delta, uint32(len(v.items))*32)
+
+		switch v.posShift {
+		case 0:
+			iw.p.iw.noteDelayCompensation = 0
+		case 1:
+			iw.p.iw.noteDelayCompensation = calcNoteDelay(iw.p.iw.resolution) * (-1)
+		case -1:
+			iw.p.iw.noteDelayCompensation = calcNoteDelay(iw.p.iw.resolution)
+		}
 		stopNotes()
 		iw.lastNum32 += uint(length)
 
@@ -455,6 +623,8 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		//fmt.Printf("got REST\n")
 		iw.inGlissando = false
 		stopNotes()
+		iw.p.iw.setStraight()
+
 	case hold:
 		return nil
 	case Lyric:
@@ -647,6 +817,7 @@ func (iw *instWriter) writeTrack() {
 
 type Instrument struct {
 	Name           string
+	Delay          [2]int // fraction of 4/4
 	MIDIChannel    int8
 	MIDIProgram    int8
 	MIDIVolume     int8
@@ -662,6 +833,7 @@ type Instrument struct {
 func (i *Instrument) Dup() *Instrument {
 	return &Instrument{
 		Name:           i.Name,
+		Delay:          i.Delay,
 		MIDIChannel:    i.MIDIChannel,
 		MIDIProgram:    i.MIDIProgram,
 		MIDIVolume:     i.MIDIVolume,

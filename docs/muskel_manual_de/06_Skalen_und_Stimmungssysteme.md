@@ -8,9 +8,11 @@ bei absoluten, Skalennoten, als auch normalen Pitchbend-Messages zum Einsatz kom
 
 Auf eine Funktion/ein Interface heruntergebrochen wäre das
 
+```go
 type Tuner interface {
 	Tune(key uint8, pitchbend int16, pitchbendRange uint8) (tunedKey uint8, tunedPitchbend int16)
 }
+```
 
 dieses interface ist von jedem Tuning zu erfüllen.
 

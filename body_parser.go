@@ -469,6 +469,35 @@ func (p *BodyParser) setInstrumentBank(i int, instr *Instrument, data string) er
 	return nil
 }
 
+// setDelay sets the delay for an instrument
+func (p *BodyParser) setDelay(i int, instr *Instrument, data string) error {
+	if len(data) == 0 {
+		instr.Delay = [2]int{0, 0}
+		return nil
+	}
+
+	d := strings.Split(data, "/")
+
+	if len(d) != 2 {
+		return fmt.Errorf("%#v is not a valid delay value", data)
+	}
+
+	num, err := strconv.Atoi(d[0])
+	if err != nil {
+		return fmt.Errorf("%#v is not a valid delay numerator", d[0])
+	}
+
+	denom, err := strconv.Atoi(d[1])
+	if err != nil || denom == 0 {
+		return fmt.Errorf("%#v is not a valid delay denominator", d[1])
+	}
+
+	instr.Delay = [2]int{num, denom}
+	//fmt.Printf("setting delay for instrument %q to %v/%v\n", instr.Name, num, denom)
+
+	return nil
+}
+
 // parseInstrEvents parses the events of a single instrument in a non-bar line
 func (p *BodyParser) parseInstrEvents(i int, instr *Instrument, data string) (err error) {
 	var barEvents BarEvents
@@ -554,6 +583,8 @@ func (p *BodyParser) parseEventsLine(tabs []string) (err error) {
 			err = p.setInstrumentBank(i, instr, data)
 		case "file":
 			err = p.setInstrumentFileGroup(i, instr, data)
+		case "delay":
+			err = p.setDelay(i, instr, data)
 		default:
 			if p.jumpInLineBefore { //&& p.firstBarSet {
 				//				fmt.Println("new bar in parse events")
