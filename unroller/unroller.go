@@ -29,7 +29,7 @@ func Unroll(s *score.Score) (dest *score.Score, err error) {
 
 	ur := newScoreUnroller(s)
 	ur.dest.SmallColumns = s.SmallColumns
-	err = ur.unrollInstruments(s.Bars, s.Instruments)
+	err = ur.unrollTracks(s.Bars, s.Tracks)
 	return ur.dest, err
 }
 
@@ -44,7 +44,7 @@ type unroller struct {
 	denom          uint8
 	newBarNo       int
 
-	// from flattenInstrumentEvents
+	// from flattenTrackEvents
 	currentlyRepeatingBars            []score.BarEvents
 	indexWithinCurrentlyRepeatingBars int
 
@@ -55,7 +55,7 @@ type unroller struct {
 // trackBarNumbers tracks the bar numbers and positions for each event
 func (p *unroller) trackBarNumbers() {
 
-	for _, instr := range p.dest.Instruments {
+	for _, instr := range p.dest.Tracks {
 		var events []score.BarEvents
 
 		for barNo, bar := range instr.Events {
@@ -83,15 +83,15 @@ func (p *unroller) trackBarNumbers() {
 
 		instr.Events = events
 
-		//		p.dest.Instruments = append(p.dest.Instruments, nu)
+		//		p.dest.Tracks = append(p.dest.Tracks, nu)
 		//instr.unrolled = events
 	}
 	//	p.dest.barNumbersTracked = true
 }
 
-func (s *unroller) createInstruments(instruments []*score.Instrument) {
+func (s *unroller) createTracks(instruments []*score.Track) {
 	for _, instr := range instruments {
-		s.dest.AddInstrument(instr.Dup())
+		s.dest.AddTrack(instr.Dup())
 	}
 }
 
@@ -109,7 +109,7 @@ func (s *unroller) unrollJump(jump string) {
 		nub.TimeSig[1] = s.denom
 		// nub.include = ""
 		s.unrolledBars = append(s.unrolledBars, nub)
-		for _, _instr := range s.dest.Instruments {
+		for _, _instr := range s.dest.Tracks {
 			//			fmt.Printf("adding bar %v => %v\n    %v\n", s.dest.Parts[jump][0]+j, s.newBarNo, _instr.events[s.dest.Parts[jump][0]+j])
 			if _, has := s.instrBarevents[_instr.Name]; has {
 				s.instrBarevents[_instr.Name] = append(s.instrBarevents[_instr.Name], _instr.Events[s.dest.Parts[jump][0]+j])
@@ -143,7 +143,7 @@ func (s *unroller) unrollInclude(sc *score.Score) {
 		nub.TimeSig[0] = s.num
 		nub.TimeSig[1] = s.denom
 		s.unrolledBars = append(s.unrolledBars, nub)
-		for _, _instr := range sc.Instruments {
+		for _, _instr := range sc.Tracks {
 			//			fmt.Printf("adding bar %v => %v\n    %v\n", s.dest.Parts[jump][0]+j, s.newBarNo, _instr.events[s.dest.Parts[jump][0]+j])
 			s.instrBarevents[_instr.Name] = append(s.instrBarevents[_instr.Name], _instr.Events[j].Dup())
 		}
@@ -163,7 +163,7 @@ func (s *unroller) unrollBar(bar *score.Bar) {
 	s.unrolledBars = append(s.unrolledBars, bar)
 	s.newBarNo++
 
-	for _, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Tracks {
 		//		fmt.Printf("adding bar %v\n", bar.originalBarNo)
 		if len(instr.Events)-1 >= bar.OriginalBarNo {
 			s.instrBarevents[instr.Name] = append(s.instrBarevents[instr.Name], instr.Events[bar.OriginalBarNo])
@@ -184,7 +184,7 @@ func (s *unroller) unrollBarsAndJumps() {
 	s.denom = 4
 	s.newBarNo = 0
 
-	//	s.createInstruments()
+	//	s.createTracks()
 
 	//	fmt.Printf("len bars: %v\n", len(s.src.Bars))
 
@@ -207,7 +207,7 @@ func (s *unroller) unrollBarsAndJumps() {
 
 	s.dest.Bars = s.unrolledBars
 
-	for _, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Tracks {
 		//		fmt.Printf("[0] len bars in instr: %v\n", len(s.instrBarevents[ii]))
 		instr.Events = s.instrBarevents[instr.Name]
 	}
@@ -229,8 +229,8 @@ func (s *unroller) dupEvents(src []*score.Event, barNo, lenBar int) (dest []*sco
 	return
 }
 
-// flattenInstrumentBarEvents flattens the instrument barevents for a given bar
-func (s *unroller) flattenInstrumentBarEvents(barNo int, bar score.BarEvents, instr *score.Instrument) (events []*score.Event) {
+// flattenTrackBarEvents flattens the instrument barevents for a given bar
+func (s *unroller) flattenTrackBarEvents(barNo int, bar score.BarEvents, instr *score.Track) (events []*score.Event) {
 	numBar, denomBar := s.dest.Bars[barNo].TimeSig[0], s.dest.Bars[barNo].TimeSig[1]
 	lenBar := items.Length32ths(numBar, denomBar)
 
@@ -277,17 +277,17 @@ func (s *unroller) flattenInstrumentBarEvents(barNo int, bar score.BarEvents, in
 	return
 }
 
-func (s *unroller) flattenInstrumentEvents() {
+func (s *unroller) flattenTrackEvents() {
 	if !s.dest.IsUnrolled {
 		panic("must be unrolled")
 	}
 
-	for _, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Tracks {
 		s.currentlyRepeatingBars = []score.BarEvents{}
 		s.indexWithinCurrentlyRepeatingBars = 0
 		var events []*score.Event
 		for barNo, bar := range instr.Events {
-			events = append(events, s.flattenInstrumentBarEvents(barNo, bar, instr)...)
+			events = append(events, s.flattenTrackBarEvents(barNo, bar, instr)...)
 		}
 
 		instr.Unrolled = events
@@ -305,7 +305,7 @@ func (s *unroller) evalRandomItems() {
 	if !s.dest.IsUnrolled {
 		panic("must be unrolled")
 	}
-	for _, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Tracks {
 		var unrolled []*score.Event
 		for _, ev := range instr.Unrolled {
 			switch v := ev.Item.(type) {
@@ -401,7 +401,7 @@ func (s *unroller) moveNoteAccordingToScale(sc *items.Scale, p *template.Call, v
 	return
 }
 
-func (s *unroller) unfoldTemplateCallWithFollowingEvent(idx int, instr *score.Instrument, ev *score.Event, v *template.Call) (unrolled []*score.Event) {
+func (s *unroller) unfoldTemplateCallWithFollowingEvent(idx int, instr *score.Track, ev *score.Event, v *template.Call) (unrolled []*score.Event) {
 	/*
 			TODO
 			1. calc the distance of the next event in 32ths (respecting bar changes etc)
@@ -575,7 +575,7 @@ func (s *unroller) convertEvents(barNo int, p *template.Call, in ...*template.Po
 	return
 }
 
-func (s *unroller) unfoldTemplateCall(idx int, instr *score.Instrument, ev *score.Event, v *template.Call) (unrolled []*score.Event) {
+func (s *unroller) unfoldTemplateCall(idx int, instr *score.Track, ev *score.Event, v *template.Call) (unrolled []*score.Event) {
 
 	// no following event
 	if idx+1 >= len(instr.Unrolled) {
@@ -585,7 +585,7 @@ func (s *unroller) unfoldTemplateCall(idx int, instr *score.Instrument, ev *scor
 	return s.unfoldTemplateCallWithFollowingEvent(idx, instr, ev, v)
 }
 
-func (s *unroller) unfoldTemplate(idx int, ev *score.Event, instr *score.Instrument) (unrolled []*score.Event) {
+func (s *unroller) unfoldTemplate(idx int, ev *score.Event, instr *score.Track) (unrolled []*score.Event) {
 	switch v := ev.Item.(type) {
 	case *template.Call:
 		unrolled = append(unrolled, s.unfoldTemplateCall(idx, instr, ev, v)...)
@@ -599,7 +599,7 @@ func (s *unroller) unfoldTemplates() {
 	if !s.dest.IsUnrolled {
 		panic("must be unrolled")
 	}
-	for _, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Tracks {
 		var unrolled []*score.Event
 		for idx, ev := range instr.Unrolled {
 			//			fmt.Printf("unrolled event: %#v\n", ev)
@@ -610,7 +610,7 @@ func (s *unroller) unfoldTemplates() {
 }
 
 func (s *unroller) unfoldRepeated() {
-	for _, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Tracks {
 		var lastEvent *score.Event
 		for i, ev := range instr.Unrolled {
 			switch ev.Item.(type) {
@@ -681,7 +681,7 @@ func (s *unroller) replaceScaleNotes() {
 		panic("must be unrolled")
 	}
 
-	for _, instr := range s.dest.Instruments {
+	for _, instr := range s.dest.Tracks {
 		var unrolled []*score.Event
 		for _, ev := range instr.Unrolled {
 			switch v := ev.Item.(type) {
@@ -769,13 +769,13 @@ func (s *unroller) replaceScaleNotes() {
 	}
 }
 
-func (s *unroller) unrollInstruments(bars []*score.Bar, instr []*score.Instrument) error {
+func (s *unroller) unrollTracks(bars []*score.Bar, instr []*score.Track) error {
 
 	s.copyBars(bars)
 
 	// attach the barnumbers and position in 32th relative to start to the event
 	//s.src.trackBarNumbers()
-	s.createInstruments(instr)
+	s.createTracks(instr)
 	s.trackBarNumbers()
 
 	// unroll the repetition within an instrument and the total jumps
@@ -786,7 +786,7 @@ func (s *unroller) unrollInstruments(bars []*score.Bar, instr []*score.Instrumen
 	// since now we have the barnumbers properly attached to events, we can flatten
 	// the events so that we have a single line of events where we could easily look
 	// for the next event
-	s.flattenInstrumentEvents()
+	s.flattenTrackEvents()
 
 	// evaluate randomness here before the template unfolding, to be able to randomly choose
 	// templates

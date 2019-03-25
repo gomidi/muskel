@@ -622,7 +622,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 type instWriter struct {
 	p                  *writer
 	wr                 *mid.SMFWriter
-	instr              *score.Instrument
+	instr              *score.Track
 	emptyBars          uint32
 	lastItem           interface{}
 	prevVel            int8
@@ -665,7 +665,7 @@ type instWriter struct {
 	// currentScale        *Scale
 }
 
-func newInstrumentSMFWriter(p *writer, wr *mid.SMFWriter, instr *score.Instrument) *instWriter {
+func newTrackSMFWriter(p *writer, wr *mid.SMFWriter, instr *score.Track) *instWriter {
 	return &instWriter{
 		p:              p,
 		wr:             wr,

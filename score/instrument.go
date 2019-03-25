@@ -1,6 +1,6 @@
 package score
 
-type Instrument struct {
+type Track struct {
 	Name           string
 	Delay          [2]int // fraction of 4/4
 	MIDIChannel    int8
@@ -15,8 +15,8 @@ type Instrument struct {
 	FileGroup      string
 }
 
-func (i *Instrument) Dup() *Instrument {
-	return &Instrument{
+func (i *Track) Dup() *Track {
+	return &Track{
 		Name:           i.Name,
 		Delay:          i.Delay,
 		MIDIChannel:    i.MIDIChannel,
@@ -31,11 +31,11 @@ func (i *Instrument) Dup() *Instrument {
 	}
 }
 
-func (i *Instrument) Pad(s string) string {
+func (i *Track) Pad(s string) string {
 	return Pad(s, i.colWidth)
 }
 
-func (i *Instrument) CalcColWidth(unrolled bool) {
+func (i *Track) CalcColWidth(unrolled bool) {
 	i.colWidth = len(i.Name) + 2
 
 	if unrolled {

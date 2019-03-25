@@ -34,9 +34,9 @@ func New(r io.Reader) *Parser {
 		input:  bufio.NewScanner(r),
 		header: &header{sc},
 		body: &body{
-			Score:          sc,
-			currentBarNo:   -1,
-			numInstruments: -1,
+			Score:        sc,
+			currentBarNo: -1,
+			numTracks:    -1,
 		},
 	}
 }

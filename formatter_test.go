@@ -195,7 +195,7 @@ func TestFormatterJumps(t *testing.T) {
 		var bf strings.Builder
 
 		fm := formatter.New(sc)
-		fm.HideInstrumentProperties = true
+		fm.HideTrackProperties = true
 		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())

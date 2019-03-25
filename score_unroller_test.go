@@ -770,7 +770,7 @@ templ: 1e 2&f#
 		var bf strings.Builder
 
 		fm := formatter.New(unr)
-		fm.HideInstrumentProperties = true
+		fm.HideTrackProperties = true
 		fm.HideHeader = true
 		fm.WriteTo(&bf)
 

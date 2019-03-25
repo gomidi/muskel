@@ -16,7 +16,7 @@ type body struct {
 	currentBarNo      int
 	jumpInLineBefore  bool
 	inPart            string
-	numInstruments    int
+	numTracks         int
 	lastPosition      string
 	currentPosition   string
 	currentPosIn32ths uint
@@ -126,8 +126,8 @@ func (p *body) includeScore(sc *score.Score, file string) error {
 	b := score.NewBar()
 	b.Include = file
 
-	for _, instr := range sc.Instruments {
-		if !p.Score.HasInstrument(instr.Name) {
+	for _, instr := range sc.Tracks {
+		if !p.Score.HasTrack(instr.Name) {
 			return fmt.Errorf("instrument %q not found in main score", instr.Name)
 		}
 	}
@@ -275,13 +275,13 @@ func (p *body) parseBarLine(data string) error {
 
 func (p *body) getInstrData(tabs []string) (instrData []string) {
 	//instrData = tabs[1 : len(tabs)-1]
-	to := p.numInstruments + 1
+	to := p.numTracks + 1
 	if len(tabs)-1 < to {
 		to = len(tabs) - 1
 	}
 	instrData = tabs[1:to]
 
-	if missingTabs := p.numInstruments - (len(tabs) - 2); missingTabs > 0 {
+	if missingTabs := p.numTracks - (len(tabs) - 2); missingTabs > 0 {
 		for mt := 0; mt < missingTabs; mt++ {
 			instrData = append(instrData, "")
 		}
@@ -289,17 +289,17 @@ func (p *body) getInstrData(tabs []string) (instrData []string) {
 	return instrData
 }
 
-func (p *body) getInstrument(i int) (instr *score.Instrument) {
-	if i > len(p.Score.Instruments)-1 {
-		instr = score.NewInstrument("")
-		p.Score.AddInstrument(instr)
+func (p *body) getTrack(i int) (instr *score.Track) {
+	if i > len(p.Score.Tracks)-1 {
+		instr = score.NewTrack("")
+		p.Score.AddTrack(instr)
 		return
 	}
-	return p.Score.Instruments[i]
+	return p.Score.Tracks[i]
 }
 
-// setInstrumentName sets the name of an instrument
-func (p *body) setInstrumentName(i int, instr *score.Instrument, name string) error {
+// setTrackName sets the name of an instrument
+func (p *body) setTrackName(i int, instr *score.Track, name string) error {
 	name = strings.Trim(name, "<>")
 	if instr.Name == "" {
 		instr.Name = name
@@ -313,7 +313,7 @@ func (p *body) setInstrumentName(i int, instr *score.Instrument, name string) er
 	return nil
 }
 
-func (p *body) setInstrumentPitchbendrange(i int, instr *score.Instrument, data string) error {
+func (p *body) setTrackPitchbendrange(i int, instr *score.Track, data string) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -337,8 +337,8 @@ func (p *body) setInstrumentPitchbendrange(i int, instr *score.Instrument, data 
 	return nil
 }
 
-// setInstrumentChannel sets the MIDI channel of an instrument
-func (p *body) setInstrumentChannel(i int, instr *score.Instrument, data string) error {
+// setTrackChannel sets the MIDI channel of an instrument
+func (p *body) setTrackChannel(i int, instr *score.Track, data string) error {
 	if len(data) == 0 {
 		instr.MIDIChannel = -1
 		return nil
@@ -365,13 +365,13 @@ func (p *body) setInstrumentChannel(i int, instr *score.Instrument, data string)
 	return nil
 }
 
-func (p *body) setInstrumentFileGroup(i int, instr *score.Instrument, data string) error {
+func (p *body) setTrackFileGroup(i int, instr *score.Track, data string) error {
 	instr.FileGroup = strings.TrimSpace(data)
 	return nil
 }
 
-// setInstrumentProgram sets the MIDI program value of an instrument
-func (p *body) setInstrumentProgram(i int, instr *score.Instrument, data string) error {
+// setTrackProgram sets the MIDI program value of an instrument
+func (p *body) setTrackProgram(i int, instr *score.Track, data string) error {
 	if len(data) == 0 {
 		instr.MIDIProgram = -1
 		return nil
@@ -398,8 +398,8 @@ func (p *body) setInstrumentProgram(i int, instr *score.Instrument, data string)
 	return nil
 }
 
-// setInstrumentVolume sets the MIDI volume of an instrument
-func (p *body) setInstrumentVolume(i int, instr *score.Instrument, data string) error {
+// setTrackVolume sets the MIDI volume of an instrument
+func (p *body) setTrackVolume(i int, instr *score.Track, data string) error {
 	if len(data) == 0 {
 		instr.MIDIVolume = -1
 		return nil
@@ -426,8 +426,8 @@ func (p *body) setInstrumentVolume(i int, instr *score.Instrument, data string) 
 	return nil
 }
 
-// setInstrumentTranspose sets the MIDITranspose for an instrument
-func (p *body) setInstrumentTranspose(i int, instr *score.Instrument, data string) error {
+// setTrackTranspose sets the MIDITranspose for an instrument
+func (p *body) setTrackTranspose(i int, instr *score.Track, data string) error {
 	if len(data) == 0 || data == "" {
 		instr.MIDITranspose = 0
 		return nil
@@ -446,8 +446,8 @@ func (p *body) setInstrumentTranspose(i int, instr *score.Instrument, data strin
 	return nil
 }
 
-// setInstrumentBank sets the MIDI bank for an instrument
-func (p *body) setInstrumentBank(i int, instr *score.Instrument, data string) error {
+// setTrackBank sets the MIDI bank for an instrument
+func (p *body) setTrackBank(i int, instr *score.Track, data string) error {
 	if len(data) == 0 {
 		instr.MIDIBank = -1
 		return nil
@@ -475,7 +475,7 @@ func (p *body) setInstrumentBank(i int, instr *score.Instrument, data string) er
 }
 
 // setDelay sets the delay for an instrument
-func (p *body) setDelay(i int, instr *score.Instrument, data string) error {
+func (p *body) setDelay(i int, instr *score.Track, data string) error {
 	if len(data) == 0 {
 		instr.Delay = [2]int{0, 0}
 		return nil
@@ -504,7 +504,7 @@ func (p *body) setDelay(i int, instr *score.Instrument, data string) error {
 }
 
 // parseInstrEvents parses the events of a single instrument in a non-bar line
-func (p *body) parseInstrEvents(i int, instr *score.Instrument, data string) (err error) {
+func (p *body) parseInstrEvents(i int, instr *score.Track, data string) (err error) {
 	var barEvents score.BarEvents
 
 	if diff := (p.currentBarNo - (len(instr.Events) - 1)); diff > 0 {
@@ -554,40 +554,40 @@ func (p *body) handleLastColumn(data string) error {
 func (p *body) parseEventsLine(tabs []string) (err error) {
 	//	fmt.Printf("parseEventsLine in score %q\n", p.Score.FileName)
 
-	if p.numInstruments == -1 {
-		p.numInstruments = len(tabs) - 2
+	if p.numTracks == -1 {
+		p.numTracks = len(tabs) - 2
 	}
 
-	// fmt.Printf("num instruments: %v\n", p.numInstruments)
+	// fmt.Printf("num instruments: %v\n", p.numTracks)
 
 	instrData := p.getInstrData(tabs)
 	firstColumn := strings.TrimSpace(tabs[0])
 
 	for i, data := range instrData {
-		if i >= p.numInstruments || i >= len(tabs)-2 {
+		if i >= p.numTracks || i >= len(tabs)-2 {
 			break
 		}
 		// fmt.Printf("column: %v\n", i)
-		instr := p.getInstrument(i)
+		instr := p.getTrack(i)
 		data = strings.TrimSpace(data)
 
 		switch strings.ToLower(firstColumn) {
 		case "":
-			err = p.setInstrumentName(i, instr, data)
+			err = p.setTrackName(i, instr, data)
 		case "pbrange", "pitchbendrange":
-			err = p.setInstrumentPitchbendrange(i, instr, data)
+			err = p.setTrackPitchbendrange(i, instr, data)
 		case "ch", "channel":
-			err = p.setInstrumentChannel(i, instr, data)
+			err = p.setTrackChannel(i, instr, data)
 		case "prog", "program":
-			err = p.setInstrumentProgram(i, instr, data)
+			err = p.setTrackProgram(i, instr, data)
 		case "vol", "volume":
-			err = p.setInstrumentVolume(i, instr, data)
+			err = p.setTrackVolume(i, instr, data)
 		case "trans", "transpose":
-			err = p.setInstrumentTranspose(i, instr, data)
+			err = p.setTrackTranspose(i, instr, data)
 		case "bank":
-			err = p.setInstrumentBank(i, instr, data)
+			err = p.setTrackBank(i, instr, data)
 		case "file":
-			err = p.setInstrumentFileGroup(i, instr, data)
+			err = p.setTrackFileGroup(i, instr, data)
 		case "delay":
 			err = p.setDelay(i, instr, data)
 		default:

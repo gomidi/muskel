@@ -84,8 +84,8 @@ func WriteFormattedFile(s *score.Score, filep string) (err error) {
 	return
 }
 
-func RenameInstrument(s *score.Score, old, nu string) error {
-	in := s.GetInstrument(old)
+func RenameTrack(s *score.Score, old, nu string) error {
+	in := s.GetTrack(old)
 	if in == nil {
 		return fmt.Errorf("instrument with name %q could not be found", old)
 	}
@@ -108,7 +108,7 @@ func RenameInstrument(s *score.Score, old, nu string) error {
 
 			includes[b.Include] = true
 
-			RenameInstrument(target, old, nu)
+			RenameTrack(target, old, nu)
 		}
 	}
 	return err
@@ -126,12 +126,12 @@ func syncInclude(s *score.Score, include string) error {
 
 	var changed bool
 
-	for _, instr := range s.Instruments {
-		if !target.HasInstrument(instr.Name) {
-			target.AddInstrument(instr)
+	for _, instr := range s.Tracks {
+		if !target.HasTrack(instr.Name) {
+			target.AddTrack(instr)
 			changed = true
 		} else {
-			ti := target.GetInstrument(instr.Name)
+			ti := target.GetTrack(instr.Name)
 
 			if ti == nil {
 				return fmt.Errorf("could not get instrument %q from include %q although it says, is has this instrument", instr.Name, include)
@@ -153,10 +153,10 @@ func syncInclude(s *score.Score, include string) error {
 		WriteFormattedFile(target, target.FileName)
 	}
 
-	return SyncInstruments(target)
+	return SyncTracks(target)
 }
 
-func SyncInstruments(s *score.Score) error {
+func SyncTracks(s *score.Score) error {
 	var includes = map[string]bool{}
 	for _, b := range s.Bars {
 		if b.Include != "" {
@@ -284,7 +284,7 @@ func tempDir(prefix string) (dir string, err error) {
 }
 
 func renameTemplateInCalls(s *score.Score, old, nu string) (err error) {
-	for _, instr := range s.Instruments {
+	for _, instr := range s.Tracks {
 		for ii, bev := range instr.Events {
 			for i, ev := range bev {
 				switch v := ev.Item.(type) {

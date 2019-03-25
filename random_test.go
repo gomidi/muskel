@@ -91,7 +91,7 @@ bb: 2d
 
 		var bf strings.Builder
 		fm := formatter.New(unr)
-		fm.HideInstrumentProperties = true
+		fm.HideTrackProperties = true
 		fm.HideHeader = true
 		fm.WriteTo(&bf)
 
@@ -165,7 +165,7 @@ func TestRandom1(t *testing.T) {
 
 		var bf strings.Builder
 		fm := formatter.New(unr)
-		fm.HideInstrumentProperties = true
+		fm.HideTrackProperties = true
 		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())

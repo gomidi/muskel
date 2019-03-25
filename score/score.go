@@ -9,7 +9,7 @@ import (
 
 type Score struct {
 	FileName    string
-	Instruments []*Instrument
+	Tracks []*Track
 	Bars        []*Bar
 
 	Meta                        map[string]string
@@ -59,8 +59,8 @@ func New() *Score {
 	}
 }
 
-func NewInstrument(name string) *Instrument {
-	instr := &Instrument{}
+func NewTrack(name string) *Track {
+	instr := &Track{}
 	instr.MIDIProgram = -1
 	instr.MIDIChannel = -1
 	instr.MIDIVolume = -1
@@ -68,13 +68,13 @@ func NewInstrument(name string) *Instrument {
 	return instr
 }
 
-func (s *Score) RmInstrument(name string) error {
-	var instrs []*Instrument
+func (s *Score) RmTrack(name string) error {
+	var instrs []*Track
 
 	name = strings.TrimSpace(name)
 	var found bool
 
-	for _, instr := range s.Instruments {
+	for _, instr := range s.Tracks {
 		if instr.Name != name {
 			instrs = append(instrs, instr)
 		} else {
@@ -83,15 +83,15 @@ func (s *Score) RmInstrument(name string) error {
 	}
 
 	if found {
-		s.Instruments = instrs
+		s.Tracks = instrs
 		return nil
 	}
 
 	return fmt.Errorf("could not find instrument %q", name)
 }
 
-func (s *Score) GetInstrument(name string) *Instrument {
-	for _, instr := range s.Instruments {
+func (s *Score) GetTrack(name string) *Track {
+	for _, instr := range s.Tracks {
 		if instr.Name == name {
 			return instr
 		}
@@ -99,17 +99,17 @@ func (s *Score) GetInstrument(name string) *Instrument {
 	return nil
 }
 
-func (s *Score) AddInstrument(i *Instrument) error {
+func (s *Score) AddTrack(i *Track) error {
 	i.Name = strings.TrimSpace(i.Name)
-	if s.HasInstrument(i.Name) {
+	if s.HasTrack(i.Name) {
 		return fmt.Errorf("instrument %q already defined", i.Name)
 	}
-	s.Instruments = append(s.Instruments, i)
+	s.Tracks = append(s.Tracks, i)
 	return nil
 }
 
-func (p *Score) HasInstrument(name string) bool {
-	for _, instr := range p.Instruments {
+func (p *Score) HasTrack(name string) bool {
+	for _, instr := range p.Tracks {
 		if instr.Name == name {
 			return true
 		}
@@ -120,7 +120,7 @@ func (p *Score) HasInstrument(name string) bool {
 func (p *Score) enroll() {
 
 	// enroll the instrument events again
-	for _, instr := range p.Instruments {
+	for _, instr := range p.Tracks {
 		instr.Events = []BarEvents{}
 		var be BarEvents
 		var lastBarNo int

@@ -35,7 +35,7 @@ func (debugLog) Printf(format string, vals ...interface{}) {
 func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwriter.Option) error {
 	numTracks := uint16(2) // first track is for time signatures, second track is for tempo changes
 
-	for _, instr := range s.Instruments {
+	for _, instr := range s.Tracks {
 		if instr.MIDIChannel >= 0 && (filegroup == "*" || instr.FileGroup == filegroup) {
 			numTracks++
 		}
@@ -82,7 +82,7 @@ func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (er
 	}
 
 	var fileGroups = map[string]string{}
-	for _, instr := range s.Instruments {
+	for _, instr := range s.Tracks {
 		fileGroups[instr.FileGroup] = fmt.Sprintf(midifile, instr.FileGroup)
 	}
 
@@ -167,7 +167,7 @@ func (p *writer) Write(wr smf.Writer) error {
 		return err
 	}
 
-	for i, instr := range p.score.Instruments {
+	for i, instr := range p.score.Tracks {
 		if p.fileGroup != "*" && instr.FileGroup != p.fileGroup {
 			continue
 		}
@@ -185,7 +185,7 @@ func (p *writer) Write(wr smf.Writer) error {
 		p.iw.setDelay(instr.Delay[0], instr.Delay[1])
 		p.iw.setStraight()
 
-		iw := newInstrumentSMFWriter(p, p.wr, instr)
+		iw := newTrackSMFWriter(p, p.wr, instr)
 		_ = i
 		//fmt.Printf("writing MIDI for col: %v, instr: %q\n", i, instr.Name)
 		iw.writeIntro()

@@ -411,7 +411,7 @@ chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2
 
 		var bf strings.Builder
 		fm := formatter.New(unr)
-		fm.HideInstrumentProperties = true
+		fm.HideTrackProperties = true
 		fm.HideHeader = true
 		fm.WriteTo(&bf)
 

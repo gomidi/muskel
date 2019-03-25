@@ -11,19 +11,19 @@ import (
 )
 
 type Formatter struct {
-	score                    *score.Score
-	writerSysLine            int
-	jumpInLineBefore         bool
-	HideInstrumentProperties bool
-	HideHeader               bool
-	bf                       strings.Builder
+	score               *score.Score
+	writerSysLine       int
+	jumpInLineBefore    bool
+	HideTrackProperties bool
+	HideHeader          bool
+	bf                  strings.Builder
 }
 
 func New(s *score.Score) *Formatter {
 	return &Formatter{score: s}
 }
 
-func (p *Formatter) printProp(instr *score.Instrument, prop interface{}) string {
+func (p *Formatter) printProp(instr *score.Track, prop interface{}) string {
 	ipad := instr.Pad(fmt.Sprintf("%v", prop))
 	if p.score.SmallColumns {
 		return fmt.Sprintf("%v|", ipad)
@@ -32,13 +32,13 @@ func (p *Formatter) printProp(instr *score.Instrument, prop interface{}) string 
 	return fmt.Sprintf(" %v |", ipad)
 }
 
-func (p *Formatter) writeInstrumentProps(bf io.Writer) {
+func (p *Formatter) writeTrackProps(bf io.Writer) {
 	l := "File     |"
 	if p.score.SmallColumns {
 		l = "File    |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if p.score.SmallColumns {
 			l += fmt.Sprintf("%v|", instr.Pad(instr.FileGroup))
 		} else {
@@ -54,7 +54,7 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 		l = "Ch      |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if instr.MIDIChannel == -1 {
 			l += p.printProp(instr, " ")
 		} else {
@@ -69,7 +69,7 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 		l = "Bank    |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if instr.MIDIBank == -1 {
 			l += p.printProp(instr, " ")
 		} else {
@@ -84,7 +84,7 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 		l = "Prog    |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if instr.MIDIProgram == -1 {
 			l += p.printProp(instr, " ")
 		} else {
@@ -99,7 +99,7 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 		l = "Vol     |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if instr.MIDIVolume == -1 {
 			l += p.printProp(instr, " ")
 		} else {
@@ -114,7 +114,7 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 		l = "PbRange |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if instr.PitchbendRange == 0 {
 			l += p.printProp(instr, " ")
 		} else {
@@ -129,7 +129,7 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 		l = "Trans   |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if instr.MIDITranspose == 0 {
 			l += p.printProp(instr, " ")
 		} else {
@@ -144,7 +144,7 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 		l = "Delay   |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		if instr.Delay[0] == 0 {
 			l += p.printProp(instr, " ")
 		} else {
@@ -156,14 +156,14 @@ func (p *Formatter) writeInstrumentProps(bf io.Writer) {
 
 }
 
-func (p *Formatter) writeInstrumentLines(bf io.Writer) {
+func (p *Formatter) writeTrackLines(bf io.Writer) {
 	// 9 whitespace to first pipe
 	l := "         |"
 	if p.score.SmallColumns {
 		l = "        |"
 	}
 
-	for _, instr := range p.score.Instruments {
+	for _, instr := range p.score.Tracks {
 		instr.CalcColWidth(p.score.IsUnrolled)
 		//instrColWidths[i] = instr.colWidth
 		if p.score.SmallColumns {
@@ -176,8 +176,8 @@ func (p *Formatter) writeInstrumentLines(bf io.Writer) {
 
 	p.writeBodyLine(bf, l)
 
-	if !p.HideInstrumentProperties {
-		p.writeInstrumentProps(bf)
+	if !p.HideTrackProperties {
+		p.writeTrackProps(bf)
 	}
 }
 
@@ -202,7 +202,7 @@ func (f *Formatter) prepareBars() {
 		for _, b := range f.score.Bars {
 			b.Events = map[score.BarEventKey]*score.Event{}
 
-			for i, instr := range f.score.Instruments {
+			for i, instr := range f.score.Tracks {
 				for _, ev := range instr.Unrolled {
 					if ev.BarNo == b.BarNo {
 						b.AddInstrEvent(ev.DistanceToStartOfBarIn32th, i, ev)
@@ -217,7 +217,7 @@ func (f *Formatter) prepareBars() {
 	for _, b := range f.score.Bars {
 		b.Events = map[score.BarEventKey]*score.Event{}
 
-		for i, instr := range f.score.Instruments {
+		for i, instr := range f.score.Tracks {
 			for j, bev := range instr.Events {
 				if j == b.BarNo {
 					for bidx, ev := range bev {
@@ -232,7 +232,7 @@ func (f *Formatter) prepareBars() {
 func (p *Formatter) printBody(bf io.Writer, barLine string) {
 	var l string
 	p.jumpInLineBefore = true
-	p.writeInstrumentLines(bf)
+	p.writeTrackLines(bf)
 	//	fmt.Printf("num bars: %v\n", len(p.score.Bars))
 	//	for b, bar := range p.score.Bars {
 	//		fmt.Printf("bar %v: %#v\n", b, bar)
@@ -321,7 +321,7 @@ func (p *Formatter) printBody(bf io.Writer, barLine string) {
 				//l = fmt.Sprintf("     %3s+ |")
 			}
 
-			for instrCol, instr := range p.score.Instruments {
+			for instrCol, instr := range p.score.Tracks {
 				if ev, has := bar.Events[score.BarEventKey{instrCol, bar.Positions[pi]}]; has && ev != nil {
 					l += fmt.Sprintf(prefix+"%s"+barLine, instr.Pad(ev.OriginalData))
 				} else {
