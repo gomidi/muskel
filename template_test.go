@@ -1,53 +1,13 @@
-package muskel
+package muskel_test
 
 import (
-	"reflect"
 	"strings"
 	"testing"
+
+	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/formatter"
+	"gitlab.com/gomidi/muskel/unroller"
 )
-
-func TestParseFragment(t *testing.T) {
-	//	t.Skip()
-	tests := []struct {
-		input    string
-		expected templateFragment
-	}{
-		{"2a'", templateFragment{"2", "a'"}},
-		{"a'", templateFragment{"", "a'"}},
-		{"2", templateFragment{"2", ""}},
-		{"2&", templateFragment{"2&", ""}},
-		{"&", templateFragment{"&", ""}},
-		{".", templateFragment{".", ""}},
-		{";", templateFragment{";", ""}},
-		{"2;", templateFragment{"2;", ""}},
-		{"2.;", templateFragment{"2.;", ""}},
-		{"2.", templateFragment{"2.", ""}},
-		{"&.", templateFragment{"&.", ""}},
-		{"&;", templateFragment{"&;", ""}},
-		{"&.;", templateFragment{"&.;", ""}},
-
-		{"2&a", templateFragment{"2&", "a"}},
-		{"&a", templateFragment{"&", "a"}},
-		{".a", templateFragment{".", "a"}},
-		{";a", templateFragment{";", "a"}},
-		{"2;a", templateFragment{"2;", "a"}},
-		{"2.;a", templateFragment{"2.;", "a"}},
-		{"2.a", templateFragment{"2.", "a"}},
-		{"&.a", templateFragment{"&.", "a"}},
-		{"&;a", templateFragment{"&;", "a"}},
-		{"&.;a", templateFragment{"&.;", "a"}},
-	}
-
-	for i, test := range tests {
-		var f templateFragment
-
-		f.parse(test.input)
-
-		if !reflect.DeepEqual(f, test.expected) {
-			t.Errorf("[%v] parse(%q) resulted in %#v // expected: %#v", i, test.input, f, test.expected)
-		}
-	}
-}
 
 func TestUnrollTemplate(t *testing.T) {
 	//	t.Skip()
@@ -434,7 +394,7 @@ chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2
 			}
 		*/
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll template")
+		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll template")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -442,7 +402,7 @@ chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2
 		}
 		//		sc.SmallColumns = true
 
-		unr, err := sc.Unroll()
+		unr, err := unroller.Unroll(sc)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
@@ -450,9 +410,9 @@ chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2
 		}
 
 		var bf strings.Builder
-		fm := unr.Formatter()
-		fm.hideInstrumentProps = true
-		fm.hideHeader = true
+		fm := formatter.New(unr)
+		fm.HideInstrumentProperties = true
+		fm.HideHeader = true
 		fm.WriteTo(&bf)
 
 		/*

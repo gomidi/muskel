@@ -1,8 +1,11 @@
-package muskel
+package muskel_test
 
 import (
 	"strings"
 	"testing"
+
+	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/unroller"
 )
 
 func TestParserBarLength(t *testing.T) {
@@ -69,14 +72,14 @@ Ch |     |       |       |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "include main")
+		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "include main")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
 			continue
 		}
 
-		unr, err := sc.Unroll()
+		unr, err := unroller.Unroll(sc)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)

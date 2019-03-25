@@ -1,26 +1,29 @@
-package muskel
+package muskel_test
 
 import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"gitlab.com/gomidi/muskel/parser"
+	"gitlab.com/gomidi/muskel/template"
 )
 
 type templateGetter struct {
-	template map[string]*TemplateDefinition
+	template map[string]*template.Definition
 }
 
-func (p *templateGetter) add(pd *TemplateDefinition) {
+func (p *templateGetter) add(pd *template.Definition) {
 	p.template[pd.Name] = pd
 }
 
-func (p *templateGetter) GetTemplateDefinition(name string) *TemplateDefinition {
+func (p *templateGetter) GetTemplateDefinition(name string) *template.Definition {
 	return p.template[name]
 }
 
 func newTemplateGetter() *templateGetter {
 	return &templateGetter{
-		template: map[string]*TemplateDefinition{},
+		template: map[string]*template.Definition{},
 	}
 }
 
@@ -42,15 +45,15 @@ func TestSpread(t *testing.T) {
 
 	get := newTemplateGetter()
 
-	var pd TemplateDefinition
+	var pd template.Definition
 	err := pd.Parse("templA: 2a 2&b 3c' 5f 7&g 8a 13e")
 
 	get.add(&pd)
 
-	var pc = &TemplateCall{}
-	pc.getter = get.GetTemplateDefinition
+	var pc = template.NewTemplateCall(&parser.Items{})
+	pc.Getter = get.GetTemplateDefinition
 	if err == nil {
-		err = pc.parseTemplate("templA", 0)
+		err = pc.ParseTemplate("templA", 0)
 	}
 
 	if err != nil {
@@ -60,11 +63,11 @@ func TestSpread(t *testing.T) {
 
 	var positionOfNextBar int
 	var newPositionOfNextBar int
-	var events []*positionedEvent
+	var events []*template.PositionedEvent
 
 	for i, test := range tests {
 		if positionOfNextBar >= 0 {
-			events, newPositionOfNextBar = TemplateEvents(pc.Events).Spread(positionOfNextBar, test.num, test.denom)
+			events, newPositionOfNextBar = template.TemplateEvents(pc.Events).Spread(positionOfNextBar, test.num, test.denom)
 		}
 
 		if newPositionOfNextBar != test.expectedPositionOfNextBar {
@@ -218,7 +221,7 @@ func TestParseTemplate(t *testing.T) {
 		defs := strings.Split(test.definitions, "\n")
 
 		for _, df := range defs {
-			var pd TemplateDefinition
+			var pd template.Definition
 			err = pd.Parse(strings.TrimSpace(df))
 			if err != nil {
 				break
@@ -226,10 +229,10 @@ func TestParseTemplate(t *testing.T) {
 			get.add(&pd)
 		}
 
-		var pc = &TemplateCall{}
-		pc.getter = get.GetTemplateDefinition
+		var pc = template.NewTemplateCall(&parser.Items{})
+		pc.Getter = get.GetTemplateDefinition
 		if err == nil {
-			err = pc.parseTemplate(test.call, 0)
+			err = pc.ParseTemplate(test.call, 0)
 			//			err = pc.Parse(test.call[1:])
 		}
 
@@ -254,30 +257,30 @@ func TestParseCall(t *testing.T) {
 	//	t.Skip()
 	tests := []struct {
 		input    string
-		expected TemplateCall
+		expected template.Call
 		err      bool
 	}{
 		// the prefix $ has already been handled before
-		{"test", TemplateCall{Name: "test", Slice: [2]int{-1, -1}}, false},
-		{"test1", TemplateCall{Name: "test1", Slice: [2]int{-1, -1}}, false},
-		{"te_st", TemplateCall{Name: "te_st", Slice: [2]int{-1, -1}}, false},
-		{"test^2", TemplateCall{Name: "test", Slice: [2]int{-1, -1}, scaleMove: 2, scaleMoveMode: 1}, false},
-		{"test^^-11", TemplateCall{Name: "test", Slice: [2]int{-1, -1}, scaleMove: -11, scaleMoveMode: 2}, false},
-		{"test~+", TemplateCall{Name: "test~", Slice: [2]int{-1, -1}, velocityAdd: "+"}, false},
-		{"test++", TemplateCall{Name: "test", Slice: [2]int{-1, -1}, velocityAdd: "++"}, false},
-		{"test~~=", TemplateCall{Name: "test~~", Slice: [2]int{-1, -1}, velocityAdd: "="}, false},
-		{"test-", TemplateCall{Name: "test", Slice: [2]int{-1, -1}, velocityAdd: "-"}, false},
-		{"test--", TemplateCall{Name: "test", Slice: [2]int{-1, -1}, velocityAdd: "--"}, false},
-		{"test[:2]", TemplateCall{Name: "test", Slice: [2]int{0, 2}}, false},
-		{"test(a,b)", TemplateCall{Name: "test", Slice: [2]int{-1, -1}, Params: []string{"a", "b"}}, false},
-		{"test/a,:,c/", TemplateCall{Name: "test", Slice: [2]int{-1, -1}, Replacements: []string{"a", ":", "c"}}, false},
-		{"test(a,b)[1:]/d,:,f/", TemplateCall{
+		{"test", template.Call{Name: "test", Slice: [2]int{-1, -1}}, false},
+		{"test1", template.Call{Name: "test1", Slice: [2]int{-1, -1}}, false},
+		{"te_st", template.Call{Name: "te_st", Slice: [2]int{-1, -1}}, false},
+		{"test^2", template.Call{Name: "test", Slice: [2]int{-1, -1}, ScaleMove: 2, ScaleMoveMode: 1}, false},
+		{"test^^-11", template.Call{Name: "test", Slice: [2]int{-1, -1}, ScaleMove: -11, ScaleMoveMode: 2}, false},
+		{"test~+", template.Call{Name: "test~", Slice: [2]int{-1, -1}, VelocityAdd: "+"}, false},
+		{"test++", template.Call{Name: "test", Slice: [2]int{-1, -1}, VelocityAdd: "++"}, false},
+		{"test~~=", template.Call{Name: "test~~", Slice: [2]int{-1, -1}, VelocityAdd: "="}, false},
+		{"test-", template.Call{Name: "test", Slice: [2]int{-1, -1}, VelocityAdd: "-"}, false},
+		{"test--", template.Call{Name: "test", Slice: [2]int{-1, -1}, VelocityAdd: "--"}, false},
+		{"test[:2]", template.Call{Name: "test", Slice: [2]int{0, 2}}, false},
+		{"test(a,b)", template.Call{Name: "test", Slice: [2]int{-1, -1}, Params: []string{"a", "b"}}, false},
+		{"test/a,:,c/", template.Call{Name: "test", Slice: [2]int{-1, -1}, Replacements: []string{"a", ":", "c"}}, false},
+		{"test(a,b)[1:]/d,:,f/", template.Call{
 			Name:         "test",
 			Slice:        [2]int{1, -1},
 			Replacements: []string{"d", ":", "f"},
 			Params:       []string{"a", "b"},
 		}, false},
-		{"!first(a,2)[1:]/d,:,f/", TemplateCall{
+		{"!first(a,2)[1:]/d,:,f/", template.Call{
 			Name:         "first",
 			Slice:        [2]int{1, -1},
 			Replacements: []string{"d", ":", "f"},
@@ -287,7 +290,7 @@ func TestParseCall(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		var pc TemplateCall
+		var pc template.Call
 
 		err := pc.Parse(test.input)
 

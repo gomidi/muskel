@@ -1,8 +1,12 @@
-package muskel
+package muskel_test
 
 import (
 	"strings"
 	"testing"
+
+	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/formatter"
+	"gitlab.com/gomidi/muskel/unroller"
 )
 
 func TestFormatterJumps(t *testing.T) {
@@ -181,7 +185,7 @@ func TestFormatterJumps(t *testing.T) {
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter   jumps")
+		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter   jumps")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -190,8 +194,8 @@ func TestFormatterJumps(t *testing.T) {
 
 		var bf strings.Builder
 
-		fm := sc.Formatter()
-		fm.hideInstrumentProps = true
+		fm := formatter.New(sc)
+		fm.HideInstrumentProperties = true
 		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())
@@ -345,7 +349,7 @@ Delay   |       |     |
 				continue
 			}
 		*/
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter")
+		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "formatter")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -353,7 +357,7 @@ Delay   |       |     |
 		}
 		sc.SmallColumns = true
 
-		unr, err := sc.Unroll()
+		unr, err := unroller.Unroll(sc)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
@@ -362,7 +366,7 @@ Delay   |       |     |
 
 		var bf strings.Builder
 
-		err = unr.WriteTo(&bf)
+		err = muskel.WriteFormattedTo(unr, &bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format unrolled score: %s\n%s\n", i, err.Error(), test.input)

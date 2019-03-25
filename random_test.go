@@ -1,8 +1,12 @@
-package muskel
+package muskel_test
 
 import (
 	"strings"
 	"testing"
+
+	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/formatter"
+	"gitlab.com/gomidi/muskel/unroller"
 )
 
 func TestRandom2(t *testing.T) {
@@ -70,7 +74,7 @@ bb: 2d
 		//			continue
 		//		}
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "random2")
+		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "random2")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -78,7 +82,7 @@ bb: 2d
 		}
 		//		sc.SmallColumns = true
 
-		unr, err := sc.Unroll()
+		unr, err := unroller.Unroll(sc)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
@@ -86,9 +90,9 @@ bb: 2d
 		}
 
 		var bf strings.Builder
-		fm := unr.Formatter()
-		fm.hideInstrumentProps = true
-		fm.hideHeader = true
+		fm := formatter.New(unr)
+		fm.HideInstrumentProperties = true
+		fm.HideHeader = true
 		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())
@@ -144,7 +148,7 @@ func TestRandom1(t *testing.T) {
 		//			continue
 		//		}
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "random1")
+		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "random1")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
@@ -152,7 +156,7 @@ func TestRandom1(t *testing.T) {
 		}
 		//		sc.SmallColumns = true
 
-		unr, err := sc.Unroll()
+		unr, err := unroller.Unroll(sc)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
@@ -160,8 +164,8 @@ func TestRandom1(t *testing.T) {
 		}
 
 		var bf strings.Builder
-		fm := unr.Formatter()
-		fm.hideInstrumentProps = true
+		fm := formatter.New(unr)
+		fm.HideInstrumentProperties = true
 		fm.WriteTo(&bf)
 
 		result := strings.TrimSpace(bf.String())

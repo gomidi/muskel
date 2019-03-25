@@ -1,12 +1,17 @@
-package muskel
+package muskel_test
 
 import (
 	"strings"
 	"testing"
+
+	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/formatter"
+	"gitlab.com/gomidi/muskel/score"
+	"gitlab.com/gomidi/muskel/unroller"
 )
 
 func init() {
-	DEBUG = true
+	score.DEBUG = true
 }
 
 func TestUnroll(t *testing.T) {
@@ -748,14 +753,14 @@ templ: 1e 2&f#
 			}
 		*/
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll")
+		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)
 			continue
 		}
 
-		unr, err := sc.Unroll()
+		unr, err := unroller.Unroll(sc)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
@@ -764,9 +769,9 @@ templ: 1e 2&f#
 
 		var bf strings.Builder
 
-		fm := unr.Formatter()
-		fm.hideInstrumentProps = true
-		fm.hideHeader = true
+		fm := formatter.New(unr)
+		fm.HideInstrumentProperties = true
+		fm.HideHeader = true
 		fm.WriteTo(&bf)
 
 		if err != nil {

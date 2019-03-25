@@ -1,4 +1,4 @@
-package muskel
+package muskel_test
 
 import (
 	"fmt"
@@ -9,11 +9,15 @@ import (
 	"gitlab.com/gomidi/midi/midimessage/channel"
 	"gitlab.com/gomidi/midi/midimessage/meta"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
+	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/score"
+	"gitlab.com/gomidi/muskel/smf"
+	"gitlab.com/gomidi/muskel/unroller"
 )
 
 func TestSMFWriter(t *testing.T) {
 
-	DEBUG = false
+	score.DEBUG = false
 
 	var tests = []struct {
 		input                string
@@ -479,14 +483,14 @@ Ch |1  |
 			}
 		*/
 
-		sc, err := Parse(strings.NewReader(test.input), fmt.Sprintf("test-%v", i))
+		sc, err := muskel.Parse(strings.NewReader(test.input), fmt.Sprintf("test-%v", i))
 
 		if err != nil {
 			t.Errorf("[%v] can't parse score: %s", i, err)
 			continue
 		}
 
-		usc, err := sc.Unroll()
+		usc, err := unroller.Unroll(sc)
 
 		if err != nil {
 			t.Errorf("[%v] can't unroll score: %s", i, err)
@@ -497,7 +501,7 @@ Ch |1  |
 		lg.wantedTrack = test.track
 		lg.includeMeta = test.includeMeta
 		lg.includeControlChange = test.includeControlChange
-		err = usc.writeSMFTo(ioutil.Discard, "*", smfwriter.Debug(&lg))
+		err = smf.WriteSMFTo(usc, ioutil.Discard, "*", smfwriter.Debug(&lg))
 
 		if err != nil {
 			t.Errorf("[%v] can't write SMF: %s", i, err)

@@ -1,28 +1,30 @@
-package muskel
+package muskel_test
 
 import (
 	"reflect"
 	"testing"
+
+	"gitlab.com/gomidi/muskel/template"
 )
 
 func TestParseDefinition(t *testing.T) {
 	//	t.Skip()
 	tests := []struct {
 		input    string
-		expected TemplateDefinition
+		expected template.Definition
 		err      bool
 	}{
 		// the prefix $ has already been handled before
-		{"test : 2a' &kd", TemplateDefinition{Name: "test", Original: "2a' &kd"}, false},
-		{"test : a' &kd", TemplateDefinition{Name: "test", Original: "a' &kd"}, false},
-		{"test  2a' &kd", TemplateDefinition{}, true},
-		{"test~ : 2#1 &kd", TemplateDefinition{Name: "test~", Original: "2#1 &kd", NumParams: 1}, false},
-		{"test : 2#1 #2kd", TemplateDefinition{Name: "test", Original: "2#1 #2kd", NumParams: 2}, false},
-		{"test~~ : 2#1 &#1", TemplateDefinition{Name: "test~~", Original: "2#1 &#1", NumParams: 1}, false},
+		{"test : 2a' &kd", template.Definition{Name: "test", Original: "2a' &kd"}, false},
+		{"test : a' &kd", template.Definition{Name: "test", Original: "a' &kd"}, false},
+		{"test  2a' &kd", template.Definition{}, true},
+		{"test~ : 2#1 &kd", template.Definition{Name: "test~", Original: "2#1 &kd", NumParams: 1}, false},
+		{"test : 2#1 #2kd", template.Definition{Name: "test", Original: "2#1 #2kd", NumParams: 2}, false},
+		{"test~~ : 2#1 &#1", template.Definition{Name: "test~~", Original: "2#1 &#1", NumParams: 1}, false},
 	}
 
 	for i, test := range tests {
-		var pd TemplateDefinition
+		var pd template.Definition
 
 		err := pd.Parse(test.input)
 
@@ -58,7 +60,7 @@ func TestCallDefinition(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		var pd TemplateDefinition
+		var pd template.Definition
 
 		err := pd.Parse(test.input)
 
