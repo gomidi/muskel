@@ -129,6 +129,17 @@ des Templates. Allerdings gibt es dabei noch ein paar Optionen:
    ah_ja/:,d',:,6/
    ersetzt das Ereignis 2&g' zu 2d' und 5c zu 6c
 
+   Wenn Pausen beim Ersetzen übersprungen werden sollen, bekommen die Ersetzer ein `!` vorangestellt:
+
+```
+ah_ne:  1a 2&* 3f 4* 5g 6*
+ah_so:  1ah_ne/!d',!g,!5&/
+```
+
+ersetzt das Ereignis 1a zu 1d', 3f zu 3g und 5g zu 5&g
+
+
+
 3. Es können im Template Platzhalter mit #n definiert werden, wobei n eine Zahl ist und
    beim Aufruf werden diese dann ersetzt.
    z.B.
