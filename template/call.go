@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 )
 
 type PositionedEvent struct {
@@ -30,7 +30,7 @@ func (p *PositionedEvent) dup() (nu *PositionedEvent) {
 
 func (p *PositionedEvent) String() string {
 	//return p.position + p.originalData
-	return muskellib.Pos32thToString(p.PositionIn32ths) + p.OriginalData
+	return items.Pos32thToString(p.PositionIn32ths) + p.OriginalData
 }
 
 type Call struct {
@@ -81,7 +81,7 @@ type TemplateEvents []*PositionedEvent
 // when the last event is return, positionOfNextBar is -1
 // the returned events are relative to the bar given by start
 func (p TemplateEvents) Spread(start int, num, denom uint8) (barEvents []*PositionedEvent, positionOfNextBar int) {
-	barLength := muskellib.Length32ths(num, denom)
+	barLength := items.Length32ths(num, denom)
 	positionOfNextBar = start + barLength
 
 	var lastIdx int
@@ -90,7 +90,7 @@ func (p TemplateEvents) Spread(start int, num, denom uint8) (barEvents []*Positi
 		if int(ev.PositionIn32ths) >= start && int(ev.PositionIn32ths) < positionOfNextBar {
 			nu := ev.dup()
 			nu.PositionIn32ths -= uint(start)
-			nu.Position = muskellib.Pos32thToString(nu.PositionIn32ths)
+			nu.Position = items.Pos32thToString(nu.PositionIn32ths)
 			barEvents = append(barEvents, nu)
 			lastIdx = idx
 		}
@@ -132,7 +132,7 @@ func (p *Call) parseItem(data string, posIn32th uint) (item interface{}, err err
 
 func (p *Call) mkEvent(position string, posIn32th uint, data string) (ev *PositionedEvent, err error) {
 	ev = &PositionedEvent{}
-	_, ev.PositionIn32ths, err = muskellib.PositionTo32th("", position)
+	_, ev.PositionIn32ths, err = items.PositionTo32th("", position)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (p *Call) mkEvent(position string, posIn32th uint, data string) (ev *Positi
 		//		fmt.Printf("removing %v from %v\n", p.firstPos, ev.positionIn32ths)
 		ev.PositionIn32ths -= p.firstPos
 	}
-	ev.Position = muskellib.Pos32thToString(ev.PositionIn32ths)
+	ev.Position = items.Pos32thToString(ev.PositionIn32ths)
 	return
 }
 
@@ -189,7 +189,7 @@ func (p *Call) parseEvent(idx int, data string, posIn32th uint) (ev *PositionedE
 			p.firstPos = 0
 			pos = "1"
 		} else {
-			_, p.firstPos, err = muskellib.PositionTo32th("", pos)
+			_, p.firstPos, err = items.PositionTo32th("", pos)
 			if err != nil {
 				return nil, err
 			}
@@ -239,7 +239,7 @@ func (p *Call) findEventThatIsNotRest(start int) (found int) {
 		return -1
 	}
 
-	if p.Events[start].Item != muskellib.Rest {
+	if p.Events[start].Item != items.Rest {
 		return start
 	}
 
@@ -284,7 +284,7 @@ func (p *Call) replaceEvents(posIn32th uint) (err error) {
 			rpl = rpl[1:]
 		}
 
-		position, item := muskellib.ReplaceItemWith(rpl)
+		position, item := items.ReplaceItemWith(rpl)
 
 		if position == "" {
 			position = ev.Position
@@ -295,7 +295,7 @@ func (p *Call) replaceEvents(posIn32th uint) (err error) {
 		}
 
 		if itidx == 0 {
-			_, p.firstPos, err = muskellib.PositionTo32th("", position)
+			_, p.firstPos, err = items.PositionTo32th("", position)
 			if err != nil {
 				return err
 			}
@@ -355,12 +355,12 @@ func (p *Call) addVelocity(orig int8) (vel int8) {
 	}
 
 	if p.VelocityAdd == "=" {
-		return muskellib.DynamicToVelocity("=")
+		return items.DynamicToVelocity("=")
 	}
 
-	middle := muskellib.DynamicToVelocity("=")
+	middle := items.DynamicToVelocity("=")
 
-	diff := muskellib.DynamicToVelocity(p.VelocityAdd) - middle
+	diff := items.DynamicToVelocity(p.VelocityAdd) - middle
 
 	vel = orig + diff
 	if vel > 127 {
@@ -396,11 +396,11 @@ func (p *Call) __parseEvent(idx int, ev string, posIn32th uint, firstScaleNoteDi
 
 		for _, evv := range v.Events {
 			switch vv := evv.Item.(type) {
-			case muskellib.Note:
+			case items.Note:
 				vv.Velocity = p.addVelocity(vv.Velocity)
 				evv.OriginalData = vv.String()
 				evv.Item = vv
-			case muskellib.MIDINote:
+			case items.MIDINote:
 				vv.Velocity = p.addVelocity(vv.Velocity)
 				evv.OriginalData = vv.String()
 				evv.Item = vv
@@ -408,7 +408,7 @@ func (p *Call) __parseEvent(idx int, ev string, posIn32th uint, firstScaleNoteDi
 			p.Events = append(p.Events, evv)
 		}
 		//p.Events = append(p.Events, v.Events...)
-	case muskellib.Note:
+	case items.Note:
 		ee := e.dup()
 		nt := v.Dup()
 
@@ -479,7 +479,7 @@ func (p *Call) __parseEvent(idx int, ev string, posIn32th uint, firstScaleNoteDi
 		ee.Item = nt
 		ee.OriginalData = nt.String()
 		p.Events = append(p.Events, ee)
-	case muskellib.MIDINote:
+	case items.MIDINote:
 		ee := e.dup()
 		nt := v.Dup()
 		nt.Velocity = p.addVelocity(nt.Velocity)

@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 )
 
 var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("=") + "]*)(:{0,1})([<>]{0,1})$")
 
-func parseMIDINote(data string) (nt muskellib.MIDINote, err error) {
+func parseMIDINote(data string) (nt items.MIDINote, err error) {
 	mt := regexMIDINote.FindStringSubmatch(data)
 	if len(mt) < 2 {
 		return nt, fmt.Errorf("not a valid MIDINote: %q", data)
@@ -25,7 +25,7 @@ func parseMIDINote(data string) (nt muskellib.MIDINote, err error) {
 		return nt, fmt.Errorf("not a valid MIDINote: %q: must be >= 1 and <= 128", data)
 	}
 	nt.Note = int8(i)
-	nt.Velocity = muskellib.DynamicToVelocity(mt[2])
+	nt.Velocity = items.DynamicToVelocity(mt[2])
 	nt.Dotted = mt[3] == ":"
 
 	if mt[4] == ">" {
@@ -38,7 +38,7 @@ func parseMIDINote(data string) (nt muskellib.MIDINote, err error) {
 	return nt, nil
 }
 
-func parseMIDICC(data string) (cc muskellib.MIDICC, err error) {
+func parseMIDICC(data string) (cc items.MIDICC, err error) {
 	var ccval int = -1
 
 	if len(data) > 2 {
@@ -95,7 +95,7 @@ func parseMIDICC(data string) (cc muskellib.MIDICC, err error) {
 	return
 }
 
-func parseMIDIPitchbend(data string) (pb muskellib.MIDIPitchbend, err error) {
+func parseMIDIPitchbend(data string) (pb items.MIDIPitchbend, err error) {
 	if idx := strings.Index(data, "~"); idx > -1 {
 		pb.Tilde = data[idx:]
 		data = data[:idx]
@@ -120,7 +120,7 @@ func parseMIDIPitchbend(data string) (pb muskellib.MIDIPitchbend, err error) {
 	return
 }
 
-func parseMIDIAftertouch(data string) (at muskellib.MIDIAftertouch, err error) {
+func parseMIDIAftertouch(data string) (at items.MIDIAftertouch, err error) {
 	if idx := strings.Index(data, "~"); idx > -1 {
 		at.Tilde = data[idx:]
 		data = data[:idx]
@@ -143,7 +143,7 @@ func parseMIDIAftertouch(data string) (at muskellib.MIDIAftertouch, err error) {
 	return
 }
 
-func parseMIDIPolyAftertouch(data string) (pt muskellib.MIDIPolyAftertouch, err error) {
+func parseMIDIPolyAftertouch(data string) (pt items.MIDIPolyAftertouch, err error) {
 	if idx := strings.Index(data, "~"); idx > -1 {
 		pt.Tilde = data[idx:]
 		data = data[:idx]
@@ -161,7 +161,7 @@ func parseMIDIPolyAftertouch(data string) (pt muskellib.MIDIPolyAftertouch, err 
 		return
 	}
 
-	var nt muskellib.Note
+	var nt items.Note
 	nt, err = parseNote(d[0])
 	if err != nil {
 		err = fmt.Errorf("invalid format for MIDI PT can't parse note: %s", err.Error())
@@ -184,7 +184,7 @@ func parseMIDIPolyAftertouch(data string) (pt muskellib.MIDIPolyAftertouch, err 
 
 var regScaleNote = regexp.MustCompile("^(-){0,1}([0-9]+)(.*)$")
 
-func parseScaleNote(data string) (nt muskellib.Note, err error) {
+func parseScaleNote(data string) (nt items.Note, err error) {
 	mt := regScaleNote.FindStringSubmatch(data)
 	// fmt.Printf("scale note %q match: %#v\n", data, mt)
 	var i int
@@ -251,12 +251,12 @@ func parseScaleNote(data string) (nt muskellib.Note, err error) {
 		}
 	}
 
-	nt.Velocity = muskellib.DynamicToVelocity(dynamic)
+	nt.Velocity = items.DynamicToVelocity(dynamic)
 
 	return
 }
 
-func parseNote(data string) (nt muskellib.Note, err error) {
+func parseNote(data string) (nt items.Note, err error) {
 
 	switch data[:1] {
 	case "a", "b", "c", "d", "e", "f", "g":
@@ -325,7 +325,7 @@ func parseNote(data string) (nt muskellib.Note, err error) {
 		nt.GlissandoExp = true
 	}
 
-	nt.Velocity = muskellib.DynamicToVelocity(dynamic)
+	nt.Velocity = items.DynamicToVelocity(dynamic)
 
 	return
 }

@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/template"
 )
@@ -84,7 +84,7 @@ func (p *header) include(file string) error {
 }
 
 func (p *header) parseCommand(data string) error {
-	var c muskellib.CommandCall
+	var c items.CommandCall
 	err := c.Parse(strings.TrimSpace(data))
 	if err != nil {
 		return err

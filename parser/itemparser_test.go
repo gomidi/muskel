@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	. "gitlab.com/gomidi/muskel/muskellib"
+	. "gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/template"
 )
 

@@ -1,6 +1,6 @@
 package score
 
-import "gitlab.com/gomidi/muskel/muskellib"
+import "gitlab.com/gomidi/muskel/items"
 
 type BarEventKey struct {
 	InstrCol int
@@ -21,7 +21,7 @@ type Bar struct {
 	Include       string
 	IncludedScore *Score // must be an unrolled score
 	Events        map[BarEventKey]*Event
-	Scale         *muskellib.Scale
+	Scale         *items.Scale
 	IsEmpty       bool
 	Tilde         string
 }
@@ -51,7 +51,7 @@ func (b *Bar) ensurePositionExist(pos uint) {
 			b.Positions = np
 
 			op := append([]string{}, b.OriginalPositions[:i]...)
-			op = append(op, muskellib.Pos32thToString(pos))
+			op = append(op, items.Pos32thToString(pos))
 			op = append(op, b.OriginalPositions[i:]...)
 			b.OriginalPositions = op
 			return
@@ -59,12 +59,12 @@ func (b *Bar) ensurePositionExist(pos uint) {
 	}
 
 	b.Positions = append(b.Positions, pos)
-	b.OriginalPositions = append(b.OriginalPositions, muskellib.Pos32thToString(pos))
+	b.OriginalPositions = append(b.OriginalPositions, items.Pos32thToString(pos))
 	return
 }
 
 func (b *Bar) length32th() int {
-	return muskellib.Length32ths(b.TimeSig[0], b.TimeSig[1])
+	return items.Length32ths(b.TimeSig[0], b.TimeSig[1])
 }
 
 func (b *Bar) Dup() (nuB *Bar) {
@@ -151,7 +151,7 @@ func (be BarEvents) isHolding() bool {
 
 	for _, ev := range be {
 		// _, is := ev.Item.(hold)
-		if ev.Item == muskellib.Hold {
+		if ev.Item == items.Hold {
 			return true
 		}
 	}
@@ -165,11 +165,11 @@ func (be BarEvents) RepeatingBars() (num int, untilNext bool) {
 
 	for _, ev := range be {
 		switch v := ev.Item.(type) {
-		case muskellib.RepeatLastBar:
+		case items.RepeatLastBar:
 			return 1, false
-		case muskellib.RepeatLastBarUntilChange:
+		case items.RepeatLastBarUntilChange:
 			return 1, true
-		case muskellib.RepeatLastNBarsUntilChange:
+		case items.RepeatLastNBarsUntilChange:
 			return int(v), true
 		}
 	}

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/template"
 )
 
@@ -14,7 +14,7 @@ type Items struct {
 }
 
 // TODO implement parseOSC
-func (p *Items) parseOSC(data string) (om muskellib.OSCMessage, err error) {
+func (p *Items) parseOSC(data string) (om items.OSCMessage, err error) {
 	return om, fmt.Errorf("parseOSC is not implemented yet")
 }
 
@@ -35,9 +35,9 @@ func (p *Items) parseTemplate(data string, positionIn32th uint) (pc *template.Ca
 
 // ntuple has the form {c,e,d}3&
 // where 3& is the ending position that defines the total length
-func (p *Items) parseNTuple(data string, posIn32th uint) (nt muskellib.NTuple, err error) {
+func (p *Items) parseNTuple(data string, posIn32th uint) (nt items.NTuple, err error) {
 
-	var ntp muskellib.NTuple
+	var ntp items.NTuple
 	orig := data
 
 	dd := strings.Split(data, "}")
@@ -64,7 +64,7 @@ func (p *Items) parseNTuple(data string, posIn32th uint) (nt muskellib.NTuple, e
 		return
 	}
 
-	_, endPos, err := muskellib.PositionTo32th("", pos)
+	_, endPos, err := items.PositionTo32th("", pos)
 
 	if err != nil {
 		return nt, err
@@ -101,7 +101,7 @@ func (p *Items) parseRandom(data string, posIn32th uint) (item interface{}, err 
 	if data[0] == '(' {
 		alternatives := strings.Trim(data, "()")
 		alt := strings.Split(alternatives, ",")
-		var r muskellib.RandomChooser
+		var r items.RandomChooser
 		for _, a := range alt {
 			a = strings.TrimSpace(a)
 			if a != "" {
@@ -124,7 +124,7 @@ func (p *Items) parseRandom(data string, posIn32th uint) (item interface{}, err 
 
 	num := data[:idx]
 
-	var rp muskellib.RandomProbability
+	var rp items.RandomProbability
 	var n int
 	n, err = strconv.Atoi(num)
 
@@ -154,11 +154,11 @@ func (p *Items) parseCommand(data string, posIn32th uint) (interface{}, error) {
 
 func (p *Items) parseGlissando(data string, posIn32th uint) (interface{}, error) {
 	if data == "" {
-		return muskellib.GlissandoLinear, nil
+		return items.GlissandoLinear, nil
 	}
 
 	if data == "~" {
-		return muskellib.GlissandoExponential, nil
+		return items.GlissandoExponential, nil
 	}
 	return nil, fmt.Errorf("invalid glissando: \"~%s\"", data)
 }
@@ -172,11 +172,11 @@ func (p *Items) ParseItem(data string, posIn32th uint) (interface{}, error) {
 	case 1:
 		switch data[0] {
 		case '%':
-			return muskellib.RepeatLastEvent{}, nil
+			return items.RepeatLastEvent{}, nil
 		case ':':
-			return muskellib.Hold, nil
+			return items.Hold, nil
 		case '*':
-			return muskellib.Rest, nil
+			return items.Rest, nil
 		case '~':
 			return p.parseGlissando("", posIn32th)
 		default:
@@ -192,7 +192,7 @@ func (p *Items) ParseItem(data string, posIn32th uint) (interface{}, error) {
 		case '~':
 			return p.parseGlissando(data[1:], posIn32th)
 		case '"':
-			return muskellib.Lyric(strings.Trim(data, `"`)), nil
+			return items.Lyric(strings.Trim(data, `"`)), nil
 		case '{':
 			return p.parseNTuple(data[1:], posIn32th)
 		case '$':
@@ -206,7 +206,7 @@ func (p *Items) ParseItem(data string, posIn32th uint) (interface{}, error) {
 			if endIdx != len(data)-1 {
 				return nil, fmt.Errorf("invalid MultiItem: %q must start and end with underscore _", data)
 			}
-			var m muskellib.MultiItem
+			var m items.MultiItem
 			d := strings.Split(data[1:endIdx], "_")
 			for _, dd := range d {
 				it, err := p.ParseItem(dd, posIn32th)
@@ -233,14 +233,14 @@ func (p *Items) ParseItem(data string, posIn32th uint) (interface{}, error) {
 			return p.parseTemplate(data, posIn32th)
 		case '.':
 			if data == "..." {
-				return muskellib.RepeatLastBarUntilChange{}, nil
+				return items.RepeatLastBarUntilChange{}, nil
 			}
 			if data == "./." {
-				return muskellib.RepeatLastBar{}, nil
+				return items.RepeatLastBar{}, nil
 			}
 			if strings.Index("123456789", data[1:2]) != -1 && data[2] == '.' {
 				n, err := strconv.Atoi(data[1:2])
-				return muskellib.RepeatLastNBarsUntilChange(n), err
+				return items.RepeatLastNBarsUntilChange(n), err
 			}
 		default:
 			switch data[0:2] {

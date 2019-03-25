@@ -1,4 +1,4 @@
-package muskellib
+package items
 
 import (
 	"reflect"

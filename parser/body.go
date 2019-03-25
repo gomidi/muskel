@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/template"
 	"gitlab.com/gomidi/muskel/unroller"
@@ -163,7 +163,7 @@ func (p *body) parseScale(data string, b *score.Bar) error {
 	}
 
 	mod := data[:idx]
-	md, has := muskellib.Modes[mod]
+	md, has := items.Modes[mod]
 	if !has {
 		return fmt.Errorf("unknown mode: %q", mod)
 	}
@@ -171,12 +171,12 @@ func (p *body) parseScale(data string, b *score.Bar) error {
 	if err != nil {
 		return fmt.Errorf("invalid base note for scale: %q", data[idx+1:])
 	}
-	b.Scale = &muskellib.Scale{BaseNote: nt.ToMIDI(), Mode: md}
+	b.Scale = &items.Scale{BaseNote: nt.ToMIDI(), Mode: md}
 	return nil
 }
 
 func (p *body) parseCommand(data string) error {
-	var c muskellib.CommandCall
+	var c items.CommandCall
 	err := c.Parse(data)
 	if err != nil {
 		return err
@@ -597,7 +597,7 @@ func (p *body) parseEventsLine(tabs []string) (err error) {
 			}
 			p.jumpInLineBefore = false
 			if i == 0 {
-				p.lastPosition, p.currentPosIn32ths, err = muskellib.PositionTo32th(p.lastPosition, firstColumn)
+				p.lastPosition, p.currentPosIn32ths, err = items.PositionTo32th(p.lastPosition, firstColumn)
 				if err != nil {
 					return err
 				}

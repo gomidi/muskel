@@ -10,7 +10,7 @@ import (
 	"gitlab.com/gomidi/midi/mid"
 	"gitlab.com/gomidi/midi/midimessage/channel"
 	"gitlab.com/gomidi/midi/smf"
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 )
 
@@ -214,7 +214,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		return nil
 	}
 	switch v := item.(type) {
-	case muskellib.GlissStart:
+	case items.GlissStart:
 		iw.startGlissandoNote = iw.prevKey
 		delete(iw.noteOns, iw.startGlissandoNote)
 		stopNotes()
@@ -223,12 +223,12 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		iw.inGlissando = true
 		iw.wr.BackupTimeline()
 		iw.glissandoFunc = linearGlissando
-		if v == muskellib.GlissandoExponential {
+		if v == items.GlissandoExponential {
 			iw.glissandoFunc = exponentialGlissando
 		}
 
 		addedNotes = append(addedNotes, iw.startGlissandoNote)
-	case muskellib.Note:
+	case items.Note:
 		vel := v.Velocity
 		if vel < 0 {
 			vel = iw.prevVel
@@ -327,7 +327,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			}
 			iw.wr.BackupTimeline()
 		}
-	case muskellib.MIDINote:
+	case items.MIDINote:
 		switch v.PosShift {
 		case 0:
 			iw.p.iw.setStraight()
@@ -360,7 +360,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		} else {
 			addedNotes = append(addedNotes, n)
 		}
-	case muskellib.MIDICC:
+	case items.MIDICC:
 		//fmt.Printf("MIDICC %v, %v\n", v[0], v[1])
 
 		if iw.inCCGlissando && v.Controller == iw.CCGlissandoController {
@@ -401,7 +401,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			iw.wr.Plan(0, 3, 128, iw.wr.Channel.ControlChange(v.Controller, 0))
 		}
 
-	case muskellib.MIDIPitchbend:
+	case items.MIDIPitchbend:
 		if iw.inPBGlissando {
 			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startPBGlissando) / float64(iw.wr.Ticks32th())))
 			distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startPBGlissando) / float64(iw.wr.Ticks64th())))
@@ -442,7 +442,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		if v.Dotted && v.Value != 0 {
 			iw.wr.Plan(0, 3, 128, iw.wr.Channel.Pitchbend(0))
 		}
-	case muskellib.MIDIPolyAftertouch:
+	case items.MIDIPolyAftertouch:
 		//fmt.Printf("MIDIPolyAftertouch %v, %v\n", v[0], v[1])
 		ki := uint8(int8(v.Key) + iw.instr.MIDITranspose)
 
@@ -483,7 +483,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		if v.Dotted && v.Value != 0 {
 			iw.wr.Plan(0, 3, 128, iw.wr.Channel.PolyAftertouch(ki, 0))
 		}
-	case muskellib.MIDIAftertouch:
+	case items.MIDIAftertouch:
 		//fmt.Printf("Aftertouch %v, \n", uint8(v))
 		if iw.inATGlissando {
 			//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startCCGlissando) / float64(iw.wr.Ticks32th())))
@@ -521,9 +521,9 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		if v.Dotted && v.Value > 0 {
 			iw.wr.Plan(0, 3, 128, iw.wr.Channel.Aftertouch(0))
 		}
-	case muskellib.OSCMessage:
+	case items.OSCMessage:
 		// TODO implement OSC
-	case muskellib.NTuple:
+	case items.NTuple:
 		// definition of a tuple
 		// we need the complete time length over which the tuple is spread
 		// it is not that easy, since we need to define the noteoff of the
@@ -563,7 +563,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		var delta uint32
 
 		for _, it := range v.Items {
-			if item != muskellib.Hold {
+			if item != items.Hold {
 				if delta > 0 {
 					iw.wr.Forward(0, delta, uint32(len(v.Items))*32)
 				}
@@ -589,7 +589,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		stopNotes()
 		iw.lastNum32 += uint(length)
 
-	case muskellib.MultiItem:
+	case items.MultiItem:
 		stopNotes()
 
 		for _, it := range v {
@@ -599,15 +599,15 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 		return addedNotes
 
-	case muskellib.Lyric:
+	case items.Lyric:
 		stopNotes()
 		iw.wr.Lyric(string(v))
 	default:
-		if item == muskellib.Hold {
+		if item == items.Hold {
 			return nil
 		}
 
-		if item == muskellib.Rest {
+		if item == items.Rest {
 			iw.inGlissando = false
 			stopNotes()
 			iw.p.iw.setStraight()
@@ -734,11 +734,11 @@ func (iw *instWriter) writeUnrolled() {
 			diffBars -= lastEv.BarNo
 		}
 
-		if ev.Item == muskellib.Rest && len(iw.noteOns) == 0 {
+		if ev.Item == items.Rest && len(iw.noteOns) == 0 {
 			continue
 		}
 
-		if ev.Item != muskellib.Hold {
+		if ev.Item != items.Hold {
 			if lastEv != nil && lastEv.BarNo == ev.BarNo {
 				isHolding = false
 				//fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th)

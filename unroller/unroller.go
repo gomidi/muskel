@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/template"
 	//"crypto/rand"
@@ -20,7 +20,7 @@ func Unroll(s *score.Score) (dest *score.Score, err error) {
 		var oldPos string
 
 		for pi, pos := range b.OriginalPositions {
-			oldPos, b.Positions[pi], err = muskellib.PositionTo32th(oldPos, pos)
+			oldPos, b.Positions[pi], err = items.PositionTo32th(oldPos, pos)
 			if err != nil {
 				return nil, err
 			}
@@ -232,7 +232,7 @@ func (s *unroller) dupEvents(src []*score.Event, barNo, lenBar int) (dest []*sco
 // flattenInstrumentBarEvents flattens the instrument barevents for a given bar
 func (s *unroller) flattenInstrumentBarEvents(barNo int, bar score.BarEvents, instr *score.Instrument) (events []*score.Event) {
 	numBar, denomBar := s.dest.Bars[barNo].TimeSig[0], s.dest.Bars[barNo].TimeSig[1]
-	lenBar := muskellib.Length32ths(numBar, denomBar)
+	lenBar := items.Length32ths(numBar, denomBar)
 
 	numRep, untilNext := bar.RepeatingBars()
 
@@ -309,7 +309,7 @@ func (s *unroller) evalRandomItems() {
 		var unrolled []*score.Event
 		for _, ev := range instr.Unrolled {
 			switch v := ev.Item.(type) {
-			case *muskellib.RandomChooser:
+			case *items.RandomChooser:
 				rand.Seed(time.Now().UnixNano())
 				v.Chosen = rand.Intn(len(v.Alternatives))
 				//				fmt.Printf("chosen: %v\n", v.chosen)
@@ -317,7 +317,7 @@ func (s *unroller) evalRandomItems() {
 				nuEv.Item = v.Alternatives[v.Chosen]
 				nuEv.OriginalData = v.AlternativesOriginalData[v.Chosen]
 				unrolled = append(unrolled, nuEv)
-			case *muskellib.RandomProbability:
+			case *items.RandomProbability:
 				switch int(v.Prob) {
 				case 0:
 				// zero percent chance
@@ -383,7 +383,7 @@ func (s *unroller) unfoldTemplateCallNoFollowingEvent(ev *score.Event, v *templa
 	return
 }
 
-func (s *unroller) moveNoteAccordingToScale(sc *muskellib.Scale, p *template.Call, v muskellib.Note) (abs muskellib.Note) {
+func (s *unroller) moveNoteAccordingToScale(sc *items.Scale, p *template.Call, v items.Note) (abs items.Note) {
 	mv := p.ScaleMove
 	if mv > 0 {
 		mv -= 1
@@ -396,7 +396,7 @@ func (s *unroller) moveNoteAccordingToScale(sc *muskellib.Scale, p *template.Cal
 		n += diff
 
 		nn := sc.StepToNote(sc.NoteToStep(uint8(n)))
-		abs.Letter, abs.Augmenter, abs.Octave = muskellib.KeyToNote(nn)
+		abs.Letter, abs.Augmenter, abs.Octave = items.KeyToNote(nn)
 	}
 	return
 }
@@ -502,7 +502,7 @@ func (s *unroller) convertEvents(barNo int, p *template.Call, in ...*template.Po
 		ev.BarNo = barNo
 		ev.DistanceToStartOfBarIn32th = pev.PositionIn32ths
 		switch v := pev.Item.(type) {
-		case muskellib.Note:
+		case items.Note:
 			if p.ScaleMoveMode == 2 && p.FirstNoteIsScaleNote == -1 && v.ScaleNote == 0 {
 				nnt := s.moveNoteAccordingToScale(sc, p, v)
 				ev.Item = nnt
@@ -511,14 +511,14 @@ func (s *unroller) convertEvents(barNo int, p *template.Call, in ...*template.Po
 				ev.Item = pev.Item
 				ev.OriginalData = pev.OriginalData
 			}
-		case muskellib.MultiItem:
-			var nuMI muskellib.MultiItem
+		case items.MultiItem:
+			var nuMI items.MultiItem
 			//inner := strings.Trim(pev.originalData, "()")
 			ss := strings.Split(pev.OriginalData[1:], "_")
 			ss = ss[:len(ss)-1]
 			for idx, mi := range v {
 				switch vv := mi.(type) {
-				case muskellib.Note:
+				case items.Note:
 					if p.ScaleMoveMode == 2 && p.FirstNoteIsScaleNote == -1 && vv.ScaleNote == 0 {
 						nnnt := s.moveNoteAccordingToScale(sc, p, vv)
 						nuMI = append(nuMI, nnnt)
@@ -531,8 +531,8 @@ func (s *unroller) convertEvents(barNo int, p *template.Call, in ...*template.Po
 
 			ev.OriginalData = "_" + strings.Join(ss, "_") + "_"
 			ev.Item = nuMI
-		case muskellib.NTuple:
-			var nuNT muskellib.NTuple
+		case items.NTuple:
+			var nuNT items.NTuple
 			nuNT.EndPos = v.EndPos
 			nuNT.PosShift = v.PosShift
 			inner := strings.Trim(pev.OriginalData, "{")
@@ -542,7 +542,7 @@ func (s *unroller) convertEvents(barNo int, p *template.Call, in ...*template.Po
 
 			for idx, mi := range v.Items {
 				switch vv := mi.(type) {
-				case muskellib.Note:
+				case items.Note:
 					if p.ScaleMoveMode == 2 && p.FirstNoteIsScaleNote == -1 && vv.ScaleNote == 0 {
 						nnnt := s.moveNoteAccordingToScale(sc, p, vv)
 						nuNT.Items = append(nuNT.Items, nnnt)
@@ -563,7 +563,7 @@ func (s *unroller) convertEvents(barNo int, p *template.Call, in ...*template.Po
 				posShift = "<"
 			}
 
-			ev.OriginalData = "{" + strings.Join(ss, ",") + "}" + muskellib.Pos32thToString(v.EndPos) + posShift
+			ev.OriginalData = "{" + strings.Join(ss, ",") + "}" + items.Pos32thToString(v.EndPos) + posShift
 			ev.Item = nuNT
 		default:
 			ev.Item = pev.Item
@@ -614,12 +614,12 @@ func (s *unroller) unfoldRepeated() {
 		var lastEvent *score.Event
 		for i, ev := range instr.Unrolled {
 			switch ev.Item.(type) {
-			case muskellib.RepeatLastEvent:
+			case items.RepeatLastEvent:
 				//				fmt.Printf("got repeated: %v\n", lastItem)
 				ev.Item = lastEvent.Item
 				ev.OriginalData = lastEvent.OriginalData
 			default:
-				if ev.Item == muskellib.Hold {
+				if ev.Item == items.Hold {
 					// do nothing
 					continue
 				}
@@ -639,8 +639,8 @@ func (s *unroller) copyBars(bars []*score.Bar) {
 	}
 }
 
-func (s *unroller) scaleAt(barNo int) (scale *muskellib.Scale) {
-	scale = &muskellib.Scale{Mode: muskellib.Ionian, BaseNote: 60}
+func (s *unroller) scaleAt(barNo int) (scale *items.Scale) {
+	scale = &items.Scale{Mode: items.Ionian, BaseNote: 60}
 
 	for _, bar := range s.dest.Bars {
 		if bar.BarNo > barNo {
@@ -654,7 +654,7 @@ func (s *unroller) scaleAt(barNo int) (scale *muskellib.Scale) {
 	return
 }
 
-func (s *unroller) convertScaleNoteToAbsNote(barNo int, nt muskellib.Note) (abs muskellib.Note) {
+func (s *unroller) convertScaleNoteToAbsNote(barNo int, nt items.Note) (abs items.Note) {
 	if nt.ScaleNote == 0 {
 		return nt
 	}
@@ -671,7 +671,7 @@ func (s *unroller) convertScaleNoteToAbsNote(barNo int, nt muskellib.Note) (abs 
 			key += 1
 		}
 	}
-	abs.Letter, abs.Augmenter, abs.Octave = muskellib.KeyToNote(key)
+	abs.Letter, abs.Augmenter, abs.Octave = items.KeyToNote(key)
 	abs.ScaleNote = 0
 	return abs
 }
@@ -685,7 +685,7 @@ func (s *unroller) replaceScaleNotes() {
 		var unrolled []*score.Event
 		for _, ev := range instr.Unrolled {
 			switch v := ev.Item.(type) {
-			case muskellib.Note:
+			case items.Note:
 				switch {
 				case v.ScaleNote == 0:
 					unrolled = append(unrolled, ev)
@@ -696,15 +696,15 @@ func (s *unroller) replaceScaleNotes() {
 					nuEv.OriginalData = nt.String()
 					unrolled = append(unrolled, nuEv)
 				}
-			case muskellib.MultiItem:
-				var nuMI muskellib.MultiItem
+			case items.MultiItem:
+				var nuMI items.MultiItem
 				nuEv := ev.Dup()
 				itms := strings.Split(ev.OriginalData[1:], "_")
 				itms = itms[:len(itms)-1]
 
 				for it_idx, it := range v {
 					switch vv := it.(type) {
-					case muskellib.Note:
+					case items.Note:
 						switch {
 						case vv.ScaleNote == 0:
 							nuMI = append(nuMI, vv)
@@ -721,8 +721,8 @@ func (s *unroller) replaceScaleNotes() {
 				nuEv.Item = nuMI
 				nuEv.OriginalData = "_" + strings.Join(itms, "_") + "_"
 				unrolled = append(unrolled, nuEv)
-			case muskellib.NTuple:
-				var nuNt muskellib.NTuple
+			case items.NTuple:
+				var nuNt items.NTuple
 				nuEv := ev.Dup()
 				nuNt.EndPos = v.EndPos
 				nuNt.PosShift = v.PosShift
@@ -733,7 +733,7 @@ func (s *unroller) replaceScaleNotes() {
 
 				for it_idx, it := range v.Items {
 					switch vv := it.(type) {
-					case muskellib.Note:
+					case items.Note:
 						switch {
 						case vv.ScaleNote == 0:
 							nuNt.Items = append(nuNt.Items, vv)
@@ -758,7 +758,7 @@ func (s *unroller) replaceScaleNotes() {
 				}
 
 				nuEv.Item = nuNt
-				nuEv.OriginalData = "{" + strings.Join(orig, ",") + "}" + muskellib.Pos32thToString(v.EndPos) + posShift
+				nuEv.OriginalData = "{" + strings.Join(orig, ",") + "}" + items.Pos32thToString(v.EndPos) + posShift
 				unrolled = append(unrolled, nuEv)
 			default:
 				unrolled = append(unrolled, ev)

@@ -6,17 +6,17 @@ import (
 	"sort"
 	"strings"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 )
 
 type Formatter struct {
-	score               *score.Score
-	writerSysLine       int
-	jumpInLineBefore    bool
+	score                    *score.Score
+	writerSysLine            int
+	jumpInLineBefore         bool
 	HideInstrumentProperties bool
-	HideHeader          bool
-	bf                  strings.Builder
+	HideHeader               bool
+	bf                       strings.Builder
 }
 
 func New(s *score.Score) *Formatter {
@@ -292,8 +292,8 @@ func (p *Formatter) printBody(bf io.Writer, barLine string) {
 		}
 
 		if bar.Scale != nil {
-			var nt muskellib.Note
-			nt.Letter, nt.Augmenter, nt.Octave = muskellib.KeyToNote(bar.Scale.BaseNote)
+			var nt items.Note
+			nt.Letter, nt.Augmenter, nt.Octave = items.KeyToNote(bar.Scale.BaseNote)
 			nt.Velocity = -1
 			l += fmt.Sprintf("\\%s^%v", bar.Scale.Name(), nt.String())
 		}

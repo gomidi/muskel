@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"gitlab.com/gomidi/muskel/muskellib"
+	"gitlab.com/gomidi/muskel/items"
 )
 
 func TestScaleNote(t *testing.T) {
@@ -66,7 +66,7 @@ func TestNote(t *testing.T) {
 		var n2 = nt.Dup()
 		// n2.velocity = -1
 
-		n2.Letter, n2.Augmenter, n2.Octave = muskellib.KeyToNote(nt.ToMIDI())
+		n2.Letter, n2.Augmenter, n2.Octave = items.KeyToNote(nt.ToMIDI())
 
 		//fmt.Printf("%s: %v -> %v\n", test, nt.toMIDI(), n2.String())
 		got1 := n2.String()
