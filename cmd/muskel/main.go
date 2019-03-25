@@ -19,11 +19,13 @@ import (
 	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/score"
+	"gitlab.com/gomidi/muskel/unroller"
 	"gitlab.com/metakeule/config"
 )
 
 var (
-	cfg = config.MustNew("muskel", "0.9.0", "muskel is a musical sketch language")
+	cfg = config.MustNew("muskel", "0.9.5", "muskel is a musical sketch language")
 
 	argFile       = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
 	argFmt        = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
@@ -39,21 +41,21 @@ var (
 	cmdSMF      = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
 	argSMFTicks = cmdSMF.NewInt32("ticks", "resolution of SMF file in ticks", config.Default(int32(960)))
 
-	cmdAddInstr     = cfg.MustCommand("addinstr", "add an instrument")
-	argAddInstrName = cmdAddInstr.NewString("name", "name of the instrument", config.Required)
+	cmdAddTrack     = cfg.MustCommand("addtrack", "add a track")
+	argAddTrackName = cmdAddTrack.NewString("name", "name of the track", config.Required)
 
 	cmdRenameTemplate    = cfg.MustCommand("renametemplate", "rename a template")
 	argRenameTemplateOld = cmdRenameTemplate.NewString("old", "old name of the template", config.Required)
 	argRenameTemplateNew = cmdRenameTemplate.NewString("new", "new name of the template", config.Required)
 
-	cmdRenameInstr    = cfg.MustCommand("renameinstr", "rename an instrument")
-	argRenameInstrOld = cmdRenameInstr.NewString("old", "old name of the instrument", config.Required)
-	argRenameInstrNew = cmdRenameInstr.NewString("new", "new name of the instrument", config.Required)
+	cmdRenameTrack    = cfg.MustCommand("renametrack", "rename a track")
+	argRenameTrackOld = cmdRenameTrack.NewString("old", "old name of the track", config.Required)
+	argRenameTrackNew = cmdRenameTrack.NewString("new", "new name of the track", config.Required)
 
-	cmdRmInstr     = cfg.MustCommand("rminstr", "remove an instrument")
-	argRmInstrName = cmdRmInstr.NewString("name", "name of the instrument that should be removed", config.Required)
+	cmdRmTrack     = cfg.MustCommand("rmtrack", "remove a track")
+	argRmTrackName = cmdRmTrack.NewString("name", "name of the track that should be removed", config.Required)
 
-	cmdSyncInstr = cfg.MustCommand("syncinstr", "sync instruments in iclude files to the instruments within the main file")
+	cmdSyncTracks = cfg.MustCommand("synctracks", "sync tracks in include files to the tracks within the given main file")
 
 	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs audacious)")
 )
@@ -89,7 +91,7 @@ func fmtFile(file string) error {
 
 	//sc.AddMissingProperties()
 
-	err = sc.WriteToFile(file)
+	err = muskel.WriteFormattedFile(sc, file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
 		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
@@ -105,7 +107,7 @@ func fmtFile(file string) error {
 
 var lock sync.RWMutex
 
-func runAddInstrument() error {
+func runAddTrack() error {
 	inFile := argFile.Get()
 
 	sc, err := muskel.ParseFile(inFile)
@@ -117,16 +119,16 @@ func runAddInstrument() error {
 		return err
 	}
 
-	name := strings.TrimSpace(argAddInstrName.Get())
+	name := strings.TrimSpace(argAddTrackName.Get())
 
 	if name == "" {
 		return fmt.Errorf("empty name is not allowed")
 	}
-	instr := muskel.NewInstrument(name)
+	trck := score.NewTrack(name)
 
-	sc.AddInstrument(instr)
+	sc.AddTrack(trck)
 
-	err = sc.WriteToFile(inFile)
+	err = muskel.WriteFormattedFile(sc, inFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
 		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
@@ -136,7 +138,7 @@ func runAddInstrument() error {
 	return nil
 }
 
-func runRmInstrument() error {
+func runRmTrack() error {
 	inFile := argFile.Get()
 
 	sc, err := muskel.ParseFile(inFile)
@@ -148,10 +150,10 @@ func runRmInstrument() error {
 		return err
 	}
 
-	name := strings.TrimSpace(argRmInstrName.Get())
-	sc.RmInstrument(name)
+	name := strings.TrimSpace(argRmTrackName.Get())
+	sc.RmTrack(name)
 
-	err = sc.WriteToFile(inFile)
+	err = muskel.WriteFormattedFile(sc, inFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
 		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
@@ -161,7 +163,7 @@ func runRmInstrument() error {
 	return nil
 }
 
-func runSyncInstruments() error {
+func runSyncTracks() error {
 	inFile := argFile.Get()
 
 	sc, err := muskel.ParseFile(inFile)
@@ -173,11 +175,11 @@ func runSyncInstruments() error {
 		return err
 	}
 
-	return sc.SyncInstruments()
+	return muskel.SyncTracks(sc)
 }
 
-// RenameInstrument(old, nu string)
-func runRenameInstrument() error {
+// RenameTrack(old, nu string)
+func runRenameTrack() error {
 	inFile := argFile.Get()
 
 	sc, err := muskel.ParseFile(inFile)
@@ -189,14 +191,14 @@ func runRenameInstrument() error {
 		return err
 	}
 
-	old := strings.TrimSpace(argRenameInstrOld.Get())
-	nu := strings.TrimSpace(argRenameInstrNew.Get())
+	old := strings.TrimSpace(argRenameTrackOld.Get())
+	nu := strings.TrimSpace(argRenameTrackNew.Get())
 
 	if nu == "" {
 		return fmt.Errorf("empty name is not allowed")
 	}
 
-	err = sc.RenameInstrument(old, nu)
+	err = muskel.RenameTrack(sc, old, nu)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
 		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
@@ -206,7 +208,7 @@ func runRenameInstrument() error {
 	return nil
 }
 
-// RenameInstrument(old, nu string)
+// RenameTrack(old, nu string)
 func runRenamePattern() error {
 	inFile := argFile.Get()
 
@@ -226,7 +228,7 @@ func runRenamePattern() error {
 		return fmt.Errorf("empty name is not allowed")
 	}
 
-	err = sc.RenameTemplate(old, nu)
+	err = muskel.RenameTemplate(sc, old, nu)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
 		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
@@ -239,7 +241,7 @@ func runRenamePattern() error {
 func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
 	if argDebug.Get() {
-		muskel.DEBUG = true
+		score.DEBUG = true
 	}
 
 	inFile := argFile.Get()
@@ -349,15 +351,15 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		}
 
 		if argUnroll.IsSet() {
-			var ur *muskel.Score
-			ur, err = sc.Unroll()
+			var ur *score.Score
+			ur, err = unroller.Unroll(sc)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "ERROR while unrolling MuSkeL: %s\n", err.Error())
 				beeep.Alert("ERROR while unrolling MuSkeL:", err.Error(), "assets/warning.png")
 				return err
 			}
 
-			err = ur.WriteToFile(argUnroll.Get())
+			err = muskel.WriteFormattedFile(ur, argUnroll.Get())
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "ERROR while writing unrolling MuSkeL: %s\n", err.Error())
 				beeep.Alert("ERROR while writing unrolled MuSkeL:", err.Error(), "assets/warning.png")
@@ -367,7 +369,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 		}
 
 		if argFmt.Get() {
-			err = sc.WriteToFile(inFilep)
+			err = muskel.WriteFormattedFile(sc, inFilep)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
 				beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
@@ -382,7 +384,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 
 		switch cfg.ActiveCommand() {
 		case cmdSMF:
-			err = sc.WriteSMF(outFile, smfwriter.TimeFormat(smf.MetricTicks(argSMFTicks.Get())))
+			err = muskel.WriteSMFFile(sc, outFile, smfwriter.TimeFormat(smf.MetricTicks(argSMFTicks.Get())))
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
@@ -395,7 +397,7 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 			beeep.Notify("OK MuSkeL converted to SMF", path.Base(outFile), "assets/information.png")
 			return nil
 		case cmdPlay:
-			err = sc.WriteSMF(outFile)
+			err = muskel.WriteSMFFile(sc, outFile)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 				beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
@@ -475,14 +477,14 @@ func run() error {
 	}
 
 	switch cfg.ActiveCommand() {
-	case cmdAddInstr:
-		return runAddInstrument()
-	case cmdRmInstr:
-		return runRmInstrument()
-	case cmdSyncInstr:
-		return runSyncInstruments()
-	case cmdRenameInstr:
-		return runRenameInstrument()
+	case cmdAddTrack:
+		return runAddTrack()
+	case cmdRmTrack:
+		return runRmTrack()
+	case cmdSyncTracks:
+		return runSyncTracks()
+	case cmdRenameTrack:
+		return runRenameTrack()
 	case cmdRenameTemplate:
 		return runRenamePattern()
 	}
