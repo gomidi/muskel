@@ -5,10 +5,7 @@ import (
 	"strings"
 )
 
-// TODO see the following list
-/*
-- translate augmentation symbols like ^ and ° to pitchbend messages
-*/
+// TODO translate augmentation symbols like ^ and ° to pitchbend messages
 
 type Note struct {
 	letter         string

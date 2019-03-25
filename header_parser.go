@@ -26,14 +26,14 @@ func (p *HeaderParser) parseTemperamentLine(line string) error {
 	return nil
 }
 
-// parsePatternDefinitionLine parses a line in the header that defines a pattern
-func (p *HeaderParser) parsePatternDefinitionLine(line string) error {
-	var pd PatternDefinition
+// parseTemplateDefinitionLine parses a line in the header that defines a template
+func (p *HeaderParser) parseTemplateDefinitionLine(line string) error {
+	var pd TemplateDefinition
 	err := pd.Parse(line)
 	if err != nil {
-		return fmt.Errorf("invalid pattern definition line %#v: %s", line, err)
+		return fmt.Errorf("invalid template definition line %#v: %s", line, err)
 	}
-	p.Score.PatternDefinitions[pd.Name] = &pd
+	p.Score.TemplateDefinitions[pd.Name] = &pd
 	return nil
 }
 
@@ -53,15 +53,15 @@ func (p *HeaderParser) parseMetaLine(line string) error {
 	return nil
 }
 
-var regExPattern = regexp.MustCompile("^([a-zA-Z][_a-zA-Z]+).*")
+var regExTemplate = regexp.MustCompile("^([a-zA-Z][_a-zA-Z]+).*")
 
 func (p *HeaderParser) includeScore(sc *Score) error {
 	//panic("implement")
-	for k, v := range sc.PatternDefinitions {
-		if p.Score.PatternDefinitions[k] != nil || p.Score.IncludedPatternDefinitions[k] != nil {
-			return fmt.Errorf("pattern %q already defined in main file, can't redefine", k)
+	for k, v := range sc.TemplateDefinitions {
+		if p.Score.TemplateDefinitions[k] != nil || p.Score.IncludedTemplateDefinitions[k] != nil {
+			return fmt.Errorf("template %q already defined in main file, can't redefine", k)
 		}
-		p.Score.IncludedPatternDefinitions[k] = v
+		p.Score.IncludedTemplateDefinitions[k] = v
 	}
 	return nil
 }
@@ -111,8 +111,8 @@ func (p *HeaderParser) parseHeaderLine(line string) error {
 	case '$':
 		return p.parseCommand(line[1:])
 	default:
-		if regExPattern.MatchString(line) {
-			return p.parsePatternDefinitionLine(line)
+		if regExTemplate.MatchString(line) {
+			return p.parseTemplateDefinitionLine(line)
 		}
 		return nil
 	}

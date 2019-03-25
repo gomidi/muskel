@@ -276,15 +276,13 @@ func (s *ScoreUnroller) evalRandomItems() {
 			default:
 				unrolled = append(unrolled, ev)
 			}
-			// handle patterns
-			_ = ev
 		}
 
 		instr.unrolled = unrolled
 	}
 }
 
-func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternCall) (unrolled []*Event) {
+func (s *ScoreUnroller) unfoldTemplateCallNoFollowingEvent(ev *Event, v *TemplateCall) (unrolled []*Event) {
 
 	var positionOfNextBar int = 0
 
@@ -293,8 +291,8 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 	var evts []*positionedEvent
 
 	//	fmt.Printf("offset: %v\n", ev.DistanceToStartOfBarIn32th)
-	pvs := PatternEvents(v.Events)
-	//	fmt.Printf("pattern events: %v\n", v.Events)
+	pvs := TemplateEvents(v.Events)
+	//	fmt.Printf("template events: %v\n", v.Events)
 
 	evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
 	unrolled = append(unrolled, s.convertEvents(ev.BarNo, v, evts...)...)
@@ -322,7 +320,7 @@ func (s *ScoreUnroller) unfoldPatternCallNoFollowingEvent(ev *Event, v *PatternC
 	return
 }
 
-func (s *ScoreUnroller) moveNoteAccordingToScale(sc *Scale, p *PatternCall, v Note) (abs Note) {
+func (s *ScoreUnroller) moveNoteAccordingToScale(sc *Scale, p *TemplateCall, v Note) (abs Note) {
 	mv := p.scaleMove
 	if mv > 0 {
 		mv -= 1
@@ -340,15 +338,15 @@ func (s *ScoreUnroller) moveNoteAccordingToScale(sc *Scale, p *PatternCall, v No
 	return
 }
 
-func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Instrument, ev *Event, v *PatternCall) (unrolled []*Event) {
+func (s *ScoreUnroller) unfoldTemplateCallWithFollowingEvent(idx int, instr *Instrument, ev *Event, v *TemplateCall) (unrolled []*Event) {
 	//	panic("hiho")
 	/*
 			TODO
 			1. calc the distance of the next event in 32ths (respecting bar changes etc)
-			2. for each pattern event:
-			   a. calc the distance to the previous pattern event in 32ths
+			2. for each template event:
+			   a. calc the distance to the previous template event in 32ths
 			   b. if it is smaller than the next normal event, write it to unrolled
-			   c. otherwise skip the pattern event loop
+			   c. otherwise skip the template event loop
 
 			ad 1:
 			  we need the distance between the bars and corresponding from the start of the bar to
@@ -356,12 +354,12 @@ func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Inst
 			  of event - distance from start of previous
 
 		    ad 2:
-			  a for the first pattern event it is either 0 (sync start) or based on the first position. for
-			    the following pattern events it is the position related to current position minus the relative position
-				of the previous pattern event
+			  a for the first template event it is either 0 (sync start) or based on the first position. for
+			    the following template events it is the position related to current position minus the relative position
+				of the previous template event
 
 		Question: what to do, if there is no next event?
-		I think then the pattern can be fully unrolled
+		I think then the template can be fully unrolled
 	*/
 
 	// there is a following event
@@ -375,7 +373,7 @@ func (s *ScoreUnroller) unfoldPatternCallWithFollowingEvent(idx int, instr *Inst
 	var evts []*positionedEvent
 
 	//	fmt.Printf("offset: %v\n", ev.DistanceToStartOfBarIn32th)
-	pvs := PatternEvents(v.Events)
+	pvs := TemplateEvents(v.Events)
 
 	// for each following empty bar
 	nextEv := instr.unrolled[idx+1]
@@ -433,7 +431,7 @@ barLoop:
 
 }
 
-func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*positionedEvent) (out []*Event) {
+func (s *ScoreUnroller) convertEvents(barNo int, p *TemplateCall, in ...*positionedEvent) (out []*Event) {
 	out = make([]*Event, len(in))
 	sc := s.scaleAt(barNo)
 
@@ -515,27 +513,27 @@ func (s *ScoreUnroller) convertEvents(barNo int, p *PatternCall, in ...*position
 	return
 }
 
-func (s *ScoreUnroller) unfoldPatternCall(idx int, instr *Instrument, ev *Event, v *PatternCall) (unrolled []*Event) {
+func (s *ScoreUnroller) unfoldTemplateCall(idx int, instr *Instrument, ev *Event, v *TemplateCall) (unrolled []*Event) {
 
 	// no following event
 	if idx+1 >= len(instr.unrolled) {
-		return s.unfoldPatternCallNoFollowingEvent(ev, v)
+		return s.unfoldTemplateCallNoFollowingEvent(ev, v)
 	}
 
-	return s.unfoldPatternCallWithFollowingEvent(idx, instr, ev, v)
+	return s.unfoldTemplateCallWithFollowingEvent(idx, instr, ev, v)
 }
 
-func (s *ScoreUnroller) unfoldPattern(idx int, ev *Event, instr *Instrument) (unrolled []*Event) {
+func (s *ScoreUnroller) unfoldTemplate(idx int, ev *Event, instr *Instrument) (unrolled []*Event) {
 	switch v := ev.Item.(type) {
-	case *PatternCall:
-		unrolled = append(unrolled, s.unfoldPatternCall(idx, instr, ev, v)...)
+	case *TemplateCall:
+		unrolled = append(unrolled, s.unfoldTemplateCall(idx, instr, ev, v)...)
 	default:
 		unrolled = append(unrolled, ev)
 	}
 	return
 }
 
-func (s *ScoreUnroller) unfoldPatterns() {
+func (s *ScoreUnroller) unfoldTemplates() {
 	if !s.dest.isUnrolled {
 		panic("must be unrolled")
 	}
@@ -543,8 +541,7 @@ func (s *ScoreUnroller) unfoldPatterns() {
 		var unrolled []*Event
 		for idx, ev := range instr.unrolled {
 			//			fmt.Printf("unrolled event: %#v\n", ev)
-			// handle patterns
-			unrolled = append(unrolled, s.unfoldPattern(idx, ev, instr)...)
+			unrolled = append(unrolled, s.unfoldTemplate(idx, ev, instr)...)
 		}
 		instr.unrolled = unrolled
 	}
@@ -727,21 +724,21 @@ func (s *ScoreUnroller) unrollInstruments(bars []*Bar, instr []*Instrument) erro
 	// for the next event
 	s.flattenInstrumentEvents()
 
-	// evaluate randomness here before the pattern unfolding, to be able to randomly choose
-	// patterns
+	// evaluate randomness here before the template unfolding, to be able to randomly choose
+	// templates
 	s.evalRandomItems()
 
-	// unfold the patterns in a way that they are interrupted by the next non empty event
-	s.unfoldPatterns()
+	// unfold the templates in a way that they are interrupted by the next non empty event
+	s.unfoldTemplates()
 
-	// evalute randomness a second time, so that randomness produced by patterns can be evaluated
+	// evalute randomness a second time, so that randomness produced by templates can be evaluated
 	s.evalRandomItems()
 
 	// replace scale notes with absolute Notes
 	s.replaceScaleNotes()
 
 	// unfold the repeated items
-	// we don't want to repeat patterns or randomness via repeated items, because it is confusing
+	// we don't want to repeat templates or randomness via repeated items, because it is confusing
 	// and does not bring much to the table
 	// it is more interesting to be sure that repeating always means doubling the real item
 	// before
@@ -759,8 +756,8 @@ func newScoreUnroller(src *Score) *ScoreUnroller {
 	nu.BodyComments = src.BodyComments
 	nu.Parts = src.Parts
 	nu.Temperament = src.Temperament
-	nu.PatternDefinitions = src.PatternDefinitions
-	nu.IncludedPatternDefinitions = src.IncludedPatternDefinitions
+	nu.TemplateDefinitions = src.TemplateDefinitions
+	nu.IncludedTemplateDefinitions = src.IncludedTemplateDefinitions
 	nu.HeaderComments = src.HeaderComments
 	nu.barNumbersTracked = true
 

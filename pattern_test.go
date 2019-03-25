@@ -10,36 +10,36 @@ func TestParseFragment(t *testing.T) {
 	//	t.Skip()
 	tests := []struct {
 		input    string
-		expected patternFragment
+		expected templateFragment
 	}{
-		{"2a'", patternFragment{"2", "a'"}},
-		{"a'", patternFragment{"", "a'"}},
-		{"2", patternFragment{"2", ""}},
-		{"2&", patternFragment{"2&", ""}},
-		{"&", patternFragment{"&", ""}},
-		{".", patternFragment{".", ""}},
-		{";", patternFragment{";", ""}},
-		{"2;", patternFragment{"2;", ""}},
-		{"2.;", patternFragment{"2.;", ""}},
-		{"2.", patternFragment{"2.", ""}},
-		{"&.", patternFragment{"&.", ""}},
-		{"&;", patternFragment{"&;", ""}},
-		{"&.;", patternFragment{"&.;", ""}},
+		{"2a'", templateFragment{"2", "a'"}},
+		{"a'", templateFragment{"", "a'"}},
+		{"2", templateFragment{"2", ""}},
+		{"2&", templateFragment{"2&", ""}},
+		{"&", templateFragment{"&", ""}},
+		{".", templateFragment{".", ""}},
+		{";", templateFragment{";", ""}},
+		{"2;", templateFragment{"2;", ""}},
+		{"2.;", templateFragment{"2.;", ""}},
+		{"2.", templateFragment{"2.", ""}},
+		{"&.", templateFragment{"&.", ""}},
+		{"&;", templateFragment{"&;", ""}},
+		{"&.;", templateFragment{"&.;", ""}},
 
-		{"2&a", patternFragment{"2&", "a"}},
-		{"&a", patternFragment{"&", "a"}},
-		{".a", patternFragment{".", "a"}},
-		{";a", patternFragment{";", "a"}},
-		{"2;a", patternFragment{"2;", "a"}},
-		{"2.;a", patternFragment{"2.;", "a"}},
-		{"2.a", patternFragment{"2.", "a"}},
-		{"&.a", patternFragment{"&.", "a"}},
-		{"&;a", patternFragment{"&;", "a"}},
-		{"&.;a", patternFragment{"&.;", "a"}},
+		{"2&a", templateFragment{"2&", "a"}},
+		{"&a", templateFragment{"&", "a"}},
+		{".a", templateFragment{".", "a"}},
+		{";a", templateFragment{";", "a"}},
+		{"2;a", templateFragment{"2;", "a"}},
+		{"2.;a", templateFragment{"2.;", "a"}},
+		{"2.a", templateFragment{"2.", "a"}},
+		{"&.a", templateFragment{"&.", "a"}},
+		{"&;a", templateFragment{"&;", "a"}},
+		{"&.;a", templateFragment{"&.;", "a"}},
 	}
 
 	for i, test := range tests {
-		var f patternFragment
+		var f templateFragment
 
 		f.parse(test.input)
 
@@ -49,7 +49,7 @@ func TestParseFragment(t *testing.T) {
 	}
 }
 
-func TestUnrollPattern(t *testing.T) {
+func TestUnrollTemplate(t *testing.T) {
 	//	t.Skip()
 	tests := []struct {
 		input    string
@@ -434,7 +434,7 @@ chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2
 			}
 		*/
 
-		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll pattern")
+		sc, err := Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll template")
 
 		if err != nil {
 			t.Errorf("[%v] could not parse score: %s\n%s\n", i, err.Error(), test.input)

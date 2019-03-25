@@ -42,9 +42,9 @@ var (
 	cmdAddInstr     = cfg.MustCommand("addinstr", "add an instrument")
 	argAddInstrName = cmdAddInstr.NewString("name", "name of the instrument", config.Required)
 
-	cmdRenamePattern    = cfg.MustCommand("renamepattern", "rename a pattern")
-	argRenamePatternOld = cmdRenamePattern.NewString("old", "old name of the pattern", config.Required)
-	argRenamePatternNew = cmdRenamePattern.NewString("new", "new name of the pattern", config.Required)
+	cmdRenameTemplate    = cfg.MustCommand("renametemplate", "rename a template")
+	argRenameTemplateOld = cmdRenameTemplate.NewString("old", "old name of the template", config.Required)
+	argRenameTemplateNew = cmdRenameTemplate.NewString("new", "new name of the template", config.Required)
 
 	cmdRenameInstr    = cfg.MustCommand("renameinstr", "rename an instrument")
 	argRenameInstrOld = cmdRenameInstr.NewString("old", "old name of the instrument", config.Required)
@@ -219,14 +219,14 @@ func runRenamePattern() error {
 		return err
 	}
 
-	old := strings.TrimSpace(argRenamePatternOld.Get())
-	nu := strings.TrimSpace(argRenamePatternNew.Get())
+	old := strings.TrimSpace(argRenameTemplateOld.Get())
+	nu := strings.TrimSpace(argRenameTemplateNew.Get())
 
 	if nu == "" {
 		return fmt.Errorf("empty name is not allowed")
 	}
 
-	err = sc.RenamePattern(old, nu)
+	err = sc.RenameTemplate(old, nu)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
 		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
@@ -483,7 +483,7 @@ func run() error {
 		return runSyncInstruments()
 	case cmdRenameInstr:
 		return runRenameInstrument()
-	case cmdRenamePattern:
+	case cmdRenameTemplate:
 		return runRenamePattern()
 	}
 	return cmd(dir, file)

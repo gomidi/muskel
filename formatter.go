@@ -425,13 +425,13 @@ func (p *Formatter) printHeader(bf io.Writer) {
 	fmt.Fprint(bf, "\n\n")
 	// bf.WriteString("\n\n")
 
-	pattDefMap := map[string]string{}
+	templDefMap := map[string]string{}
 
-	for k, v := range p.score.PatternDefinitions {
-		pattDefMap[pad(k+":", 15)] = v.Original
+	for k, v := range p.score.TemplateDefinitions {
+		templDefMap[pad(k+":", 15)] = v.Original
 	}
 
-	p.printSorted(bf, "%s %s\n", pattDefMap)
+	p.printSorted(bf, "%s %s\n", templDefMap)
 
 	fmt.Fprint(bf, "\n\n")
 	//bf.WriteString("\n\n")

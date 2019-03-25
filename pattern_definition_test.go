@@ -9,20 +9,20 @@ func TestParseDefinition(t *testing.T) {
 	//	t.Skip()
 	tests := []struct {
 		input    string
-		expected PatternDefinition
+		expected TemplateDefinition
 		err      bool
 	}{
 		// the prefix $ has already been handled before
-		{"test : 2a' &kd", PatternDefinition{Name: "test", Original: "2a' &kd"}, false},
-		{"test : a' &kd", PatternDefinition{Name: "test", Original: "a' &kd"}, false},
-		{"test  2a' &kd", PatternDefinition{}, true},
-		{"test~ : 2#1 &kd", PatternDefinition{Name: "test~", Original: "2#1 &kd", NumParams: 1}, false},
-		{"test : 2#1 #2kd", PatternDefinition{Name: "test", Original: "2#1 #2kd", NumParams: 2}, false},
-		{"test~~ : 2#1 &#1", PatternDefinition{Name: "test~~", Original: "2#1 &#1", NumParams: 1}, false},
+		{"test : 2a' &kd", TemplateDefinition{Name: "test", Original: "2a' &kd"}, false},
+		{"test : a' &kd", TemplateDefinition{Name: "test", Original: "a' &kd"}, false},
+		{"test  2a' &kd", TemplateDefinition{}, true},
+		{"test~ : 2#1 &kd", TemplateDefinition{Name: "test~", Original: "2#1 &kd", NumParams: 1}, false},
+		{"test : 2#1 #2kd", TemplateDefinition{Name: "test", Original: "2#1 #2kd", NumParams: 2}, false},
+		{"test~~ : 2#1 &#1", TemplateDefinition{Name: "test~~", Original: "2#1 &#1", NumParams: 1}, false},
 	}
 
 	for i, test := range tests {
-		var pd PatternDefinition
+		var pd TemplateDefinition
 
 		err := pd.Parse(test.input)
 
@@ -58,7 +58,7 @@ func TestCallDefinition(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		var pd PatternDefinition
+		var pd TemplateDefinition
 
 		err := pd.Parse(test.input)
 

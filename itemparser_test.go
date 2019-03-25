@@ -42,16 +42,16 @@ func TestParseItem(t *testing.T) {
 	for i, test := range tests {
 		var parser itemParser
 
-		parser.GetDefinition = func(name string) *PatternDefinition {
+		parser.GetDefinition = func(name string) *TemplateDefinition {
 			if name == "pa" {
-				return &PatternDefinition{
+				return &TemplateDefinition{
 					Name:      "pa",
 					NumParams: 0,
 					Original:  "2a'",
 				}
 			}
 			if name == "pb" {
-				return &PatternDefinition{
+				return &TemplateDefinition{
 					Name:      "pb",
 					NumParams: 1,
 					Original:  "1#1 2a' 2&a'",

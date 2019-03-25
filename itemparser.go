@@ -333,13 +333,13 @@ func (p *itemParser) parseOSC(data string) (om OSCMessage, err error) {
 	return om, fmt.Errorf("parseOSC is not implemented yet")
 }
 
-func (p *itemParser) parsePattern(data string, positionIn32th uint) (pc *PatternCall, err error) {
+func (p *itemParser) parseTemplate(data string, positionIn32th uint) (pc *TemplateCall, err error) {
 	if p.GetDefinition == nil {
 		return nil, fmt.Errorf("no definition resolver defined")
 	}
-	pc = &PatternCall{}
+	pc = &TemplateCall{}
 	pc.getter = p.GetDefinition
-	err = pc.parsePattern(data, positionIn32th)
+	err = pc.parseTemplate(data, positionIn32th)
 	return
 }
 
@@ -402,7 +402,7 @@ func (p *itemParser) parseNTuple(data string, posIn32th uint) (nt NTuple, err er
 }
 
 type itemParser struct {
-	GetDefinition func(name string) *PatternDefinition
+	GetDefinition func(name string) *TemplateDefinition
 }
 
 func (p *itemParser) parseRandom(data string, posIn32th uint) (item interface{}, err error) {
@@ -544,7 +544,7 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 		//case 'O':
 		//	return p.parseOSC(data[1:])
 		case '!':
-			return p.parsePattern(data, posIn32th)
+			return p.parseTemplate(data, posIn32th)
 		case '.':
 			if data == "..." {
 				return RepeatLastBarUntilChange{}, nil
@@ -570,8 +570,8 @@ func (p *itemParser) parseItem(data string, posIn32th uint) (interface{}, error)
 				return parseMIDIPolyAftertouch(data[2:])
 			}
 
-			if regExPattern.MatchString(data) {
-				return p.parsePattern(data, posIn32th)
+			if regExTemplate.MatchString(data) {
+				return p.parseTemplate(data, posIn32th)
 			}
 			res, err := parseNote(data)
 			if err != nil {

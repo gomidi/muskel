@@ -120,12 +120,12 @@ func velocityToDynamic(vel int8) (dyn string) {
 	}
 }
 
-type patternFragment struct {
+type templateFragment struct {
 	position string
 	item     string
 }
 
-func (f *patternFragment) parse(s string) {
+func (f *templateFragment) parse(s string) {
 	if regPos.MatchString(s) {
 		all := regPos.FindAllString(s, 1)
 		f.position = all[0]
@@ -136,7 +136,7 @@ func (f *patternFragment) parse(s string) {
 }
 
 // syntax for params:  #1 #2 etc.
-var pattReg = regexp.MustCompile(regexp.QuoteMeta("#") + "([1-9]+)")
+var templateReg = regexp.MustCompile(regexp.QuoteMeta("#") + "([1-9]+)")
 var regPos = regexp.MustCompile("^([1-9]?[0-9]?)([&;" + regexp.QuoteMeta(".") + "]*)")
 
 type positionedEvent struct {
@@ -176,7 +176,7 @@ func splitItems(def string) (items []string) {
 }
 
 func replaceItemWith(replacement string) (position string, item string) {
-	var frepl patternFragment
+	var frepl templateFragment
 	frepl.parse(replacement)
 
 	position = frepl.position

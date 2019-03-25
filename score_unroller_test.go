@@ -58,11 +58,11 @@ func TestUnroll(t *testing.T) {
 		},
 		{
 			`
-patt: 1^2 2&^3
+templ: 1^2 2&^3
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt   |
+    1    | templ   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -76,11 +76,11 @@ patt: 1^2 2&^3
 		},
 		{
 			`
-patt: 1^2 2&^3
+templ: 1^2 2&^3
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^2   |
+    1    | templ^2   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -94,11 +94,11 @@ patt: 1^2 2&^3
 		},
 		{
 			`
-patt: 1^2 2&^3
+templ: 1^2 2&^3
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^-3   |
+    1    | templ^-3   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -112,12 +112,12 @@ patt: 1^2 2&^3
 		},
 		{
 			`
-pattA: 1^2 2&^3
-pattB: 1pattA^-3
+templA: 1^2 2&^3
+templB: 1templA^-3
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | pattB   |
+    1    | templB   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -131,11 +131,11 @@ pattB: 1pattA^-3
 		},
 		{
 			`
-patt: 1^2 2&^3
+templ: 1^2 2&^3
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^3   |
+    1    | templ^^3   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -149,11 +149,11 @@ patt: 1^2 2&^3
 		},
 		{
 			`
-patt: 1^2 2&^3
+templ: 1^2 2&^3
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^-2   |
+    1    | templ^^-2   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -167,11 +167,11 @@ patt: 1^2 2&^3
 		},
 		{
 			`
-patt: 1e 2&f
+templ: 1e 2&f
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^3   |
+    1    | templ^^3   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -185,11 +185,11 @@ patt: 1e 2&f
 		},
 		{
 			`
-patt: 1#1 2&f 3^1
+templ: 1#1 2&f 3^1
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^3(e)   |
+    1    | templ^^3(e)   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -205,11 +205,11 @@ patt: 1#1 2&f 3^1
 		},
 		{
 			`
-patt: 1#1 2&f 3^1
+templ: 1#1 2&f 3^1
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^3(^2)   |
+    1    | templ^^3(^2)   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -226,11 +226,11 @@ patt: 1#1 2&f 3^1
 		{
 			`
 @test: mount to step 3
-patt: 1#1 2&f 3^1
+templ: 1#1 2&f 3^1
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^3(^2)/:,^1,:/   |
+    1    | templ^^3(^2)/:,^1,:/   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -246,11 +246,11 @@ patt: 1#1 2&f 3^1
 		},
 		{
 			`
-patt: 1e 2&f
+templ: 1e 2&f
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^1   |
+    1    | templ^^1   |
 \dorian^e
     1    | ./.   |`,
 			`
@@ -264,11 +264,11 @@ patt: 1e 2&f
 		},
 		{
 			`
-patt: 1e 2&f#
+templ: 1e 2&f#
 =
          | <Vocals> |
 4/4\dorian^d
-    1    | patt^^2   |
+    1    | templ^^2   |
 \dorian^e
     1    | ./.   |`,
 			`

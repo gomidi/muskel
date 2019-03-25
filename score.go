@@ -19,14 +19,14 @@ type Score struct {
 	Instruments []*Instrument
 	Bars        []*Bar
 
-	Meta                       map[string]string
-	HeaderIncludes             []string
-	Temperament                map[string]string
-	PatternDefinitions         map[string]*PatternDefinition
-	IncludedPatternDefinitions map[string]*PatternDefinition
-	Parts                      map[string][2]int // part name to start bar no and last bar
-	BodyComments               map[int]string    // line calculated from the start of the system
-	HeaderComments             []string          // comments in the header, as they come
+	Meta                        map[string]string
+	HeaderIncludes              []string
+	Temperament                 map[string]string
+	TemplateDefinitions         map[string]*TemplateDefinition
+	IncludedTemplateDefinitions map[string]*TemplateDefinition
+	Parts                       map[string][2]int // part name to start bar no and last bar
+	BodyComments                map[int]string    // line calculated from the start of the system
+	HeaderComments              []string          // comments in the header, as they come
 
 	SmallColumns        bool // if the formatting should have no distance to the column lines
 	isUnrolled          bool
@@ -56,13 +56,13 @@ func (s *Score) AddMissingProperties() {
 
 func NewScore() *Score {
 	return &Score{
-		Meta:                       map[string]string{},
-		Temperament:                map[string]string{},
-		PatternDefinitions:         map[string]*PatternDefinition{},
-		Parts:                      map[string][2]int{},
-		BodyComments:               map[int]string{},
-		isUnrolled:                 false,
-		IncludedPatternDefinitions: map[string]*PatternDefinition{},
+		Meta:                        map[string]string{},
+		Temperament:                 map[string]string{},
+		TemplateDefinitions:         map[string]*TemplateDefinition{},
+		Parts:                       map[string][2]int{},
+		BodyComments:                map[int]string{},
+		isUnrolled:                  false,
+		IncludedTemplateDefinitions: map[string]*TemplateDefinition{},
 	}
 }
 
@@ -132,8 +132,8 @@ func (p *ScoreUnroller) trackBarNumbers() {
 	//	p.dest.barNumbersTracked = true
 }
 
-// Unroll unrolls repetitions, patterns and randomness and returns a score
-// without repetition, randomness and patterns
+// Unroll unrolls repetitions, templates and randomness and returns a score
+// without repetition, randomness and templates
 func (s *Score) Unroll() (dest *Score, err error) {
 
 	for _, b := range s.Bars {
@@ -492,12 +492,12 @@ func tempDir(prefix string) (dir string, err error) {
 	return
 }
 
-func (s *Score) renamePatternInCalls(old, nu string) (err error) {
+func (s *Score) renameTemplateInCalls(old, nu string) (err error) {
 	for _, instr := range s.Instruments {
 		for ii, bev := range instr.events {
 			for i, ev := range bev {
 				switch v := ev.Item.(type) {
-				case *PatternCall:
+				case *TemplateCall:
 					if v.Name == old {
 						v.Name = nu
 					}
@@ -515,51 +515,51 @@ func (s *Score) renamePatternInCalls(old, nu string) (err error) {
 
 }
 
-func (s *Score) hasPattern(name string) bool {
-	_, hasOwn := s.PatternDefinitions[name]
-	_, hasIncluded := s.IncludedPatternDefinitions[name]
+func (s *Score) hasTemplate(name string) bool {
+	_, hasOwn := s.TemplateDefinitions[name]
+	_, hasIncluded := s.IncludedTemplateDefinitions[name]
 
 	return hasOwn || hasIncluded
 }
 
-func (s *Score) renamePatternDefinition(old, nu string) error {
-	_, hasOwn := s.PatternDefinitions[old]
-	_, hasIncluded := s.IncludedPatternDefinitions[old]
+func (s *Score) renameTemplateDefinition(old, nu string) error {
+	_, hasOwn := s.TemplateDefinitions[old]
+	_, hasIncluded := s.IncludedTemplateDefinitions[old]
 
-	if !s.hasPattern(old) {
-		return fmt.Errorf("could not find a pattern with the name %q", old)
+	if !s.hasTemplate(old) {
+		return fmt.Errorf("could not find a template with the name %q", old)
 	}
 
-	if s.hasPattern(nu) {
-		return fmt.Errorf("a pattern with name %q already exists", nu)
+	if s.hasTemplate(nu) {
+		return fmt.Errorf("a template with name %q already exists", nu)
 	}
 
 	if hasOwn {
-		pt := s.PatternDefinitions[old]
+		pt := s.TemplateDefinitions[old]
 
-		delete(s.PatternDefinitions, old)
+		delete(s.TemplateDefinitions, old)
 
 		pt.Name = nu
 
-		s.PatternDefinitions[nu] = pt
-		return s.renamePatternInCalls(old, nu)
+		s.TemplateDefinitions[nu] = pt
+		return s.renameTemplateInCalls(old, nu)
 	}
 
 	if hasIncluded {
-		pt := s.IncludedPatternDefinitions[old]
+		pt := s.IncludedTemplateDefinitions[old]
 
-		delete(s.IncludedPatternDefinitions, old)
+		delete(s.IncludedTemplateDefinitions, old)
 
 		pt.Name = nu
 
-		s.IncludedPatternDefinitions[nu] = pt
+		s.IncludedTemplateDefinitions[nu] = pt
 	}
 
 	return nil
 }
 
-func (s *Score) RenamePattern(old, nu string) (err error) {
-	err = s.renamePatternDefinition(old, nu)
+func (s *Score) RenameTemplate(old, nu string) (err error) {
+	err = s.renameTemplateDefinition(old, nu)
 
 	if err != nil {
 		return
@@ -579,17 +579,17 @@ func (s *Score) RenamePattern(old, nu string) (err error) {
 				return err
 			}
 
-			target.RenamePattern(old, nu)
+			target.RenameTemplate(old, nu)
 			//target.WriteToFile(target.FileName)
 
 			includes[b.include] = true
 		}
 	}
 
-	s.renamePatternInCalls(old, nu)
+	s.renameTemplateInCalls(old, nu)
 
-	for _, patt := range s.PatternDefinitions {
-		it := strings.Split(patt.Original, " ")
+	for _, templ := range s.TemplateDefinitions {
+		it := strings.Split(templ.Original, " ")
 
 		var changed bool = false
 
@@ -614,7 +614,7 @@ func (s *Score) RenamePattern(old, nu string) (err error) {
 		}
 
 		if changed {
-			patt.Original = strings.Join(it, " ")
+			templ.Original = strings.Join(it, " ")
 		}
 	}
 

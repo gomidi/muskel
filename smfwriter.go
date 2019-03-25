@@ -55,8 +55,6 @@ func (p *SMFWriter) Write(wr smf.Writer) error {
 		p.iw.setDelay(instr.Delay[0], instr.Delay[1])
 		p.iw.setStraight()
 
-		// TODO implement offset
-
 		iw := newInstrumentSMFWriter(p, p.wr, instr)
 		_ = i
 		//fmt.Printf("writing MIDI for col: %v, instr: %q\n", i, instr.Name)

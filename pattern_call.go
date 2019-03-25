@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-type PatternCall struct {
+type TemplateCall struct {
 	Name         string
 	Params       []string
 	Replacements []string
@@ -17,18 +17,18 @@ type PatternCall struct {
 	SyncFirst    bool
 	result       string
 	//	offset       uint
-	firstPos                          uint
-	Events                            []*positionedEvent // just a sausage of positions within one fictive infinite bar
-	getter                            func(name string) *PatternDefinition
-	velocityAdd                       string
-	scaleMove                         int8 // 0: force to scale (take next note in scale if not exact matching, no movement for in scale notes), n >0 || n < 0: move by n steps along the scale
-	scaleMoveMode                     int8 // 0: no scale movement, 1: move only scale notes, 2: move only scale notes or non scale notes depending on the first item
-	firstNoteIsScaleNote              int  // 0: not set, 1: true, 2: false
-	firstNoteAbsKey                   uint8
-	syncFirstThroughPatternDefinition bool
+	firstPos                           uint
+	Events                             []*positionedEvent // just a sausage of positions within one fictive infinite bar
+	getter                             func(name string) *TemplateDefinition
+	velocityAdd                        string
+	scaleMove                          int8 // 0: force to scale (take next note in scale if not exact matching, no movement for in scale notes), n >0 || n < 0: move by n steps along the scale
+	scaleMoveMode                      int8 // 0: no scale movement, 1: move only scale notes, 2: move only scale notes or non scale notes depending on the first item
+	firstNoteIsScaleNote               int  // 0: not set, 1: true, 2: false
+	firstNoteAbsKey                    uint8
+	syncFirstThroughTemplateDefinition bool
 }
 
-func (p *PatternCall) String() string {
+func (p *TemplateCall) String() string {
 	var bf strings.Builder
 
 	//	fmt.Printf("len events: %v\n", len(p.Events))
@@ -41,15 +41,15 @@ func (p *PatternCall) String() string {
 	return bf.String()
 }
 
-type PatternEvents []*positionedEvent
+type TemplateEvents []*positionedEvent
 
 // Spread is called unless the returned positionOfNextBar is < 0
 // The first call to spread is with start number of the position within the bar where the
-// pattern is embedded.
+// template is embedded.
 // Subsequent calls will set start to the last returned positionOfNextBar
 // when the last event is return, positionOfNextBar is -1
 // the returned events are relative to the bar given by start
-func (p PatternEvents) Spread(start int, num, denom uint8) (barEvents []*positionedEvent, positionOfNextBar int) {
+func (p TemplateEvents) Spread(start int, num, denom uint8) (barEvents []*positionedEvent, positionOfNextBar int) {
 	barLength := length32ths(num, denom)
 	positionOfNextBar = start + barLength
 
@@ -72,7 +72,7 @@ func (p PatternEvents) Spread(start int, num, denom uint8) (barEvents []*positio
 	return
 }
 
-func (p *PatternCall) parseItem(data string, posIn32th uint) (item interface{}, err error) {
+func (p *TemplateCall) parseItem(data string, posIn32th uint) (item interface{}, err error) {
 	if len(data) == 0 {
 		return nil, nil
 	}
@@ -81,7 +81,7 @@ func (p *PatternCall) parseItem(data string, posIn32th uint) (item interface{}, 
 	return ip.parseItem(data, posIn32th)
 }
 
-func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev *positionedEvent, err error) {
+func (p *TemplateCall) mkEvent(position string, posIn32th uint, data string) (ev *positionedEvent, err error) {
 	ev = &positionedEvent{}
 	_, ev.positionIn32ths, err = positionTo32th("", position)
 	if err != nil {
@@ -91,7 +91,7 @@ func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev 
 	ev.originalData = data
 	item, err := p.parseItem(ev.originalData, posIn32th)
 	ev.item = item
-	if p.SyncFirst || p.syncFirstThroughPatternDefinition {
+	if p.SyncFirst || p.syncFirstThroughTemplateDefinition {
 		//		fmt.Printf("removing %v from %v\n", p.firstPos, ev.positionIn32ths)
 		ev.positionIn32ths -= p.firstPos
 	}
@@ -99,7 +99,7 @@ func (p *PatternCall) mkEvent(position string, posIn32th uint, data string) (ev 
 	return
 }
 
-func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *positionedEvent, err error) {
+func (p *TemplateCall) parseEvent(idx int, data string, posIn32th uint) (ev *positionedEvent, err error) {
 
 	var positionBf strings.Builder
 	var bf strings.Builder
@@ -136,7 +136,7 @@ func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *posi
 	pos := positionBf.String()
 	if idx == 0 {
 		if pos == "" {
-			p.syncFirstThroughPatternDefinition = true
+			p.syncFirstThroughTemplateDefinition = true
 			p.firstPos = 0
 			pos = "1"
 		} else {
@@ -158,8 +158,8 @@ func (p *PatternCall) parseEvent(idx int, data string, posIn32th uint) (ev *posi
 	return ev, nil
 }
 
-// sliceEvents slices the events according to the pattern call slice definition
-func (p *PatternCall) sliceEvents() {
+// sliceEvents slices the events according to the template call slice definition
+func (p *TemplateCall) sliceEvents() {
 	if p.Slice[0] < 0 {
 		return
 	}
@@ -186,7 +186,7 @@ func (p *PatternCall) sliceEvents() {
 	p.Events = evs
 }
 
-func (p *PatternCall) findEventThatIsNotRest(start int) (found int) {
+func (p *TemplateCall) findEventThatIsNotRest(start int) (found int) {
 	if start >= len(p.Events) {
 		return -1
 	}
@@ -198,8 +198,8 @@ func (p *PatternCall) findEventThatIsNotRest(start int) (found int) {
 	return p.findEventThatIsNotRest(start + 1)
 }
 
-// replaceEvents replaces the events according to the pattern call replace definition
-func (p *PatternCall) replaceEvents(posIn32th uint) (err error) {
+// replaceEvents replaces the events according to the template call replace definition
+func (p *TemplateCall) replaceEvents(posIn32th uint) (err error) {
 	lenRepl := len(p.Replacements)
 
 	if lenRepl == 0 {
@@ -271,28 +271,28 @@ func (p *PatternCall) replaceEvents(posIn32th uint) (err error) {
 	return nil
 }
 
-func (p *PatternCall) parsePattern(data string, positionIn32th uint) error {
+func (p *TemplateCall) parseTemplate(data string, positionIn32th uint) error {
 	if p.getter == nil {
-		return fmt.Errorf("need pattern getter")
+		return fmt.Errorf("need template getter")
 	}
 
-	//	fmt.Printf("parse pattern called with: %q\n", data)
+	//	fmt.Printf("parse template called with: %q\n", data)
 
 	err := p.Parse(data)
 
 	if err != nil {
-		return fmt.Errorf("could not parse pattern call: %s", err)
+		return fmt.Errorf("could not parse template call: %s", err)
 	}
 
 	def := p.getter(p.Name)
 
 	if def == nil {
-		return fmt.Errorf("could not find definition for pattern %q", p.Name)
+		return fmt.Errorf("could not find definition for template %q", p.Name)
 	}
 
 	p.result, err = def.Call(p.Params...)
 	if err != nil {
-		return fmt.Errorf("could not call pattern %s with %q: %s", p.Name, data, err)
+		return fmt.Errorf("could not call template %s with %q: %s", p.Name, data, err)
 	}
 
 	//	fmt.Printf("result: %q\n", p.result)
@@ -300,7 +300,7 @@ func (p *PatternCall) parsePattern(data string, positionIn32th uint) error {
 	return p.parseEvents(p.result, positionIn32th)
 }
 
-func (p *PatternCall) addVelocity(orig int8) (vel int8) {
+func (p *TemplateCall) addVelocity(orig int8) (vel int8) {
 	if orig == -1 {
 		return orig
 	}
@@ -329,7 +329,7 @@ func (p *PatternCall) addVelocity(orig int8) (vel int8) {
 	return
 }
 
-func (p *PatternCall) __parseEvent(idx int, ev string, posIn32th uint, firstScaleNoteDiff int8) (newDiff int8, err error) {
+func (p *TemplateCall) __parseEvent(idx int, ev string, posIn32th uint, firstScaleNoteDiff int8) (newDiff int8, err error) {
 	e, err := p.parseEvent(idx, ev, posIn32th)
 	if err != nil {
 		return firstScaleNoteDiff, fmt.Errorf("could not parse event %q: %s", ev, err.Error())
@@ -340,9 +340,9 @@ func (p *PatternCall) __parseEvent(idx int, ev string, posIn32th uint, firstScal
 	//p.Events = append(p.Events, e)
 
 	switch v := e.item.(type) {
-	case *PatternCall:
+	case *TemplateCall:
 		if v.scaleMoveMode == 2 {
-			return firstScaleNoteDiff, fmt.Errorf("mounting of pattern into a scale is not allowed inside pattern definitions, only in the score")
+			return firstScaleNoteDiff, fmt.Errorf("mounting of templates into a scale is not allowed inside template definitions, only in the score")
 		}
 		err := v.parseEvents(v.result, e.positionIn32ths)
 		if err != nil {
@@ -408,7 +408,7 @@ func (p *PatternCall) __parseEvent(idx int, ev string, posIn32th uint, firstScal
 
 		if p.scaleMoveMode == 2 {
 			if p.firstNoteIsScaleNote == -1 && nt.scaleNote == 0 {
-				// TODO that has to be done when unrolling
+				// that has to be done when unrolling
 			}
 			if p.firstNoteIsScaleNote == 1 && nt.scaleNote != 0 {
 				sn := nt.scaleNote
@@ -448,9 +448,9 @@ func (p *PatternCall) __parseEvent(idx int, ev string, posIn32th uint, firstScal
 	return firstScaleNoteDiff, nil
 }
 
-func (p *PatternCall) parseEvents(data string, posIn32th uint) (err error) {
+func (p *TemplateCall) parseEvents(data string, posIn32th uint) (err error) {
 	p.Events = []*positionedEvent{}
-	p.syncFirstThroughPatternDefinition = false
+	p.syncFirstThroughTemplateDefinition = false
 
 	//fmt.Printf("parseEvents called with data: %v\n", data)
 	var firstScaleNoteDiff int8
@@ -491,9 +491,9 @@ func (p *PatternCall) parseEvents(data string, posIn32th uint) (err error) {
 }
 
 //var regPatternCallNameDyn =
-var regPatternCallNameDyn = regexp.MustCompile("^([a-zA-Z][_~a-zA-Z0-9]+)(" + regexp.QuoteMeta("^") + "{1,2}[-0-9]+){0,1}([" + regexp.QuoteMeta("-+=") + "]*)$")
+var regTemplateCallNameDyn = regexp.MustCompile("^([a-zA-Z][_~a-zA-Z0-9]+)(" + regexp.QuoteMeta("^") + "{1,2}[-0-9]+){0,1}([" + regexp.QuoteMeta("-+=") + "]*)$")
 
-func (p *PatternCall) Parse(call string) error {
+func (p *TemplateCall) Parse(call string) error {
 	replacements := ""
 	slice := ""
 	params := ""
@@ -522,7 +522,7 @@ func (p *PatternCall) Parse(call string) error {
 
 	//fmt.Printf("replacements: %q\n", replacements)
 
-	mt := regPatternCallNameDyn.FindStringSubmatch(call)
+	mt := regTemplateCallNameDyn.FindStringSubmatch(call)
 
 	p.Name = mt[1]
 
@@ -536,7 +536,7 @@ func (p *PatternCall) Parse(call string) error {
 
 		si, err := strconv.Atoi(dt)
 		if err != nil {
-			return fmt.Errorf("error in scale moving of pattern %q: %q is not a number", p.Name, dt)
+			return fmt.Errorf("error in scale moving of template %q: %q is not a number", p.Name, dt)
 		}
 
 		p.scaleMove = int8(si)
@@ -574,7 +574,7 @@ func (p *PatternCall) Parse(call string) error {
 	if slice != "" {
 		sl := strings.Split(slice, ":")
 		if len(sl) != 2 {
-			return fmt.Errorf("ERROR in call of pattern %q: invalid slice %q", p.Name, "["+slice+"]")
+			return fmt.Errorf("ERROR in call of template %q: invalid slice %q", p.Name, "["+slice+"]")
 		}
 
 		from := strings.TrimSpace(sl[0])
@@ -585,7 +585,7 @@ func (p *PatternCall) Parse(call string) error {
 		} else {
 			fromI, err := strconv.Atoi(from)
 			if err != nil {
-				return fmt.Errorf("ERROR in call of pattern %q: invalid slice %q", p.Name, "["+slice+"]")
+				return fmt.Errorf("ERROR in call of template %q: invalid slice %q", p.Name, "["+slice+"]")
 			}
 			p.Slice[0] = fromI
 		}
@@ -593,7 +593,7 @@ func (p *PatternCall) Parse(call string) error {
 		if to != "" {
 			toI, err := strconv.Atoi(to)
 			if err != nil || toI == 0 {
-				return fmt.Errorf("ERROR in call of pattern %q: invalid slice %q", p.Name, "["+slice+"]")
+				return fmt.Errorf("ERROR in call of template %q: invalid slice %q", p.Name, "["+slice+"]")
 			}
 			p.Slice[1] = toI
 		}

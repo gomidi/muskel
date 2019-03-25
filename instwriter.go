@@ -520,21 +520,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			iw.wr.Plan(0, 3, 128, iw.wr.Channel.Aftertouch(0))
 		}
 	case OSCMessage:
-		//	case *PatternCall:
-		/*
-			Was wir wollen:
-
-			1. wir suchen die position des nächsten events
-			2. dann kennen wir die entfernung vom pattern startpunkt zum nächsten event
-			3. dann gehen wir durch die pattern-events takt für takt bis zur stelle, wo das nächste event kommt
-			4. dann brechen wir das pattern ab.
-		*/
-		// TODO do something with the pc events
-	/*
-		barevts := v.Events
-
-		_ = barevts
-	*/
+		// TODO implement OSC
 	case NTuple:
 		// definition of a tuple
 		// we need the complete time length over which the tuple is spread
@@ -563,11 +549,6 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 		length := uint32(v.endPos - iw.lastNum32)
 
-		//fmt.Printf("total length: %v\n", length)
-
-		//lengthPerItem := uint32(4.0 * math.Round(float64(length)/float64(len(v.items))))
-		//lengthPerItem := uint32(math.Round(float64(length) / float64(len(v.items))))
-		// fmt.Printf("posShift: %v\n", v.posShift)
 		switch v.posShift {
 		case 0:
 			iw.p.iw.setStraight()
@@ -582,9 +563,6 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		for _, it := range v.items {
 			if item != Hold {
 				if delta > 0 {
-					//iw.wr.Forward(0, delta, 128)
-					//iw.wr.Forward(0, delta, 32)
-					//fmt.Printf("lengthPerItem: %v\n", float64(delta)/float64(uint32(len(v.items))*32))
 					iw.wr.Forward(0, delta, uint32(len(v.items))*32)
 				}
 				added := iw.writeItem(it, stopNotes)
@@ -594,7 +572,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 					iw.noteOns[addn] = true
 				}
 			}
-			delta += length // lengthPerItem
+			delta += length 
 		}
 		iw.wr.Forward(0, delta, uint32(len(v.items))*32)
 

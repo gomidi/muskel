@@ -25,16 +25,16 @@ func (p *BodyParser) newBar(b *Bar) {
 	p.Score.Bars = append(p.Score.Bars, b)
 }
 
-func (p *BodyParser) GetPatternDefinition(name string) *PatternDefinition {
-	if def := p.Score.PatternDefinitions[name]; def != nil {
+func (p *BodyParser) GetTemplateDefinition(name string) *TemplateDefinition {
+	if def := p.Score.TemplateDefinitions[name]; def != nil {
 		return def
 	}
-	return p.Score.IncludedPatternDefinitions[name]
+	return p.Score.IncludedTemplateDefinitions[name]
 }
 
 // parseSingleItem parses a single item (no multiitem)
 func (p *BodyParser) parseSingleItem(data string, posIn32th uint) (interface{}, error) {
-	return (&itemParser{p.GetPatternDefinition}).parseItem(strings.TrimSpace(data), posIn32th)
+	return (&itemParser{p.GetTemplateDefinition}).parseItem(strings.TrimSpace(data), posIn32th)
 }
 
 // parseItem parses an item that may be a lyric, a multiitem or a single item
