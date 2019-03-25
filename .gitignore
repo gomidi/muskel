@@ -1,2 +1,7 @@
 *.mid
 .gometalinter*
+cmd/muskel/*.mskl
+simple-reaper
+cmd/muskel/muskel
+*.gide
+*.test
