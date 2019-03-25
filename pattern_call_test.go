@@ -131,6 +131,18 @@ func TestParsePattern(t *testing.T) {
 			false,
 		},
 		{
+			"pattA: 1b 2a 3c'",
+			"pattA/g,d,4/",
+			"1g 2d 4c'",
+			false,
+		},
+		{
+			"pattA: 1b 1&* 2a 2&* 3c'",
+			"pattA/g,!d,!4/",
+			"1g 1&* 2d 2&* 4c'",
+			false,
+		},
+		{
 			"pattA: 1b 2a\npattB: 1pattA",
 			"pattB",
 			"1b 2a",

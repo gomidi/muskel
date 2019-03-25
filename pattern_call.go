@@ -186,6 +186,18 @@ func (p *PatternCall) sliceEvents() {
 	p.Events = evs
 }
 
+func (p *PatternCall) findEventThatIsNotRest(start int) (found int) {
+	if start >= len(p.Events) {
+		return -1
+	}
+
+	if p.Events[start].item != Rest {
+		return start
+	}
+
+	return p.findEventThatIsNotRest(start + 1)
+}
+
 // replaceEvents replaces the events according to the pattern call replace definition
 func (p *PatternCall) replaceEvents(posIn32th uint) (err error) {
 	lenRepl := len(p.Replacements)
@@ -193,52 +205,69 @@ func (p *PatternCall) replaceEvents(posIn32th uint) (err error) {
 	if lenRepl == 0 {
 		return nil
 	}
+
+	lenev := len(p.Events)
 	//	panic("no replacements")
 
-	i := 0
+	//i := 0
 
-	for itidx, ev := range p.Events {
+	offset := 0
 
-		if i < lenRepl && p.Replacements[i] != ":" {
-			position, item := replaceItemWith(p.Replacements[i])
+	for i, rpl := range p.Replacements {
+		itidx := i + offset
+		if itidx >= lenev {
+			break
+		}
 
-			if position == "" {
-				position = ev.position
-			}
-
-			if item == "" {
-				item = ev.originalData
-			}
-
-			if itidx == 0 {
-				_, p.firstPos, err = positionTo32th("", position)
-				if err != nil {
-					return err
-				}
-			}
-
-			var nu *positionedEvent
-
-			nu, err = p.mkEvent(position, posIn32th, item)
-
-			if err != nil {
-				return err
-			}
-
-			/*
-				if itidx == 0 {
-					firstPos = nu.positionIn32ths
-				}
-			*/
-			p.Events[itidx] = nu
-
-		} else {
+		ev := p.Events[itidx]
+		if rpl == ":" {
 			if itidx == 0 {
 				p.firstPos = ev.positionIn32ths
 			}
+			continue
 		}
-		i++
+
+		if rpl[0] == '!' {
+			//offset += 1
+			found := p.findEventThatIsNotRest(itidx)
+			if found == -1 {
+				break
+			}
+			ev = p.Events[found]
+			offset += found - itidx
+			itidx = found
+			rpl = rpl[1:]
+		}
+
+		position, item := replaceItemWith(rpl)
+
+		if position == "" {
+			position = ev.position
+		}
+
+		if item == "" {
+			item = ev.originalData
+		}
+
+		if itidx == 0 {
+			_, p.firstPos, err = positionTo32th("", position)
+			if err != nil {
+				return err
+			}
+		}
+
+		var nu *positionedEvent
+
+		nu, err = p.mkEvent(position, posIn32th, item)
+
+		if err != nil {
+			return err
+		}
+
+		p.Events[itidx] = nu
+
 	}
+
 	return nil
 }
 
@@ -469,6 +498,8 @@ func (p *PatternCall) Parse(call string) error {
 	slice := ""
 	params := ""
 
+	//fmt.Printf("call: %q\n", call)
+
 	if idx := strings.Index(call, "/"); idx > 0 {
 		replacements = strings.TrimSpace(strings.Trim(call[idx:], "/"))
 		call = call[:idx]
@@ -488,6 +519,8 @@ func (p *PatternCall) Parse(call string) error {
 		p.SyncFirst = true
 		call = call[1:]
 	}
+
+	//fmt.Printf("replacements: %q\n", replacements)
 
 	mt := regPatternCallNameDyn.FindStringSubmatch(call)
 
