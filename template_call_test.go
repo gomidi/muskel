@@ -123,6 +123,18 @@ func TestParseTemplate(t *testing.T) {
 		},
 		{
 			"templA: 2a 2&#1 #2c'",
+			"templA(_e'_g'_,3&)",
+			"2a 2&_e'_g'_ 3&c'",
+			false,
+		},
+		{
+			"templA: 2a 2&_#1_#2_",
+			"templA(e',g')",
+			"2a 2&_e'_g'_",
+			false,
+		},
+		{
+			"templA: 2a 2&#1 #2c'",
 			"templA(e',3&)[1:]",
 			"2&e' 3&c'",
 			false,
@@ -273,6 +285,8 @@ func TestParseCall(t *testing.T) {
 		{"test--", template.Call{Name: "test", Slice: [2]int{-1, -1}, VelocityAdd: "--"}, false},
 		{"test[:2]", template.Call{Name: "test", Slice: [2]int{0, 2}}, false},
 		{"test(a,b)", template.Call{Name: "test", Slice: [2]int{-1, -1}, Params: []string{"a", "b"}}, false},
+		{"test(_a_b_)", template.Call{Name: "test", Slice: [2]int{-1, -1}, Params: []string{"_a_b_"}}, false},
+		{"test(_^1_^3_)", template.Call{Name: "test", Slice: [2]int{-1, -1}, Params: []string{"_^1_^3_"}}, false},
 		{"test/a,:,c/", template.Call{Name: "test", Slice: [2]int{-1, -1}, Replacements: []string{"a", ":", "c"}}, false},
 		{"test(a,b)[1:]/d,:,f/", template.Call{
 			Name:         "test",
