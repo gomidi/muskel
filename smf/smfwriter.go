@@ -254,6 +254,16 @@ func exponentialTempoChange(wr *mid.SMFWriter, distance int64, diff float64, cal
 
 // writeFirstTrack writes the first track with time signature and tempo changes
 func (p *writer) writeFirstTrack() error {
+
+	for k, v := range p.score.Meta {
+		switch strings.ToLower(k) {
+		case "copyright":
+			p.wr.Copyright(v)
+		default:
+			p.wr.Text(fmt.Sprintf("%s: %s", k, v))
+		}
+	}
+
 	num := uint8(4)
 	denom := uint8(4)
 

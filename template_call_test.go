@@ -134,6 +134,12 @@ func TestParseTemplate(t *testing.T) {
 			false,
 		},
 		{
+			"templA: 2a 2&_#1:+_#2:-_",
+			"templA(e',g')",
+			"2a 2&_e':+_g':-_",
+			false,
+		},
+		{
 			"templA: 2a 2&#1 #2c'",
 			"templA(e',3&)[1:]",
 			"2&e' 3&c'",
