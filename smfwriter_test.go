@@ -63,6 +63,7 @@ Ch |1  |
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -99,6 +100,7 @@ Ch |1  |
 [1280] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1280] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -141,6 +143,7 @@ Ch |1  |
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -165,6 +168,7 @@ Delay|1/32|
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -191,6 +195,7 @@ Delay|-1/32|
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -446,6 +451,7 @@ Ch |1  |
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1570] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -471,6 +477,275 @@ Ch |1  |
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1630] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 20
+			`
+templ: 1{c,e,g#}2
+=
+   |<p>|
+Ch |1  |
+1  |templ |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[320] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[320] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 21
+			`
+ta: c
+tb: e
+tc: g#
+=
+   |<p>|
+Ch |1  |
+1  |{ta,tb,tc}2 |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[320] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[320] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 22
+			`
+ta: MN48
+tb: MN52
+tc: MN56
+=
+   |<p>|
+Ch |1  |
+1  |{ta,tb,tc}2 |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[320] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[320] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 23
+			`
+ta: MN48=
+tb: MN52=
+tc: MN56=
+=
+   |<p>|
+Ch |1  |
+1  |{ta+,tb-,tc--}2 |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn +
+[320] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn -
+[320] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn --
+[320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 24
+			`
+=
+   |<p>|
+Ch |1  |
+1  |c: |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[90] channel.NoteOff channel 0 key 48
+`,
+		},
+		{
+			// 25
+			`
+=
+   |<p>|
+Ch |1  |
+1  |{c:,e:,g#:}2 |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[90] channel.NoteOff channel 0 key 48
+[230] channel.NoteOn channel 0 key 52 dyn =
+[90] channel.NoteOff channel 0 key 52
+[230] channel.NoteOn channel 0 key 56 dyn =
+[90] channel.NoteOff channel 0 key 56
+[230] meta.Undefined type:  0
+`,
+		},
+		{
+			// 26
+			`
+=
+   |<p>|
+Ch |1  |
+1  |{c,e,g#}2 |
+2  |a: |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[320] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[320] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 57 dyn =
+[90] channel.NoteOff channel 0 key 57
+`,
+		},
+		{
+			// 27
+			`
+=
+   |<p>|
+Ch |1  |
+1  |{c:,e:,g#:}2 |
+2  |a: |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[90] channel.NoteOff channel 0 key 48
+[230] channel.NoteOn channel 0 key 52 dyn =
+[90] channel.NoteOff channel 0 key 52
+[230] channel.NoteOn channel 0 key 56 dyn =
+[90] channel.NoteOff channel 0 key 56
+[230] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 57 dyn =
+[90] channel.NoteOff channel 0 key 57
+`,
+		},
+		{
+			// 28
+			`
+=
+   |<p>|
+Ch |1  |
+1  | d |
+2  |{c,e,g#}3 |
+3  |a |
+4 |*|
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 48 dyn =
+[320] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[320] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 57 dyn =
+[960] channel.NoteOff channel 0 key 57
+`,
+		},
+		{
+			// 29
+			`
+=
+   |<p>|
+Ch |1  |
+1  | d |
+4  |{c,e,g#}5 |
+
+1  |a |
+2 |*|
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 50 dyn =
+[2880] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 48 dyn =
+[320] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[320] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[320] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 57 dyn =
+[960] channel.NoteOff channel 0 key 57
+`,
+		},
+		{
+			// 30
+			`
+=
+   |<p>|
+Ch |1  |
+1  | d |`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 50 dyn =
+[3840] channel.NoteOff channel 0 key 50
+`,
+		},
+		{
+			// 31
+			`
+=
+   |<p>|
+Ch |1  |
+1  | d |`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 50 dyn =
+[3840] channel.NoteOff channel 0 key 50
+
+
 `,
 		},
 	}
@@ -478,11 +753,10 @@ Ch |1  |
 	for i, test := range tests {
 
 		/*
-			if i != 18 {
+			if i != 30 {
 				continue
 			}
 		*/
-
 		sc, err := muskel.Parse(strings.NewReader(test.input), fmt.Sprintf("test-%v", i))
 
 		if err != nil {
@@ -567,6 +841,9 @@ func (l *logger) format(val interface{}) string {
 func (l *logger) Printf(format string, vals ...interface{}) {
 	if len(vals) > 1 && vals[1] == meta.EndOfTrack {
 		l.currentTrack++
+		if l.includeMeta {
+			fmt.Fprintf(&l.bf, "[%v] %s\n", vals[0], l.format(vals[1]))
+		}
 		return
 	}
 
@@ -576,6 +853,10 @@ func (l *logger) Printf(format string, vals ...interface{}) {
 
 	if l.currentTrack != l.wantedTrack {
 		return
+	}
+
+	if _, isMetaUndef := vals[1].(meta.Undefined); isMetaUndef {
+		fmt.Fprintf(&l.bf, "[%v] %s\n", vals[0], l.format(vals[1]))
 	}
 
 	if _, isMeta := vals[1].(meta.Message); isMeta && !l.includeMeta {

@@ -23,6 +23,7 @@ type Bar struct {
 	Events        map[BarEventKey]*Event
 	Scale         *items.Scale
 	IsEmpty       bool
+	IsNaked       bool
 	Tilde         string
 }
 
@@ -63,7 +64,7 @@ func (b *Bar) ensurePositionExist(pos uint) {
 	return
 }
 
-func (b *Bar) length32th() int {
+func (b *Bar) Length32th() int {
 	return items.Length32ths(b.TimeSig[0], b.TimeSig[1])
 }
 
@@ -96,6 +97,7 @@ func (b *Bar) Dup() (nuB *Bar) {
 		IncludedScore:     b.IncludedScore,
 		Scale:             b.Scale,
 		IsEmpty:           b.IsEmpty,
+		IsNaked:           b.IsNaked,
 		Tilde:             b.Tilde,
 	}
 }

@@ -142,6 +142,8 @@ type writer struct {
 	fileGroup string
 	wr        *mid.SMFWriter
 	iw        *instrSMFWriter
+	lastNum   uint8
+	lastDenom uint8
 }
 
 func newWriter(s *score.Score, filegroup string) *writer {
@@ -160,7 +162,7 @@ func (p *writer) Write(wr smf.Writer) error {
 		return err
 	}
 
-	p.wr.EndOfTrack()
+	//p.wr.EndOfTrack()
 	err = p.writeTempoTrack()
 
 	if err != nil {
@@ -178,7 +180,7 @@ func (p *writer) Write(wr smf.Writer) error {
 		}
 
 		//		fmt.Println("EOT")
-		p.wr.EndOfTrack()
+		//p.wr.EndOfTrack()
 		p.iw.firstDeltaSet = false
 		p.iw.instrNo = i
 		// fmt.Printf("instr %q  delay %v\n", instr.Name, instr.Delay)
@@ -193,7 +195,7 @@ func (p *writer) Write(wr smf.Writer) error {
 	}
 
 	//	fmt.Println("EOT")
-	p.wr.EndOfTrack()
+	// p.wr.EndOfTrack()
 	return nil
 }
 
@@ -293,10 +295,14 @@ func (p *writer) writeFirstTrack() error {
 		}
 	}
 
-	p.wr.Forward(0, uint32(p.score.Bars[len(p.score.Bars)-1].BarNo-lastBar)*uint32(num), uint32(denom))
-	p.wr.Meter(num, denom)
+	p.lastNum = num
+	p.lastDenom = denom
 
-	return nil
+	//p.wr.Forward(0, uint32(p.score.Bars[len(p.score.Bars)-1].BarNo-lastBar)*uint32(num), uint32(denom))
+	//p.wr.Meter(num, denom)
+
+	//return nil
+	return p.writeEndOfTrack(lastBar)
 }
 
 func (p *writer) writeTempoTrack() error {
@@ -345,5 +351,14 @@ func (p *writer) writeTempoTrack() error {
 		}
 	}
 
+	return p.writeEndOfTrack(lastBar)
+}
+
+func (p *writer) writeEndOfTrack(lastBarWritten int) error {
+	lastBar := p.score.Bars[len(p.score.Bars)-1].BarNo
+	//p.wr.Forward(uint32(lastBar+1), 0, 0)
+	p.wr.Forward(uint32(lastBar-lastBarWritten), uint32(p.lastNum), uint32(p.lastDenom))
+	// p.wr.Undefined(0, nil)
+	p.wr.EndOfTrack()
 	return nil
 }

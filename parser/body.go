@@ -26,6 +26,7 @@ func (p *body) newBar(b *score.Bar) {
 	p.currentBarNo++
 	//fmt.Printf("parser: adding bar %v\n", p.currentBar)
 	b.BarNo = p.currentBarNo
+	b.IsNaked = true
 	b.OriginalBarNo = p.currentBarNo
 	p.Score.Bars = append(p.Score.Bars, b)
 }
@@ -596,6 +597,7 @@ func (p *body) parseEventsLine(tabs []string) (err error) {
 				p.newBar(score.NewBar())
 			}
 			p.jumpInLineBefore = false
+			p.Score.Bars[p.currentBarNo].IsNaked = false
 			if i == 0 {
 				p.lastPosition, p.currentPosIn32ths, err = items.PositionTo32th(p.lastPosition, firstColumn)
 				if err != nil {

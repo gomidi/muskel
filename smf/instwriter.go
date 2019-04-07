@@ -209,6 +209,10 @@ func exponentialGlissando(wr *mid.SMFWriter, distance int64, noteDiff int64, cal
 	//iw.prevPitchbend = pb
 }
 
+var dottedLength = [2]uint32{3, 128}
+
+//var dottedLength = [2]uint32{1, 64}
+
 func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes []uint8) {
 	if item == nil {
 		return nil
@@ -299,7 +303,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			}
 			iw.wr.NoteOn(n, vl)
 			if v.Dotted {
-				iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(n))
+				iw.wr.Plan(0, dottedLength[0], dottedLength[1], iw.wr.Channel.NoteOff(n))
 			} else {
 				addedNotes = append(addedNotes, n)
 			}
@@ -309,7 +313,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			iw.inGlissando = false
 			if v.Dotted {
 				iw.wr.Pitchbend(iw.prevPitchbend)
-				iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(iw.startGlissandoNote))
+				iw.wr.Plan(0, dottedLength[0], dottedLength[1], iw.wr.Channel.NoteOff(iw.startGlissandoNote))
 				//iw.wr.NoteOff(iw.startGlissandoNote)
 			} else {
 				addedNotes = append(addedNotes, iw.startGlissandoNote)
@@ -356,7 +360,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 		iw.wr.NoteOn(n, vl)
 		if v.Dotted {
-			iw.wr.Plan(0, 3, 128, iw.wr.Channel.NoteOff(n))
+			iw.wr.Plan(0, dottedLength[0], dottedLength[1], iw.wr.Channel.NoteOff(n))
 		} else {
 			addedNotes = append(addedNotes, n)
 		}
@@ -398,7 +402,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 
 		if v.Dotted && v.Value > 0 {
-			iw.wr.Plan(0, 3, 128, iw.wr.Channel.ControlChange(v.Controller, 0))
+			iw.wr.Plan(0, dottedLength[0], dottedLength[1], iw.wr.Channel.ControlChange(v.Controller, 0))
 		}
 
 	case items.MIDIPitchbend:
@@ -440,7 +444,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 
 		if v.Dotted && v.Value != 0 {
-			iw.wr.Plan(0, 3, 128, iw.wr.Channel.Pitchbend(0))
+			iw.wr.Plan(0, dottedLength[0], dottedLength[1], iw.wr.Channel.Pitchbend(0))
 		}
 	case items.MIDIPolyAftertouch:
 		//fmt.Printf("MIDIPolyAftertouch %v, %v\n", v[0], v[1])
@@ -481,7 +485,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 
 		if v.Dotted && v.Value != 0 {
-			iw.wr.Plan(0, 3, 128, iw.wr.Channel.PolyAftertouch(ki, 0))
+			iw.wr.Plan(0, dottedLength[0], dottedLength[1], iw.wr.Channel.PolyAftertouch(ki, 0))
 		}
 	case items.MIDIAftertouch:
 		//fmt.Printf("Aftertouch %v, \n", uint8(v))
@@ -519,7 +523,7 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 		}
 
 		if v.Dotted && v.Value > 0 {
-			iw.wr.Plan(0, 3, 128, iw.wr.Channel.Aftertouch(0))
+			iw.wr.Plan(0, dottedLength[0], dottedLength[1], iw.wr.Channel.Aftertouch(0))
 		}
 	case items.OSCMessage:
 		// TODO implement OSC
@@ -549,7 +553,9 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 
 		iw.inGlissando = false
 
-		length := uint32(v.EndPos - iw.lastNum32)
+		//length := uint32(v.EndPos - iw.lastNum32th)
+		length := uint32(v.EndPos - iw.currentDistanceToStartOfBarIn32th)
+		//fmt.Printf("NTuple endpos: %v lastnum32th: %v length: %v\n", v.EndPos, iw.lastNum32th, length)
 
 		switch v.PosShift {
 		case 0:
@@ -587,7 +593,26 @@ func (iw *instWriter) writeItem(item interface{}, stopNotes func()) (addedNotes 
 			iw.p.iw.noteDelayCompensation = calcNoteDelay(iw.p.iw.resolution)
 		}
 		stopNotes()
-		iw.lastNum32 += uint(length)
+
+		iw.lastNum32th = iw.currentDistanceToStartOfBarIn32th + uint(length)
+
+		iw.wr.Undefined(0, nil)
+		// iw.p.iw.Writer
+
+		/*
+
+			switch vv := v.Items[len(v.Items)-1].(type) {
+			case items.MIDINote:
+				if vv.Dotted {
+					// 3, 128
+					iw.lastNum128th -= uint(length)*4 - 3
+				}
+			case items.Note:
+				if vv.Dotted {
+					iw.lastNum128th -= uint(length)*4 - 3
+				}
+			}
+		*/
 
 	case items.MultiItem:
 		stopNotes()
@@ -632,7 +657,7 @@ type instWriter struct {
 	currentlyRepeating int
 	totalBeginning     bool
 	insideRepitition   bool
-	lastNum32          uint
+	lastNum32th        uint
 	inGlissando        bool
 	startGlissando     uint64
 	startGlissandoNote uint8
@@ -661,6 +686,10 @@ type instWriter struct {
 	startPBGlissandoValue int16
 	inPBGlissando         bool
 	PBglissandoFunc       func(wr *mid.SMFWriter, distance int64, noteDiff int64, callback func(val float64))
+
+	currentDistanceToStartOfBarIn32th uint
+
+	lastBarNo int
 
 	// currentScale        *Scale
 }
@@ -710,6 +739,7 @@ func (iw *instWriter) writeUnrolled() {
 	var lastEv *score.Event
 
 	iw.prevVel = 63
+	iw.lastBarNo = 0
 
 	stopNotes := func() {
 		for nt, isOn := range iw.noteOns {
@@ -731,18 +761,20 @@ func (iw *instWriter) writeUnrolled() {
 
 		diffBars := ev.BarNo
 		if lastEv != nil {
-			diffBars -= lastEv.BarNo
+			diffBars -= iw.lastBarNo
 		}
 
 		if ev.Item == items.Rest && len(iw.noteOns) == 0 {
 			continue
 		}
 
+		iw.currentDistanceToStartOfBarIn32th = ev.DistanceToStartOfBarIn32th
+
 		if ev.Item != items.Hold {
-			if lastEv != nil && lastEv.BarNo == ev.BarNo {
+			if lastEv != nil && iw.lastBarNo == ev.BarNo {
 				isHolding = false
-				//fmt.Printf("FORWARD(0, %v, 32)\n", ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th)
-				iw.wr.Forward(0, uint32(ev.DistanceToStartOfBarIn32th-lastEv.DistanceToStartOfBarIn32th), 32)
+				//fmt.Printf("FORWARD(0, %v-%v, 32)\n", ev.DistanceToStartOfBarIn32th, iw.lastNum32)
+				iw.wr.Forward(0, uint32(ev.DistanceToStartOfBarIn32th-iw.lastNum32th), 32)
 			} else {
 				if !isHolding && len(iw.noteOns) > 0 {
 					iw.wr.Forward(uint32(diffBars), 0, 32)
@@ -760,7 +792,7 @@ func (iw *instWriter) writeUnrolled() {
 			// iw.scaleAt(ev.BarNo)
 
 			var addedNotes []uint8
-			//fmt.Printf("writing item: %#v\n", ev.Item)
+			// fmt.Printf("writing item: %#v\n", ev.Item)
 			addedNotes = iw.writeItem(ev.Item, stopNotes)
 
 			for _, nt := range addedNotes {
@@ -768,22 +800,45 @@ func (iw *instWriter) writeUnrolled() {
 			}
 			iw.lastItem = ev.Item
 			lastEv = ev
+			iw.lastBarNo = lastEv.BarNo
+			switch iw.lastItem.(type) {
+			case items.NTuple:
+				// iw.lastNum32 is set by the ntuple itself
+				//if iw.lastNum32th > iw.
+				barLen := uint(iw.p.score.Bars[ev.BarNo].Length32th())
+				// fmt.Printf("post NTuple: iw.lastNum32th: %v, barlen: %v\n", iw.lastNum32th, barLen)
+				if iw.lastNum32th >= barLen {
+					iw.lastNum32th -= barLen
+					iw.lastBarNo += 1
+				}
+			default:
+				iw.lastNum32th = lastEv.DistanceToStartOfBarIn32th
+			}
+
+			// fmt.Printf("setting iw.lastNum32th to %v\n", iw.lastNum32th)
 		} else {
 			iw.wr.FinishPlanned()
 			isHolding = true
+			iw.lastNum32th = 0
 		}
 	}
 
+	// fmt.Printf("len bars: %v\n", len(iw.p.score.Bars))
 	lastBar := iw.p.score.Bars[len(iw.p.score.Bars)-1]
 	barDiff := lastBar.BarNo
 	if lastEv != nil {
-		barDiff -= lastEv.BarNo
+		barDiff -= iw.lastBarNo
 	}
+
+	// fmt.Printf("barDiff: %v iw.lastBarNo: %v\n", barDiff, iw.lastBarNo)
 	if barDiff > 0 {
 		iw.wr.Forward(uint32(barDiff), 0, 32)
+	} else {
+		iw.wr.Forward(1, 0, 32)
 	}
 	iw.wr.FinishPlanned()
 	stopNotes()
+	iw.p.writeEndOfTrack(lastBar.BarNo)
 }
 
 func (iw *instWriter) writeTrack() {

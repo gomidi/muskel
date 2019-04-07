@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"gitlab.com/gomidi/muskel/score"
@@ -196,6 +197,24 @@ func IncludeScore(p *score.Score, file string) (*score.Score, error) {
 
 }
 
+func (p *Parser) removeLastNakedBars() {
+	numBars := len(p.Score.Bars)
+	var removeLast int
+	for i := numBars - 1; i > 0; i-- {
+		b := p.Score.Bars[i]
+		var n score.Bar
+		n.IsNaked = true
+		if !reflect.DeepEqual(b, n) {
+			break
+		}
+		removeLast++
+	}
+
+	if removeLast > 0 {
+		p.Score.Bars = p.Score.Bars[:numBars-removeLast]
+	}
+}
+
 func (p *Parser) Parse() (err error) {
 	var header strings.Builder
 
@@ -222,6 +241,8 @@ func (p *Parser) Parse() (err error) {
 	}
 
 	p.body.finishPart(p.body.currentBarNo + 1)
+
+	defer p.removeLastNakedBars()
 
 	if err == io.EOF {
 		return nil

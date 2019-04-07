@@ -86,6 +86,20 @@ func (p *Items) parseNTuple(data string, posIn32th uint) (nt items.NTuple, err e
 		if err != nil {
 			return nt, fmt.Errorf("ERROR invalid n-tuple at position %v: %#v: %s", ppos, it, err)
 		}
+
+		if pc, isPC := itt.(*template.Call); isPC {
+			//fmt.Printf("pc: %#v first event: %v\n", pc, pc.Events[0])
+			if len(pc.Events) > 0 {
+				itt = pc.Events[0].Item
+			}
+			/*
+				itt, err = p.ParseItem(pc.Result, posIn32th)
+				if err != nil {
+					return nt, fmt.Errorf("ERROR invalid n-tuple at position %v: %#v: %s", ppos, itt, err)
+				}
+			*/
+		}
+
 		ntp.Items = append(ntp.Items, itt)
 	}
 	return ntp, nil
