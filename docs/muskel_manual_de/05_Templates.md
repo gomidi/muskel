@@ -115,6 +115,33 @@ resultiert in:
     1 |d'   |
 ```
 
+Der Übersichtlichkeit halber kann man Templates auch mit "Hilfstakten" versehen.
+Dazu ist die Angabe der Taktart hinter dem Template-Namen erforderlich
+
+```
+ah_ja@4/4:  1a 2&g' 3&g' | 1c
+```
+
+entspricht
+
+```
+ah_ja:  1a 2&g' 3&g' 5c 
+```
+
+Es ist immer nur ein Hilfstakt pro Template-Definition möglich.
+Bei Taktwechseln also aufsplitten:
+
+```
+tempA@4/4: 1c 2d 3e | 2f 3g
+tempB@3/4: 2d' | 1e'
+tempCombi: 1tempA 9tempB 15tempA
+```
+
+entspricht:
+
+```
+tempCombi: 1c 2d 3e 6f 7g 10d' 12e' 15c 16d 17e 20f 21g
+```
 
 ## Aufruf eine Templates
 
