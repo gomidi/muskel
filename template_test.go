@@ -10,7 +10,7 @@ import (
 )
 
 func TestUnrollTemplate(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -86,6 +86,137 @@ b_b:        1!a_a 9!a_a
 
     1    | g        |
 `,
+		},
+		{`
+a_a@4/4:        1c 2d 3e 4f | 1g 2a 3b 4c'
+b_b:        1!a_a 9!a_a
+
+
+
+=
+         | <Vocals> |
+    1    | b_b     |
+    
+    1    |      |
+
+    1    |      |
+    
+    1    |      |
+        
+    1    |  g    |
+`,
+			`
+         | <Vocals> |
+    1    | c        |
+    2    | d        |
+    3    | e        |
+    4    | f        |
+
+    1    | g        |
+    2    | a        |
+    3    | b        |
+    4    | c'       |
+
+    1    | c        |
+    2    | d        |
+    3    | e        |
+    4    | f        |
+
+    1    | g        |
+    2    | a        |
+    3    | b        |
+    4    | c'       |
+
+    1    | g        |
+`,
+		},
+		{`
+tempA@4/4: 1c 2d 3e | 2f 3g
+tempB@3/4: 2d' | 1e'
+tempCombi: 1tempA 9tempB 15tempA
+
+=
+         | <Vocals> |
+4/4
+    1    | tempCombi     |
+    
+    1    |      |
+3/4
+    1    |      |
+    
+    1    |      |
+		`,
+			`
+         | <Vocals> |
+4/4
+    1    | c        |
+    2    | d        |
+    3    | e        |
+
+    1    |          |
+    2    | f        |
+    3    | g        |
+3/4
+    1    |          |
+    2    | d'       |
+
+    1    | e'       |
+		`,
+		},
+		{`
+a_a@4/4:        1c 2d 3e 4f | 1g 2a 3b 4c'
+b_b@4/4:        1!a_a | | 1!a_a
+
+
+
+=
+         | <Vocals> |
+    1    | b_b     |
+    
+    1    |      |
+
+    1    |      |
+    
+    1    |      |
+        
+    1    |  g    |
+`,
+			`
+         | <Vocals> |
+    1    | c        |
+    2    | d        |
+    3    | e        |
+    4    | f        |
+
+    1    | g        |
+    2    | a        |
+    3    | b        |
+    4    | c'       |
+
+    1    | c        |
+    2    | d        |
+    3    | e        |
+    4    | f        |
+
+    1    | g        |
+    2    | a        |
+    3    | b        |
+    4    | c'       |
+
+    1    | g        |
+`,
+		},
+		{`
+kd: MN32=:
+sn: MN35=:
+=
+   |drums|
+1  |{kd,sn,sn}3 |
+		`,
+			`
+         | <drums>                 |
+    1    | {MN32=:,MN35=:,MN35=:}3 |
+		`,
 		},
 		{`
 a_a:         1c 2d 3e 4f 5g 6a 7b 8c' 9d' 10e' 11f'
@@ -539,7 +670,7 @@ chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2
 		// fmt.Printf("[%v]\n", i)
 
 		/*
-			if i != 19 {
+			if i == 5 {
 				continue
 			}
 		*/

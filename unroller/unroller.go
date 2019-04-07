@@ -555,6 +555,11 @@ func (s *unroller) convertEvents(barNo int, p *template.Call, in ...*template.Po
 					} else {
 						nuNT.Items = append(nuNT.Items, mi)
 					}
+				case items.MIDINote:
+					nnnt := vv.Dup()
+					nuNT.Items = append(nuNT.Items, nnnt)
+					ss[idx] = vv.String()
+
 				}
 			}
 
@@ -747,6 +752,9 @@ func (s *unroller) replaceScaleNotes() {
 							nuNt.Items = append(nuNt.Items, nnt)
 							orig[it_idx] = nnt.String()
 						}
+					case items.MIDINote:
+						nuNt.Items = append(nuNt.Items, vv)
+						orig[it_idx] = vv.String()
 					default:
 						nuNt.Items = append(nuNt.Items, vv)
 					}
