@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -51,6 +52,7 @@ type Call struct {
 	FirstNoteAbsKey                    uint8
 	syncFirstThroughTemplateDefinition bool
 	ItemParser                         ItemParser
+	timeSig                            [2]uint8
 }
 
 func NewTemplateCall(ip ItemParser) *Call {
@@ -340,6 +342,8 @@ func (p *Call) ParseTemplate(data string, positionIn32th uint) error {
 		return fmt.Errorf("could not call template %s with %q: %s", p.Name, data, err)
 	}
 
+	p.timeSig = def.TimeSignature
+
 	//	fmt.Printf("result: %q\n", p.result)
 
 	return p.parseEvents(p.result, positionIn32th)
@@ -502,17 +506,28 @@ func (p *Call) parseEvents(data string, posIn32th uint) (err error) {
 	//fmt.Printf("parseEvents called with data: %v\n", data)
 	var firstScaleNoteDiff int8
 
-	sc := bufio.NewScanner(strings.NewReader(data))
-	sc.Split(bufio.ScanWords)
+	bars := strings.Split(data, "|")
 
-	var idx int
+	for barIdx, barEvents := range bars {
 
-	for sc.Scan() {
-		ev := sc.Text()
-		if ev != "" {
-			firstScaleNoteDiff, err = p.__parseEvent(idx, ev, posIn32th, firstScaleNoteDiff)
+		var add32ths uint
+
+		if p.timeSig[1] > 0 {
+			add32ths = uint(math.Round((float64(barIdx) * float64(p.timeSig[0]) * 32) / float64(p.timeSig[1])))
 		}
-		idx++
+
+		sc := bufio.NewScanner(strings.NewReader(strings.TrimSpace(barEvents)))
+		sc.Split(bufio.ScanWords)
+
+		var idx = barIdx
+
+		for sc.Scan() {
+			ev := sc.Text()
+			if ev != "" {
+				firstScaleNoteDiff, err = p.__parseEvent(idx, ev, posIn32th+add32ths, firstScaleNoteDiff)
+			}
+			idx++
+		}
 	}
 
 	ev := []*PositionedEvent{}

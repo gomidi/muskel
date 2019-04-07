@@ -10,7 +10,7 @@ import (
 )
 
 func TestFormatterJumps(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -177,6 +177,31 @@ func TestFormatterJumps(t *testing.T) {
     2    | f        |
 `,
 		},
+		{
+			`
+aa@4/4:  1a' 2&b | 1&c" 2d | 2g 
+=
+  | <piano> | <vox> |
+1 | aa |   |
+2 |    | aa |
+
+1 |    |  |
+
+1 |    |  |
+`, `
+aa@4/4:         1a' 2&b | 1&c" 2d | 2g
+
+
+
+=
+         | <piano> | <vox> |
+    1    | aa      |       |
+    2    |         | aa    |
+
+    1    |         |       |
+
+    1    |         |       |
+		   		   `},
 	}
 
 	for i, test := range tests {
@@ -211,7 +236,7 @@ func TestFormatterJumps(t *testing.T) {
 }
 
 func TestFormatter(t *testing.T) {
-	//	t.Skip()
+	// t.Skip()
 	tests := []struct {
 		input    string
 		expected string

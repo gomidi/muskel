@@ -422,6 +422,88 @@ aa:  1a' 2&b 5&c"
     1&   | c"      |       |
     2&   |         | c"    |
 		   		   `},
+		{
+			`
+aa@4/4:  1a' 2&b | 1&c" 2d | 2g 
+=
+  | <piano> | <vox> |
+1 | aa |   |
+2 |    | aa |
+
+1 |    |  |
+
+1 |    |  |
+`, `
+         | <piano> | <vox> |
+    1    | a'      |       |
+    2    |         | a'    |
+    2&   | b       |       |
+    3&   |         | b     |
+
+    1    |         |       |
+    1&   | c"      |       |
+    2    | d       |       |
+    2&   |         | c"    |
+    3    |         | d     |
+
+    1    |         |       |
+    2    | g       |       |
+    3    |         | g     |
+		   		   `},
+		{
+			`
+aa@4/4:  1a' 2&b | 1&c" 2d | 2g 
+=
+  | <piano> | <vox> |
+1 | aa |   |
+2 |    | aa |
+
+1 |    |  |
+
+4 |  c  | c |
+`, `
+         | <piano> | <vox> |
+    1    | a'      |       |
+    2    |         | a'    |
+    2&   | b       |       |
+    3&   |         | b     |
+
+    1    |         |       |
+    1&   | c"      |       |
+    2    | d       |       |
+    2&   |         | c"    |
+    3    |         | d     |
+
+    2    | g       |       |
+    3    |         | g     |
+    4    | c       | c     |
+		   		   `},
+		{
+			`
+aa@4/4:  1a' 2&b | 1&c" 2d | 2g 
+=
+  | <piano> | <vox> |
+1 | aa |   |
+2 |    | aa |
+
+1 |    |  |
+
+1& |  c  | c |
+`, `
+         | <piano> | <vox> |
+    1    | a'      |       |
+    2    |         | a'    |
+    2&   | b       |       |
+    3&   |         | b     |
+
+    1    |         |       |
+    1&   | c"      |       |
+    2    | d       |       |
+    2&   |         | c"    |
+    3    |         | d     |
+
+    1&   | c       | c     |
+		   		   `},
 
 		{
 			`
@@ -455,12 +537,12 @@ chords_swing:   1&_#1:_#2:_ 2&_#1_#2_   2&.* 2&.;_#1:_#2:_ 3&_#1:_#2:_ 4&_#1:_#2
 
 	for i, test := range tests {
 		// fmt.Printf("[%v]\n", i)
+
 		/*
-			if i != 13 {
+			if i != 19 {
 				continue
 			}
 		*/
-
 		sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "unroll template")
 
 		if err != nil {

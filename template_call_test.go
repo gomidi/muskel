@@ -28,7 +28,7 @@ func newTemplateGetter() *templateGetter {
 }
 
 func TestSpread(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		num   uint8
 		denom uint8
@@ -91,8 +91,72 @@ func TestSpread(t *testing.T) {
 
 }
 
+func TestSpread2(t *testing.T) {
+	//t.Skip()
+	tests := []struct {
+		num   uint8
+		denom uint8
+
+		expectedEvents            string
+		expectedPositionOfNextBar int
+	}{
+		{4, 4, "2a 2&b 3c'", 32},
+		{3, 4, "1f 3&g", 56},
+		{3, 4, "1a", 80},
+		{2, 4, "", 96},
+		{4, 4, "1e", -1},
+	}
+
+	get := newTemplateGetter()
+
+	var pd template.Definition
+	err := pd.Parse("templA@4/4: 2a 2&b 3c' | 1f 3&g 4a | | 1e")
+
+	get.add(&pd)
+
+	var pc = template.NewTemplateCall(&parser.Items{})
+	pc.Getter = get.GetTemplateDefinition
+	if err == nil {
+		err = pc.ParseTemplate("templA", 0)
+	}
+
+	if err != nil {
+		t.Errorf("parseTemplate() returned unexpected error: %s", err)
+		return
+	}
+
+	var positionOfNextBar int
+	var newPositionOfNextBar int
+	var events []*template.PositionedEvent
+
+	for i, test := range tests {
+		if positionOfNextBar >= 0 {
+			events, newPositionOfNextBar = template.TemplateEvents(pc.Events).Spread(positionOfNextBar, test.num, test.denom)
+		}
+
+		if newPositionOfNextBar != test.expectedPositionOfNextBar {
+			t.Errorf("[%v] Spread(%v, %v, %v) returned positionOfNextBar %v // expected: %v", i, positionOfNextBar, test.num, test.denom, newPositionOfNextBar, test.expectedPositionOfNextBar)
+		}
+
+		positionOfNextBar = newPositionOfNextBar
+
+		var bf strings.Builder
+
+		for _, event := range events {
+			bf.WriteString(event.String() + " ")
+		}
+
+		res := strings.TrimSpace(bf.String())
+
+		if res != test.expectedEvents {
+			t.Errorf("[%v] Spread(%v, %v, %v) returned events = %q // expected %q", i, positionOfNextBar, test.num, test.denom, res, test.expectedEvents)
+		}
+	}
+
+}
+
 func TestParseTemplate(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	//parsePattern(data string, positionIn32th uint, getter func(name string) *PatternDefinition) error
 
 	tests := []struct {
@@ -326,5 +390,66 @@ func TestParseCall(t *testing.T) {
 			t.Errorf("[%v] Parse(%q) resulted in %#v // expected: %#v", i, test.input, pc, test.expected)
 		}
 	}
+
+}
+
+func TestCallWithBars(t *testing.T) {
+	//t.Skip()
+	def1 := `aa:  1a' 2&b | 5&c" 6d 10g`
+	def2 := `aa@4/4:  1a' 2&b | 1&c" 2d | 2g`
+
+	get1 := newTemplateGetter()
+	var pd1 template.Definition
+	pd1.Parse(strings.TrimSpace(def1))
+	get1.add(&pd1)
+
+	get2 := newTemplateGetter()
+	var pd2 template.Definition
+	pd2.Parse(strings.TrimSpace(def2))
+	get2.add(&pd2)
+
+	var pc1 = template.NewTemplateCall(&parser.Items{})
+	pc1.Getter = get1.GetTemplateDefinition
+	pc1.ParseTemplate("aa", 0)
+
+	var pc2 = template.NewTemplateCall(&parser.Items{})
+	pc2.Getter = get2.GetTemplateDefinition
+	pc2.ParseTemplate("aa", 0)
+
+	// fmt.Printf("\npd1: %v\npd2: %v\n\n", pd1, pd2)
+	// fmt.Printf("\npc1.Events: %v\npc2.Events: %v\n\n", pc1.Events, pc2.Events)
+
+	if !reflect.DeepEqual(pc1.Events, pc2.Events) {
+		t.Errorf("\n%#v\nis not deeply equal to \n%#v", pc1, pc2)
+	}
+
+	/*
+	   			`
+	   aa@4/4:  1a' 2&b | 1&c" 2d | 2g
+	   =
+	     | <piano> | <vox> |
+	   1 | aa |   |
+	   2 |    | aa |
+
+	   1 |    |  |
+
+	   1 |    |  |
+	   `, `
+	            | <piano> | <vox> |
+	       1    | a'      |       |
+	       2    |         | a'    |
+	       2&   | b       |       |
+	       3&   |         | b     |
+
+	       1    |         |       |
+	       1&   | c"      |       |
+	       2    | d       |       |
+	       2&   |         | c"    |
+	       3    |         | d     |
+
+	       2    | g       |       |
+	       3    |         | g     |
+	   		   		   `
+	*/
 
 }

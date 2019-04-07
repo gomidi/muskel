@@ -355,12 +355,17 @@ func (s *unroller) unfoldTemplateCallNoFollowingEvent(ev *score.Event, v *templa
 
 	//	fmt.Printf("offset: %v\n", ev.DistanceToStartOfBarIn32th)
 	pvs := template.TemplateEvents(v.Events)
-	//	fmt.Printf("template events: %v\n", v.Events)
+	// fmt.Printf("template events: %v\n", v.Events)
 
 	evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
+	// fmt.Printf("[0] position of next bar: %v\n", positionOfNextBar)
 	unrolled = append(unrolled, s.convertEvents(ev.BarNo, v, evts...)...)
 
+	// fmt.Printf("len bars: %v\n", len(s.dest.Bars))
+
 	diffBars := (len(s.dest.Bars) - 1) - ev.BarNo
+
+	// fmt.Printf("diffbars: %v\n", diffBars)
 
 	// for each following empty bar
 	for didx := 1; didx <= diffBars; didx++ {
@@ -369,16 +374,16 @@ func (s *unroller) unfoldTemplateCallNoFollowingEvent(ev *score.Event, v *templa
 				break
 			}
 		*/
+		// fmt.Printf("[1] position of next bar: %v\n", positionOfNextBar)
 		if positionOfNextBar == -1 {
 			break
 		}
 		timesig = s.dest.Bars[ev.BarNo+didx].TimeSig
 		evts, positionOfNextBar = pvs.Spread(positionOfNextBar, timesig[0], timesig[1])
 		unrolled = append(unrolled, s.convertEvents(ev.BarNo+didx, v, evts...)...)
-		didx++
 	}
 
-	//	fmt.Printf("unrolled: %v\n", unrolled)
+	// fmt.Printf("unrolled: %v\n", unrolled)
 
 	return
 }

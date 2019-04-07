@@ -384,7 +384,13 @@ func (p *Formatter) printHeader(bf io.Writer) {
 	templDefMap := map[string]string{}
 
 	for k, v := range p.score.TemplateDefinitions {
-		templDefMap[score.Pad(k+":", 15)] = v.Original
+		key := k
+
+		if v.TimeSignature[1] > 0 {
+			key += fmt.Sprintf("@%v/%v", v.TimeSignature[0], v.TimeSignature[1])
+		}
+
+		templDefMap[score.Pad(key+":", 15)] = v.Original
 	}
 
 	p.printSorted(bf, "%s %s\n", templDefMap)

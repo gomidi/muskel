@@ -8,7 +8,7 @@ import (
 )
 
 func TestParseDefinition(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		expected template.Definition
@@ -21,6 +21,7 @@ func TestParseDefinition(t *testing.T) {
 		{"test~ : 2#1 &kd", template.Definition{Name: "test~", Original: "2#1 &kd", NumParams: 1}, false},
 		{"test : 2#1 #2kd", template.Definition{Name: "test", Original: "2#1 #2kd", NumParams: 2}, false},
 		{"test~~ : 2#1 &#1", template.Definition{Name: "test~~", Original: "2#1 &#1", NumParams: 1}, false},
+		{"test@3/4: 2#1 #2kd", template.Definition{Name: "test", Original: "2#1 #2kd", NumParams: 2, TimeSignature: [2]uint8{3, 4}}, false},
 	}
 
 	for i, test := range tests {
@@ -43,7 +44,7 @@ func TestParseDefinition(t *testing.T) {
 }
 
 func TestCallDefinition(t *testing.T) {
-	//	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		params   []string

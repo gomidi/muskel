@@ -2,13 +2,15 @@ package template
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 type Definition struct {
-	Name      string
-	NumParams int
-	Original  string
+	Name          string
+	NumParams     int
+	Original      string
+	TimeSignature [2]uint8
 }
 
 func (p *Definition) Parse(definitionLine string) error {
@@ -17,7 +19,30 @@ func (p *Definition) Parse(definitionLine string) error {
 		return fmt.Errorf("ERROR in template definition line: missing : to separate name from definition")
 	}
 
-	p.Name = strings.TrimSpace(definitionLine[:idx])
+	name := strings.TrimSpace(definitionLine[:idx])
+
+	idxAt := strings.Index(name, "@")
+
+	switch {
+	case idxAt < 0:
+	// do nothing
+	case idxAt < 2:
+		return fmt.Errorf("ERROR in template definition line: name is too short")
+	default:
+		tsig := strings.Split(name[idxAt+1:], "/")
+
+		num, errNuM := strconv.Atoi(tsig[0])
+		denom, errDenom := strconv.Atoi(tsig[1])
+
+		if errNuM != nil || errDenom != nil || num < 1 || denom < 1 {
+			return fmt.Errorf("ERROR in template definition line: invalid time signature")
+		}
+
+		p.TimeSignature = [2]uint8{uint8(num), uint8(denom)}
+		name = name[:idxAt]
+	}
+
+	p.Name = name
 	definitionLine = definitionLine[idx+1:]
 
 	var paramsConsolidated = map[string]bool{}
