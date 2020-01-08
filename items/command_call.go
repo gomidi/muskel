@@ -5,11 +5,24 @@ import (
 )
 
 type CommandCall struct {
-	Name   string
-	Params []string
+	Name     string
+	Params   []string
+	original string
+	Position uint
 }
 
-func (p *CommandCall) Parse(call string) error {
+func (c CommandCall) Dup() Item {
+	return &c
+}
+
+func (c CommandCall) String() string {
+	return c.original
+}
+
+func (p *CommandCall) Parse(call string, posIn32th uint) error {
+	call = strings.TrimSpace(call)
+	p.original = call
+	p.Position = posIn32th
 	params := ""
 
 	if idx := strings.Index(call, "("); idx > 0 {
@@ -32,4 +45,8 @@ func (p *CommandCall) Parse(call string) error {
 	}
 
 	return nil
+}
+
+func (v CommandCall) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
+	panic("don't call me")
 }

@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"gitlab.com/gomidi/muskel/predefined"
 )
 
 var USER_DIR string
@@ -13,29 +15,15 @@ func init() {
 	setUserDir()
 	setWorkingDir()
 	os.MkdirAll(USER_DIR, 0755)
-	mkdrumnotes()
+	writePredefinedTemplates()
 }
 
-const drumnotes = `
-// some shortcuts for drums (GM)
-kd: MN36=:
-sn: MN40=:
-ho: MN46=:
-hc: MN42=:
-rd: MN51=:
-tb: MN54=:
-tl: MN45=:
-tm: MN48=:
-th: MN50=:
-sh: MN49=:
-
-=
-`
-
-func mkdrumnotes() error {
-	p := filepath.Join(USER_DIR, "drumnotes.mskl")
-	if !FileExists(p) {
-		return ioutil.WriteFile(p, []byte(drumnotes), 0644)
+func writePredefinedTemplates() {
+	for name, templ := range predefined.SketchesAndTokens {
+		p := filepath.Join(USER_DIR, name+".mskl")
+		if !FileExists(p) {
+			ioutil.WriteFile(p, []byte(templ), 0644)
+		}
 	}
-	return nil
+
 }

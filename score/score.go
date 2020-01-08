@@ -2,165 +2,886 @@ package score
 
 import (
 	"fmt"
+	"io"
+	"sort"
 	"strings"
 
-	"gitlab.com/gomidi/muskel/template"
+	"gitlab.com/gomidi/muskel/file"
+	"gitlab.com/gomidi/muskel/filter"
+	"gitlab.com/gomidi/muskel/items"
+	"gitlab.com/gomidi/muskel/sketch"
+	"gitlab.com/gomidi/muskel/table"
+	"gitlab.com/gomidi/muskel/timbre"
+	"gitlab.com/gomidi/muskel/track"
+	"gitlab.com/gomidi/muskel/tuning"
 )
 
+type Option func(s *Score)
+
+func Column(colname string) Option {
+	return func(s *Score) {
+		s.mainCol = colname
+	}
+}
+
+func Debug() Option {
+	return func(s *Score) {
+		//s.mainCol = colname
+		sketch.DEBUG = true
+	}
+}
+
+func Sketch(sketchname string) Option {
+	return func(s *Score) {
+		s.mainSketch = sketchname
+	}
+}
+
+func PrintBarComments() Option {
+	return func(s *Score) {
+		s.printBarComments = true
+	}
+}
+
 type Score struct {
-	FileName    string
-	Tracks []*Track
-	Bars        []*Bar
+	mainFile       string
+	mainSketch     string
+	mainCol        string
+	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
+	includedScores map[string]*Score
+	lyrics         map[string][]string
+	properties     map[string]interface{}
+	tokens         map[string]string
+	isUnrolled     bool
+	exclSketch     map[string]string
 
-	Meta                        map[string]string
-	HeaderIncludes              []string
-	Temperament                 map[string]string
-	TemplateDefinitions         map[string]*template.Definition
-	IncludedTemplateDefinitions map[string]*template.Definition
-	Parts                       map[string][2]int // part name to start bar no and last bar
-	BodyComments                map[int]string    // line calculated from the start of the system
-	HeaderComments              []string          // comments in the header, as they come
+	printBarComments bool
 
-	SmallColumns        bool // if the formatting should have no distance to the column lines
-	IsUnrolled          bool
-	BarNumbersTracked   bool
-	LineWhereBodyStarts int
-	LastLine            int
+	Bars     []*sketch.Bar
+	Parts    map[string][2]uint
+	Tracks   map[string]*track.Track
+	Tunings  map[string]*tuning.Tuning
+	Timbres  map[string]*timbre.Timbre
+	Scales   map[string]items.Mode
+	Filters  map[string]*filter.Filter
+	Sketches map[string]*sketch.Sketch
+	Unrolled map[string][]*sketch.Event
+	Files    map[string]*file.File
 }
 
-func (s *Score) AddMissingProperties() {
-	prefill := map[string]string{
-		"composer":  "",
-		"artist":    "",
-		"title":     "",
-		"date":      "",
-		"version":   "",
-		"copyright": "",
-		"genre":     "",
-		"tags":      "",
+func (s *Score) FilterTrack(colName string, events []*sketch.Event) []*sketch.Event {
+	return events
+}
+
+func New(filepath string, params []string, options ...Option) *Score {
+	s := &Score{
+		Tracks:         map[string]*track.Track{},
+		Tunings:        map[string]*tuning.Tuning{},
+		Timbres:        map[string]*timbre.Timbre{},
+		Scales:         map[string]items.Mode{},
+		Filters:        map[string]*filter.Filter{},
+		Sketches:       map[string]*sketch.Sketch{},
+		Files:          map[string]*file.File{},
+		properties:     map[string]interface{}{},
+		Unrolled:       map[string][]*sketch.Event{},
+		Parts:          map[string][2]uint{},
+		tokens:         map[string]string{},
+		includedScores: map[string]*Score{},
+		lyrics:         map[string][]string{},
+		mainFile:       filepath,
+		mainSketch:     "=SCORE",
+		params:         params,
+		exclSketch:     map[string]string{},
 	}
 
-	for k, v := range prefill {
-		if _, has := s.Meta[k]; !has {
-			s.Meta[k] = v
+	for _, opt := range options {
+		opt(s)
+	}
+	return s
+}
+
+func (sc *Score) Properties() map[string]interface{} {
+	return sc.properties
+}
+
+func (sc *Score) AddLyrics(l map[string][]string) {
+	for k, v := range l {
+		sc.lyrics[k] = v
+	}
+}
+
+func (sc *Score) Lyric(part string, fromLine, toLine int) (tokens []string) {
+	//fmt.Printf("Lyrics %q[%v:%v] // %#v", part, fromLine, toLine, sc.lyrics)
+	p := sc.lyrics[part]
+	//	l := strings.Split(p, "\n")
+
+	if fromLine < 0 {
+		fromLine = 0
+	}
+
+	if fromLine >= len(p) {
+		return
+	}
+
+	if toLine > len(p) || toLine <= 0 {
+		toLine = len(p)
+	}
+
+	for i := fromLine; i < toLine; i++ {
+		d := p[i]
+		d = strings.Replace(d, "-", "- ", -1)
+		d = strings.Replace(d, "_", "_ ", -1)
+		d = strings.Replace(d, "\t", " ", -1)
+		d = strings.Replace(d, "\n", " ", -1)
+		ds := strings.Split(d, " ")
+
+		for _, dd := range ds {
+			if dd != "" {
+				tokens = append(tokens, dd)
+			}
 		}
 	}
+
+	return
 }
 
-func New() *Score {
-	return &Score{
-		Meta:                        map[string]string{},
-		Temperament:                 map[string]string{},
-		TemplateDefinitions:         map[string]*template.Definition{},
-		Parts:                       map[string][2]int{},
-		BodyComments:                map[int]string{},
-		IsUnrolled:                  false,
-		IncludedTemplateDefinitions: map[string]*template.Definition{},
+func (sc *Score) AddInclude(filepath string, sketch string, params []string) error {
+	//fmt.Printf("AddInclude %q %q\n", filepath, part)
+	fname, err := findInclude(filepath)
+	if err != nil {
+		return fmt.Errorf("can't find include %q", filepath)
 	}
-}
 
-func NewTrack(name string) *Track {
-	instr := &Track{}
-	instr.MIDIProgram = -1
-	instr.MIDIChannel = -1
-	instr.MIDIVolume = -1
-	instr.MIDIBank = -1
-	return instr
-}
-
-func (s *Score) RmTrack(name string) error {
-	var instrs []*Track
-
-	name = strings.TrimSpace(name)
-	var found bool
-
-	for _, instr := range s.Tracks {
-		if instr.Name != name {
-			instrs = append(instrs, instr)
-		} else {
-			found = true
+	sco, has := sc.includedScores[fname]
+	if !has {
+		err := sc.Include(fname, sketch, params)
+		if err != nil {
+			return fmt.Errorf("can't include %q", filepath)
 		}
+		sco = sc.includedScores[fname]
 	}
+	if sketch == "" {
+		for k, v := range sco.tokens {
+			sc.tokens[k] = v
+		}
 
-	if found {
-		s.Tracks = instrs
+		for skname, sk := range sco.Sketches {
+			sc.Sketches[skname] = sk
+		}
 		return nil
 	}
 
-	return fmt.Errorf("could not find instrument %q", name)
-}
-
-func (s *Score) GetTrack(name string) *Track {
-	for _, instr := range s.Tracks {
-		if instr.Name == name {
-			return instr
+	if sketch[0] == '=' {
+		sk, err := sco.GetSketch(sketch)
+		if err != nil {
+			return fmt.Errorf("can't find sketch %q in include %q", sketch, filepath)
 		}
+		sc.Sketches[sketch] = sk
+		return nil
 	}
+	sh, err := sco.GetToken(sketch)
+	if err != nil {
+		return fmt.Errorf("can't find token %q in include %q", sketch, filepath)
+	}
+	sc.tokens[sketch] = sh
 	return nil
 }
 
-func (s *Score) AddTrack(i *Track) error {
-	i.Name = strings.TrimSpace(i.Name)
-	if s.HasTrack(i.Name) {
-		return fmt.Errorf("instrument %q already defined", i.Name)
+func (sc *Score) AddToken(key string, value string) {
+	if reservedNames[key] {
+		panic(fmt.Sprintf("can't add token %q: reserved name", key))
 	}
-	s.Tracks = append(s.Tracks, i)
-	return nil
+	//fmt.Printf("adding token: %q -> %q\n", key, value)
+	sc.tokens[key] = value
 }
 
-func (p *Score) HasTrack(name string) bool {
-	for _, instr := range p.Tracks {
-		if instr.Name == name {
-			return true
+func (sc *Score) GetToken(name string) (string, error) {
+	tk, has := sc.tokens[name]
+	if !has {
+		return "", fmt.Errorf("can't find token %q", name)
+	}
+	return tk, nil
+}
+
+func (sc *Score) AddProperty(key, value string) {
+	//fmt.Printf("adding property: %q -> %q\n", key, value)
+	sc.properties[key] = value
+}
+
+func (sc *Score) HasTrack(track string) bool {
+	_, has := sc.Tracks[track]
+	return has
+}
+
+func (sc *Score) GetTrack(track string) (*track.Track, error) {
+	// fmt.Printf("looking for track %q\n", track)
+	tr, has := sc.Tracks[track]
+	if !has {
+		// panic(fmt.Sprintf("can't find track %q", track))
+		return nil, fmt.Errorf("can't find track %q", track)
+	}
+	return tr, nil
+}
+
+func (sc *Score) parse(fname string, sco *Score) error {
+	f, err := file.New(fname, sco)
+	if err != nil {
+		return err
+	}
+	sc.Files[fname] = f
+	return f.Parse()
+}
+
+func (sc *Score) Parse() error {
+	return sc.parse(sc.mainFile, sc)
+}
+
+func (sc *Score) Delay(trackName string) (del [2]int) {
+	return sc.Tracks[trackName].Delay
+}
+
+func (sc *Score) Channel(trackName string) (ch int8) {
+	return sc.Tracks[trackName].MIDIChannel
+}
+
+func (sc *Score) Program(trackName string) (prog int8) {
+	return sc.Tracks[trackName].MIDIProgram
+}
+
+func (sc *Score) Volume(trackName string) (vol int8) {
+	return sc.Tracks[trackName].MIDIVolume
+}
+func (sc *Score) Bank(trackName string) (bank int8) {
+	return sc.Tracks[trackName].MIDIBank
+}
+func (sc *Score) Transpose(trackName string) (track int8) {
+	return sc.Tracks[trackName].MIDITranspose
+}
+func (sc *Score) PitchBendRange(trackName string) (pb uint8) {
+	return sc.Tracks[trackName].PitchbendRange
+}
+func (sc *Score) VelocityScale(trackName string) (vc [5]uint8) {
+	return sc.Tracks[trackName].VelocityScale
+}
+func (sc *Score) FileGroup(trackName string) (fg string) {
+	return sc.Tracks[trackName].FileGroup
+}
+
+func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
+
+	//fmt.Printf("GetIncludedSketch(%q,%q)\n", filename, sketch_table)
+	fname, err := findInclude(filename)
+	if err != nil {
+		return nil, fmt.Errorf("can't find include %q\n", filename)
+	}
+
+	sco, has := sc.includedScores[fname]
+	if !has {
+		err := sc.Include(fname, sketch_table, params)
+		if err != nil {
+			return nil, fmt.Errorf("can't  include %q\n", fname)
 		}
+		sco = sc.includedScores[fname]
 	}
-	return false
+	return sco.GetSketch(sketch_table)
 }
 
-func (p *Score) enroll() {
+func (sc *Score) Unroll() error {
+	if sc.isUnrolled {
+		return nil
+	}
 
-	// enroll the instrument events again
-	for _, instr := range p.Tracks {
-		instr.Events = []BarEvents{}
-		var be BarEvents
-		var lastBarNo int
+	var exclMode bool
+	//fmt.Printf("sketchname: %q column: %q\n", sc.mainSketch, sc.mainCol)
 
-		//		var lastBar = p.Bars[len(p.Bars)-1]
+	sketchName := sc.mainSketch
+	if sketchName == "!" {
+		sketchName = sc.findMostExclamedSketch()
+		exclMode = true
+		//fmt.Println("in exclMode")
+	}
 
-		for _, ev := range instr.Unrolled {
-			//				fmt.Printf("event: %#v\n", ev)
-			//				fmt.Printf("ev.BarNo: %v  len(p.score.Bars): %v\n", ev.BarNo, len(p.score.Bars))
-			p.Bars[ev.BarNo].ensurePositionExist(ev.DistanceToStartOfBarIn32th)
+	//fmt.Printf("sketch: %q\n", sketchName)
 
-			diff := ev.BarNo - lastBarNo
+	sketch := sc.Sketches[sketchName]
+	if sketch == nil {
+		return fmt.Errorf("could not find main sketch %q", sc.mainSketch)
+	}
 
-			for d := 0; d < diff; d++ {
-				instr.Events = append(instr.Events, be)
-				be = BarEvents{}
+	params, err := convertParams(sc.params)
+	if err != nil {
+		return err
+	}
+
+	col := sc.mainCol
+
+	if exclMode && col == "" {
+		col = "!"
+	}
+
+	if col == "!" {
+		col = sc.findMostExclamedCol(sketch)
+	}
+
+	switch {
+	case col != "":
+		//fmt.Printf("col is %q\n", col)
+		tr, events, err := sketch.Unroll(col, params[col]...)
+		if err != nil {
+			return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", col, sketch.Name, params[col], err.Error())
+		}
+		if tr == nil {
+			//fmt.Printf("could not find track for col %q\n", col)
+			trackName := sc.findMostExclamedTrack()
+			if trackName != "" {
+				//fmt.Printf("taking most exclamed track %q\n", trackName)
+				col = trackName
+				tr = sc.Tracks[trackName]
+			} else {
+				//fmt.Printf("construct track %v\n", col)
+				trackName = col
+				tr = track.New(trackName)
+				tr.MIDIChannel = 0
+				sc.Tracks[trackName] = tr
+			}
+		}
+		sc.Tracks = map[string]*track.Track{
+			tr.Name: tr,
+		}
+		//fmt.Printf("unrolling col %q for track %q\n", col, tr.Name)
+		sc.Unrolled[tr.Name] = sc.replaceScalenotesForCol(tr.Name, events)
+	default:
+		//fmt.Printf("%v\n", sc.Tracks)
+		for c := range sketch.Columns {
+			tr, events, err := sketch.Unroll(c, params[c]...)
+			if err != nil {
+				return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", col, sketch.Name, params[c], err.Error())
 			}
 
-			lastBarNo = ev.BarNo
-			be = append(be, ev)
+			if tr == nil {
+				//panic(fmt.Sprintf("could not find track %q\n", col))
+				return fmt.Errorf("could not find track %q\n", c)
+			}
+			sc.Unrolled[tr.Name] = sc.replaceScalenotesForCol(tr.Name, events)
+		}
+	}
+
+	sc.Bars, err = sketch.UnrolledBars()
+	if err != nil {
+		return err
+	}
+	sc.Parts = sketch.Parts
+	sc.isUnrolled = true
+
+	for c, evts := range sc.Unrolled {
+		sc.Unrolled[c] = sc.replaceScalenotes(c, evts)
+	}
+	return nil
+}
+
+func (sc *Score) WriteUnrolled(wr io.Writer) error {
+	err := sc.Unroll()
+	if err != nil {
+		return err
+	}
+
+	var tracks []string
+	for track := range sc.Tracks {
+		tracks = append(tracks, track)
+	}
+
+	sort.Strings(tracks)
+
+	//tr.
+	//Sketch{Table: table.NewTable("=SCORE", -1, nil)}
+
+	//fmt.Fprint(wr, "TRACKS |")
+	trks := table.NewTracks(-1, nil)
+
+	for _, tr := range tracks {
+		trks.AddCol(sc.Tracks[tr].Name)
+		//fmt.Fprintf(wr, " %s |", tr)
+	}
+
+	var data []string
+
+	data = []string{"File"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].FileGroup
+		data = append(data, val)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"Channel"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].MIDIChannel
+		var v string
+		if val > -1 {
+			v = fmt.Sprintf("%v", val+1)
+		}
+		data = append(data, v)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"Program"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].MIDIProgram
+		var v string
+		if val > -1 {
+			v = fmt.Sprintf("%v", val+1)
+		}
+		data = append(data, v)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"Bank"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].MIDIBank
+		var v string
+		if val > -1 {
+			v = fmt.Sprintf("%v", val+1)
+		}
+		data = append(data, v)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"Transpose"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].MIDITranspose
+		var v string
+		if val != 0 {
+			v = fmt.Sprintf("%v", val)
+		}
+		data = append(data, v)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"Volume"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].MIDIVolume
+		var v string
+		if val > -1 {
+			v = fmt.Sprintf("%v", val+1)
+		}
+		data = append(data, v)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"Delay"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].Delay
+		var v string
+		if val[0] != 0 {
+			v = fmt.Sprintf("%v/%v", val[0], val[1])
+		}
+		data = append(data, v)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"PitchbendRange"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].PitchbendRange
+		var v string
+		if val > 0 {
+			v = fmt.Sprintf("%v", val)
+		}
+		data = append(data, v)
+	}
+
+	trks.AddLine(data)
+
+	data = []string{"VelocityScale"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].VelocityScale
+		var v string
+		// "min: %v max: %v random: %v step: %v center: %v"
+		//0: min 1: max 2: randomize-factor 3: step-width, 4: center
+		v = fmt.Sprintf("min: %v max: %v random: %v step: %v center: %v", val[0], val[1], val[2], val[3], val[4])
+		data = append(data, v)
+	}
+	trks.AddLine(data)
+
+	fm := &formatter{wr}
+	trks.WriteTo(fm)
+
+	fmt.Fprintf(wr, "\n")
+	//fmt.Fprintf(wr, "\n\n")
+
+	sk := &table.Sketch{Table: table.NewTable("=SCORE", -1, nil)}
+	// sk := table.NewSketch("score", -1, nil)
+	_ = sk
+
+	var cols []string
+
+	for col := range sc.Unrolled {
+		cols = append(cols, col)
+	}
+
+	sort.Strings(cols)
+
+	var score = map[uint][][]string{}
+
+	for colNo, col := range cols {
+		sk.AddCol(col)
+
+		for _, ev := range sc.Unrolled[col] {
+			m := score[ev.Position]
+			//fmt.Printf("len(score[%v]) = %v // colNo: %v\n", ev.Position, len(m), colNo)
+			if len(m) == 0 || colNo == 0 {
+				//if colNo == 0 {
+				//m = make([][]string, len(cols))
+				//m = [][]string{}
+				cm := make([]string, len(cols))
+				//fmt.Printf("appending %#v to %#v\n", cm, m)
+				m = append(m, cm)
+			}
+
+			//fmt.Printf("setting score[%v][%v][%v] to %q\n", ev.Position, len(m)-1, colNo, ev.String())
+			m[len(m)-1][colNo] = ev.String()
+			/*
+				if cm, hasCol := m[colNo]; hasCol {
+
+				}
+			*/
+
+			//m[colNo] = append(m[colNo], ev.String())
+			score[ev.Position] = m
+		}
+	}
+
+	var sorted sortedLines
+
+	for pos, cls := range score {
+		for _, _cls := range cls {
+			//fmt.Printf("adding line %v\n", line{pos: pos, cols: _cls})
+			sorted = append(sorted, line{pos: pos, cols: _cls})
+		}
+	}
+
+	lastTimeSig := [2]uint8{4, 4}
+	var lastTempoChange float64 = 0
+
+	for _, bar := range sc.Bars {
+		if bar.Include != nil {
+			return fmt.Errorf("bar with include not allowed here bar no %v ", bar.No)
+		}
+		//fmt.Printf("// #%v\n", bar.No)
+		//fmt.Printf("[%v] bar %s\n", bar.No, bar.String())
+		s := fmt.Sprintf("#%s", bar.Part)
+		if bar.TimeSig != lastTimeSig || bar.No == 0 {
+			s += fmt.Sprintf(" %v/%v", bar.TimeSig[0], bar.TimeSig[1])
+			lastTimeSig = bar.TimeSig
+		}
+		if (bar.TempoChange > 0 && bar.TempoChange != lastTempoChange) || bar.No == 0 {
+			if bar.TempoChange > 0 {
+				s += fmt.Sprintf(" @%0.2f", bar.TempoChange)
+				lastTempoChange = bar.TempoChange
+			} else {
+				var tempoChange float64 = 120
+				s += fmt.Sprintf(" @%0.2f", tempoChange)
+				lastTempoChange = tempoChange
+			}
 		}
 
-		//		fmt.Printf("last bar with event: %v, last bar total: %v len bars: %v\n", lastBarNo, p.Bars[len(p.Bars)-1].barNo, len(p.Bars))
-
-		//			fmt.Printf("len bars in instrument: %v\n", len(be))
-		instr.Events = append(instr.Events, be)
-
-		if lastBarNo < p.Bars[len(p.Bars)-1].BarNo {
-			instr.Events = append(instr.Events, BarEvents{})
+		if sc.printBarComments {
+			var comment = bar.Comment
+			comment += fmt.Sprintf(" #%v", bar.No+1)
+			s += fmt.Sprintf("           // %s", comment)
 		}
 
-		instr.CalcColWidth(p.IsUnrolled)
+		sorted = append(sorted, line{pos: bar.Position, cols: []string{s}})
+	}
+
+	sort.Sort(sorted)
+	//sk.AddLine([]string{"#"})
+
+	var lastBarStart uint
+
+	for _, lin := range sorted {
+		if len(lin.cols) == 1 && len(lin.cols[0]) > 0 && lin.cols[0][0] == '#' {
+			sk.AddLine([]string{lin.cols[0]})
+			lastBarStart = lin.pos
+		} else {
+			l := []string{items.Pos32thToString(lin.pos - lastBarStart)}
+			l = append(l, lin.cols...)
+			sk.AddLine(l)
+			//fmt.Printf("adding line %q\n", l)
+		}
+	}
+
+	err = sk.WriteTo(fm)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(wr, "\n")
+	return nil
+}
+
+// gets the bar idx of an event at the given position
+// returns -1, if no bar could be found
+func (s *Score) getBarIdxOf(pos uint) (baridx int) {
+	baridx = -1
+
+	for idx, b := range s.Bars {
+		if b.Position > pos {
+			break
+		}
+		baridx = idx
+	}
+
+	return baridx
+}
+
+func convertScaleNotes(in items.Item, scale *items.Scale) items.Item {
+	if scale == nil {
+		return in
+	}
+	switch v := in.(type) {
+	case *items.Note:
+		if v.ScaleNote != 0 && scale != nil {
+			nt := v.Dup().(*items.Note)
+			nt.ScaleNote = 0
+			sn := v.ScaleNote
+			if sn > 0 {
+				sn -= 1
+			}
+			aug := nt.Augmenter
+			key := scale.StepToNote(sn)
+			if aug == "#" {
+				key++
+			}
+			nt.Letter, nt.Augmenter, nt.Octave = items.KeyToNote(key)
+			//fmt.Printf("convert scalenote %v to %s via %#v\n", v.ScaleNote-1, nt.String(), scale)
+			return nt
+		} else {
+			return v
+		}
+	case *items.NTuple:
+		n := v.Dup().(*items.NTuple)
+		for k, it := range n.Items {
+			n.Items[k] = convertScaleNotes(it, scale)
+		}
+		return n
+
+	case *items.MultiItem:
+		mv := v.Dup().(*items.MultiItem)
+
+		for k, it := range mv.Items {
+			mv.Items[k] = convertScaleNotes(it, scale)
+		}
+		return mv
+	default:
+		return v
 	}
 }
 
-var DEBUG bool
+func (s *Score) replaceScalenotesForCol(colname string, evts []*sketch.Event) []*sketch.Event {
+	var res []*sketch.Event
 
-func (s *Score) HasTemplate(name string) bool {
-	_, hasOwn := s.TemplateDefinitions[name]
-	_, hasIncluded := s.IncludedTemplateDefinitions[name]
+	//fmt.Printf("replaceScalenotesForCol %q called\n", colname)
 
-	return hasOwn || hasIncluded
+	var scale *items.Scale
+
+	for _, ev := range evts {
+		nev := ev.Dup()
+
+		switch v := nev.Item.(type) {
+		case *items.Scale:
+			//fmt.Printf("got scale in col %q: %s\n", colname, v.String())
+			scale = v.Dup().(*items.Scale)
+			if scale.Mode == nil {
+				sm, has := s.Scales[scale.Name]
+				if !has {
+					panic("can't find scale with name " + scale.Name)
+				}
+				scale.Mode = sm
+			}
+		default:
+			if scale != nil {
+				nev.Item = convertScaleNotes(nev.Item, scale)
+			}
+			res = append(res, nev)
+		}
+	}
+	//panic("TODO: implement")
+	return res
+}
+
+func (s *Score) GetMode(name string) items.Mode {
+	return s.Scales[name]
+}
+
+func (s *Score) replaceScalenotes(colname string, evts []*sketch.Event) []*sketch.Event {
+	var res []*sketch.Event
+
+	scale := s.Bars[0].Scale
+	if scale == nil {
+		scale = &items.Scale{}
+		scale.BaseNote = 60
+		scale.Mode = items.Ionian
+	}
+
+	//fmt.Printf("replaceScalenotes %q starting with scale: %s\n", colname, scale.String())
+
+	for _, ev := range evts {
+		bidx := s.getBarIdxOf(ev.Position)
+		if s.Bars[bidx].Scale != nil {
+			scale = s.Bars[bidx].Scale.Dup().(*items.Scale)
+			//fmt.Printf("replaceScalenotes %q found scale: %s at bar %s\n", colname, scale.String(), s.Bars[bidx].String())
+			if scale.Mode == nil {
+				sm, has := s.Scales[scale.Name]
+				if !has {
+					panic("can't find scale with name " + scale.Name)
+				}
+				scale.Mode = sm
+			}
+		}
+
+		nev := ev.Dup()
+		nev.Item = convertScaleNotes(nev.Item, scale)
+		res = append(res, nev)
+	}
+	//panic("TODO: implement")
+	return res
+}
+
+func (sc *Score) AddTrack(t *track.Track) {
+	// fmt.Printf("AddTrack %q\n", t.Name)
+	sc.Tracks[t.Name] = t
+}
+func (sc *Score) AddTuning(t *tuning.Tuning) {
+	sc.Tunings[t.Name] = t
+}
+
+func (sc *Score) AddFilter(t *filter.Filter) {
+	sc.Filters[t.Name] = t
+}
+
+func (sc *Score) AddScale(t items.Mode) {
+	//fmt.Printf("AddScale: %s\n", t.Name())
+	if t.Name() == "minor" {
+		panic("minor added")
+	}
+	sc.Scales[t.Name()] = t
+}
+
+func (sc *Score) AddTimbre(t *timbre.Timbre) {
+	sc.Timbres[t.Name] = t
+}
+
+func (sc *Score) AddSketch(name string) interface {
+	ParseLine([]string) error
+	AddColumn(string)
+} {
+	//fmt.Printf("AddSketch %q called\n", name)
+	if idx := strings.Index(name, "!"); idx > 0 {
+		excl := name[idx:]
+		name = name[:idx]
+		sc.exclSketch[excl] = name
+	}
+	sk := sketch.NewSketch(name, sc)
+	sk.File = sc.mainFile
+	sc.Sketches[name] = sk
+	return sk
+}
+
+func (sc *Score) findMostExclamedSketch() (name string) {
+	var best int
+	for excl, sketch := range sc.exclSketch {
+		if len(excl) > best {
+			name = sketch
+			best = len(excl)
+		}
+	}
+	return
+}
+
+func (sc *Score) findMostExclamedCol(sketch *sketch.Sketch) (col string) {
+	var best int = -1
+	for c := range sketch.Columns {
+		if idx := strings.Index(c, "!"); idx > 0 {
+			if len(c[idx:]) > best {
+				col = c
+			}
+		}
+	}
+
+	if best == -1 {
+		col = sketch.FirstColumn()
+	}
+
+	return
+}
+
+func (sc *Score) findMostExclamedTrack() (track string) {
+	var best int = -1
+	for tr := range sc.Tracks {
+		if best == -1 {
+			track = tr
+			best = 0
+		}
+		if idx := strings.Index(tr, "!"); idx > 0 {
+			if len(tr[idx:]) > best {
+				track = tr
+			}
+		}
+	}
+
+	return
+}
+
+func (sc *Score) GetSketch(name string) (*sketch.Sketch, error) {
+	/*
+		if name[0] != '=' {
+			panic("invalid sketch name " + name)
+		}
+	*/
+	s := sc.Sketches[name]
+
+	if s == nil {
+		return nil, fmt.Errorf("can't find sketch %q\n", name)
+	}
+
+	s.File = sc.mainFile
+
+	return s, nil
+}
+func (sc *Score) Include(filename string, sketch string, params []string) error {
+	fname, err := findInclude(filename)
+	if err != nil {
+		return err
+	}
+	sco, has := sc.includedScores[fname]
+	if !has {
+		var opts []Option
+		if sketch != "" {
+			opts = append(opts, Sketch(sketch))
+		}
+		sco = New(filename, params, opts...)
+		err := sc.parse(fname, sco)
+		if err != nil {
+			return err
+		}
+		sc.includedScores[fname] = sco
+		//fmt.Printf("including %q\n", fname)
+	}
+
+	return nil
+}
+func (sc *Score) Format() error {
+	for _, fl := range sc.Files {
+		err := fl.Format()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -152,15 +152,16 @@ des Templates. Allerdings gibt es dabei noch ein paar Optionen:
    ah_ja[1:3]
    nur die noten 2&g' und 3&g'
 
-2. Es können die Ereignisse ersetzt werden
-   ah_ja/:,d',:,6/
+2. Es können die Ereignisse ersetzt werden. Die Ersetzungen sind zwischen dem ersten und letzten Slash, jeweils durch weitere Slashes
+   getrennt:
+   ah_ja/:/d'/:/6/
    ersetzt das Ereignis 2&g' zu 2d' und 5c zu 6c
 
    Wenn Pausen beim Ersetzen übersprungen werden sollen, bekommen die Ersetzer ein `!` vorangestellt:
 
 ```
 ah_ne:  1a 2&* 3f 4* 5g 6*
-ah_so:  1ah_ne/!d',!g,!5&/
+ah_so:  1ah_ne/!d'/!g/!5&/
 ```
 
 ersetzt das Ereignis 1a zu 1d', 3f zu 3g und 5g zu 5&g
@@ -232,7 +233,7 @@ ah_ja:  1a- 2&#1+ 3&#1++ 5#2=
 =
       |piano                   |
 3/4 
-    1 |ah_ja+(d',f)[1:4]/:,:,6/|
+    1 |ah_ja+(d',f)[1:4]/:/:/6/|
 
     1 |                        |
 ```
@@ -253,7 +254,7 @@ Und diese Aufrufformen können auch in einem Templateinhalt stehen:
 
 ```
 ah_ja:  1a- 2&#1+ 3&#1++ 5#2= 
-ah_ne:  1ah_ja+(d',f)[1:4]/:,:,6/
+ah_ne:  1ah_ja+(d',f)[1:4]/:/:/6/
 ```
 
 ### Einhängen in die Zeitachse
@@ -306,13 +307,21 @@ pattB: 2^1 2&^2 4^-2
 
 dies kann auch mit ersetzungen kombiniert werden:
 
-pattB: pattA^2/:,:,^5/
+pattB: pattA^2/:/:/^5/
 
 entspräche
 
 pattB: 2^5 2&^7 4^5
 
 Beim verschieben werden nur Skalennoten verändert. absolute Noten bleiben unberührt.
+
+## Microverschiebungen in der Zeit
+
+- beim Aufruf eines Templates ist auch die microverschiebung möglich:
+  !template++>(a')[2:5]/:,c",:/
+  bereits microverschobene items im template werden dabei nicht verschoben, sondern nur diejenigen, die nicht
+  bereits microverschoben sind
+
 
 ## Einhängen
 
@@ -329,7 +338,7 @@ Skaleneigene Note gesetzt.
 
 die volle Syntax für einen patterncall lautet (wenn alle Optionen genutzt werden können)
 
-?50%!name^^3++(^2,a")[3:5]/:,2,:/
+?50%!name^^3++(^2,a")[3:5]/:/2/:/
 
 Die Werte, die als Parameter übergeben werden, werden angewendet, bevor das einhängen stattfindet.
 (das Slicen und Ersetzen findet aber nach dem Einhängen statt)

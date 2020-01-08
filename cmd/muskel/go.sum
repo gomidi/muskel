@@ -2,11 +2,14 @@ github.com/gen2brain/beeep v0.0.0-20180718162406-4e430518395f h1:eyHMPp7tXlBMF8P
 github.com/gen2brain/beeep v0.0.0-20180718162406-4e430518395f/go.mod h1:GprdPCZglWh5OMcIDpeKBxuUJI+fEDOTVUfxZeda4zo=
 github.com/godbus/dbus v4.1.0+incompatible h1:WqqLRTsQic3apZUK9qC5sGNfXthmPXzUZ7nQPrNITa4=
 github.com/godbus/dbus v4.1.0+incompatible/go.mod h1:/YcGZj5zSblfDWMMoOzV4fas9FZnQYTkDnsGvmh2Grw=
-github.com/gomidi/midi v1.6.0/go.mod h1:B16DbgtsXSbQK9Q75aVezVL6VGhaK+2CVe/ybwUUCHE=
 github.com/metakeule/observe v0.0.0-20170406094839-eba094fd212a h1:/k3Hx6QLkyVYMEtCqv+0PqL6rDqvEhTsd9/Ej1DY+HY=
 github.com/metakeule/observe v0.0.0-20170406094839-eba094fd212a/go.mod h1:Glid6/jlqdtVFNHa9bAJj2HPzgTc+J0VGpxGfiMNNeI=
 gitlab.com/gomidi/midi v1.13.1 h1:Tp0MtGXcP+OP/cC/hRCld66kErBUQS16UKwkpv3xQe8=
 gitlab.com/gomidi/midi v1.13.1/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
+gitlab.com/gomidi/midi v1.13.3 h1:KTKqNSu6y6MGiEbNOqMDiWHDv+YtI66hLSltwNJMYtM=
+gitlab.com/gomidi/midi v1.13.3/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
+gitlab.com/gomidi/muskel v0.9.8 h1:wattxXTVH5X3UD9dBWZ8zJ8JA5CNSaOkrdwUCJOwXyw=
+gitlab.com/gomidi/muskel v0.9.8/go.mod h1:t5vxTfwfqDUJyaYVVUj+d+7AMhcck0CxOOZAE/L1fwQ=
 gitlab.com/metakeule/config v1.13.0/go.mod h1:NOPjxiMU1sZhcTXUrpCtj4W2nB0mDYRIQXISM68FDlQ=
 gitlab.com/metakeule/fmtdate v1.2.0/go.mod h1:uZUf21xepWGLp6PgJGBbHeBVWO+/gsKi3Gdh0Fu4lGg=
 golang.org/x/sys v0.0.0-20190209173611-3b5209105503 h1:5SvYFrOM3W8Mexn9/oA44Ji7vhXAZQ9hiP+1Q/DMrWg=

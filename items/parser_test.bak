@@ -1,0 +1,101 @@
+package items_test
+
+import (
+	"reflect"
+	"testing"
+
+	. "gitlab.com/gomidi/muskel_new_new/items"
+	"gitlab.com/gomidi/muskel_new_new/score"
+)
+
+func TestParseItem(t *testing.T) {
+	hihoLy := Lyric("hiho")
+
+	var parser Parser
+
+	parser.GetDefinition = func(name string) TemplateDefinition {
+		if name == "pa" {
+			return &score.TemplateDefinition{
+				Name:      "pa",
+				NumParams: 0,
+				Original:  "2a'",
+			}
+		}
+		if name == "pb" {
+			return &score.TemplateDefinition{
+				Name:      "pb",
+				NumParams: 1,
+				Original:  "1#1 2a' 2&a'",
+			}
+		}
+		return nil
+	}
+
+	tests := []struct {
+		input    string
+		expected Item
+	}{
+		{"*", Rest},
+		{"a'=", &Note{Letter: "a", Octave: 2, Dynamic: "="}},
+		{"a'=:", &Note{Letter: "a", Octave: 2, Dynamic: "=", Dotted: ":"}},
+		{"a'=::", &Note{Letter: "a", Octave: 2, Dynamic: "=", Dotted: "::"}},
+		{"a'=:::", &Note{Letter: "a", Octave: 2, Dynamic: "=", Dotted: ":::"}},
+		{"a'=_", &Note{Letter: "a", Octave: 2, Dynamic: "=", NoteOn: true}},
+		{"_a'", &Note{Letter: "a", Octave: 2, Dynamic: "", NoteOff: true}},
+		{"a'++", &Note{Letter: "a", Octave: 2, Dynamic: "++"}},
+		{"^2", &Note{Dynamic: "", ScaleNote: 2}},
+		{"^2::", &Note{Dynamic: "", ScaleNote: 2, Dotted: "::"}},
+		{"^2_", &Note{Dynamic: "", ScaleNote: 2, NoteOn: true}},
+		{"^_2", &Note{Dynamic: "", ScaleNote: 2, NoteOff: true}},
+		{"^2#=", &Note{Dynamic: "=", ScaleNote: 2, Augmenter: "#"}},
+		{"^2++", &Note{Dynamic: "++", ScaleNote: 2}},
+		{"c#'--~", &Note{Letter: "c", Octave: 2, Dynamic: "--", GlissandoStart: true, Augmenter: "#"}},
+		{":", Hold},
+		{"./.", &BarRepeater{LastN: 1, OnlyOnce: true}},
+		{"...", &BarRepeater{LastN: 1, OnlyOnce: false}},
+		{".4.", &BarRepeater{LastN: 4, OnlyOnce: false}},
+		{"%", RepeatLastEvent{}},
+		{"{a,b}", &NTuple{Items: []Item{&Note{Letter: "a", Octave: 1, Dynamic: ""}, &Note{Letter: "b", Octave: 1, Dynamic: ""}}, Parser: &parser}},
+		{"{a:,b::}", &NTuple{Items: []Item{&Note{Letter: "a", Octave: 1, Dynamic: "", Dotted: ":"}, &Note{Letter: "b", Octave: 1, Dynamic: "", Dotted: "::"}}, Parser: &parser}},
+		{"{a=,b=,*}", &NTuple{Items: []Item{&Note{Letter: "a", Octave: 1, Dynamic: "="}, &Note{Letter: "b", Octave: 1, Dynamic: "="}, Rest}, Parser: &parser}},
+		{"\"hiho\"", &hihoLy},
+		//		{"Sa'", Note{letter: "a", octave: 2}},
+		//		{"Za'", Note{letter: "a", octave: 2}},
+		{"?30%a", &RandomProbability{Prob: 30, Item: &Note{Letter: "a", Octave: 1, Dynamic: ""}, ItemOriginalData: "a", Parser: &parser}},
+		{"?30%a::", &RandomProbability{Prob: 30, Item: &Note{Letter: "a", Octave: 1, Dynamic: "", Dotted: "::"}, ItemOriginalData: "a::", Parser: &parser}},
+		{"?(a,b)", &RandomChooser{Alternatives: []Item{&Note{Letter: "a", Octave: 1, Dynamic: ""}, &Note{Letter: "b", Octave: 1, Dynamic: ""}}, AlternativesOriginalData: []string{"a", "b"}, Parser: &parser}},
+		{"?(a,b::)", &RandomChooser{Alternatives: []Item{&Note{Letter: "a", Octave: 1, Dynamic: ""}, &Note{Letter: "b", Octave: 1, Dynamic: "", Dotted: "::"}}, AlternativesOriginalData: []string{"a", "b::"}, Parser: &parser}},
+		{"CC(23,100)", &MIDICC{Controller: 23, Value: 100}},
+		{"CC(23,100)::", &MIDICC{Controller: 23, Value: 100, Dotted: "::"}},
+		{"MN23++", &MIDINote{Note: 23, Dynamic: "++"}},
+		{"MN23++::", &MIDINote{Note: 23, Dynamic: "++", Dotted: "::"}},
+		{"MN23++_", &MIDINote{Note: 23, Dynamic: "++", NoteOn: true}},
+		{"MN_23++", &MIDINote{Note: 23, Dynamic: "++", NoteOff: true}},
+		{"AT(54)", &MIDIAftertouch{Value: 54}},
+		{"AT(54)::", &MIDIAftertouch{Value: 54, Dotted: "::"}},
+		{"PB(-20)", &MIDIPitchbend{Value: -20}},
+		{"PB(-20)::", &MIDIPitchbend{Value: -20, Dotted: "::"}},
+		{"PB(8100)", &MIDIPitchbend{Value: 8100}},
+		{"PT(c',80)", &MIDIPolyAftertouch{Key: 60, Value: 80}},
+		{"PT(c',80)::", &MIDIPolyAftertouch{Key: 60, Value: 80, Dotted: "::"}},
+		{"*a'=_*_b'*:*", &MultiItem{Items: []Item{&Note{Letter: "a", Octave: 2, Dynamic: "=", NoteOn: true}, &Note{Letter: "b", Octave: 2, Dynamic: "", NoteOff: true}, Hold}, Parser: &parser}},
+		{"*a'=_*_b'*c'::*", &MultiItem{Items: []Item{&Note{Letter: "a", Octave: 2, Dynamic: "=", NoteOn: true}, &Note{Letter: "b", Octave: 2, Dynamic: "", NoteOff: true}, &Note{Letter: "c", Octave: 2, Dynamic: "", Dotted: "::"}}, Parser: &parser}},
+		{"~", &GlideLinear},
+		{"~~", &GlideExponential},
+		//	{"O[30]/a/b", &OSCMessage{}},
+	}
+
+	for i, test := range tests {
+
+		result, err := parser.ParseItem(test.input, 0)
+
+		if err != nil {
+			t.Errorf("[%v] could not parse item for %#v: %s", i, test.input, err.Error())
+			continue
+		}
+
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Errorf("[%v] parseItem(%#v) = \n%#v \n// expected\n%#v", i, test.input, result, test.expected)
+		}
+	}
+}

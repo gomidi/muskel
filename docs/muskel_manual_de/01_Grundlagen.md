@@ -270,26 +270,27 @@ Will man kurze Stakkato-Noten schreiben, kann es schnell unübersichtlich werden
      &.;|*    |
 ```
 
-Dafür gibt es eine spezielle Notation, die die Noten tatsächlich noch etwas kürzer als 32tel macht und damit Stakkato-Feeling erzeugt:
+Dafür gibt es eine spezielle Notation, die die Noten auf 64telverkürzt und damit Stakkato-Feeling erzeugt:
 
 ```
 =
-        |piano| 
-    1   |c    |
-      . |d':  |
-     &  |c'   |
-     &. |d':  |
-    2   |d    |
-      . |d':  |
-     &  |c'   |
-     &. |d':  |
+        |piano | 
+    1   |c     |
+      . |d'::: |
+     &  |c'    |
+     &. |d'::: |
+    2   |d     |
+      . |d'::: |
+     &  |c'    |
+     &. |d'::: |
 ```
 
-Im obigen Beispiel wäre jedes `d'` eine Stakkatonote, da die Note mit einem Doppelpunkt `:` endet.
+Im obigen Beispiel wäre jedes `d'` eine 64tel, da die Note mit drei Doppelpunkten `:::` endet.
+Bei zwei Doppelpunkten `::` wäre es eine 32tel und bei einem Doppelpunkt `:` eine 16tel.
 
 # Überbindungen
 
-Eine Note dauert bis die nächste Note oder eine Pause (Stille) notiert ist, **maximal jedoch bis zum nächsten Taktwechsel**:
+Eine Note dauert bis die nächste Note oder eine Pause (Stille) notiert ist, **auch über Taktwechsel hinweg**:
 
 ```
 =
@@ -299,22 +300,18 @@ Eine Note dauert bis die nächste Note oder eine Pause (Stille) notiert ist, **m
     1&  |d    |
 ```
 
-Hier endet das `c` mit dem ersten Takt, d.h. es dauert eine `Ganze`-Note (4 Schläge im `4/4`-Takt).
+Hier endet das `c` erst auf 1& des folgenden Taktes.
 
-Im folgenden Takt ist auf dem ersten Schlag eine Pause und auf dem "und" folgt das `d`, welches wieder bis zum Ende des Taktes dauert (3,5 Schläge).
-
-Wollen wir, dass das `c` jedoch so lange erklingt, bis das `d` folgt, also *über die Taktgrenze hinaus*, so müssen wir es "überbinden", wie in der `westlichen Standardnotation` auch. In `MuSkel` drücken wir das aus, indem wir auf der 1 des folgenden Taktes einen isolierten Doppelpunkt schreiben:
+Wollen wir, dass es schon auf der 1 des folgenden Taktes endet, so müssen wir dort eine Pause setzen:
 
 ```
 =
         |piano| 
     1   |c    |
 
-    1   |:    |
-     &  |d    |
+    1   |*    |
+    1&  |d    |
 ```
-
-Damit wird der Taktwechsel "durchlässig" und alles, was zu diesem Zeitpunkt erklingt, erklingt weiterhin, natürlich nur innerhalb der Stimme.
 
 Wollen wir die letzte Note wiederholen, so verwenden wir das isolierte Prozentzeichen, z.B.:
 
@@ -339,13 +336,13 @@ Die `Dynamik` (Anschlagsstärke, laut-leise) wird durch nachgestellte `+` und `-
 `c+++`   sehr laut         (fortissimo)
 `c++`    laut              (forte)
 `c+`     etwas laut        (mezzoforte)
-`c=`     normal
+`c `     normal
 `c-`     etwas leise       (mezzopiano)
 `c--`    leise             (piano)
 `c---`   sehr leise        (pianissimo)
 `c----`  extrem leise      (pianississimo)
+`c=`     wie die Note davor
 
-**Wenn eine Note keine Anschlagsstärke angegeben hat, so hat sie die gleiche Anschlagsstärke, wie die Note davor.** Gab es noch keine Note mit einer angegebenen Anschlagsstärke, so hat sie die Anschlagsstärke *normal*.
 
 ```
 =
@@ -353,15 +350,15 @@ Die `Dynamik` (Anschlagsstärke, laut-leise) wird durch nachgestellte `+` und `-
     1 |c    |
      &|d+   |
     2 |e    |
-     &|f--  |
+     &|f-   |
 
-    1 |g    |
+    1 |g-   |
      &|a=   |
     4 |d#'  |
      &|f#   |
 ```
 
-In diesem Beispiel haben die Noten `c`, `a`, `d#'` und `f#` die Anschlagsstärke *normal*, `d` und `e` sind *etwas laut* und `f` und `g` sind *leise*.
+In diesem Beispiel haben die Noten `c`, `e`, `d#'` und `f#` die Anschlagsstärke *normal*, `d` ist *etwas laut* und `f,`g und `a` sind *leise*.
 
 # Polyphonie
 
@@ -388,13 +385,52 @@ Wenn Töne genau parallel erklingen, also die *gleiche Startposition und die gle
 ```
 =
       |piano-chords| 
-    1 |_c_e_g_     |
-    2 |_d_f_a_     |
+    1 |*c*e*g*     |
+    2 |*d*f*a*     |
 ```
 
 Hier erklingen die Töne `c`,`e` und `g` gleichzeitig auf Schlag 1 und alle bis zum Schlag 2 (Viertelnoten), an dem sie von den Tönen `d`,`f`,`a` abgelöst werden, die bis zum Ende des Taktes erklingen (punktierte Halbenoten).
 
-Mehrere Töne (oder auch allgemein Ereignisse) werden also als eine Gruppe parallel geführt, wenn in der Notation die Gruppe mit einem Unterstrich `_` *beginnt und endet*, sowie der Unterstrich zwischen den Tönen (bzw. Ereignissen) notiert wird.
+Mehrere Töne (oder auch allgemein Ereignisse) werden also als eine Gruppe parallel geführt, wenn in der Notation die Gruppe mit einem Sternchen `*` *beginnt und endet*, sowie das Sternchen zwischen den Tönen (bzw. Ereignissen) notiert wird.
+
+Um Polyphonie auch innerhalb einer Spur zu ermöglichen, kann man mit einer alternativen Schreibweise auch explizit Start und Endpunkte
+einer Note setzen. Um eine Startnote zu setzen, wird der Unterstrich _ ans Ende der Note gesetzt.
+Um eine Note zu beenden, wird der Unterstrich vor die Note gesetzt. Jede auf diese Weise nicht beendete Note erklingt bis zum Schluss des Stückes:
+
+```
+=
+      |piano1|piano2| 
+    1 |c_    |      |
+     &|      |c'_   |
+    2 |d     |      |
+     &|      |d_'   |
+    3 |e     |      |
+     &|      |_c'   |
+    4 |*     |      |
+     &|_c    |_d'   |
+```
+ 
+Hier erklingen in Spur piano2 ab Position 2& c' und d' gleichzeitig, bis c' auf 3& beendet wird und nur noch d' erklingt bis 4&.
+In Spur piano1 sind die monophone und die polyphone Schreibweise kombiniert: c erklingt von 1 bis 4&, während d von 2 bis 3 klingt
+und e bis 4.
+
+Beide Schreibweisen können auch in "Akkordschreibweise" kombiniert werden:
+
+
+```
+=
+      |piano-chords| 
+    1 |*c_*e*g_*   |
+    2 |*:*_c*      |
+    3 |*f*a*       |
+    4 |*_g*        |
+```
+
+Hier wird c von 1 bis 2 gespielt. e würde normalerweise mit dem nächsten Akkord (also auf 2) beendet werden.
+Der Doppelpunkt verhindert dieses hier, so dass e bis 3 erklingt, wo es von f und a abeglöst wird, die bis
+zum nächsten Akkord auf 4 klingen (obwohl dieser "Akkord" nur aus dem Notenende von g besteht). g erklingt durch
+alles hindurch von 1 bis 4.
+
 
 # Gesangstexte
 
@@ -404,18 +440,18 @@ Anführungsstrichen `"` geschrieben. Hier brauchen wir eine Gruppe, zusammen mit
 ```
 =
       |vocal        |
-    1 |_c_"Al-"_    |
-     &|_d_"-le"_    |
-    2 |_e_"mei-"_   |
-     &|_f_"-ne"_    |
-    3 |_g_"Ent-"_   |
-    4 |_g_"-chen"_  |
+    1 |*c*"Al-"*    |
+     &|*d*"-le"*    |
+    2 |*e*"mei-"*   |
+     &|*f*"-ne"*    |
+    3 |*g*"Ent-"*   |
+    4 |*g*"-chen"*  |
 
-    1 |_a_"schwim-"_|
-     &|_a_"-men"_   |
-    2 |_a_"auf"_    |
-     &|_a_"dem"_    |
-    3 |_g_"See"_    |
+    1 |*a*"schwim-"*|
+     &|*a*"-men"*   |
+    2 |*a*"auf"*    |
+     &|*a*"dem"*    |
+    3 |*g*"See"*    |
 ```
 
 Selbstverständlich kann der Text auch in einer eigenen Spur notiert werden und das ist wahrscheinlich auch besser lesbar:

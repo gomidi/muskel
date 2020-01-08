@@ -554,8 +554,7 @@ Zeitpunkt gesetzt wird, so wie andere Noten auch. Das bedeutet, eine N-Tole kann
 
 Die Teilung der N-Tole kommt durch die Anzahl der Elemente zustande, d.h. sie wird (z.B. beim SMF-Export) automatisch berechnet und muss nicht angegeben werden. "Lücken" werden durch entsprechende Pausenzeichen gesetzt.
 
-In einem Punkt unterscheiden sich jedoch N-Tolen von sonstigen Noten: Während sonstige Noten immer dann enden, wenn die nächste Note, oder eine Pause, oder ein Taktwechsel folgt und daher die Länge der Note nicht bei der
-Note angegeben wird, muss die N-Tole ihr Ende "kennen", um die Startpunkt ihrer Elemente zu bestimmen.
+Das Ende einer N-Tole ist, wie bei sonstigen Noten definiert: Sobald die nächste Note, oder eine Pause, oder ein Taktwechsel folgt.
 
 Schauen wir uns ein Beispiel an:
 
@@ -563,10 +562,11 @@ Schauen wir uns ein Beispiel an:
 =
       |piano   | 
     1 |c       |
-    2 |{*,f,g}3|
+    2 |{*,f,g} |
+    3 |*       |
 ```
 
-Hier haben wir ein c auf Schlag 1, welches bis zum Schlag 2 dauert (1 Viertel), gefolgt von einer Triole die aus den drei Elementen Pause, f und g besteht (innerhalb der geschweiften Klammer) und bis zum 3. Schlag dauert (Positionsangabe nach den geschweiften Klammern). Damit ist die Gesamtlänge der Triole von Schlag 2 bis Schlag 3 = 1 Schlag (Viertel) und diese Gesamtlänge wird auf drei Elemente aufgeteilt. Damit dauert jedes Element 1/12 vom 4/4 Takt. Da das erste Element eine Pause ist, beginnt das f auf 1/4 + 1/12 = 4/12 = 1/3 nach dem Beginn des Taktes und das g auf 1/4 + 2/12 = 5/12 nach dem Beginn des Taktes.
+Hier haben wir ein c auf Schlag 1, welches bis zum Schlag 2 dauert (1 Viertel), gefolgt von einer Triole die aus den drei Elementen Pause, f und g besteht (innerhalb der geschweiften Klammer) und bis zum 3. Schlag dauert (da folgt das nächste Ereignis). Damit ist die Gesamtlänge der Triole von Schlag 2 bis Schlag 3 = 1 Schlag (Viertel) und diese Gesamtlänge wird auf drei Elemente aufgeteilt. Damit dauert jedes Element 1/12 vom 4/4 Takt. Da das erste Element eine Pause ist, beginnt das f auf 1/4 + 1/12 = 4/12 = 1/3 nach dem Beginn des Taktes und das g auf 1/4 + 2/12 = 5/12 nach dem Beginn des Taktes.
 
 Mathematisch mag es etwas kompliziert erscheinen, aber intuitiv ist es leicht erfassbar, wenn man sich bewusst macht, dass die Gesamtdauer eben ein Viertel beträgt und damit genauso lang ist, wie das c, nur in drei gleiche 
 Zeiteinheiten aufgeteilt.
@@ -576,7 +576,8 @@ Diese Notation wir auch nicht komplizierter, wenn wir sie mit komplexeren Dauern
 ```
 =
       |piano         | 
-    2&|{*,f,g,*,g}6&  |
+    2&|{*,f,g,*,g}   |
+    6&|*             |
 ```
 
 Hier hat die N-Tole eine 5-Teilung und dauert von 2& bis über den 4/4 Takt hinaus: Die 6& ist das gedachte Weiterzählen in Schlägen und wir enden auf der 2& des nächsten Taktes (beim 4/4 Takt).
@@ -590,13 +591,22 @@ nicht notierbar, geweige denn lesbar.
 In Kombination mit dem SMF-Export und dem Anhören des Ergebnisses am Computer ergeben sich dennoch interessante
 Felder für Experimente, wenn man das Urteil dem Ohr überlässt.
 
-Folgende wichtigen Regeln müssen beim Umgang mit N-Tolen beachtet werden:
+Normalerweise beendet der Start einer n-Tole alle monophonen Noten. Erscheint aber an der ersten oder den ersten Positionen
+der n-Tole ein Doppelpunkt, so werden diese "durchlässig" und die vorige Note erklingt bis zum ersten "nicht-Doppelpunkt".
 
-1. Die Endposition der N-Tole darf nicht vor der Startposition liegen.
+Polyphone Noten klingen ohnehin durch n-Tolen "hindurch", es sei denn, die entsprechende Endnote erscheint innerhalb der n-Tole.
 
-2. Es darf in der gleichen Spur kein weiteres Ereignis zwischen Start- und Endposition der N-Tole liegen.
+```
+=
+      |piano         | 
+    1 |*c*d_*        |
+    2&|{:,f_,g_}     |
+    3&|{_f,_d,_g}    |
+    6&|*             |
+```
 
-3. Eine Endposition muss immer angegeben werden und valide sein.
+Hier erklingt d von 1 bis auf die zweite Position innerhalb der n-Tole auf 3&, während c bis 3& erklingt
+und f und g an entsprechender Position innerhalb der n-Tole auf 3& beendet werden.
  
 # Zufallselemente
 

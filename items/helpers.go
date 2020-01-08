@@ -2,30 +2,208 @@ package items
 
 import (
 	"fmt"
+	"math"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"gitlab.com/gomidi/midi/smf"
 )
+
+func calcAdd(distance int64, diff float64) float64 {
+	return diff / float64(distance)
+}
+
+func calcAdd2(distance int64, diff float64) float64 {
+	return diff / (float64(distance) * float64(distance))
+}
+
+var dottedLengths = map[string][2]uint32{
+	//".":   [2]uint32{1, 8},
+	":":   [2]uint32{1, 16},
+	"::":  [2]uint32{1, 32},
+	":::": [2]uint32{1, 64},
+}
+
+func linearGlide(wr SMFWriter, distance int64, noteDiff int64, callback func(val float64)) {
+
+	// pitch0      = f(0)        =  note0
+	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance * step
+	// pitchTarget = f(distance) =  note0 + (noteTarget-note0)/distance * distance = note0 + noteTarget - note0 = noteTarget
+	// y             f(x)        =  a     +      m                      * x
+	// m                         =  (noteTarget-note0)/distance
+
+	m := calcAdd(distance, float64(noteDiff))
+	wr.RestoreTimeline()
+
+	for step := int64(1); step <= distance; step++ {
+		MIDITrack.GlideForward(wr)
+		callback(m * float64(step))
+	}
+}
+
+func CalcNoteDelay(resolution smf.MetricTicks) (delay int32) {
+	return int32(math.Round(float64(resolution.Ticks4th()) * 4 / 128))
+}
+
+func exponentialGlide(wr SMFWriter, distance int64, noteDiff int64, callback func(val float64)) {
+	// y             f(x)        =  a     +      m                       * x²
+	// pitch0      = f(0)        =  note0
+	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance² * step²
+	// pitchTarget = f(distance) =  note0 + (noteTarget-note0)/distance² * distance² = note0 + noteTarget - note0 = noteTarget
+	// m                         =  (noteTarget-note0)/distance²
+
+	m := calcAdd2(distance, float64(noteDiff))
+	wr.RestoreTimeline()
+
+	for step := int64(1); step <= distance; step++ {
+		MIDITrack.GlideForward(wr)
+		callback(m * float64(step) * float64(step))
+	}
+}
+
+func LinearTempoChange(wr SMFWriter, distance int64, diff float64, callback func(val float64)) {
+
+	// pitch0      = f(0)        =  note0
+	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance * step
+	// pitchTarget = f(distance) =  note0 + (noteTarget-note0)/distance * distance = note0 + noteTarget - note0 = noteTarget
+	// y             f(x)        =  a     +      m                      * x
+	// m                         =  (noteTarget-note0)/distance
+
+	m := calcAdd(distance, diff)
+	//fmt.Printf("linearGlissando: m = %0.5f\n", m)
+	wr.RestoreTimeline()
+	//var pb int16
+
+	for step := int64(1); step <= distance; step++ {
+		//iw.wr.Forward(0, 1, 32)
+		wr.Forward(0, 1, 16)
+		callback(m * float64(step))
+		//pb = halfTonesToPitchbend(m*float64(step), iw.instr.PitchbendRange)
+		//iw.wr.Pitchbend(pb)
+	}
+
+	//iw.prevPitchbend = pb
+}
+
+func ExponentialTempoChange(wr SMFWriter, distance int64, diff float64, callback func(val float64)) {
+	// y             f(x)        =  a     +      m                       * x²
+	// pitch0      = f(0)        =  note0
+	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance² * step²
+	// pitchTarget = f(distance) =  note0 + (noteTarget-note0)/distance² * distance² = note0 + noteTarget - note0 = noteTarget
+	// m                         =  (noteTarget-note0)/distance²
+
+	m := calcAdd2(distance, diff)
+	wr.RestoreTimeline()
+	//var pb int16
+
+	for step := int64(1); step <= distance; step++ {
+		//iw.wr.Forward(0, 1, 32)
+		wr.Forward(0, 1, 16)
+		callback(m * float64(step) * float64(step))
+		//pb = halfTonesToPitchbend(m*float64(step)*float64(step), iw.instr.PitchbendRange)
+		//iw.wr.Pitchbend(pb)
+	}
+
+	//iw.prevPitchbend = pb
+}
+
+func stripNoteOnOff(data string) (noteOn bool, noteOff bool, rest string) {
+	rest = data
+
+	if usIdx := strings.LastIndex(rest, "_"); usIdx == len(rest)-1 && usIdx > 0 {
+		noteOn = true
+		rest = rest[:usIdx]
+	}
+
+	if usIdx := strings.Index(rest, "_"); usIdx == 0 {
+		noteOff = true
+		rest = rest[1:]
+	}
+
+	return
+}
+
+func KeyToNote(key uint8) (letter, augmenter string, octave int) {
+	nt := key % 12
+	octave = int(key) / 12
+	//midinote := 48 // c
+	if octave >= 4 {
+		octave -= 3
+	} else {
+		octave -= 4
+	}
+
+	// octave -= 3
+	if octave > 10 {
+		octave = 10
+	}
+
+	switch nt {
+	case 0:
+		letter = "c"
+	case 1:
+		letter = "c"
+		augmenter = "#"
+	case 2:
+		letter = "d"
+	case 3:
+		letter = "d"
+		augmenter = "#"
+	case 4:
+		letter = "e"
+	case 5:
+		letter = "f"
+	case 6:
+		letter = "f"
+		augmenter = "#"
+	case 7:
+		letter = "g"
+	case 8:
+		letter = "g"
+		augmenter = "#"
+	case 9:
+		letter = "a"
+	case 10:
+		letter = "a"
+		augmenter = "#"
+	case 11:
+		letter = "b"
+	}
+	return
+}
 
 // if returned vel is < 0, then it has not been set and
 // is drived from the previous velocity
 // always return such that rand.Intn(4) can be added or substracted
-func DynamicToVelocity(dyn string) (vel int8) {
-	vel = -1
+func DynamicToVelocity(dyn string, min, max, randomness, step, center int8) (vel int8) {
+
+	//vel = -1
+	// reset to mezzoforte
+	//vel = 63
+	vel = center
+
 	for _, rn := range dyn {
 		switch rn {
 		case '+':
-			if vel == -1 {
-				vel = 63
-			}
-			vel += 15
+			/*
+				if vel == -1 {
+					vel = 63
+				}
+			*/
+			vel += int8(step)
 		case '-':
-			if vel == -1 {
-				vel = 63
-			}
-			vel -= 15
-		case '=': // reset
-			vel = 63
+			/*
+				if vel == -1 {
+					vel = 63
+				}
+			*/
+			vel -= int8(step)
+		case '=':
+			//vel = 63
+			// take previous value
+			vel = -1
 		}
 	}
 
@@ -33,23 +211,50 @@ func DynamicToVelocity(dyn string) (vel int8) {
 		return vel
 	}
 
-	if vel > 127 {
-		vel = 123
+	if vel > max-randomness {
+		vel = max - randomness
 	}
 
-	if vel < 5 {
-		vel = 5
+	if vel < min+randomness {
+		vel = min + randomness
 	}
 
 	return
 }
 
+func CentsToPitchbend(cents float64, _range uint8) int16 {
+	return HalfTonesToPitchbend(cents/100.0, _range)
+}
+
+func HalfTonesToPitchbend(halftones float64, _range uint8) int16 {
+	res := int16(math.Round(halftones * 8192.0 / float64(_range)))
+	if res < -8191 {
+		return -8191
+	}
+
+	if res > 8192 {
+		return 8192
+	}
+
+	return res
+}
+
+func FreqRatioToCent(num, denom uint8) float64 {
+	// 1200·log2(6⁄5) Cent = 315,641 Cent
+
+	//log2(6/5) = ln(6/5) / ln(2)
+
+	return 1200.0 * math.Log2(float64(num)/float64(denom))
+}
+
 func velocityToDynamic(vel int8) (dyn string) {
 	switch vel {
 	case -1:
-		return ""
-	case 63:
+		//return ""
 		return "="
+	case 63:
+		//return "="
+		return ""
 	case 78:
 		return "+"
 	case 93:
@@ -77,8 +282,10 @@ type templateFragment struct {
 }
 
 func (f *templateFragment) parse(s string) {
+	//fmt.Printf("templateFragment.parse(%q)\n", s)
 	if regPos.MatchString(s) {
 		all := regPos.FindAllString(s, 1)
+		//fmt.Printf("matching: %v\n", all)
 		f.position = all[0]
 
 		s = regPos.ReplaceAllString(s, "")
@@ -103,7 +310,7 @@ func splitItems(def string) (items []string) {
 	return
 }
 
-func ReplaceItemWith(replacement string) (position string, item string) {
+func replaceItemWith(replacement string) (position string, item string) {
 	var frepl templateFragment
 	frepl.parse(replacement)
 
@@ -228,4 +435,30 @@ func PositionTo32th(lastPos, pos string) (completed string, num32th uint, err er
 
 	return
 
+}
+
+func slice(start, end int, s [][]bool) [][]bool {
+	if end < 0 {
+		end = len(s) + end
+	}
+	return append([][]bool{}, s[start:end]...)
+}
+
+func mapp(gr [][]bool, fn func([]bool, int) []bool) [][]bool {
+	var result [][]bool
+	for i, gg := range gr {
+		result = append(result, fn(gg, i))
+	}
+	return result
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func compareArrays(a, b []bool) (equal bool) {
+	return reflect.DeepEqual(a, b)
 }
