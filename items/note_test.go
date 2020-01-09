@@ -48,9 +48,11 @@ func TestNote(t *testing.T) {
 		"c\"\"+",
 		"c\"\"\"++",
 		"c\"'+++",
+		"c\"'+++--",
 		"c\"'++++",
 		"c\"'-",
 		"C\"'--",
+		"C^2\"'--",
 		"C\"'---",
 		"C#\"'----",
 		"C#\"'=",
@@ -65,6 +67,7 @@ func TestNote(t *testing.T) {
 		}
 
 		var n2 = nt.Dup().(*Note)
+		n2.Transposition = 0
 		// n2.velocity = -1
 
 		n2.Letter, n2.Augmenter, n2.Octave = KeyToNote(nt.ToMIDI())
@@ -72,7 +75,7 @@ func TestNote(t *testing.T) {
 		//fmt.Printf("%s: %v -> %v\n", test, nt.toMIDI(), n2.String())
 		got1 := n2.String()
 
-		if got1 != test {
+		if got1 != test && n2.ToMIDI() != nt.ToMIDI() {
 			t.Errorf("keyToNote(%s.toMIDI()) == %q // expected %q", test, got1, test)
 		}
 

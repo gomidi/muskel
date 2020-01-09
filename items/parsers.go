@@ -277,7 +277,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			nt := &Note{}
 			err := nt.Parse(data, posIn32th)
 			if err != nil {
-				return nil, fmt.Errorf("unknown item: %#v", data)
+				return nil, fmt.Errorf("unknown item: %#v: %s", data, err)
 			}
 			return nt, nil
 		}

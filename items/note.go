@@ -1,6 +1,7 @@
 package items
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"math/rand"
@@ -19,6 +20,7 @@ type Note struct {
 	Augmenter string
 	//Velocity       int8
 	Dynamic        string
+	Transposition  int8
 	GlissandoStart bool
 	GlissandoExp   bool
 	Dotted         string
@@ -66,6 +68,8 @@ func (note Note) ToMIDI() (midinote_ uint8) {
 		//case "°":
 	}
 
+	midinote += int(note.Transposition)
+
 	if midinote > 127 {
 		midinote = 127
 	}
@@ -89,6 +93,9 @@ func (n Note) String() string {
 
 		bf.WriteString(letter)
 		bf.WriteString(n.Augmenter)
+		if n.Transposition != 0 {
+			bf.WriteString(fmt.Sprintf("^%v", n.Transposition))
+		}
 
 		switch n.Octave {
 		case -5, 5:
@@ -120,8 +127,12 @@ func (n Note) String() string {
 		default:
 			panic(fmt.Sprintf("invalid octave: %v", n.Octave))
 		}
+
 	} else {
 		bf.WriteString(fmt.Sprintf("^%v", n.ScaleNote))
+		if n.Transposition != 0 {
+			bf.WriteString(fmt.Sprintf("^%v", n.Transposition))
+		}
 	}
 
 	//bf.WriteString(velocityToDynamic(n.Velocity))
@@ -162,7 +173,47 @@ func (n Note) Dup() Item {
 	return &n
 }
 
+func parseTransposition(data string) (trans int8, rest string, err error) {
+	var numbf bytes.Buffer
+	var restbf bytes.Buffer
+	var numComplete bool
+	var minusPossible = true
+
+	for _, char := range data {
+		switch char {
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			minusPossible = false
+			if !numComplete {
+				numbf.WriteRune(char)
+			} else {
+				restbf.WriteRune(char)
+			}
+		case '-':
+			if !minusPossible {
+				numComplete = true
+			}
+			if !numComplete {
+				numbf.WriteRune(char)
+			} else {
+				restbf.WriteRune(char)
+			}
+		default:
+			if !numComplete {
+				numComplete = true
+			}
+			restbf.WriteRune(char)
+		}
+	}
+
+	tr, err := strconv.Atoi(numbf.String())
+	if err != nil {
+		return 0, "", fmt.Errorf("can't parse number of transposition in %q", data)
+	}
+	return int8(tr), restbf.String(), nil
+}
+
 func (nt *Note) Parse(data string, posIn32th uint) (err error) {
+	original := data
 
 	nt.NoteOn, nt.NoteOff, data = stripNoteOnOff(data)
 
@@ -174,14 +225,42 @@ func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 		nt.Letter = strings.ToLower(data[:1])
 		nt.Octave = -1
 	default:
-		err = fmt.Errorf("invalid note: %#v", data)
+		err = fmt.Errorf("invalid note: %#v I", original)
 		return
 	}
+
+	if len(data) > 1 {
+		data = data[1:]
+	} else {
+		data = ""
+	}
+
+	if len(data) > 0 && data[0] == '#' {
+		nt.Augmenter = "#"
+		if len(data) > 1 {
+			data = data[1:]
+		} else {
+			data = ""
+		}
+	}
+
+	if idx := strings.Index(data, "^"); idx >= 0 {
+		if len(data) < 2 {
+			err = fmt.Errorf("invalid note: %#v II", original)
+		}
+		nt.Transposition, data, err = parseTransposition(data[1:])
+		if err != nil {
+			err = fmt.Errorf("invalid note: %#v: %s III", original, err)
+			return
+		}
+	}
+
+	//fmt.Printf("note data: %q\n", data)
 
 	var dynamic string
 	var gliss int
 
-	for _, l := range data[1:] {
+	for _, l := range data {
 		switch l {
 		case ':':
 			nt.Dotted += ":"
@@ -197,8 +276,8 @@ func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 			nt.PosShift = 1
 		case '<':
 			nt.PosShift = -1
-		case '#':
-			nt.Augmenter += "#"
+		//case '#':
+		//	nt.Augmenter += "#"
 		//case '^':
 		//nt.Augmenter += "^"
 		//case '°':
@@ -220,7 +299,7 @@ func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 				nt.Octave -= 1
 			}
 		default:
-			err = fmt.Errorf("invalid note: %#v", data)
+			err = fmt.Errorf("invalid note: %#v IV", original)
 			return
 		}
 	}
@@ -365,20 +444,58 @@ func (v Note) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
 var regScaleNote = regexp.MustCompile("^(-){0,1}([0-9]+)(.*)$")
 
 func (nt *Note) parseScale(data string) (err error) {
+	original := data
 
 	nt.NoteOn, nt.NoteOff, data = stripNoteOnOff(data)
 
+	var transp int8
+
+	if idx := strings.Index(data, "^"); idx > 0 {
+		if len(data[idx:]) < 2 {
+			err = fmt.Errorf("invalid scale note: %#v I", original)
+		}
+		pre := data[:idx]
+		transp, data, err = parseTransposition(data[idx+1:])
+		if err != nil {
+			err = fmt.Errorf("invalid scale note: %#v: %s II", original, err)
+			return
+		}
+
+		data = pre + data
+	}
+
 	mt := regScaleNote.FindStringSubmatch(data)
-	// fmt.Printf("scale note %q match: %#v\n", data, mt)
+	//fmt.Printf("scale note %q match: %#v\n", data, mt)
 	var i int
 	i, err = strconv.Atoi(mt[1] + mt[2])
 
 	if err != nil {
-		err = fmt.Errorf("invalid scale note: %#v", data)
+		err = fmt.Errorf("invalid scale note: %#v III", data)
 		return
 	}
 
 	nt.ScaleNote = int8(i)
+	switch {
+	case transp == 0:
+	case nt.ScaleNote > 0 && transp > 0:
+		nt.ScaleNote += transp
+	case nt.ScaleNote < 0 && transp < 0:
+		nt.ScaleNote += transp
+	case nt.ScaleNote == 0:
+		err = fmt.Errorf("invalid scale note: %#v III", data)
+		return
+	case nt.ScaleNote+transp == 0:
+		if transp > 0 {
+			nt.ScaleNote = 1
+		} else {
+			nt.ScaleNote = -1
+		}
+	case nt.ScaleNote < 0 && transp > 0:
+		nt.ScaleNote = nt.ScaleNote + transp
+		if nt.ScaleNote >= 0 {
+			nt.ScaleNote += 1
+		}
+	}
 
 	var dynamic string
 
@@ -429,7 +546,7 @@ func (nt *Note) parseScale(data string) (err error) {
 				}
 		*/
 		default:
-			err = fmt.Errorf("invalid scale note: %#v", data)
+			err = fmt.Errorf("invalid scale note: %#v IV", data)
 			return
 		}
 	}

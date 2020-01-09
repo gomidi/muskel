@@ -1685,6 +1685,27 @@ TRACK   | Vocals | Drums |
   2    |       | (c "c")  |
 `,
 		},
+		{ // 50
+			`
+=melody | Verse1 |
+ #
+  1     | a^2      |
+  2     | a^-2     |
+
+TRACK   | Vocals |
+ Channel| 1      |
+
+=SCORE  | Vocals |
+ #
+  1     |   =melody    |
+`,
+			`
+=SCORE | Vocals |
+ # 4/4 @120.00
+  1    | a^2    |
+  2    | a^-2   |
+`,
+		},
 		/*
 			 - firstsync scheint nicht richtig zu funktionieren
 			(z.B. einbetten von =!patt1 auf 4&, wobei patt1 patt2 einbindet ohne ! auf 1 und patt2 erste note auf 4& hat)

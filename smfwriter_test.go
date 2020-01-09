@@ -2827,6 +2827,52 @@ TRACK   | Vocals | Drums |
 [2880] channel.NoteOff channel 0 key 48
 `,
 		},
+		{
+			// 100
+			`
+
+TRACK   | Vocals | 
+ Channel| 1      |      
+
+=SCORE | Vocals |
+ #
+  1    | c^2'--     |
+  2    | c^-2'++     |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 62 dyn --
+[960] channel.NoteOff channel 0 key 62
+[0] channel.NoteOn channel 0 key 58 dyn ++
+[2880] channel.NoteOff channel 0 key 58
+`,
+		},
+		{
+			// 101
+			`
+
+TRACK   | Vocals | 
+ Channel| 1      |      
+
+=SCORE | Vocals |
+ #
+  1    | ^1^2--     |
+  2    | ^1^-1++     |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 64 dyn --
+[960] channel.NoteOff channel 0 key 64
+[0] channel.NoteOn channel 0 key 59 dyn ++
+[2880] channel.NoteOff channel 0 key 59
+`,
+		},
 		/*
 			{ // 47
 						`

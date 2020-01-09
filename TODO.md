@@ -9,9 +9,6 @@
   multiple calls of embed could be done. it would be great, if these "globals" would only be globals for the current file/score.
   but that would require the token resolving procedure to change a bit, I guess. (maybe its time to separate token resolving from pattern resolving, which also might make sense, since token resolving must not be recursive while pattern resolving may be)
 
-- allow notes and midinotes to be transposed, e.g. c'^12 is the same as c" and c'^12^-4 is g#'
-  ^2^4 is the same as ^6 and ^2^4^-3 is ^3
-
 - tempowechsel und globale scalewechsel mitten im takt ermöglichen:
   in der positionsspalte hinter der position, durch leerzeichen abgetrennt, z.B.
   2& @220 \major^g#' diese müssen im takt gespeichert werden (mit ihrer position)
@@ -19,6 +16,8 @@
 - allow to use parts like patterns inside cols (via [part] syntax): 
   that allows to selectively repeat parts (just for some cols) and to override not fitting things
     
+- cleanup scalenotes: make nt.ScaleNote a *int8 and copy it when duplicating. when it is not set, it is no scale note. otherwise it
+  is the step (counting from 0). parsing makes 1->0 2->1 etc but -1->-1 this should make scale calculations and transpositions easier.
 
 - improve/fix scale definition syntax in a way that chords could also be defined as a scale
 - fix mounting patterns / scale notes within patterns
