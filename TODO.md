@@ -1,10 +1,14 @@
 # nächste TODOs
 
-- $_euclid with tokens, multiitems, ntuples etc
-
 - fix problem with lyrics
 - fix: glissandi führen zu positionsverschiebungen
+
 - fix replace/overwrite nach taktwiederholungen mit .2. etc.
+
+- add $embed() command with params like drums.* (would allow all tokens in the drum table to be addressed without the drums. prefix)
+  or drums.sn (would only allow sn to be addressed without the drums. prefix). Multiple of these params could be passed to $embed.
+  multiple calls of embed could be done. it would be great, if these "globals" would only be globals for the current file/score.
+  but that would require the token resolving procedure to change a bit, I guess. (maybe its time to separate token resolving from pattern resolving, which also might make sense, since token resolving must not be recursive while pattern resolving may be)
 
 - allow notes and midinotes to be transposed, e.g. c'^12 is the same as c" and c'^12^-4 is g#'
   ^2^4 is the same as ^6 and ^2^4^-3 is ^3

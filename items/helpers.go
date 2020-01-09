@@ -1,6 +1,7 @@
 package items
 
 import (
+	"bytes"
 	"fmt"
 	"math"
 	"reflect"
@@ -378,6 +379,33 @@ func getQNNumberFromPos(pos string) (qnnumber int, rest string) {
 		}
 	}
 
+	return
+}
+
+func splitParams(params string) (res []string) {
+	var embed int
+	var bf bytes.Buffer
+
+	for _, char := range params {
+		switch char {
+		case ',':
+			if embed > 0 {
+				bf.WriteRune(char)
+			} else {
+				res = append(res, bf.String())
+				bf.Reset()
+			}
+		case '{':
+			embed++
+			bf.WriteRune(char)
+		case '}':
+			embed--
+			bf.WriteRune(char)
+		default:
+			bf.WriteRune(char)
+		}
+	}
+	res = append(res, bf.String())
 	return
 }
 

@@ -486,6 +486,54 @@ func (t *testScore) Properties() map[string]interface{} {
 	return nil
 }
 
+func TestSketchFromEventsLine(t *testing.T) {
+	var line = `1e|2&#1|5#2|10#1 `
+	sk, err := sketchFromEventsLine("test", line, &testScore{})
+	_ = sk
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	_, evts, err := sk.Unroll("pattern", "a", "b")
+	_ = evts
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	bars, err := sk.UnrolledBars()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(bars) != 3 {
+		t.Errorf("must have %v bars, but has: %v", 3, len(bars))
+	}
+
+	if len(evts) != 4 {
+		t.Errorf("must have %v events, but has: %v", 4, len(evts))
+	}
+
+	if evts[3].Position != 72 {
+		t.Errorf("last event must have pos %v but has: %v", 72, evts[3].Position)
+	}
+
+	/*
+		fmt.Printf("sk.Bars: %v\n", sk.Bars)
+		fmt.Printf("sk.Positions: %v\n", sk.Positions)
+		fmt.Printf("sk.Columns: %v\n", sk.Columns)
+		fmt.Printf("sk.colOrder: %v\n", sk.colOrder)
+
+		fmt.Printf("bars: %v\n", bars)
+		fmt.Printf("events: %v\n", evts)
+
+		DEBUG = true
+		printEvents("test", evts)
+		DEBUG = false
+	*/
+	_ = bars
+}
+
 func TestCall(t *testing.T) {
 	//t.Skip()
 	var s = NewSketch("sk", nil)

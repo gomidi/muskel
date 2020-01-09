@@ -5,6 +5,29 @@ import (
 	"testing"
 )
 
+func TestSplitParams(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected []string
+	}{
+		{"a,b,c", []string{"a", "b", "c"}},
+		{"a,{b,c}", []string{"a", "{b,c}"}},
+		{"a,{b,c},e", []string{"a", "{b,c}", "e"}},
+		{"a,(b c),e", []string{"a", "(b c)", "e"}},
+		{"a,(b c)...,e", []string{"a", "(b c)...", "e"}},
+		{"a,{b,{g,b}},e", []string{"a", "{b,{g,b}}", "e"}},
+	}
+
+	for i, test := range tests {
+
+		result := splitParams(test.input)
+
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Errorf("[%v] splitParams(%v) = %#v // expected: %#v", i, test.input, result, test.expected)
+		}
+	}
+}
+
 func TestEuclideanRhythm1(t *testing.T) {
 	tests := []struct {
 		start32th uint
@@ -13,11 +36,11 @@ func TestEuclideanRhythm1(t *testing.T) {
 		dur       string
 		expected  string
 	}{
-		{0, "3", "8", "&", "1#1 1&#2 2#2 2&#1 3#2 3&#2 4#1 4&#2"},
-		{0, "3", "8", "1", "1#1 2#2 3#2 4#1 5#2 6#2 7#1 8#2"},
-		{0, "3", "8", ".", "1#1 1.#2 1&#2 1&.#1 2#2 2.#2 2&#1 2&.#2"},
-		{8, "3", "8", "&", "2#1 2&#2 3#2 3&#1 4#2 4&#2 5#1 5&#2"},
-		{4, "5", "8", "&", "1&#1 2#2 2&#1 3#1 3&#2 4#1 4&#1 5#2"},
+		{0, "3", "8", "&", "1#1|1&#2|2#2|2&#1|3#2|3&#2|4#1|4&#2"},
+		{0, "3", "8", "1", "1#1|2#2|3#2|4#1|5#2|6#2|7#1|8#2"},
+		{0, "3", "8", ".", "1#1|1.#2|1&#2|1&.#1|2#2|2.#2|2&#1|2&.#2"},
+		{8, "3", "8", "&", "2#1|2&#2|3#2|3&#1|4#2|4&#2|5#1|5&#2"},
+		{4, "5", "8", "&", "1&#1|2#2|2&#1|3#1|3&#2|4#1|4&#1|5#2"},
 	}
 
 	for i, test := range tests {

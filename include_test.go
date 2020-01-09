@@ -1427,6 +1427,186 @@ TRACK | x |
   4    | a  |  
    `,
 		},
+		{ // 42
+			`
+$include("drumnote")
+
+=rhythm |a|
+#
+1   |$_euclid(3,12,&)| 
+*3
+
+TRACK | Drums |
+
+=SCORE |  Drums                      |
+#
+1      |  =rhythm(f",drums.sn) |
+2&     |                             |
+#
+1      |                             |
+`,
+			`
+=SCORE | Drums   |
+ # 4/4 @120.00
+  1    | f"      |
+  1&   | MN40::: |
+  2    | MN40::: |
+  2&   | MN40::: |
+  3    | f"      |
+  3&   | MN40::: |
+  4    | MN40::: |
+  4&   | MN40::: |
+ #
+  1    | f"      |
+  1&   | MN40::: |
+  2    | MN40::: |
+  2&   | MN40::: |
+`,
+		},
+		{ // 43
+			`
+$include("drumnote")
+
+=rhythm |a|
+#
+1   |$_euclid(3,12,&)| 
+*3
+
+TRACK | Drums |
+
+=SCORE |  Drums                      |
+#
+1      |  =rhythm((f" g),drums.sn) |
+2&     |                             |
+#
+1      |                             |
+`,
+			`
+=SCORE | Drums   |
+ # 4/4 @120.00
+  1    | (f" g)  |
+  1&   | MN40::: |
+  2    | MN40::: |
+  2&   | MN40::: |
+  3    | (f" g)  |
+  3&   | MN40::: |
+  4    | MN40::: |
+  4&   | MN40::: |
+ #
+  1    | (f" g)  |
+  1&   | MN40::: |
+  2    | MN40::: |
+  2&   | MN40::: |
+`,
+		},
+		{ // 44
+			`
+$include("drumnote")
+
+=rhythm |a|
+#
+1   |$_euclid(3,12,&)| 
+*3
+
+TRACK | Drums |
+
+=SCORE |  Drums                      |
+#
+1      |  =rhythm(drums.kd,(drums.sn drums.kd)) |
+2&     |                             |
+#
+1      |                             |
+`,
+			`
+=SCORE | Drums             |
+ # 4/4 @120.00
+  1    | MN36:::           |
+  1&   | (MN40::: MN36:::) |
+  2    | (MN40::: MN36:::) |
+  2&   | (MN40::: MN36:::) |
+  3    | MN36:::           |
+  3&   | (MN40::: MN36:::) |
+  4    | (MN40::: MN36:::) |
+  4&   | (MN40::: MN36:::) |
+ #
+  1    | MN36:::           |
+  1&   | (MN40::: MN36:::) |
+  2    | (MN40::: MN36:::) |
+  2&   | (MN40::: MN36:::) |
+`,
+		},
+		{ // 45
+			`
+$include("drumnote")
+
+=rhythm |a|
+#
+1   |$_euclid(3,12,&)| 
+*3
+
+TRACK | Drums |
+
+=SCORE |  Drums                      |
+#
+1      |  =rhythm(drums.kd,{a,b}) |
+2&     |                             |
+#
+1      |                             |
+`,
+			`
+=SCORE | Drums   |
+ # 4/4 @120.00
+  1    | MN36::: |
+  1&   | {a,b}   |
+  2    | {a,b}   |
+  2&   | {a,b}   |
+  3    | MN36::: |
+  3&   | {a,b}   |
+  4    | {a,b}   |
+  4&   | {a,b}   |
+ #
+  1    | MN36::: |
+  1&   | {a,b}   |
+  2    | {a,b}   |
+  2&   | {a,b}   |
+`,
+		},
+		{ // 46
+			`
+$include("drumnote")
+
+=rhythm |a|
+#
+1   |$_euclid(3,12,&)| 
+*3
+
+TRACK | Drums |
+
+=SCORE |  Drums                      |
+#
+1      |  =rhythm(drums.kd,{drums.kd,b}) |
+2&     |                             |
+#
+1      |                             |
+`,
+			`
+=SCORE | Drums       |
+ # 4/4 @120.00
+  1    | MN36:::     |
+  1&   | {MN36:::,b} |
+  2    | {MN36:::,b} |
+  2&   | {MN36:::,b} |
+  3    | MN36:::     |
+  3&   | {MN36:::,b} |
+  4    | {MN36:::,b} |
+  4&   | {MN36:::,b} |
+ #
+  1    | MN36:::     |
+  1&   | {MN36:::,b} |
+  2    | {MN36:::,b} |
+  2&   | {MN36:::,b} |
+`,
+		},
 		/*
 			 - firstsync scheint nicht richtig zu funktionieren
 			(z.B. einbetten von =!patt1 auf 4&, wobei patt1 patt2 einbindet ohne ! auf 1 und patt2 erste note auf 4& hat)
@@ -1461,12 +1641,17 @@ TRACK | x |
 		*/
 	}
 
-	//	sketch.DEBUG = true
+	// sketch.DEBUG = true
 
 	for i, test := range tests {
 
 		// fmt.Printf("############ %v ###############\n", i)
 
+		/*
+			if i != 46 {
+				continue
+			}
+		*/
 		if i == 36 {
 			continue
 		}

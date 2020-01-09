@@ -1,27 +1,135 @@
 package sketch
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"gitlab.com/gomidi/muskel/items"
 )
 
-func eventsFromPatternDef(patternDef string, posshift int, posIn32th uint, params []string) (evts []*Event) {
-	var p items.Call
-	var ps items.Parser
-	p.ItemParser = &ps
+func parseEventsLineItem(posItem string) (pos, value string, err error) {
+	//fmt.Printf("parse eventslineItem: %v\n", posItem)
+	var positionBf strings.Builder
+	var bf strings.Builder
+	rd := bufio.NewReader(strings.NewReader(strings.TrimSpace(posItem)))
+	positionFound := false
+	var rn rune
+
+	for err == nil {
+		rn, _, err = rd.ReadRune()
+
+		if err != nil {
+			break
+		}
+
+		switch {
+		case strings.IndexRune("1234567890&;:.", rn) >= 0:
+			if !positionFound {
+				positionBf.WriteRune(rn)
+			} else {
+				bf.WriteRune(rn)
+			}
+		default:
+			positionFound = true
+			bf.WriteRune(rn)
+		}
+
+	}
+
+	if err != nil && err != io.EOF {
+		return
+	}
+
+	pos = positionBf.String()
+	value = bf.String()
+	err = nil
+	return
+}
+
+func sketchFromEventsLine(name string, patternDef string, sc Score) (*Sketch, error) {
+	posItems := strings.Split(patternDef, "|")
+	var sk = NewSketch(name, sc)
+	sk.AddColumn("pattern")
+	err := sk.ParseLine([]string{"#"})
+	//fmt.Printf("ParseLine: #\n")
+	if err != nil {
+		return nil, err
+	}
+	var barNo uint
+
+	for _, posItem := range posItems {
+		pos, val, err := parseEventsLineItem(posItem)
+
+		if err != nil {
+			return nil, err
+		}
+
+		var num32 uint
+		_, num32, err = items.PositionTo32th("", pos)
+
+		if err != nil {
+			return nil, err
+		}
+
+		b := num32 / 32
+		rest := num32 % 32
+
+		for b > barNo {
+			//fmt.Printf("ParseLine: #\n")
+			err = sk.ParseLine([]string{"#"})
+			if err != nil {
+				return nil, err
+			}
+			barNo++
+		}
+
+		//fmt.Printf("ParseLine: %s | %s\n", items.Pos32thToString(rest), val)
+
+		err = sk.ParseLine([]string{items.Pos32thToString(rest), val, ""})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return sk, nil
+}
+
+func eventsFromPatternDef(name, patternDef string, sc Score, posshift int, posIn32th uint, params []string) (evts []*Event, err error) {
+	replaced := replaceParams(patternDef, params)
+	//fmt.Printf("eventsFromPatternDef replaced: %q\n", replaced)
+	sk, err := sketchFromEventsLine(name, replaced, sc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, _evts, err := sk.Unroll("pattern")
+
+	if err != nil {
+		return nil, err
+	}
+
+	//var p items.Call
+	//var ps items.Parser
+	//p.ItemParser = &ps
 	// p.Params = params
 
-	p.ParseEventsLine(replaceParams(patternDef, params), posshift, posIn32th)
+	//p.ParseEventsLine(replaceParams(patternDef, params), posshift, posIn32th)
 
-	for _, pev := range p.Events {
+	for _, pev := range _evts {
 		ev := &Event{}
 		ev.Position = pev.Position
 		ev.Item = pev.Item.Dup()
 		evts = append(evts, ev)
+	}
+
+	if DEBUG {
+		printEvents(" after eventsFromPatternDef "+patternDef, evts)
 	}
 
 	return
@@ -108,6 +216,12 @@ func getBarsInPosRange(from, to uint, bars []*Bar) (res []*Bar) {
 
 //func replaceParams(s string, params []interface{}) string {
 func replaceParams(s string, params []string) string {
+	if DEBUG {
+		fmt.Printf("should replace params %#v in %q\n", params, s)
+	}
+	if len(params) == 0 {
+		return s
+	}
 	paramslen := len(params)
 	return items.TemplateReg.ReplaceAllStringFunc(s, func(in string) (out string) {
 		i, err := strconv.Atoi(in[1:])

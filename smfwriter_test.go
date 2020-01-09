@@ -2716,6 +2716,47 @@ pp | b
 [0] meta.Undefined type:  0
 `,
 		},
+		{
+			// 97
+			`
+TRACK |p |
+Ch      |1 |
+
+sh |
+xx | c
+yy | e
+zz | g
+pp | b
+
+=SCORE |p        |
+#
+1      |{sh.xx,sh.yy,{sh.xx,:,sh.xx,{sh.zz,sh.pp}},sh.xx} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 48 dyn =
+[240] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 55 dyn =
+[60] channel.NoteOff channel 0 key 55
+[0] channel.NoteOn channel 0 key 59 dyn =
+[60] channel.NoteOff channel 0 key 59
+[0] meta.Undefined type:  0
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] meta.Undefined type:  0
+`,
+		},
 	}
 
 	for i, test := range tests {

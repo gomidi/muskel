@@ -15,7 +15,7 @@ type eventStream struct {
 
 func newEventStream(start, end uint, isTemplate bool, events ...*Event) *eventStream {
 	if DEBUG {
-		fmt.Printf("newEventStream(start: %v, end: %v, isTemplate: %v, events: %v)", start, end, isTemplate, events)
+		fmt.Printf("newEventStream(start: %v, end: %v, isTemplate: %v, events: %v)\n", start, end, isTemplate, events)
 	}
 	return &eventStream{
 		start:      start,

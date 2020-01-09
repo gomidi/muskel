@@ -25,7 +25,10 @@ func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, absoluteEnd
 
 	//_evt, diff, absoluteEnd = pc.modifyEvents(start, until, evts)
 	var _evt []*Event
-	_evt, absoluteEnd = pc.modifyEvents(start, until, evts)
+	_evt, absoluteEnd, err = pc.modifyEvents(start, until, evts)
+	if err != nil {
+		return
+	}
 
 	// TODO check if length is correct
 	length := absoluteEnd //- start
@@ -68,8 +71,11 @@ func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, absoluteEnd
 	return
 }
 
-func (c *call) modifyItem(it items.Item) items.Item {
+func (c *call) modifyItem(it items.Item) (items.Item, error) {
 	cc := c.call
+	if DEBUG {
+		fmt.Printf("modify item %T %v\n", it, it)
+	}
 	switch v := it.(type) {
 	case *items.Note:
 		it := v.Dup().(*items.Note)
@@ -79,7 +85,7 @@ func (c *call) modifyItem(it items.Item) items.Item {
 				it.PosShift = cc.PosShift
 			}
 		}
-		return it
+		return it, nil
 	case *items.MIDINote:
 		it := v.Dup().(*items.MIDINote)
 		if c != nil {
@@ -88,17 +94,40 @@ func (c *call) modifyItem(it items.Item) items.Item {
 				it.PosShift = cc.PosShift
 			}
 		}
-		return it
+		return it, nil
+
+	case *items.Call:
+		if v.IsToken() && c != nil {
+			pc := c.column.newCall(v)
+			//posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+			posEv, err := pc.getEventStream(0, 1)
+			if err != nil {
+				return nil, err
+			}
+			it := posEv.events[0].Item
+			return it, nil
+		} else {
+			return it.Dup(), nil
+		}
+
 	case *items.NTuple:
-		it := v.Dup().(*items.NTuple)
 		if c != nil {
+			it := v.Dup().(*items.NTuple)
+			it, err := c.column.replaceNtupleTokens(v)
 			if it.PosShift == 0 && cc.PosShift != 0 {
 				it.PosShift = cc.PosShift
 			}
+
+			if err != nil {
+				return nil, err
+			}
+
+			return it, nil
+		} else {
+			return v.Dup(), nil
 		}
-		return it
 	default:
-		return it.Dup()
+		return it.Dup(), nil
 	}
 }
 
@@ -123,7 +152,7 @@ func (c *call) applyLyrics(evts []*Event) ([]*Event, error) {
 }
 
 //func (pc *call) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, diff uint, end uint) {
-func (pc *call) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint) {
+func (pc *call) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint, err error) {
 	//p := pc.column
 	projectedBarEnd := pc.column.sketch.projectedBarEnd
 	for _, ev := range evts {
@@ -135,12 +164,15 @@ func (pc *call) modifyEvents(start uint, until uint, evts []*Event) (evt []*Even
 		//diff += ev.Position
 		nuEv := ev.Dup()
 		nuEv.Position = pos
-		nuEv.Item = pc.modifyItem(ev.Item)
+		nuEv.Item, err = pc.modifyItem(ev.Item)
+		if err != nil {
+			return
+		}
 		//nuEv := modEventByTemplateCall(ev, pos, tc)
 		evt = append(evt, nuEv)
 	}
 
-	//fmt.Printf("slice: %v\n", tc.Slice)
+	//fmt.Printf("slice: %v\n", pc.call.Slice)
 	evt, end = sliceEvents(pc.call.Slice, evt, projectedBarEnd)
 
 	if pc.call.Slice[0] > 0 {
@@ -206,7 +238,11 @@ func (pc *call) _getEventStream(start uint, endPos uint, isOverride bool) (*even
 	var es *eventStream
 
 	if pc.call.IsToken() {
-		es = newEventStream(start, 1, true, evts...)
+		if isOverride {
+			es = newEventStream(start, 1, true, evts...)
+		} else {
+			es = newEventStream(start, 1, false, evts...)
+		}
 	} else {
 		es = newEventStream(start, end, true, evts...)
 
@@ -252,7 +288,10 @@ func (c *call) unroll(start uint, until uint) (evt []*Event, diff uint, end uint
 		for _, it := range items {
 			ev := &Event{}
 			ev.Position = start
-			ev.Item = c.modifyItem(it)
+			ev.Item, err = c.modifyItem(it)
+			if err != nil {
+				return
+			}
 			evt = append(evt, ev)
 		}
 		end = c.column.sketch.projectedBarEnd

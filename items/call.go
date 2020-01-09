@@ -394,7 +394,11 @@ func (p *Call) __parseEvent(idx int, ev string, posIn32th uint, firstScaleNoteDi
 		return firstScaleNoteDiff, fmt.Errorf("could not parse event %q: %s", ev, err.Error())
 	}
 
+	p.Events = append(p.Events, e)
+	return firstScaleNoteDiff, nil
+
 	switch v := e.Item.(type) {
+
 	case *Call:
 		if v.ScaleMoveMode == 2 {
 			return firstScaleNoteDiff, fmt.Errorf("mounting of templates into a scale is not allowed inside template definitions, only in the score")
@@ -682,15 +686,7 @@ func (p *Call) SimpleParse(call string) error {
 	}
 
 	if params != "" {
-		ps := strings.Split(params, ",")
-
-		for _, param := range ps {
-			param = strings.TrimSpace(param)
-
-			if param != "" {
-				p.Params = append(p.Params, param)
-			}
-		}
+		p.Params = splitParams(params)
 	}
 
 	p.Slice[0] = -1

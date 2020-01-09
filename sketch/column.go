@@ -18,11 +18,17 @@ func (p *column) newCall(pc *items.Call) *call {
 	}
 }
 
-func (p *column) euclidEventStream(start uint, endPos uint, evts []*Event) *eventStream {
+func (p *column) euclidEventStream(start uint, endPos uint, evts []*Event) (*eventStream, error) {
 	var cl items.Call
 	pc := p.newCall(&cl)
 	//evts, diff, absoluteEnd := pc.modifyEvents(start, endPos, evts)
-	evts, absoluteEnd := pc.modifyEvents(start, endPos, evts)
+	printEvents("euclidEventStream before modifyEvents", evts)
+	//fmt.Printf("calling modifyEvents(%v,%v)\n", start, endPos)
+	evts, absoluteEnd, err := pc.modifyEvents(start, endPos, evts)
+	printEvents("euclidEventStream after modifyEvents", evts)
+	if err != nil {
+		return nil, err
+	}
 	//_ = diff
 	_end := uint(endPos)
 
@@ -30,7 +36,7 @@ func (p *column) euclidEventStream(start uint, endPos uint, evts []*Event) *even
 		_end = absoluteEnd
 	}
 
-	return newEventStream(start, absoluteEnd, true, evts...)
+	return newEventStream(start, absoluteEnd, true, evts...), nil
 }
 
 func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err error) {
@@ -112,7 +118,7 @@ func (p *column) unroll(ims []items.Item, endPos uint, params []string) (unrolle
 
 	var evts []*Event
 	for i, it := range ims {
-		if it == nil {
+		if it == nil || err != nil {
 			continue
 		}
 
@@ -151,6 +157,10 @@ func (p *column) unroll(ims []items.Item, endPos uint, params []string) (unrolle
 		evts = append(evts, &ev)
 	}
 
+	if err != nil {
+		return
+	}
+
 	//fmt.Printf("rolledEvts: %v\n", rolledEvts)
 	//fmt.Printf(">> rolledEvts\n")
 
@@ -183,17 +193,28 @@ func (p *column) unroll(ims []items.Item, endPos uint, params []string) (unrolle
 			switch v.Name {
 			case "_euclid":
 				var eu items.EuclideanRhythm
-				err := eu.Parse(v.Position, v.Params...)
+				err = eu.Parse(v.Position, v.Params...)
 				if err != nil {
 					continue
 				}
 
-				_evts := eventsFromPatternDef(eu.PatternDef, 0, v.Position, params)
+				_evts, err := eventsFromPatternDef(v.Name, eu.PatternDef, p.sketch.Score, 0, v.Position, params)
+
+				//DEBUG = true
+				printEvents("from _euclid", _evts)
+				//DEBUG = false
+
+				if err != nil {
+					continue
+				}
 
 				if len(_evts) == 0 {
 					continue
 				}
-				posEv = p.euclidEventStream(forward+ev.Position, endPos, _evts)
+				posEv, err = p.euclidEventStream(forward+ev.Position, endPos, _evts)
+				if err != nil {
+					continue
+				}
 			default:
 				continue
 			}

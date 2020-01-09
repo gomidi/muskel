@@ -83,7 +83,10 @@ func (e *EuclideanRhythm) Parse(startPos32th uint, params ...string) error {
 			val = "#2"
 		}
 		e.Sketch = append(e.Sketch, [2]string{pos, val})
-		bf.WriteString(pos + val + " ")
+		if i > 0 {
+			pos = "|" + pos
+		}
+		bf.WriteString(pos + val)
 	}
 
 	e.PatternDef = strings.TrimSpace(bf.String())
