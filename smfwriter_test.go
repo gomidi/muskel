@@ -571,16 +571,17 @@ Ch |1  |
 			// 21
 			`
 
-=tt |a|b|c|
-#
-1 |c|e|g#|
+tt |
+a|c
+b|e
+c|g#
 
 TRACK |p|
 Ch |1  |
 
 =SCORE |p|
 #
-1  |{=tt.a,=tt.b,=tt.c}|
+1  |{tt.a,tt.b,tt.c}|
 2  |*|
 			`,
 			2,
@@ -2453,6 +2454,266 @@ Ch     |1  |
 [1920] channel.NoteOff channel 0 key 72
 [0] channel.NoteOn channel 0 key 50 dyn =
 [1920] channel.NoteOff channel 0 key 50
+`,
+		},
+		{
+			// 90
+			`
+TRACK |p  |
+Ch     |1  |
+
+=SCORE |p  |
+#
+1      |c"+- |
+2      |^1----+++  |
+3      |d+++-  |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 72 dyn =
+[960] channel.NoteOff channel 0 key 72
+[0] channel.NoteOn channel 0 key 60 dyn -
+[960] channel.NoteOff channel 0 key 60
+[0] channel.NoteOn channel 0 key 50 dyn ++
+[1920] channel.NoteOff channel 0 key 50
+`,
+		},
+		{
+			// 91
+			`
+TRACK |p |
+Ch      |1 |
+
+=SCORE |p        |
+#
+1      |{c,e,g#,a} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[480] channel.NoteOff channel 0 key 56
+[0] channel.NoteOn channel 0 key 57 dyn =
+[480] channel.NoteOff channel 0 key 57
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 92
+			`
+TRACK |p |
+Ch      |1 |
+
+=SCORE |p        |
+#
+1      |{c,e,g#,{a,b}} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 56 dyn =
+[480] channel.NoteOff channel 0 key 56
+[0] channel.NoteOn channel 0 key 57 dyn =
+[240] channel.NoteOff channel 0 key 57
+[0] channel.NoteOn channel 0 key 59 dyn =
+[240] channel.NoteOff channel 0 key 59
+[0] meta.Undefined type:  0
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 93
+			`
+TRACK |p |
+Ch      |1 |
+
+=SCORE |p        |
+#
+1      |{c,e,{a,b},g#} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 57 dyn =
+[240] channel.NoteOff channel 0 key 57
+[0] channel.NoteOn channel 0 key 59 dyn =
+[240] channel.NoteOff channel 0 key 59
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 56 dyn =
+[480] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 94
+			`
+TRACK |p |
+Ch      |1 |
+
+=SCORE |p        |
+#
+1      |{c,e,{a,b,c#,d},g#} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 57 dyn =
+[120] channel.NoteOff channel 0 key 57
+[0] channel.NoteOn channel 0 key 59 dyn =
+[120] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 49 dyn =
+[120] channel.NoteOff channel 0 key 49
+[0] channel.NoteOn channel 0 key 50 dyn =
+[120] channel.NoteOff channel 0 key 50
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 56 dyn =
+[480] channel.NoteOff channel 0 key 56
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 95
+			`
+TRACK |p |
+Ch      |1 |
+
+=SCORE |p        |
+#
+1      |{c,e,{c,e,c,e},c} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[120] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[120] channel.NoteOff channel 0 key 52
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 96
+			`
+TRACK |p |
+Ch      |1 |
+
+=SCORE |p        |
+#
+1      |{c,e,{c,e,c,{g,b}},c} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[120] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 55 dyn =
+[60] channel.NoteOff channel 0 key 55
+[0] channel.NoteOn channel 0 key 59 dyn =
+[60] channel.NoteOff channel 0 key 59
+[0] meta.Undefined type:  0
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] meta.Undefined type:  0
+`,
+		},
+		{
+			// 97
+			`
+TRACK |p |
+Ch      |1 |
+
+sh |
+xx | c
+yy | e
+zz | g
+pp | b
+
+=SCORE |p        |
+#
+1      |{sh.xx,sh.yy,{sh.xx,sh.yy,sh.xx,{sh.zz,sh.pp}},sh.xx} |
+3      |*        |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[480] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 52 dyn =
+[120] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 55 dyn =
+[60] channel.NoteOff channel 0 key 55
+[0] channel.NoteOn channel 0 key 59 dyn =
+[60] channel.NoteOff channel 0 key 59
+[0] meta.Undefined type:  0
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 48 dyn =
+[480] channel.NoteOff channel 0 key 48
+[0] meta.Undefined type:  0
 `,
 		},
 	}

@@ -33,6 +33,67 @@ func (p *column) euclidEventStream(start uint, endPos uint, evts []*Event) *even
 	return newEventStream(start, absoluteEnd, true, evts...)
 }
 
+func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err error) {
+	out = in.Dup().(*items.NTuple)
+	out.Items = nil
+	//var parser items.Parser
+
+	for _, it := range in.Items {
+		switch v := it.(type) {
+		case *items.Call:
+			/*
+				var newItsm = make([]items.Item, len(v.Items))
+					for itidx, itm := range v.Items {
+						switch vv := itm.(type) {
+						case *items.Call:
+							//fmt.Printf("templateCall at position: %v\n", ev.Position)
+							pc := p.newCall(vv)
+							posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+							if err != nil {
+								return nil, err
+							}
+							// fmt.Printf("got item: %v\n", posEv.events[0].Item)
+							newItsm[itidx] = posEv.events[0].Item
+						default:
+							newItsm[itidx] = itm
+						}
+					}
+			*/
+			if v.IsToken() {
+				pc := c.newCall(v)
+				//posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+				posEv, err := pc.getEventStream(0, 1)
+				if err != nil {
+					return nil, err
+				}
+				/*
+					tok, err0 := c.sketch.Score.GetToken(v.Name)
+					if err != nil {
+						return nil, fmt.Errorf("could not find token %q within ntuple %v: %s", v.Name, in, err0)
+					}
+					nit, err := parser.ParseItem(tok, 0)
+					if err != nil {
+						return nil, fmt.Errorf("could not parse token %q resolving to %q within ntuple %v: %s", v.Name, tok, in, err)
+					}
+				*/
+				out.Items = append(out.Items, posEv.events[0].Item)
+			} else {
+				return nil, fmt.Errorf("could not use pattern (%q) within ntuple %v", v.Name, in)
+			}
+		case *items.NTuple:
+			nit, err := c.replaceNtupleTokens(v)
+			if err != nil {
+				return nil, fmt.Errorf("could not replace tokens in ntuple %q within ntuple %v: %s", v, in, err)
+			}
+			out.Items = append(out.Items, nit)
+		default:
+			out.Items = append(out.Items, it.Dup())
+		}
+	}
+
+	return out, nil
+}
+
 func (p *column) unroll(ims []items.Item, endPos uint, params []string) (unrolled []*Event, err error) {
 	s := p.sketch
 	// "Templates" und imports werden ersetzt (triggert beim Template Phase 1-4)
@@ -144,26 +205,15 @@ func (p *column) unroll(ims []items.Item, endPos uint, params []string) (unrolle
 			}
 
 			// fmt.Printf("inside ntuple: %v\n", v)
-			var newItsm = make([]items.Item, len(v.Items))
-			for itidx, itm := range v.Items {
-				switch vv := itm.(type) {
-				case *items.Call:
-					//fmt.Printf("templateCall at position: %v\n", ev.Position)
-					pc := p.newCall(vv)
-					posEv, err = pc.getEventStream(forward+ev.Position, endPos)
-					if err != nil {
-						return nil, err
-					}
-					// fmt.Printf("got item: %v\n", posEv.events[0].Item)
-					newItsm[itidx] = posEv.events[0].Item
-				default:
-					newItsm[itidx] = itm
-				}
+			newItm, err := p.replaceNtupleTokens(v)
+			if err != nil {
+				return nil, err
 			}
-			v.Items = newItsm
+
+			//v.Items = newItsm
 			var nev Event
 			nev.Position = ev.Position + forward
-			nev.Item = v.Dup()
+			nev.Item = newItm
 			posEv = newEventStream(nev.Position, uint(until), false, &nev)
 		case *items.MultiItem:
 			// TODO look inside each item and replace random things and templatecalls if there

@@ -1,29 +1,21 @@
 # nächste TODOs
 
+- $_euclid with tokens, multiitems, ntuples etc
+
 - fix problem with lyrics
+- fix: glissandi führen zu positionsverschiebungen
+- fix replace/overwrite nach taktwiederholungen mit .2. etc.
 
 - allow notes and midinotes to be transposed, e.g. c'^12 is the same as c" and c'^12^-4 is g#'
   ^2^4 is the same as ^6 and ^2^4^-3 is ^3
-
-- allow conflicting dynamics that get "added": e.g. c'+- is the same as  c' and c'+-+ will be c'+
-  that allows for placeholders to simply append dynamics, e.g.  #1+ may as well be called with c'-
 
 - tempowechsel und globale scalewechsel mitten im takt ermöglichen:
   in der positionsspalte hinter der position, durch leerzeichen abgetrennt, z.B.
   2& @220 \major^g#' diese müssen im takt gespeichert werden (mit ihrer position)
 
-- $_euclid with tokens, patterns, multiitems, ntuples etc
-
-- fix: glissandi führen zu positionsverschiebungen
-
-- replace/overwrite nach taktwiederholungen mit .2. etc.
-
 - allow to use parts like patterns inside cols (via [part] syntax): 
   that allows to selectively repeat parts (just for some cols) and to override not fitting things
     
-- what happens with =pattern.x[3:10] if there is a bar in between? does it even matter?
-
-- embed ntuples inside ntuples, e.g. {c,d,{e,B}}
 
 - improve/fix scale definition syntax in a way that chords could also be defined as a scale
 - fix mounting patterns / scale notes within patterns

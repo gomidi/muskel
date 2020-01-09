@@ -1,7 +1,9 @@
 package items
 
 import (
+	"bytes"
 	"fmt"
+	"math"
 	"strings"
 	//	"gitlab.com/gomidi/midi/mid"
 )
@@ -46,7 +48,13 @@ func (v *NTuple) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
 	return nil
 }
 
-func (v NTuple) writeMIDI(wr SMFWriter, endPos uint) (addedNotes []uint8) {
+func (v *NTuple) writeMIDI(wr SMFWriter, endPos uint) []uint8 {
+	addedNotes, _, _ := v._writeMIDI(wr, endPos)
+
+	return addedNotes
+}
+
+func (v *NTuple) _writeMIDI(wr SMFWriter, endPos uint) (addedNotes []uint8, length uint32, delta int32) {
 	// definition of a tuple
 	// we need the complete time length over which the tuple is spread
 	// it is not that easy, since we need to define the noteoff of the
@@ -70,12 +78,14 @@ func (v NTuple) writeMIDI(wr SMFWriter, endPos uint) (addedNotes []uint8) {
 	// {a',e'',f}3&
 	// would mean: the total duration is from the current position until 3&
 
+	//fmt.Printf("ntuple: %v endPos: %v\n", v, endPos)
+
 	MIDITrack.noteGlide.active = false
 
 	//length := uint32(v.EndPos - iw.lastNum32th)
 	//length := uint32(v.EndPos - iw.currentDistanceToStartOfBarIn32th)
-	length := uint32(endPos - MIDITrack.CurrentDistanceToStartOfBarIn32th)
-	//fmt.Printf("NTuple endpos: %v lastnum32th: %v length: %v\n", v.EndPos, iw.lastNum32th, length)
+	length = uint32(endPos - MIDITrack.CurrentDistanceToStartOfBarIn32th)
+	//fmt.Printf("NTuple length: %v\n", length)
 
 	switch v.PosShift {
 	case 0:
@@ -86,23 +96,41 @@ func (v NTuple) writeMIDI(wr SMFWriter, endPos uint) (addedNotes []uint8) {
 		MIDITrack.SetAhead()
 	}
 
-	var delta uint32
+	//var delta uint32
+	var currentStartPos uint
+	var _length = length
 
-	for _, it := range v.Items {
+	for i, it := range v.Items {
+		currentStartPos = MIDITrack.CurrentDistanceToStartOfBarIn32th
 		if it != Hold {
 			if delta > 0 {
-				wr.Forward(0, delta, uint32(len(v.Items))*32)
+				wr.Forward(0, uint32(delta), uint32(len(v.Items))*32)
 			}
-			added := MIDITrack.WriteItem(wr, it)
-			delta = 0
+			var added []uint8
+			if subTup, isSub := it.(*NTuple); isSub {
+				MIDITrack.CurrentDistanceToStartOfBarIn32th = uint(math.Round(float64(i) * float64(int(length)/len(v.Items))))
+				added, _, _ = subTup._writeMIDI(wr, uint(math.Round(float64(i+1)*float64(int(length)/len(v.Items)))))
+				//_length = _length * uint32(len(subTup.Items))
+				MIDITrack.CurrentDistanceToStartOfBarIn32th = currentStartPos
+				delta = -int32(_length)
+			} else {
+				//_length = length
+				added = MIDITrack.WriteItem(wr, it)
+				for _, addn := range added {
+					MIDITrack.NoteOns[addn] = true
+				}
+				delta = 0
+			}
 
-			for _, addn := range added {
-				MIDITrack.NoteOns[addn] = true
-			}
 		}
-		delta += length
+		delta += int32(_length)
+		//fmt.Printf("delta: %v\n", delta)
 	}
-	wr.Forward(0, delta, uint32(len(v.Items))*32)
+
+	if delta > 0 {
+		//fmt.Printf("forwarding %v/%v\n", delta, uint32(len(v.Items))*32)
+		wr.Forward(0, uint32(delta), uint32(len(v.Items))*32)
+	}
 
 	var comp int32
 	switch v.PosShift {
@@ -116,11 +144,13 @@ func (v NTuple) writeMIDI(wr SMFWriter, endPos uint) (addedNotes []uint8) {
 
 	MIDITrack.SetNoteDelayCompensation(comp)
 
-	MIDITrack.StopNotes(wr)
-
 	MIDITrack.LastNum32th = MIDITrack.CurrentDistanceToStartOfBarIn32th + uint(length)
-
+	MIDITrack.StopNotes(wr)
 	wr.Undefined(0, nil)
+
+	//wr.Undefined(0, nil)
+
+	//wr.Undefined(0, nil)
 	// iw.p.iw.Writer
 
 	/*
@@ -137,7 +167,35 @@ func (v NTuple) writeMIDI(wr SMFWriter, endPos uint) (addedNotes []uint8) {
 			}
 		}
 	*/
-	return addedNotes
+	return
+}
+
+func (ntp *NTuple) split(data string) (res []string) {
+	var embed int
+	var bf bytes.Buffer
+	for _, char := range data {
+		switch char {
+		case '{':
+			embed++
+			bf.WriteRune(char)
+		case '}':
+			embed--
+			bf.WriteRune(char)
+		case ',':
+			if embed > 0 {
+				bf.WriteRune(char)
+			} else {
+				res = append(res, bf.String())
+				bf.Reset()
+			}
+		default:
+			bf.WriteRune(char)
+		}
+	}
+
+	res = append(res, bf.String())
+	return
+
 }
 
 // ntuple has the form {c,e,d}>
@@ -145,13 +203,13 @@ func (ntp *NTuple) Parse(data string, posIn32th uint) (err error) {
 
 	orig := data
 
-	dd := strings.Split(data, "}")
+	idx := strings.LastIndex(data, "}")
 
-	if len(dd) != 2 {
+	if idx <= 0 {
 		return fmt.Errorf("invalid n-tuple: %#v", "{"+orig)
 	}
 
-	pos := strings.TrimSpace(dd[1])
+	pos := strings.TrimSpace(strings.TrimLeft(data[idx:], "}"))
 
 	if strings.HasSuffix(pos, ">") {
 		ntp.PosShift = 1
@@ -178,9 +236,9 @@ func (ntp *NTuple) Parse(data string, posIn32th uint) (err error) {
 		}
 	*/
 
-	data = strings.TrimSpace(dd[0])
+	data = strings.TrimSpace(data[:idx])
 
-	d := strings.Split(data, ",")
+	d := ntp.split(data)
 
 	if len(d) < 2 {
 		err = fmt.Errorf("empty or single item n-tuples are not allowed: %#v", "{"+orig)

@@ -355,7 +355,7 @@ func (sc *Score) Unroll() error {
 		for c := range sketch.Columns {
 			tr, events, err := sketch.Unroll(c, params[c]...)
 			if err != nil {
-				return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", col, sketch.Name, params[c], err.Error())
+				return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", c, sketch.Name, params[c], err.Error())
 			}
 
 			if tr == nil {
