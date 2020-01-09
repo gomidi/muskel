@@ -147,7 +147,10 @@ func (c *call) applyLyrics(evts []*Event) ([]*Event, error) {
 		return nil, fmt.Errorf("invalid lyrics call name %q", cc.Name)
 	}
 
-	l := c.column.sketch.Score.Lyric(cc.Name, cc.Slice[0], cc.Slice[1])
+	l, err := c.column.sketch.Score.Lyric(cc.Name, cc.Slice[0], cc.Slice[1])
+	if err != nil {
+		return nil, err
+	}
 	return applyLyrics(evts, l), nil
 }
 

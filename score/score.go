@@ -110,9 +110,13 @@ func (sc *Score) AddLyrics(l map[string][]string) {
 	}
 }
 
-func (sc *Score) Lyric(part string, fromLine, toLine int) (tokens []string) {
+func (sc *Score) Lyric(part string, fromLine, toLine int) (tokens []string, err error) {
 	//fmt.Printf("Lyrics %q[%v:%v] // %#v", part, fromLine, toLine, sc.lyrics)
-	p := sc.lyrics[part]
+	p, has := sc.lyrics[part]
+
+	if !has {
+		return nil, fmt.Errorf("could not find lyrics for %q", part)
+	}
 	//	l := strings.Split(p, "\n")
 
 	if fromLine < 0 {
@@ -168,23 +172,35 @@ func (sc *Score) AddInclude(filepath string, sketch string, params []string) err
 		for skname, sk := range sco.Sketches {
 			sc.Sketches[skname] = sk
 		}
+
+		sc.AddLyrics(sco.lyrics)
 		return nil
 	}
 
-	if sketch[0] == '=' {
+	switch sketch[0] {
+	case '=':
 		sk, err := sco.GetSketch(sketch)
 		if err != nil {
 			return fmt.Errorf("can't find sketch %q in include %q", sketch, filepath)
 		}
 		sc.Sketches[sketch] = sk
 		return nil
+	case '@':
+		ly, has := sco.lyrics[sketch]
+		if !has {
+			return fmt.Errorf("can't find lyrics %q in include %q", sketch, filepath)
+		}
+		sc.lyrics[sketch] = ly
+		return nil
+	default:
+		sh, err := sco.GetToken(sketch)
+		if err != nil {
+			return fmt.Errorf("can't find token %q in include %q", sketch, filepath)
+		}
+		sc.tokens[sketch] = sh
+		return nil
 	}
-	sh, err := sco.GetToken(sketch)
-	if err != nil {
-		return fmt.Errorf("can't find token %q in include %q", sketch, filepath)
-	}
-	sc.tokens[sketch] = sh
-	return nil
+
 }
 
 func (sc *Score) AddToken(key string, value string) {

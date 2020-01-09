@@ -14,5 +14,5 @@ type Score interface {
 	GetMode(name string) items.Mode
 	FilterTrack(colName string, events []*Event) []*Event
 	Properties() map[string]interface{}
-	Lyric(part string, fromLine, toLine int) (tokens []string)
+	Lyric(part string, fromLine, toLine int) (tokens []string, err error)
 }

@@ -1706,6 +1706,30 @@ TRACK   | Vocals |
   2    | a^-2   |
 `,
 		},
+		{ // 51
+			`
+			
+$include("testdata/includes/lyrics")
+
+=melody | Verse1 |
+ #
+  1     | a      |
+  2     | c      |
+
+TRACK   | Vocals |
+ Channel| 1      |
+
+=SCORE | Vocals         |
+ #
+  1    | =melody@lyrics.Verse |
+`,
+			`
+=SCORE | Vocals    |
+ # 4/4 @120.00
+  1    | (a "Hi-") |
+  2    | (c "ho")  |
+`,
+		},
 		/*
 			 - firstsync scheint nicht richtig zu funktionieren
 			(z.B. einbetten von =!patt1 auf 4&, wobei patt1 patt2 einbindet ohne ! auf 1 und patt2 erste note auf 4& hat)
