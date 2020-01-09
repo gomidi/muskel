@@ -1607,6 +1607,84 @@ TRACK | Drums |
   2&   | {MN36:::,b} |
 `,
 		},
+		{ // 47
+			`
+=melody | Verse1 |
+ #
+  1     | a      |
+  1     | b>     |
+  2     | c      |
+
+TRACK   | Vocals |
+ Channel| 1      |
+
+@lyr  |
+ a b c| V1
+
+=SCORE | Vocals         |
+ #
+  1    | =melody@lyr.V1 |
+`,
+			`
+=SCORE | Vocals   |
+ # 4/4 @120.00
+  1    | (a "a")  |
+  1    | (b> "b") |
+  2    | (c "c")  |
+`,
+		},
+		{ // 48
+			`
+=melody | Verse1 |
+ #
+  1     | a      |
+  1     | b>     |
+  2     | c      |
+
+TRACK   | Vocals | Drums |
+ Channel| 1      | 2     |
+
+@lyr  |
+ a b c| V1
+
+=SCORE | Vocals         | Drums |
+ #
+  1    | =melody@lyr.V1 |       |
+`,
+			`
+=SCORE | Drums | Vocals   |
+ # 4/4 @120.00
+  1    |       | (a "a")  |
+  1    |       | (b> "b") |
+  2    |       | (c "c")  |
+`,
+		},
+		{ // 49
+			`
+=melody | Verse1 |
+ #
+  1     | a      |
+  1     | b>     |
+  2     | c      |
+
+TRACK   | Vocals | Drums |
+ Channel| 1      | 2     |
+
+@lyr  |
+ a b c| V1
+
+=SCORE | Drums          | Vocals |
+ #
+  1    |  |   =melody@lyr.V1    |
+`,
+			`
+=SCORE | Drums | Vocals   |
+ # 4/4 @120.00
+  1    |       | (a "a")  |
+  1    |       | (b> "b") |
+  2    |       | (c "c")  |
+`,
+		},
 		/*
 			 - firstsync scheint nicht richtig zu funktionieren
 			(z.B. einbetten von =!patt1 auf 4&, wobei patt1 patt2 einbindet ohne ! auf 1 und patt2 erste note auf 4& hat)
@@ -1641,14 +1719,14 @@ TRACK | Drums |
 		*/
 	}
 
-	// sketch.DEBUG = true
+	//sketch.DEBUG = true
 
 	for i, test := range tests {
 
 		// fmt.Printf("############ %v ###############\n", i)
 
 		/*
-			if i != 46 {
+			if i != 49 {
 				continue
 			}
 		*/

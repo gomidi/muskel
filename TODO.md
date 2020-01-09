@@ -1,6 +1,5 @@
 # nächste TODOs
 
-- fix problem with lyrics
 - fix: glissandi führen zu positionsverschiebungen
 
 - fix replace/overwrite nach taktwiederholungen mit .2. etc.

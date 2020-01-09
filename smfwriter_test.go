@@ -2757,6 +2757,104 @@ pp | b
 [0] meta.Undefined type:  0
 `,
 		},
+		{
+			// 98
+			`
+=melody | Verse1 |
+ #
+  1     | a      |
+  1     | b>     |
+  2     | c      |
+
+TRACK   | Vocals |
+ Channel| 1      |
+
+@lyr  |
+ a b c| V1
+
+=SCORE | Vocals         |
+ #
+  1    | =melody@lyr.V1 |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 57 dyn =
+[0] meta.Lyric: "a"
+[0] channel.NoteOff channel 0 key 57
+[30] channel.NoteOn channel 0 key 59 dyn =
+[0] meta.Lyric: "b"
+[930] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 48 dyn =
+[0] meta.Lyric: "c"
+[2880] channel.NoteOff channel 0 key 48
+`,
+		},
+		{
+			// 99
+			`
+=melody | Verse1 |
+ #
+  1     | a      |
+  1     | b>     |
+  2     | c      |
+
+TRACK   | Vocals | Drums |
+ Channel| 1      |       |
+
+@lyr  |
+ a b c| V1
+
+=SCORE | Vocals         |
+ #
+  1    | =melody@lyr.V1 |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 57 dyn =
+[0] meta.Lyric: "a"
+[0] channel.NoteOff channel 0 key 57
+[30] channel.NoteOn channel 0 key 59 dyn =
+[0] meta.Lyric: "b"
+[930] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 48 dyn =
+[0] meta.Lyric: "c"
+[2880] channel.NoteOff channel 0 key 48
+`,
+		},
+		/*
+			{ // 47
+						`
+			=melody | Verse1 |
+			 #
+			  1     | a      |
+			  1     | b      |
+			  2     | c      |
+
+			TRACK   | Vocals | Drums |
+			 Channel| 1      |       |
+
+			@lyr  |
+			 a b c| V1
+
+			=SCORE | Vocals         |
+			 #
+			  1    | =melody@lyr.V1 |
+			`,
+						`
+			=SCORE | Vocals  |
+			 # 4/4 @120.00
+			  1    | (a "a") |
+			  1    | (b "b") |
+			  2    | (c "c") |
+			`,
+					},
+		*/
 	}
 
 	for i, test := range tests {

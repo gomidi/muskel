@@ -532,9 +532,10 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		sk.AddCol(col)
 
 		for _, ev := range sc.Unrolled[col] {
+			//fmt.Printf("[%v] ev: %v\n", ev.Position, ev)
 			m := score[ev.Position]
 			//fmt.Printf("len(score[%v]) = %v // colNo: %v\n", ev.Position, len(m), colNo)
-			if len(m) == 0 || colNo == 0 {
+			if len(m) == 0 || colNo == 0 || m[len(m)-1][colNo] != "" {
 				//if colNo == 0 {
 				//m = make([][]string, len(cols))
 				//m = [][]string{}
@@ -558,6 +559,8 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 
 	var sorted sortedLines
 
+	//fmt.Printf("score: %#v\n", score)
+
 	for pos, cls := range score {
 		for _, _cls := range cls {
 			//fmt.Printf("adding line %v\n", line{pos: pos, cols: _cls})
@@ -567,6 +570,8 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 
 	lastTimeSig := [2]uint8{4, 4}
 	var lastTempoChange float64 = 0
+
+	//fmt.Printf("sorted: %#v\n", sorted)
 
 	for _, bar := range sc.Bars {
 		if bar.Include != nil {
@@ -598,6 +603,8 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 
 		sorted = append(sorted, line{pos: bar.Position, cols: []string{s}})
 	}
+
+	//fmt.Printf("sorted: %#v\n", sorted)
 
 	sort.Sort(sorted)
 	//sk.AddLine([]string{"#"})
