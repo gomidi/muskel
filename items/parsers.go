@@ -247,6 +247,11 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 				err = pb.Parse(data[2:], posIn32th)
 				it = pb
 				return
+			case "PC":
+				pc := &MIDIProgramChange{}
+				err = pc.Parse(data[2:], posIn32th)
+				it = pc
+				return
 			case "AT":
 				at := &MIDIAftertouch{}
 				err = at.Parse(data[2:], posIn32th)

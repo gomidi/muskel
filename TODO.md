@@ -1,6 +1,17 @@
 # nächste TODOs
 
+- allow loading of tracks via include
+
 - fix: glissandi führen zu positionsverschiebungen
+
+- fix:   microverschiebungen zur gleichen zeit werden nicht korrekt aufgehoben (es verschiebt sich alles nachfolgende)
+  2  | #1<        |
+  2  | #2<        |              
+  2  | #3<        |
+  3  | (#1 #2 #3) |              
+// oder
+  2  | (#1< #2< #3<) |              
+  3  | (#1 #2 #3) |
 
 - fix replace/overwrite nach taktwiederholungen mit .2. etc.
 

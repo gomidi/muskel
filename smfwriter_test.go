@@ -2717,7 +2717,7 @@ pp | b
 `,
 		},
 		{
-			// 97
+			// 98
 			`
 TRACK |p |
 Ch      |1 |
@@ -2758,7 +2758,7 @@ pp | b
 `,
 		},
 		{
-			// 98
+			// 99
 			`
 =melody | Verse1 |
  #
@@ -2793,7 +2793,7 @@ TRACK   | Vocals |
 `,
 		},
 		{
-			// 99
+			// 100
 			`
 =melody | Verse1 |
  #
@@ -2828,7 +2828,7 @@ TRACK   | Vocals | Drums |
 `,
 		},
 		{
-			// 100
+			// 101
 			`
 
 TRACK   | Vocals | 
@@ -2851,7 +2851,7 @@ TRACK   | Vocals |
 `,
 		},
 		{
-			// 101
+			// 102
 			`
 
 TRACK   | Vocals | 
@@ -2871,6 +2871,65 @@ TRACK   | Vocals |
 [960] channel.NoteOff channel 0 key 64
 [0] channel.NoteOn channel 0 key 59 dyn ++
 [2880] channel.NoteOff channel 0 key 59
+`,
+		},
+		{
+			// 103
+			`
+
+TRACK   | Vocals | 
+ Channel| 1      |      
+
+=SCORE | Vocals |
+ #
+  1    | PC(2)  |
+  2    | PC(3)  |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.ProgramChange channel 0 program 1
+[960] channel.ProgramChange channel 0 program 2
+`,
+		},
+		{
+			// 104
+			`
+$include("cc")
+
+TRACK   | Vocals | 
+ Channel| 1      |      
+
+=SCORE | Vocals |
+ #
+  2    | =!reset(2,3) |
+
+			`,
+			2,
+			false,
+			true,
+			`
+[0] channel.ControlChange channel 0 controller 101 ("Registered Parameter (MSB)") value 0
+[0] channel.ControlChange channel 0 controller 100 ("Registered Parameter (LSB)") value 0
+[0] channel.ControlChange channel 0 controller 6 ("Data Entry (MSB)") value 2
+[0] channel.ControlChange channel 0 controller 38 ("Data Entry (LSB)") value 0
+[0] channel.ControlChange channel 0 controller 101 ("Registered Parameter (MSB)") value 127
+[0] channel.ControlChange channel 0 controller 100 ("Registered Parameter (LSB)") value 127
+[960] channel.ControlChange channel 0 controller 0 ("Bank Select (MSB)") value 2
+[240] channel.ProgramChange channel 0 program 2
+[120] channel.ControlChange channel 0 controller 121 ("All Controllers Off") value 0
+[120] channel.ControlChange channel 0 controller 7 ("Volume (MSB)") value 100
+[0] channel.ControlChange channel 0 controller 11 ("Expression (MSB)") value 127
+[0] channel.ControlChange channel 0 controller 64 ("Hold Pedal (on/off)") value 0
+[0] channel.ControlChange channel 0 controller 10 ("Pan position (MSB)") value 64
+[240] channel.ControlChange channel 0 controller 101 ("Registered Parameter (MSB)") value 0
+[120] channel.ControlChange channel 0 controller 100 ("Registered Parameter (LSB)") value 0
+[120] channel.ControlChange channel 0 controller 6 ("Data Entry (MSB)") value 2
+[120] channel.ControlChange channel 0 controller 38 ("Data Entry (LSB)") value 0
+[120] channel.ControlChange channel 0 controller 101 ("Registered Parameter (MSB)") value 127
+[120] channel.ControlChange channel 0 controller 100 ("Registered Parameter (LSB)") value 127
 `,
 		},
 		/*
