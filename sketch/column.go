@@ -442,10 +442,7 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*Event, 
 	events = c.unrollBarRepetitions(events, endPos)
 	printEvents("after unrollBarRepetitions of events", events)
 
-	events, err = c.unrollIncludedBars(events)
-	if err != nil {
-		return nil, err
-	}
+	events = c.unrollIncludedBars(events)
 
 	printEvents("after unrollIncludedBars of events", events)
 	//fmt.Printf("unrolled: %v\n", events)
@@ -459,7 +456,7 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*Event, 
 	return events, nil
 }
 
-func (p *column) unrollIncludedBars(evts []*Event) ([]*Event, error) {
+func (p *column) unrollIncludedBars(evts []*Event) []*Event {
 
 	s := p.sketch
 
@@ -470,18 +467,17 @@ func (p *column) unrollIncludedBars(evts []*Event) ([]*Event, error) {
 		//fmt.Printf("sketch: %q bar %v no: %v pos: %v jumpto %q\n", s.Name, i, bar.No, bar.Position, bar.JumpTo)
 
 		if bar.Include != nil {
-			ets, end, err := s.includeCol(bar.Position, p.name, *bar.Include)
+			lastBarEnd = bar.Include.Length32ths
+			ets, err := s.includeCol(bar.Position, p.name, *bar.Include)
 			if err != nil {
-				return nil, err
+				continue
 			}
-			//ets = forwardEvents(ets, bar.Position)
 			printEvents("added included events", ets)
 
 			if DEBUG {
-				fmt.Printf("end is: %v\n", end)
+				fmt.Printf("end is: %v\n", lastBarEnd)
 			}
 			res = append(res, ets...)
-			lastBarEnd = end
 			continue
 		}
 
@@ -503,7 +499,7 @@ func (p *column) unrollIncludedBars(evts []*Event) ([]*Event, error) {
 	ets := getEventsInPosRange(lastBarEnd, s.projectedBarEnd, evts)
 	res = append(res, ets...)
 
-	return res, nil
+	return res
 }
 
 func (p *column) unrollPartRepetitions(evts []*Event, stopPos uint) ([]*Event, error) {

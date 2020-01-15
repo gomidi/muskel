@@ -46,6 +46,26 @@ func (p *Sketch) WriteTo(f Formatter) error {
 	return p.writeDataLines(f)
 }
 
+func formatPosition(pos string) string {
+	pos = strings.TrimSpace(pos)
+	if len(pos) == 0 {
+		return ""
+	}
+
+	switch pos[0] {
+	case '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return pos
+	case '&':
+		return " " + pos
+	case '.':
+		return "  " + pos
+	case ';':
+		return "   " + pos
+	default:
+		return pos
+	}
+}
+
 func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 	var s strings.Builder
 
@@ -65,7 +85,7 @@ func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 		}
 		return t.Table.writeLine(f, first+last)
 	}
-	s.WriteString(t.Table.Pad(0, "    "+line[0]) + t.Table.separator())
+	s.WriteString(t.Table.Pad(0, "    "+formatPosition(line[0])) + t.Table.separator())
 
 	for i, _ := range t.cols {
 		col := ""

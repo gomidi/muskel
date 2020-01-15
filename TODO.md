@@ -1,8 +1,6 @@
 # nächste TODOs
 
-- fix: wieder erlauben, dass die Hauptzählzeit (Zahl) fehlt, wenn eine nebenzählzeit existiert und es eine Hauptzählzeit vorher gab
-  z.B & oder . oder &. oder &; oder ; oder .; oder &.; nach 1 oder 2 usw. entsprechend wird dann bei der formatierung um ein leerzeichen
-  weiter eingerückt
+- fix: parts in includes können weder in dieser noch in der inkludierenden datei verwendet werden.
 - fix: replace/overwrite nach taktwiederholungen mit .2. etc.
 - fix: glissandi führen zu positionsverschiebungen
 - fix: microverschiebungen zur gleichen zeit werden nicht korrekt aufgehoben (es verschiebt sich alles nachfolgende)

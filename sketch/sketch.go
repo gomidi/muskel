@@ -808,7 +808,7 @@ func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*Event, e
 	return patt.call(0, false, inc.Params...)
 }
 
-func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts []*Event, end uint, err error) {
+func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts []*Event, err error) {
 	evts, err = s._includeCol(column, inc)
 	if err != nil {
 		return
@@ -816,7 +816,6 @@ func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts 
 
 	evts = forwardEvents(evts, start)
 	printEvents("after including in col "+column, evts)
-	end = inc.Length32ths
 	return
 }
 

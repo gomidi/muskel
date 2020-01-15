@@ -22,9 +22,15 @@ func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwr
 		fmt.Printf("WriteSMFTo filegroup %v\n", filegroup)
 	}
 
-	for _, track := range s.Tracks {
+	for trackName := range s.Unrolled {
+
+		//for _, track := range s.Tracks {
 		//for name, col := range s.Columns {
-		//track := s.GetTrack(name)
+		track, err := s.GetTrack(trackName)
+
+		if err != nil {
+			return fmt.Errorf("could not find track %q", trackName)
+		}
 		// fmt.Printf("track %q midichannel: %v\n", track.Name, track.MIDIChannel)
 		if track.MIDIChannel >= 0 && (filegroup == "*" || track.FileGroup == filegroup) {
 			numTracks++
