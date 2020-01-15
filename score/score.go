@@ -174,6 +174,11 @@ func (sc *Score) AddInclude(filepath string, sketch string, params []string) err
 		}
 
 		sc.AddLyrics(sco.lyrics)
+
+		for trname, tr := range sco.Tracks {
+			sc.Tracks[trname] = tr
+		}
+
 		return nil
 	}
 

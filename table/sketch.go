@@ -50,7 +50,17 @@ func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 	var s strings.Builder
 
 	if len(line[0]) > 0 && (line[0][0] == '#' || line[0][0] == '$' || line[0][0] == '[' || line[0][0] == '*') {
-		return t.Table.writeLine(f, " "+line[0])
+		var first, last string
+		first = " " + line[0]
+		if idx := strings.Index(line[0], "##"); idx > 0 {
+			var ff formatLine
+			t.Table.writeFirstLine(&ff)
+			last = string(ff)
+			idx2 := strings.Index(last, "|")
+			last = " " + last[idx2:]
+			first = " " + line[0][:idx+2]
+		}
+		return t.Table.writeLine(f, first+last)
 	}
 	s.WriteString(t.Table.Pad(0, "  "+line[0]) + t.Table.separator())
 

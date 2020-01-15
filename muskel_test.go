@@ -453,6 +453,54 @@ TRACK | voc | bass |
  #
   2    | d'  |      |
 `},
+		// 15
+		{`
+TRACK | voc | bass |
+ // Volume | 100 | 80 |
+ch  | 1 |
+
+=SCORE | voc | bass |
+#
+1    | c#" |
+*3
+#
+2 | d' |
+`, `
+TRACK | voc | bass |
+// Volume | 100 | 80 |
+ ch   | 1   |      |
+
+=SCORE | voc | bass |
+ #
+  1    | c#" |      |
+ *3
+ #
+  2    | d'  |      |
+`},
+		// 16
+		{`
+TRACK | voc | bass |
+ // Volume | 100 | 80 |
+ch  | 1 |
+
+=SCORE | voc | bass |
+#
+1    | c#" |
+*3
+# // ##
+2 | d' |
+`, `
+TRACK | voc | bass |
+// Volume | 100 | 80 |
+ ch   | 1   |      |
+
+=SCORE | voc | bass |
+ #
+  1    | c#" |      |
+ *3
+ # // ## | voc | bass |
+  2    | d'  |      |
+`},
 	}
 
 	for i, test := range tests {

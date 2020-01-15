@@ -40,3 +40,13 @@ func tableHeader(line string) (cols []string) {
 
 	return
 }
+
+type formatLine string
+
+func (f *formatLine) WriteLine(l string) error {
+	*f = formatLine(l)
+	return nil
+}
+
+var _f formatLine
+var _ Formatter = &_f

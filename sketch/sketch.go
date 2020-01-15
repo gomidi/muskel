@@ -280,6 +280,9 @@ func (p *Sketch) parseBarLine(data string) error {
 
 	if idx := strings.Index(data, "//"); idx > -1 {
 		comment = strings.TrimSpace(data[idx+2:])
+		if idx2 := strings.Index(comment, "##"); idx2 > -1 {
+			comment = comment[:idx2+2]
+		}
 		data = strings.TrimSpace(data[:idx])
 	}
 
@@ -495,7 +498,7 @@ func (s *Sketch) unrollIncludedBars() (unrolled []*Bar, err error) {
 				b.No = no
 				b.Position += bar.Position
 				b.Comment = fmt.Sprintf("from %s.%s.%v", bar.Include.File, skname, incbar.No)
-				b.Part = ""
+				//b.Part = ""
 				unrolled = append(unrolled, b)
 				no++
 			}
@@ -950,12 +953,15 @@ func (p *Sketch) AddColumn(name string) {
 
 // parseLine parses a line in the body (everything after the =)
 func (p *Sketch) ParseLine(tabs []string) error {
-	switch len(tabs) {
-	case 1:
-		return p.parseBarLine(strings.TrimSpace(tabs[0]))
-	case 0:
-		panic("must not happen")
-	default:
-		return p.parseEventsLine(tabs)
+	if len(tabs) == 0 {
+		return fmt.Errorf("must have tabs")
 	}
+
+	first := strings.TrimSpace(tabs[0])
+
+	if len(tabs) == 1 || (first != "" && first[0] == '#') {
+		return p.parseBarLine(first)
+	}
+
+	return p.parseEventsLine(tabs)
 }

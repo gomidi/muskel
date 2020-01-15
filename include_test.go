@@ -1730,6 +1730,32 @@ TRACK   | Vocals |
   2    | (c "ho")  |
 `,
 		},
+		{ // 52
+			`
+			
+
+TRACK   | Voc    | Piano | Drums |
+ Channel| 1      |       |       |
+
+=SCORE | Voc       | Piano | Drums |
+ # 4/4 @100
+  1    | (a "Hi-") |       |       |
+  2    | (c "ho")  |       |       |
+$include("testdata/includes/score2")
+`,
+			`
+=SCORE | Drums | Piano | Voc       |
+ # 4/4 @100.00
+  1    |       |       | (a "Hi-") |
+  2    |       |       | (c "ho")  |
+ #C 3/4 @134.00
+  1    |       | f"    | e"        |
+  2&   |       | d     | c         |
+ # 6/4 @100.00
+  4&   |       | f     | g'        |
+`,
+		},
+
 		/*
 			 - firstsync scheint nicht richtig zu funktionieren
 			(z.B. einbetten von =!patt1 auf 4&, wobei patt1 patt2 einbindet ohne ! auf 1 und patt2 erste note auf 4& hat)
@@ -1764,17 +1790,18 @@ TRACK   | Vocals |
 		*/
 	}
 
-	//sketch.DEBUG = true
+	// sketch.DEBUG = true
 
 	for i, test := range tests {
 
 		// fmt.Printf("############ %v ###############\n", i)
 
 		/*
-			if i != 49 {
+			if i != 52 {
 				continue
 			}
 		*/
+
 		if i == 36 {
 			continue
 		}

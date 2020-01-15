@@ -259,7 +259,7 @@ func (f *File) Parse() (err error) {
 			break
 		}
 
-		line := f.Input.Text()
+		line := strings.TrimSpace(f.Input.Text())
 
 		if len(line) > 1 && line[:2] == "*/" && f.currentMultiLineComment != nil {
 			//	fmt.Printf("[%v] multicomment end reached\n", f.currentLine)

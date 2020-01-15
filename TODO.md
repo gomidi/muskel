@@ -1,10 +1,11 @@
 # nächste TODOs
 
-- allow loading of tracks via include
-
+- fix: allow empty space before comments (line and multiline comments)
+- fix: including sub folders of project dir does not work
+- fix: including in score does only include the first bar, parts gets lost, what about tempo and time signatures?
 - fix: glissandi führen zu positionsverschiebungen
-
-- fix:   microverschiebungen zur gleichen zeit werden nicht korrekt aufgehoben (es verschiebt sich alles nachfolgende)
+- fix: replace/overwrite nach taktwiederholungen mit .2. etc.
+- fix: microverschiebungen zur gleichen zeit werden nicht korrekt aufgehoben (es verschiebt sich alles nachfolgende)
   2  | #1<        |
   2  | #2<        |              
   2  | #3<        |
@@ -12,8 +13,6 @@
 // oder
   2  | (#1< #2< #3<) |              
   3  | (#1 #2 #3) |
-
-- fix replace/overwrite nach taktwiederholungen mit .2. etc.
 
 - add $embed() command with params like drums.* (would allow all tokens in the drum table to be addressed without the drums. prefix)
   or drums.sn (would only allow sn to be addressed without the drums. prefix). Multiple of these params could be passed to $embed.
