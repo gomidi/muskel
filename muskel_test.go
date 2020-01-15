@@ -41,17 +41,17 @@ x          | y
 1 | |
 
 `, `
-TRACK   | Voc | Git | Bass |
- Channel| 2   | 3   | 4    |
- Delay  | 1/8 | 1/5 | -1/5 |
+TRACK    | Voc | Git | Bass |
+ Channel | 2   | 3   | 4    |
+ Delay   | 1/8 | 1/5 | -1/5 |
 
 
 PROPERTY |
  x       | y
 
-=texter | a | b | c |
+=texter  | a | b | c |
  #
-  1     |   |   |   |
+    1    |   |   |   |
 
 `},
 
@@ -64,9 +64,9 @@ PROPERTY |
 
 `, `
 //=a: b
-=texter | a | b | c |
+=texter  | a | b | c |
  #
-  1     |   |   |   |
+    1    |   |   |   |
 
 `},
 
@@ -119,10 +119,10 @@ PROPERTY |
 1 | |
 */
 
-=test | c | b | c |
+=test    | c | b | c |
  #
-  1   |   |   |   |
-  2   | b |   |   |
+    1    |   |   |   |
+    2    | b |   |   |
 
 `},
 
@@ -150,10 +150,10 @@ PROPERTY |
 1 | |
 */
 
-=test | c | b | c |
+=test    | c | b | c |
  #
 //1 | |
-  2   | b |   |   |
+    2    | b |   |   |
 
 `},
 
@@ -172,7 +172,7 @@ a            | b
 //1 | |
 2 |b|
 //3 | |
-4 |b|
+4&. |b|
 
 `, `
 PROPERTY |
@@ -183,12 +183,12 @@ PROPERTY |
 1 | |
 */
 
-=test | c | b | c |
+=test    | c | b | c |
  #
 //1 | |
-  2   | b |   |   |
+    2    | b |   |   |
 //3 | |
-  4   | b |   |   |
+    4&.  | b |   |   |
 
 `},
 		// 6
@@ -217,12 +217,12 @@ PROPERTY |
 1 | | | |C
 */
 
-=test | c | b | c |
+=test    | c | b | c |
  #
 //1 | |
-  2   | b |   |   | D
+    2    | b |   |   | D
 //3 | |
-  4   | b |   |   |
+    4    | b |   |   |
 
 `},
 		// 7
@@ -238,9 +238,9 @@ Program |10|20|30|
 PROPERTY |
  a       | b
 
-TRACK   | voc | git | bass |
- Channel| 1   | 2   | 3    |
- Program| 10  | 20  | 30   |
+TRACK    | voc | git | bass |
+ Channel | 1   | 2   | 3    |
+ Program | 10  | 20  | 30   |
 
 `},
 		// 8
@@ -258,11 +258,11 @@ SCALE |test|maj_or|min_or
 PROPERTY |
  a       | b
 
-SCALE | test | maj_or | min_or |
- 1    | d#'  | c      | a"     |
- 2    | f'   | d      | b"     |
- 3    | a"   | a"     | c"'    |
- 4    | a#'  | c"'    | d"'    |
+SCALE    | test | maj_or | min_or |
+ 1       | d#'  | c      | a"     |
+ 2       | f'   | d      | b"     |
+ 3       | a"   | a"     | c"'    |
+ 4       | a#'  | c"'    | d"'    |
 
 `},
 		// 9
@@ -283,14 +283,14 @@ c"| +10 |
 PROPERTY |
  a       | b
 
-TUNING | custom |
- d"    | +23    |
- d#"   | +12    |
- e"    | -12    |
- f#"   | +40    |
- g"    | +30    |
- a"    | 400Hz  |
- c"    | +10    |
+TUNING   | custom |
+ d"      | +23    |
+ d#"     | +12    |
+ e"      | -12    |
+ f#"     | +40    |
+ g"      | +30    |
+ a"      | 400Hz  |
+ c"      | +10    |
 
 `},
 		// 10
@@ -310,13 +310,13 @@ CC35   |1~;120          |                  |
 PROPERTY |
  a       | b
 
-TIMBRE    | legato[vocals] | staccato[vocals] |
- On       | @on-0.25       | @on              |
- Off      | @off           | @on+0.25         |
- Velocity | @vel-5         | @vel+5           |
- PitchBend| @pitch         | @pitch+10        |
- CC12     | 125~;0         |                  |
- CC35     | 1~;120         |                  |
+TIMBRE     | legato[vocals] | staccato[vocals] |
+ On        | @on-0.25       | @on              |
+ Off       | @off           | @on+0.25         |
+ Velocity  | @vel-5         | @vel+5           |
+ PitchBend | @pitch         | @pitch+10        |
+ CC12      | 125~;0         |                  |
+ CC35      | 1~;120         |                  |
 
 `},
 		// 11
@@ -346,29 +346,29 @@ min    | 20        |
 type  | *         |
 
 `, `
-drums |
- kd   | MN34++
+drums    |
+ kd      | MN34++
 
-=rhythm | euclid           |
+=rhythm  | euclid           |
  #
-  1     | $_euclid(3,12,&) |
+    1    | $_euclid(3,12,&) |
 
 PROPERTY |
  a       | b
 
-FILTER    | bass      |
- source   | drums     |
- range    | *         |
- srcrange | kd        |
- thresh   | *         |
- srcthresh| *         |
- factor   | *-0.5     |
- target   | cc_volume |
- attack   | 0.10ms    |
- release  | 0.20ms    |
- max      | 100       |
- min      | 20        |
- type     | *         |
+FILTER     | bass      |
+ source    | drums     |
+ range     | *         |
+ srcrange  | kd        |
+ thresh    | *         |
+ srcthresh | *         |
+ factor    | *-0.5     |
+ target    | cc_volume |
+ attack    | 0.10ms    |
+ release   | 0.20ms    |
+ max       | 100       |
+ min       | 20        |
+ type      | *         |
 
 `},
 		// 12
@@ -383,15 +383,15 @@ ch  | 1 |
 #
 2 | d' |
 `, `
-TRACK | voc |
- ch   | 1   |
+TRACK    | voc |
+ ch      | 1   |
 
-=SCORE | voc |
+=SCORE   | voc |
  #
-  1    | c#" |
+    1    | c#" |
  *3
  #
-  2    | d'  |
+    2    | d'  |
 `},
 		// 13
 		{`
@@ -409,19 +409,19 @@ ch  | 1 |
 #
 2 | d' |
 `, `
-TRACK | voc | bass | git |
- ch   | 1   |      |     |
+TRACK    | voc | bass | git |
+ ch      | 1   |      |     |
 
-=tester | a  | b |
+=tester  | a  | b |
  #
-  1     | ^3 |   |
+    1    | ^3 |   |
 
-=SCORE | voc | bass |
+=SCORE   | voc | bass |
  #
-  1    | c#" |      |
+    1    | c#" |      |
  *3
  #
-  2    | d'  |      |
+    2    | d'  |      |
 `},
 		// 14
 		{`
@@ -429,8 +429,8 @@ TRACK | voc | bass |
 ch  | 1 |
 
 @lyrics |
-hu ha ho | v1
-hü hä hö   |
+hu ha ho| v1
+hü hä hö|
 
 =SCORE | voc | bass |
 #
@@ -439,19 +439,19 @@ hü hä hö   |
 #
 2 | d' |
 `, `
-TRACK | voc | bass |
- ch   | 1   |      |
+TRACK    | voc | bass |
+ ch      | 1   |      |
 
-@lyrics     |
- hu ha ho   | v1
- hü hä hö   |
+@lyrics      |
+ hu ha ho    | v1
+ hü hä hö    |
 
-=SCORE | voc | bass |
+=SCORE   | voc | bass |
  #
-  1    | c#" |      |
+    1    | c#" |      |
  *3
  #
-  2    | d'  |      |
+    2    | d'  |      |
 `},
 		// 15
 		{`
@@ -466,16 +466,16 @@ ch  | 1 |
 #
 2 | d' |
 `, `
-TRACK | voc | bass |
+TRACK    | voc | bass |
 // Volume | 100 | 80 |
- ch   | 1   |      |
+ ch      | 1   |      |
 
-=SCORE | voc | bass |
+=SCORE   | voc | bass |
  #
-  1    | c#" |      |
+    1    | c#" |      |
  *3
  #
-  2    | d'  |      |
+    2    | d'  |      |
 `},
 		// 16
 		{`
@@ -490,16 +490,38 @@ ch  | 1 |
 # // ##
 2 | d' |
 `, `
-TRACK | voc | bass |
+TRACK    | voc | bass |
 // Volume | 100 | 80 |
- ch   | 1   |      |
+ ch      | 1   |      |
 
-=SCORE | voc | bass |
+=SCORE   | voc | bass |
  #
-  1    | c#" |      |
+    1    | c#" |      |
  *3
  # // ## | voc | bass |
-  2    | d'  |      |
+    2    | d'  |      |
+`},
+		// 17
+		{`
+TRACK | voc | bass |
+ch  | 1 |
+
+=SCORE | voc | bass |
+#
+1    | c#" |
+*3
+# 4/4 @120 // ## | a | b |
+2 | d' |
+`, `
+TRACK    | voc | bass |
+ ch      | 1   |      |
+
+=SCORE            | voc | bass |
+ #
+    1             | c#" |      |
+ *3
+ # 4/4 @120 // ## | voc | bass |
+    2             | d'  |      |
 `},
 	}
 

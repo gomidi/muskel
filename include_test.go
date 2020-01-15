@@ -8,7 +8,7 @@ import (
 )
 
 func TestInclude(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -27,12 +27,12 @@ TRACK | Voc | Drums | Piano |
 1  |     | drums.ho    |       |
 `,
 			`
-=SCORE | Drums   | Piano | Voc |
+=SCORE         | Drums   | Piano | Voc |
  # 4/4 @120.00
-  1    | MN36::: | b"    | a"  |
-  2&   | MN40::: | d     | c   |
+    1          | MN36::: | b"    | a"  |
+    2&         | MN40::: | d     | c   |
  #
-  1    | MN46::: |       |     |
+    1          | MN46::: |       |     |
 `,
 		},
 		{ // 1
@@ -55,13 +55,13 @@ TRACK | Voc | Drums | Piano |
 1  |     | =hu.a    |       |
 `,
 			`
-=SCORE | Drums   | Piano | Voc |
+=SCORE         | Drums   | Piano | Voc |
  # 4/4 @120.00
-  1    | MN36::: | b"    | a"  |
-  2&   | MN40::: | d     | c   |
+    1          | MN36::: | b"    | a"  |
+    2&         | MN40::: | d     | c   |
  #
-  1    | MN40::: |       |     |
-  2    | MN36::: |       |     |
+    1          | MN40::: |       |     |
+    2          | MN36::: |       |     |
 `,
 		},
 		{ // 2
@@ -84,21 +84,21 @@ TRACK | Voc | Drums | Piano |
 1      |     |                            |       |
 `,
 			`
-=SCORE | Drums | Piano | Voc |
+=SCORE         | Drums | Piano | Voc |
  # 4/4 @120.00
-  1    | f"    | b"    | a"  |
-  1&   | e"    |       |     |
-  2    | e"    |       |     |
-  2&   | e"    | d     | c   |
-  3    | f"    |       |     |
-  3&   | e"    |       |     |
-  4    | e"    |       |     |
-  4&   | e"    |       |     |
+    1          | f"    | b"    | a"  |
+    1&         | e"    |       |     |
+    2          | e"    |       |     |
+    2&         | e"    | d     | c   |
+    3          | f"    |       |     |
+    3&         | e"    |       |     |
+    4          | e"    |       |     |
+    4&         | e"    |       |     |
  #
-  1    | f"    |       |     |
-  1&   | e"    |       |     |
-  2    | e"    |       |     |
-  2&   | e"    |       |     |
+    1          | f"    |       |     |
+    1&         | e"    |       |     |
+    2          | e"    |       |     |
+    2&         | e"    |       |     |
 `,
 		},
 		{ // 3
@@ -1881,14 +1881,14 @@ TRACK | Voc | Drums | Piano |
 			`
 $include("drumnote")
 
-TRACK | Voc | Drums | Piano |
+TRACK    | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums    | Piano |
+=SCORE   | Voc | Drums    | Piano |
  #
-  1    | a"  | drums.kd | b"    |
-  2&   | c   | drums.sn | d     |
+    1    | a"  | drums.kd | b"    |
+    2&   | c   | drums.sn | d     |
  #
-  1    |     | drums.ho |       |
+    1    |     | drums.ho |       |
 
 `,
 		},
@@ -1916,19 +1916,19 @@ TRACK | Voc | Drums | Piano |
 $include("testdata/includes/header")
 $include("drumnote")
 
-=hu | a        |
+=hu      | a        |
  #
-  1 | drums.sn |
-  2 | drums.kd |
+    1    | drums.sn |
+    2    | drums.kd |
 
-TRACK | Voc | Drums | Piano |
+TRACK    | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums    | Piano |
+=SCORE   | Voc | Drums    | Piano |
  #
-  1    | a"  | drums.kd | b"    |
-  2&   | c   | drums.sn | d     |
+    1    | a"  | drums.kd | b"    |
+    2&   | c   | drums.sn | d     |
  #
-  1    |     | =hu.a    |       |
+    1    |     | =hu.a    |       |
 
 `,
 		},
@@ -1946,15 +1946,15 @@ $include("testdata/includes/score")
 
 `,
 			`
-TRACK | Voc | Drums | Piano |
+TRACK    | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums | Piano |
+=SCORE   | Voc | Drums | Piano |
  # 4/4
-  1    | a"  | d     | b"    |
-  2&   | c   |       | d     |
+    1    | a"  | d     | b"    |
+    2&   | c   |       | d     |
  $include("testdata/includes/score")
  #
-  1    | d   |       |       |
+    1    | d   |       |       |
 
 `,
 		},
@@ -1973,16 +1973,16 @@ $include("testdata/includes/score")
 
 `,
 			`
-TRACK | Voc | Drums | Piano |
+TRACK    | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums | Piano |
+=SCORE   | Voc | Drums | Piano |
  # 4/4
-  1    | a"  | d     | b"    |
-  2&   | c   |       | d     |
+    1    | a"  | d     | b"    |
+    2&   | c   |       | d     |
  $include("testdata/includes/score")
  $include("testdata/includes/score")
  #
-  1    | d   |       |       |
+    1    | d   |       |       |
 `,
 		},
 	}

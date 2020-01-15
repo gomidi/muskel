@@ -65,9 +65,31 @@ func (t *Table) CalcColWidths() error {
 
 	for _, line := range t.Data {
 		for i, c := range line {
-			if i == 0 && len(line) == 1 {
-				continue
+			if i == 0 && len(line) == 1 && len(line[0]) > 0 {
+				switch line[0][0] {
+				case '$':
+					continue
+				case '*':
+					continue
+				default:
+				}
 			}
+
+			if idx := strings.Index(c, "##"); idx > 0 {
+				c = c[:idx+2]
+			} else {
+				if idx2 := strings.Index(c, "//"); idx2 > 0 {
+					c = c[:idx2]
+				}
+			}
+
+			if i == 0 {
+				c = c + " "
+			}
+
+			/*
+
+			 */
 			if ll := len(c); i < len(t.cols)+1 && ll > t.colWidths[i] {
 				t.colWidths[i] = ll
 			}
@@ -82,8 +104,8 @@ func (t *Table) calcColWidth(col int) error {
 	if col == 0 {
 		t.colWidths[0] = LenUTF8(t.name)
 
-		if t.colWidths[col] < 1 {
-			t.colWidths[col] = 1
+		if t.colWidths[0] < 8 {
+			t.colWidths[0] = 8
 		}
 
 		return nil

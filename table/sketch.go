@@ -62,7 +62,7 @@ func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 		}
 		return t.Table.writeLine(f, first+last)
 	}
-	s.WriteString(t.Table.Pad(0, "  "+line[0]) + t.Table.separator())
+	s.WriteString(t.Table.Pad(0, "    "+line[0]) + t.Table.separator())
 
 	for i, _ := range t.cols {
 		col := ""
