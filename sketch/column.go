@@ -447,6 +447,7 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*Event, 
 		return nil, err
 	}
 
+	printEvents("after unrollIncludedBars of events", events)
 	//fmt.Printf("unrolled: %v\n", events)
 	events, err = c.unrollPartRepetitions(events, endPos)
 	if err != nil {
@@ -475,9 +476,17 @@ func (p *column) unrollIncludedBars(evts []*Event) ([]*Event, error) {
 			}
 			//ets = forwardEvents(ets, bar.Position)
 			printEvents("added included events", ets)
+
+			if DEBUG {
+				fmt.Printf("end is: %v\n", end)
+			}
 			res = append(res, ets...)
 			lastBarEnd = end
 			continue
+		}
+
+		if DEBUG {
+			fmt.Printf("bar has start position: %v\n", bar.Position)
 		}
 
 		endPos := bar.Position + uint(bar.Length32th())
@@ -506,7 +515,9 @@ func (p *column) unrollPartRepetitions(evts []*Event, stopPos uint) ([]*Event, e
 
 	for i, bar := range s.Bars {
 		_ = i
-		//fmt.Printf("sketch: %q bar %v no: %v pos: %v jumpto %q\n", s.Name, i, bar.No, bar.Position, bar.JumpTo)
+		if DEBUG {
+			fmt.Printf("sketch: %q bar %v no: %v pos: %v jumpto %q include: %#v length: %v\n", s.Name, i, bar.No, bar.Position, bar.JumpTo, bar.Include, bar.Length32th())
+		}
 
 		lastBarEnd = bar.Position + uint(bar.Length32th())
 

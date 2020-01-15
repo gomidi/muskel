@@ -233,7 +233,7 @@ func (s *Sketch) Unroll(colName string, params ...string) (*track.Track, []*Even
 		return tr, nil, nil
 	}
 
-	//printEvents("after column "+colName+" call of sketch "+s.Name+" in file "+s.File, events)
+	printEvents("Sketch.Unroll: after column "+colName+" call of sketch "+s.Name+" in file "+s.File, events)
 
 	events = rollTheDice(events)
 	//printEvents("after rollTheDice "+colName, events)
@@ -497,7 +497,7 @@ func (s *Sketch) unrollIncludedBars() (unrolled []*Bar, err error) {
 				b := incbar.Dup()
 				b.No = no
 				b.Position += bar.Position
-				b.Comment = fmt.Sprintf("from %s.%s.%v", bar.Include.File, skname, incbar.No)
+				b.Comment = fmt.Sprintf("from %s.%s#%v", bar.Include.File, skname, incbar.No+1)
 				//b.Part = ""
 				unrolled = append(unrolled, b)
 				no++
@@ -838,7 +838,7 @@ func (p *Sketch) parseCommandLF(data string) error {
 		if inc, isInc := it.(items.Include); isInc {
 			sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
 			if err != nil {
-				return fmt.Errorf("can't find sketch table %q in include %q", inc.Sketch, inc.File)
+				return fmt.Errorf("can't find sketch table %q in include %q: %s", inc.Sketch, inc.File, err.Error())
 			}
 
 			inc.Length32ths = sk.projectedBarEnd

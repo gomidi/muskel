@@ -1755,6 +1755,28 @@ $include("testdata/includes/score2")
     4&          |       | f     | g'        |
 `,
 		},
+		{ // 53
+			`
+TRACK | Voc | Drums | Piano |
+
+=SCORE   | Voc | Drums   | Piano |
+$include("testdata/includes/score2")
+#
+1        | d   |      |     B  |
+
+`,
+			`
+=SCORE          | Drums | Piano | Voc |
+ #C 3/4 @134.00
+    1           |       | f"    | e"  |
+    2&          |       | d     | c   |
+ # 6/4 @100.00
+    4&          |       | f     | g'  |
+ # 4/4
+    1           |       | B     | d   |
+
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -1790,16 +1812,16 @@ $include("testdata/includes/score2")
 		*/
 	}
 
-	// sketch.DEBUG = true
+	//sketch.DEBUG = true
 
 	for i, test := range tests {
 
 		// fmt.Printf("############ %v ###############\n", i)
 
 		/*
-		   if i != 52 {
-		     continue
-		   }
+			if i != 53 {
+				continue
+			}
 		*/
 
 		if i == 36 {

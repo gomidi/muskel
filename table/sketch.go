@@ -57,8 +57,11 @@ func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 			t.Table.writeFirstLine(&ff)
 			last = string(ff)
 			idx2 := strings.Index(last, "|")
-			last = " " + last[idx2:]
-			first = " " + line[0][:idx+2]
+			last = "## " + last[idx2:]
+			first = " " + line[0][:idx]
+			//t.Table.Pad(0, first)
+			first = Pad(first, t.Table.colWidths[0]-2)
+			//fmt.Printf("first: %q last: %q\n", first, last)
 		}
 		return t.Table.writeLine(f, first+last)
 	}

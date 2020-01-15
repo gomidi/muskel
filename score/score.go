@@ -3,6 +3,7 @@ package score
 import (
 	"fmt"
 	"io"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -151,7 +152,7 @@ func (sc *Score) Lyric(part string, fromLine, toLine int) (tokens []string, err 
 
 func (sc *Score) AddInclude(filepath string, sketch string, params []string) error {
 	//fmt.Printf("AddInclude %q %q\n", filepath, part)
-	fname, err := findInclude(filepath)
+	fname, err := sc.findInclude(filepath)
 	if err != nil {
 		return fmt.Errorf("can't find include %q", filepath)
 	}
@@ -160,7 +161,7 @@ func (sc *Score) AddInclude(filepath string, sketch string, params []string) err
 	if !has {
 		err := sc.Include(fname, sketch, params)
 		if err != nil {
-			return fmt.Errorf("can't include %q", filepath)
+			return fmt.Errorf("can't include %q, reason: %s", filepath, err.Error())
 		}
 		sco = sc.includedScores[fname]
 	}
@@ -186,7 +187,7 @@ func (sc *Score) AddInclude(filepath string, sketch string, params []string) err
 	case '=':
 		sk, err := sco.GetSketch(sketch)
 		if err != nil {
-			return fmt.Errorf("can't find sketch %q in include %q", sketch, filepath)
+			return fmt.Errorf("can't find sketch %q in include %q, reason: %s", sketch, filepath, err.Error())
 		}
 		sc.Sketches[sketch] = sk
 		return nil
@@ -288,10 +289,14 @@ func (sc *Score) FileGroup(trackName string) (fg string) {
 	return sc.Tracks[trackName].FileGroup
 }
 
+func (sc *Score) findInclude(filename string) (fname string, err error) {
+	return findInclude(filepath.Dir(sc.mainFile), filename)
+}
+
 func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
 
 	//fmt.Printf("GetIncludedSketch(%q,%q)\n", filename, sketch_table)
-	fname, err := findInclude(filename)
+	fname, err := sc.findInclude(filename)
 	if err != nil {
 		return nil, fmt.Errorf("can't find include %q\n", filename)
 	}
@@ -300,7 +305,7 @@ func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []strin
 	if !has {
 		err := sc.Include(fname, sketch_table, params)
 		if err != nil {
-			return nil, fmt.Errorf("can't  include %q\n", fname)
+			return nil, fmt.Errorf("can't include %q, reason: %s\n", fname, err.Error())
 		}
 		sco = sc.includedScores[fname]
 	}
@@ -883,7 +888,7 @@ func (sc *Score) GetSketch(name string) (*sketch.Sketch, error) {
 	return s, nil
 }
 func (sc *Score) Include(filename string, sketch string, params []string) error {
-	fname, err := findInclude(filename)
+	fname, err := sc.findInclude(filename)
 	if err != nil {
 		return err
 	}

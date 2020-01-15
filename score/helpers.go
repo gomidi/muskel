@@ -17,17 +17,23 @@ func FileExists(file string) bool {
 	return !info.IsDir()
 }
 
-func findInclude(file string) (resolved string, err error) {
+func findInclude(relDir string, file string) (resolved string, err error) {
 	if filepath.Ext(file) != ".mskl" {
 		file = file + ".mskl"
 	}
-	if FileExists(file) {
-		//fmt.Printf("found: %q\n", file)
-		return filepath.Abs(file)
-	}
 
 	if filepath.IsAbs(file) {
+		if FileExists(file) {
+			//fmt.Printf("found: %q\n", file)
+			return filepath.Abs(file)
+		}
 		return "", fmt.Errorf("file not found: %q (abs path)", file)
+	}
+
+	try0 := filepath.Join(relDir, file)
+	if FileExists(try0) {
+		//fmt.Printf("found: %q\n", try2)
+		return filepath.Abs(try0)
 	}
 
 	try1 := filepath.Join(WORKING_DIR, file)
