@@ -1,13 +1,5 @@
 # nächste TODOs
 
-- allow cols in the bar lines, when the stripped second col starts with // this in combination with an option to 
-  replace ## with the piped column names of the table should allow with proper alignment to easily replicate the columns
-  in  a comment where needed (the ## should be kept in the source before the cols in order to properly swap them, so they are
-  always the right ones, when parsing, everything after the ## is discarded)
-  maybe add an option to always respect the barlines when calculating the width of the first column
-  siehe =SCORE von kraftwerk/modell
-- die positionsnummer um 3 leerzeichen gegenüber der barline einrücken (also 2 leerzeichen mehr als jetzt)
-  siehe =SCORE von kraftwerk/modell
 - fix: wieder erlauben, dass die Hauptzählzeit (Zahl) fehlt, wenn eine nebenzählzeit existiert und es eine Hauptzählzeit vorher gab
   z.B & oder . oder &. oder &; oder ; oder .; oder &.; nach 1 oder 2 usw. entsprechend wird dann bei der formatierung um ein leerzeichen
   weiter eingerückt
