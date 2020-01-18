@@ -1805,6 +1805,50 @@ $include("testdata/includes/score3")
     1                    |       | d   |
 `,
 		},
+		{ // 55
+			`
+TRACK | Voc | Piano |
+
+=SCORE   | Voc | Piano |
+# \minor^c
+1        | ^1  | ^2    |
+$include("testdata/includes/score3", "=something")
+#
+1        | ^1   |  ^2    |    
+
+`,
+			`
+=SCORE                  | Piano | Voc |
+ # 4/4 @120.00 \minor^c
+    1                   | d     | c   |
+ #
+    1                   | d     | c   |
+ #
+    1                   | d     | c   |
+`,
+		},
+		{ // 56
+			`
+TRACK | Voc | Piano |
+
+=SCORE   | Voc | Piano |
+# \minor^c
+1        | ^1  | ^2    |
+$include("testdata/includes/score3", "=something2")
+#
+1        | ^1   |  ^2    |    
+
+`,
+			`
+=SCORE                  | Piano | Voc |
+ # 4/4 @120.00 \minor^c
+    1                   | d     | c   |
+ # \major^g
+    1                   | a     | g   |
+ # \minor^c
+    1                   | d     | c   |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

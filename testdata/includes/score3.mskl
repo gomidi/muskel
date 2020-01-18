@@ -1,5 +1,13 @@
 TRACK | Voc | Piano |
 
+=something | Voc | Piano |
+#
+1 | ^1 | ^2 |
+
+=something2 | Voc | Piano |
+# \major^g
+1 | ^1 | ^2 |
+
 =SCORE | Voc | Piano |
 #A @140 \major^g
 1      | e"  | f"    | 

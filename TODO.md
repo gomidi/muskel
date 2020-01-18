@@ -8,6 +8,7 @@
   3&
     .  => nicht zulässig
    &.  => 3&. 
+- fix: can't pass shortcuts to patterns within file where they are not defined (same for scales and patterns), make some recursive resolver to pass along
 - fix: replace/overwrite nach taktwiederholungen mit .2. etc.
 - fix: glissandi führen zu positionsverschiebungen
 - fix: microverschiebungen zur gleichen zeit werden nicht korrekt aufgehoben (es verschiebt sich alles nachfolgende)
