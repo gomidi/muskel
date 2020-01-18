@@ -1,6 +1,13 @@
 # nächste TODOs
 
-- fix: parts in includes können weder in dieser noch in der inkludierenden datei verwendet werden.
+- fix: sicherstellen, dass bei verkürzter schreibweise nur die letzte ziffer/beat position verwendet wird und nicht die letzte position, also
+  4
+    .   => 4.
+   &    => 4&
+
+  3&
+    .  => nicht zulässig
+   &.  => 3&. 
 - fix: replace/overwrite nach taktwiederholungen mit .2. etc.
 - fix: glissandi führen zu positionsverschiebungen
 - fix: microverschiebungen zur gleichen zeit werden nicht korrekt aufgehoben (es verschiebt sich alles nachfolgende)

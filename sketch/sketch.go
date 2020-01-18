@@ -62,11 +62,13 @@ type Sketch struct {
 	currentPosIn32ths   uint
 	projectedBarEnd     uint
 	currentTimeSignatur [2]uint8
+	currentTempo        float64
 	lastPosition        string
+	currentScale        *items.Scale
 }
 
 func NewSketch(name string, sc Score) *Sketch {
-	return &Sketch{
+	sk := &Sketch{
 		Score:   sc,
 		Name:    name,
 		Columns: map[string][]string{},
@@ -76,7 +78,16 @@ func NewSketch(name string, sc Score) *Sketch {
 		//jumpInLineBefore:    true,
 		barChangeRequired:   true,
 		currentTimeSignatur: [2]uint8{4, 4},
+		currentTempo:        120,
 	}
+
+	if sk.isScore() {
+		scale := &items.Scale{}
+		scale.BaseNote = 60
+		scale.Mode = items.Major
+		sk.currentScale = scale
+	}
+	return sk
 }
 
 func (s *Sketch) calcColWidth(colName string) (colWidth int) {
@@ -320,6 +331,8 @@ func (p *Sketch) parseBarLine(data string) error {
 		for n := 0; n < num; n++ {
 			b := NewBar() //score.NewBar()
 			b.TimeSig = p.currentTimeSignatur
+			b.TempoChange = p.currentTempo
+			b.Scale = p.currentScale
 			if n == 0 {
 				b.Comment = comment
 			}
@@ -367,6 +380,8 @@ func (p *Sketch) parseBarLine(data string) error {
 	b.Part = part
 	p.jumpInLineBefore = false
 	b.TimeSig = p.currentTimeSignatur
+	b.TempoChange = p.currentTempo
+	b.Scale = p.currentScale
 	b.Comment = comment
 
 	if idx := strings.Index(data, "\\"); idx >= 0 {
@@ -408,12 +423,16 @@ func (p *Sketch) parseBarLine(data string) error {
 }
 
 func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
-
+	if DEBUG {
+		//fmt.Printf("unrollPartBars called for bars \n")
+		printBars("unrollPartBars start", bars...)
+	}
 	var res []*Bar
 	var lastBarEnd uint
 	var i int
 
-	for _, bar := range s.Bars {
+	for _, bar := range bars {
+		//for _, bar := range s.Bars {
 		//fmt.Printf("sketch: %q bar %v no: %v pos: %v jumpto %q\n", s.Name, i, bar.No, bar.Position, bar.JumpTo)
 
 		lastBarEnd = bar.Position + uint(bar.Length32th())
@@ -456,6 +475,7 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 				endPos = s.projectedBarEnd
 			}
 
+			//fmt.Printf("getting bars from %v to %v\n", bar.Position, endPos)
 			brs := getBarsInPosRange(bar.Position, endPos, bars)
 			var nbars []*Bar
 
@@ -493,7 +513,13 @@ func (s *Sketch) unrollIncludedBars() (unrolled []*Bar, err error) {
 				skname = "=SCORE"
 			}
 
-			for _, incbar := range sk.Bars {
+			skBars, err := sk.UnrolledBars()
+
+			if err != nil {
+				return nil, fmt.Errorf("can't get unrolled bars for include %q: %s", bar.Include.File+"#"+skname, err.Error())
+			}
+
+			for _, incbar := range skBars {
 				b := incbar.Dup()
 				b.No = no
 				b.Position += bar.Position
@@ -527,7 +553,7 @@ func (s *Sketch) UnrolledBars() (unrolled []*Bar, err error) {
 	if err != nil {
 		return nil, err
 	}
-	printBars("after unrolling", unrolled...)
+	printBars("after unrolling PartBars", unrolled...)
 	return
 }
 
@@ -548,6 +574,8 @@ func (p *Sketch) handleEmptyBarChange(comment, part string) {
 	b := NewBar()
 	b.Comment = comment
 	b.TimeSig = p.currentTimeSignatur
+	b.TempoChange = p.currentTempo
+	b.Scale = p.currentScale
 	b.Part = part
 	p.newBar(b)
 }
@@ -612,6 +640,7 @@ func (p *Sketch) handleTempoChange(b *Bar, data string) error {
 		return fmt.Errorf("error in tempo change %#v. must be a number", data)
 	}
 	b.TempoChange = bpm
+	p.currentTempo = bpm
 	return nil
 }
 
@@ -738,6 +767,7 @@ func (p *Sketch) parseScale(data string, b *Bar) error {
 	}
 
 	b.Scale = &sc
+	p.currentScale = &sc
 	return nil
 }
 
@@ -923,14 +953,17 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 
 	s.currentPosIn32ths += pos32ths
 	s.Positions = append(s.Positions, [2]uint{uint(s.currentBarNo), pos32ths})
+	//fmt.Printf("s.colOrder: %v colsData: %v\n", s.colOrder, colsData)
 
 	for i, data := range colsData {
 		data = strings.TrimSpace(data)
-		colName := s.colOrder[i]
-		if s.isScore() && !s.Score.HasTrack(colName) {
-			return fmt.Errorf("can't find track %q", colName)
+		if i < len(s.colOrder) {
+			colName := s.colOrder[i]
+			if s.isScore() && !s.Score.HasTrack(colName) {
+				return fmt.Errorf("can't find track %q", colName)
+			}
+			s.Columns[colName] = append(s.Columns[colName], data)
 		}
-		s.Columns[colName] = append(s.Columns[colName], data)
 	}
 
 	/*
@@ -962,5 +995,6 @@ func (p *Sketch) ParseLine(tabs []string) error {
 		return p.parseBarLine(first)
 	}
 
+	//fmt.Printf("ParseLine %v\n", tabs)
 	return p.parseEventsLine(tabs)
 }

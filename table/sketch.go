@@ -58,9 +58,9 @@ func formatPosition(pos string) string {
 	case '&':
 		return " " + pos
 	case '.':
-		return "  " + pos
+		return " " + pos
 	case ';':
-		return "   " + pos
+		return " " + pos
 	default:
 		return pos
 	}

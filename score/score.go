@@ -596,6 +596,7 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 
 	lastTimeSig := [2]uint8{4, 4}
 	var lastTempoChange float64 = 0
+	var lastScale = &items.Scale{BaseNote: 60, Mode: items.Major}
 
 	//fmt.Printf("sorted: %#v\n", sorted)
 
@@ -618,6 +619,15 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 				var tempoChange float64 = 120
 				s += fmt.Sprintf(" @%0.2f", tempoChange)
 				lastTempoChange = tempoChange
+			}
+		}
+
+		if ((bar.Scale) != nil && bar.Scale != lastScale) || bar.No == 0 {
+			if bar.Scale != nil {
+				s += fmt.Sprintf(" %s", bar.Scale.String())
+				lastScale = bar.Scale
+			} else {
+				s += fmt.Sprintf(" %s", lastScale.String())
 			}
 		}
 
@@ -759,7 +769,7 @@ func (s *Score) replaceScalenotes(colname string, evts []*sketch.Event) []*sketc
 	if scale == nil {
 		scale = &items.Scale{}
 		scale.BaseNote = 60
-		scale.Mode = items.Ionian
+		scale.Mode = items.Major
 	}
 
 	//fmt.Printf("replaceScalenotes %q starting with scale: %s\n", colname, scale.String())

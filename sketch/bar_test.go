@@ -40,7 +40,7 @@ func TestBars(t *testing.T) {
 1 | a | c |
 `,
 			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{4, 4}},
+				&Bar{Position: 0, TimeSig: [2]uint8{4, 4}, TempoChange: 120},
 			},
 		},
 		{ // 1
@@ -49,7 +49,7 @@ func TestBars(t *testing.T) {
 1 | a | c |
 `,
 			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}},
+				&Bar{Position: 0, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, TempoChange: 120},
 			},
 		},
 		{ // 2
@@ -58,7 +58,7 @@ func TestBars(t *testing.T) {
 1 | a | c |
 `,
 			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}},
+				&Bar{Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, TempoChange: 120},
 			},
 		},
 		{ // 3
@@ -67,7 +67,7 @@ func TestBars(t *testing.T) {
 1 | a | c |
 `,
 			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{3, 6}, TimeSigChange: [2]uint8{3, 6}},
+				&Bar{Position: 0, TimeSig: [2]uint8{3, 6}, TimeSigChange: [2]uint8{3, 6}, TempoChange: 120},
 			},
 		},
 		{ // 4
@@ -81,10 +81,10 @@ func TestBars(t *testing.T) {
 1 | f | g |
 `,
 			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{4, 4}, Part: "A"},
-				&Bar{No: 1, Position: 32, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "B"},
+				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{4, 4}, Part: "A", TempoChange: 120},
+				&Bar{No: 1, Position: 32, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "B", TempoChange: 120},
 				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4}, JumpTo: "A"},
-				&Bar{No: 3, Position: 88, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}},
+				&Bar{No: 3, Position: 88, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, TempoChange: 120},
 			},
 		},
 		{ // 5
@@ -98,10 +98,10 @@ func TestBars(t *testing.T) {
 1 | f | g |
 `,
 			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Comment: "tester#1", Part: "A"},
-				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B"},
+				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Comment: "tester#1", Part: "A", TempoChange: 120},
+				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},
 				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4}, JumpTo: "A"},
-				&Bar{No: 3, Position: 80, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}},
+				&Bar{No: 3, Position: 80, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, TempoChange: 120},
 			},
 		},
 		{ // 6
@@ -117,17 +117,17 @@ $include("testinclude")
 # 4/4
 `,
 			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "A"},
-				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B"},
+				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "A", TempoChange: 120},
+				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},
 				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4}, Include: &items.Include{
 					File:        "testinclude",
 					Sketch:      "=SCORE",
 					Length32ths: 40,
 				},
 				},
-				&Bar{No: 3, Position: 96, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, Part: "C"},
+				&Bar{No: 3, Position: 96, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, Part: "C", TempoChange: 120},
 				&Bar{No: 4, Position: 120, TimeSig: [2]uint8{4, 4}, JumpTo: "B"},
-				&Bar{No: 5, Position: 192, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}},
+				&Bar{No: 5, Position: 192, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, TempoChange: 120},
 			},
 		},
 		{ // 7
@@ -144,8 +144,8 @@ $include("testinclude")
 # 4/4
 `,
 			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "A"},
-				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B"},
+				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "A", TempoChange: 120},
+				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},
 				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4},
 					Include: &items.Include{
 						File:        "testinclude",
@@ -160,9 +160,9 @@ $include("testinclude")
 						Length32ths: 40,
 					},
 				},
-				&Bar{No: 4, Position: 136, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}},
+				&Bar{No: 4, Position: 136, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, TempoChange: 120},
 				&Bar{No: 5, Position: 160, TimeSig: [2]uint8{4, 4}, JumpTo: "B"},
-				&Bar{No: 6, Position: 296, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}},
+				&Bar{No: 6, Position: 296, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, TempoChange: 120},
 			},
 		},
 	}

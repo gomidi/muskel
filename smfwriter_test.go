@@ -2389,7 +2389,7 @@ TRACK  | Voice |
 Channel | 3     |
 
 =SCORE  | Voice                     |
-# 4/4 @120 \ionian^d#'
+# 4/4 @120 \major^d#'
 1       | ^1 |
 2       | ^2  |
 3       | * |

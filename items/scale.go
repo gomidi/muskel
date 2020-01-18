@@ -56,7 +56,11 @@ func (s *Scale) Parse(data string, pos uint) error {
 func (s *Scale) String() string {
 	var nt Note
 	nt.Letter, nt.Augmenter, nt.Octave = KeyToNote(s.BaseNote)
-	return fmt.Sprintf("\\%s^%s", s.Name, nt.String())
+	name := s.Name
+	if name == "" {
+		name = s.Mode.Name()
+	}
+	return fmt.Sprintf("\\%s^%s", name, nt.String())
 }
 
 func (s *Scale) WriteMIDI(SMFWriter) []uint8 {
