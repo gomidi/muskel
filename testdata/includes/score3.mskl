@@ -1,5 +1,10 @@
 TRACK | Voc | Piano |
 
+=template | drums |
+#
+1        |#1 |
+2        |#2 |
+
 =something | Voc | Piano |
 #
 1 | ^1 | ^2 |

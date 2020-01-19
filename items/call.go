@@ -194,7 +194,7 @@ func (p *Call) parseItem(data string, posIn32th uint) (item Item, err error) {
 
 func (p *Call) mkEvent(position string, posIn32th uint, data string) (ev *callEvent, err error) {
 	ev = &callEvent{}
-	_, ev.Position, err = PositionTo32th("", position)
+	_, ev.Position, err = PositionTo32th(0, position)
 	if err != nil {
 		return nil, err
 	}
@@ -255,7 +255,7 @@ func (p *Call) parseEvent(idx int, data string, posIn32th uint) (ev *callEvent, 
 			p.firstPos = 0
 			pos = "1"
 		} else {
-			_, p.firstPos, err = PositionTo32th("", pos)
+			_, p.firstPos, err = PositionTo32th(0, pos)
 			if err != nil {
 				return nil, err
 			}

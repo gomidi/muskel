@@ -5,27 +5,34 @@ import (
 	"strings"
 )
 
-type Lyric string
+type Lyric struct {
+	Text     string
+	PosShift int // 0 = no, 1 = laidback, -1 = ahead of time
+}
 
 func (l *Lyric) Parse(data string, posIn32th uint) (err error) {
 	t := strings.Trim(data, `"`)
-	*l = Lyric(t)
+	l.Text = t
 	return nil
 }
 
-func (l Lyric) Text() string {
-	return string(l)
+func (l *Lyric) Dup() Item {
+	return &Lyric{Text: l.Text, PosShift: l.PosShift}
 }
 
-func (l Lyric) Dup() Item {
-	return &l
+func (l *Lyric) String() string {
+	s := fmt.Sprintf("%q", l.Text)
+	switch l.PosShift {
+	case -1:
+		return s + "<"
+	case 1:
+		return s + ">"
+	default:
+		return s
+	}
 }
 
-func (l Lyric) String() string {
-	return fmt.Sprintf("%q", string(l))
-}
-
-func (v Lyric) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	wr.Lyric(v.Text())
+func (v *Lyric) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
+	wr.Lyric(v.Text)
 	return
 }

@@ -70,7 +70,7 @@ func sketchFromEventsLine(name string, patternDef string, sc Score) (*Sketch, er
 		}
 
 		var num32 uint
-		_, num32, err = items.PositionTo32th("", pos)
+		_, num32, err = items.PositionTo32th(0, pos)
 
 		if err != nil {
 			return nil, err
@@ -327,7 +327,8 @@ func ntupleHasNote(me *items.NTuple) bool {
 
 func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 	applied = ev.Dup()
-	l := items.Lyric(lyric)
+	var l items.Lyric
+	l.Text = lyric
 
 	switch v := applied.Item.(type) {
 	case *items.MultiItem:
@@ -337,8 +338,15 @@ func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 		v.Items = append(v.Items, &l)
 		applied.Item = v
 		wasApplied = true
-	case *items.Note, *items.MIDINote:
+	case *items.Note:
 		var me = &items.MultiItem{}
+		l.PosShift = v.PosShift
+		me.Items = append(me.Items, ev.Item.Dup(), &l)
+		applied.Item = me
+		wasApplied = true
+	case *items.MIDINote:
+		var me = &items.MultiItem{}
+		l.PosShift = v.PosShift
 		me.Items = append(me.Items, ev.Item.Dup(), &l)
 		applied.Item = me
 		wasApplied = true
@@ -347,6 +355,7 @@ func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 			return
 		}
 		var me = &items.MultiItem{}
+		l.PosShift = v.PosShift
 		me.Items = append(me.Items, ev.Item.Dup(), &l)
 		applied.Item = me
 		wasApplied = true

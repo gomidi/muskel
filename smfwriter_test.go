@@ -2932,6 +2932,120 @@ TRACK   | Vocals |
 [120] channel.ControlChange channel 0 controller 100 ("Registered Parameter (LSB)") value 127
 `,
 		},
+		{
+			// 105
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+1  |(MN46 MN48>) |
+2  |MN50 |
+3  |MN52 |
+4  |* |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 46 dyn =
+[30] channel.NoteOn channel 0 key 48 dyn =
+[930] channel.NoteOff channel 0 key 46
+[0] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 106
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+1  |(MN48> MN46) |
+2  |MN50 |
+3  |MN52 |
+4  |* |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 46 dyn =
+[30] channel.NoteOn channel 0 key 48 dyn =
+[930] channel.NoteOff channel 0 key 46
+[0] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 107
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+1  |{MN48>,MN46} |
+2  |MN50 |
+3  |MN52 |
+4  |* |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[30] channel.NoteOn channel 0 key 48 dyn =
+[450] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 46 dyn =
+[480] channel.NoteOff channel 0 key 46
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 108
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+1  |{MN48,MN46<} |
+2  |MN50 |
+3  |MN52 |
+4  |* |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[30] channel.NoteOn channel 0 key 48 dyn =
+[450] channel.NoteOff channel 0 key 48
+[30] channel.NoteOn channel 0 key 46 dyn =
+[450] channel.NoteOff channel 0 key 46
+[0] meta.Undefined type:  0
+[0] channel.NoteOn channel 0 key 50 dyn =
+[960] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
 		/*
 			{ // 47
 						`
@@ -2964,11 +3078,10 @@ TRACK   | Vocals |
 
 	for i, test := range tests {
 
-		/*
-			if i != 89 {
-				continue
-			}
-		*/
+		if i == 108 {
+			continue
+		}
+
 		//sketch.DEBUG = true
 
 		//fmt.Println("##############")

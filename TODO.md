@@ -1,24 +1,13 @@
 # nächste TODOs
 
-- fix: sicherstellen, dass bei verkürzter schreibweise nur die letzte ziffer/beat position verwendet wird und nicht die letzte position, also
-  4
-    .   => 4.
-   &    => 4&
-
-  3&
-    .  => nicht zulässig
-   &.  => 3&. 
-- fix: can't pass shortcuts to patterns within file where they are not defined (same for scales and patterns), make some recursive resolver to pass along
-- fix: replace/overwrite nach taktwiederholungen mit .2. etc.
 - fix: glissandi führen zu positionsverschiebungen
-- fix: microverschiebungen zur gleichen zeit werden nicht korrekt aufgehoben (es verschiebt sich alles nachfolgende)
-  2  | #1<        |
-  2  | #2<        |              
-  2  | #3<        |
-  3  | (#1 #2 #3) |              
-// oder
-  2  | (#1< #2< #3<) |              
-  3  | (#1 #2 #3) |
+
+- fix: microverschiebungen innerhalb von ntuples werden nicht korrekt vorgenommen aufgehoben 
+  2   | {c,d<} |              
+  2&  | *      |
+
+- fix: replace/overwrite nach taktwiederholungen mit .2. etc.
+
 
 - add $embed() command with params like drums.* (would allow all tokens in the drum table to be addressed without the drums. prefix)
   or drums.sn (would only allow sn to be addressed without the drums. prefix). Multiple of these params could be passed to $embed.

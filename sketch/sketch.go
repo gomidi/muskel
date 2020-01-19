@@ -65,6 +65,7 @@ type Sketch struct {
 	currentTempo        float64
 	lastPosition        string
 	currentScale        *items.Scale
+	currentBeat         uint
 }
 
 func NewSketch(name string, sc Score) *Sketch {
@@ -79,6 +80,7 @@ func NewSketch(name string, sc Score) *Sketch {
 		barChangeRequired:   true,
 		currentTimeSignatur: [2]uint8{4, 4},
 		currentTempo:        120,
+		currentBeat:         0,
 	}
 
 	if sk.isScore() {
@@ -566,6 +568,7 @@ func (p *Sketch) newBar(b *Bar) {
 	p.Bars = append(p.Bars, b)
 	p.currentPosIn32ths = p.projectedBarEnd
 	p.projectedBarEnd += uint(b.Length32th())
+	p.currentBeat = 0
 	//fmt.Printf("projectedBarEnd: %v\n", p.projectedBarEnd)
 }
 
@@ -941,11 +944,12 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 		return fmt.Errorf("can't start with an empty position")
 	}
 
-	pos, pos32ths, err := items.PositionTo32th(s.lastPosition, firstColumn)
+	pos, pos32ths, err := items.PositionTo32th(s.currentBeat, firstColumn)
 
 	if err != nil {
 		return err
 	}
+	s.currentBeat, _ = items.GetQNNumberFromPos(pos)
 
 	if pos != "" {
 		s.lastPosition = pos

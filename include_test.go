@@ -1626,11 +1626,11 @@ TRACK   | Vocals |
   1    | =melody@lyr.V1 |
 `,
 			`
-=SCORE                   | Vocals   |
+=SCORE                   | Vocals    |
  # 4/4 @120.00 \major^c'
-    1                    | (a "a")  |
-    1                    | (b> "b") |
-    2                    | (c "c")  |
+    1                    | (a "a")   |
+    1                    | (b> "b">) |
+    2                    | (c "c")   |
 `,
 		},
 		{ // 48
@@ -1652,11 +1652,11 @@ TRACK   | Vocals | Drums |
   1    | =melody@lyr.V1 |       |
 `,
 			`
-=SCORE                   | Drums | Vocals   |
+=SCORE                   | Drums | Vocals    |
  # 4/4 @120.00 \major^c'
-    1                    |       | (a "a")  |
-    1                    |       | (b> "b") |
-    2                    |       | (c "c")  |
+    1                    |       | (a "a")   |
+    1                    |       | (b> "b">) |
+    2                    |       | (c "c")   |
 `,
 		},
 		{ // 49
@@ -1678,11 +1678,11 @@ TRACK    | Vocals | Drums |
     1    |           |   =melody@lyr.V1    |
 `,
 			`
-=SCORE                   | Drums | Vocals   |
+=SCORE                   | Drums | Vocals    |
  # 4/4 @120.00 \major^c'
-    1                    |       | (a "a")  |
-    1                    |       | (b> "b") |
-    2                    |       | (c "c")  |
+    1                    |       | (a "a")   |
+    1                    |       | (b> "b">) |
+    2                    |       | (c "c")   |
 `,
 		},
 		{ // 50
@@ -1847,6 +1847,48 @@ $include("testdata/includes/score3", "=something2")
     1                   | a     | g   |
  # \minor^c
     1                   | d     | c   |
+`,
+		},
+		{ // 57
+			`
+TRACK | Voc | Piano |
+
+=SCORE   | Voc | Piano |
+#
+1        | c  | d    |
+&        | g  | a    |
+#
+2.        | b   |  g    |    
+&        | d | f |
+
+`,
+			`
+=SCORE                   | Piano | Voc |
+ # 4/4 @120.00 \major^c'
+    1                    | d     | c   |
+    1&                   | a     | g   |
+ #
+    2.                   | g     | b   |
+    2&                   | f     | d   |
+`,
+		},
+		{ // 58
+			`
+TRACK | drums |
+
+$include("drumnote")
+$include("testdata/includes/score3")
+
+=SCORE   | drums |
+#
+1        | =template.drums(drums.kd,drums.sn) |
+
+`,
+			`
+=SCORE                   | drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+    2                    | MN40::: |
 `,
 		},
 

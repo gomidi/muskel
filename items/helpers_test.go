@@ -201,31 +201,31 @@ func TestHalfTonesToPitchbend(t *testing.T) {
 
 func TestPositionTo32th(t *testing.T) {
 	tests := []struct {
-		lastPos   string
+		lastBeat  uint
 		pos       string
 		completed string
 		num32th   uint
 	}{
-		{"", "1", "1", 0},
-		{"1", ";", "1;", 1},
-		{"1", ".", "1.", 2},
-		{"1", "&", "1&", 4},
-		{"1", "&;", "1&;", 5},
-		{"1&", ";", "1&;", 5},
-		{"1", "&.", "1&.", 6},
-		{"1&", ".", "1&.", 6},
-		{"1", "&.;", "1&.;", 7},
-		{"1&", ".;", "1&.;", 7},
-		{"1&.", ";", "1&.;", 7},
-		{"", "2", "2", 8},
-		{"2", "&", "2&", 12},
+		{0, "1", "1", 0},
+		{1, ";", "1;", 1},
+		{1, ".", "1.", 2},
+		{1, "&", "1&", 4},
+		{1, "&;", "1&;", 5},
+		//{0, ";", "1;", 1},
+		{1, "&.", "1&.", 6},
+		//{"1&", ".", "1&.", 6},
+		{1, "&.;", "1&.;", 7},
+		//{"1&", ".;", "1&.;", 7},
+		//{"1&.", ";", "1&.;", 7},
+		{1, "2", "2", 8},
+		{2, "&", "2&", 12},
 	}
 
 	for i, test := range tests {
-		completed, num32th, _ := PositionTo32th(test.lastPos, test.pos)
+		completed, num32th, _ := PositionTo32th(test.lastBeat, test.pos)
 
 		if completed != test.completed || num32th != test.num32th {
-			t.Errorf("[%v] positionTo32th(%#v, %#v) = %#v, %v // expected %#v, %v", i, test.lastPos, test.pos, completed, num32th, test.completed, test.num32th)
+			t.Errorf("[%v] positionTo32th(%#v, %#v) = %#v, %v // expected %#v, %v", i, test.lastBeat, test.pos, completed, num32th, test.completed, test.num32th)
 		}
 	}
 }
@@ -233,7 +233,7 @@ func TestPositionTo32th(t *testing.T) {
 func TestGetQNNumberFromPos(t *testing.T) {
 	tests := []struct {
 		position string
-		qnumber  int
+		qnumber  uint
 		rest     string
 	}{
 		{"1", 1, ""},
@@ -255,7 +255,7 @@ func TestGetQNNumberFromPos(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		qn, rest := getQNNumberFromPos(test.position)
+		qn, rest := GetQNNumberFromPos(test.position)
 
 		if qn != test.qnumber || rest != test.rest {
 			t.Errorf("[%v] getQNNumberFromPos(%#v) = %v, %#v // expected %v, %#v", i, test.position, qn, rest, test.qnumber, test.rest)

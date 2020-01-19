@@ -552,7 +552,7 @@ func TestCall(t *testing.T) {
 	pos := strings.Split("1\n1&\n2", "\n")
 
 	for _, p := range pos {
-		_, _p, _ := items.PositionTo32th("", p)
+		_, _p, _ := items.PositionTo32th(0, p)
 		s.Positions = append(s.Positions, [2]uint{0, _p})
 	}
 

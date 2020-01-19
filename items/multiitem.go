@@ -1,6 +1,7 @@
 package items
 
 import (
+	"sort"
 	"strings"
 )
 
@@ -70,6 +71,37 @@ func (m MultiItem) IsHold() bool {
 	return hasHold && !hasStoppingNote
 }
 
+type sortMultiItem []Item
+
+func (s sortMultiItem) Len() int {
+	return len(s)
+}
+
+func (s sortMultiItem) Swap(a, b int) {
+	s[a], s[b] = s[b], s[a]
+}
+
+func getPosShift(i Item) int {
+	switch v := i.(type) {
+	case *Note:
+		return v.PosShift
+	case *MIDINote:
+		return v.PosShift
+	case *NTuple:
+		return v.PosShift
+	case *Call:
+		return v.PosShift
+	case *Lyric:
+		return v.PosShift
+	default:
+		return 0
+	}
+}
+
+func (s sortMultiItem) Less(a, b int) bool {
+	return getPosShift(s[a]) < getPosShift(s[b])
+}
+
 func (v MultiItem) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
 	if !v.IsHold() {
 		MIDITrack.StopNotes(wr)
@@ -79,7 +111,10 @@ func (v MultiItem) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
 
 	MIDITrack.NoteOns = map[uint8]bool{}
 
-	for _, it := range v.Items {
+	sorted := sortMultiItem(v.Items)
+	sort.Sort(sorted)
+
+	for _, it := range sorted {
 		if it != Hold {
 			// ignore the returned velocities
 			added := MIDITrack.WriteItem(wr, it)

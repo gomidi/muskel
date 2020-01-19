@@ -68,6 +68,7 @@ type Score struct {
 	Sketches map[string]*sketch.Sketch
 	Unrolled map[string][]*sketch.Event
 	Files    map[string]*file.File
+	Parent   *Score
 }
 
 func (s *Score) FilterTrack(colName string, events []*sketch.Event) []*sketch.Event {
@@ -220,6 +221,9 @@ func (sc *Score) AddToken(key string, value string) {
 func (sc *Score) GetToken(name string) (string, error) {
 	tk, has := sc.tokens[name]
 	if !has {
+		if sc.Parent != nil {
+			return sc.Parent.GetToken(name)
+		}
 		return "", fmt.Errorf("can't find token %q", name)
 	}
 	return tk, nil
@@ -909,6 +913,7 @@ func (sc *Score) Include(filename string, sketch string, params []string) error 
 			opts = append(opts, Sketch(sketch))
 		}
 		sco = New(filename, params, opts...)
+		sco.Parent = sc
 		err := sc.parse(fname, sco)
 		if err != nil {
 			return err

@@ -355,26 +355,26 @@ func Length32ths(num, denom uint8) int {
 	return int(num*32) / int(denom)
 }
 
-func getQNNumberFromPos(pos string) (qnnumber int, rest string) {
+func GetQNNumberFromPos(pos string) (qnnumber uint, rest string) {
 	if len(pos) == 0 {
 		panic("empty position is not valid")
 	}
-	qnnumber = -1
+	qnnumber = 0
 	rest = pos
 
 	if len(pos) > 1 {
 		if i2, err := strconv.Atoi(pos[0:2]); err == nil {
-			qnnumber = i2
+			qnnumber = uint(i2)
 			rest = pos[2:]
 		} else {
 			if i1, err := strconv.Atoi(pos[0:1]); err == nil {
-				qnnumber = i1
+				qnnumber = uint(i1)
 				rest = pos[1:]
 			}
 		}
 	} else {
 		if i1, err := strconv.Atoi(pos[0:1]); err == nil {
-			qnnumber = i1
+			qnnumber = uint(i1)
 			rest = pos[1:]
 		}
 	}
@@ -409,9 +409,61 @@ func splitParams(params string) (res []string) {
 	return
 }
 
+/*
+lastBeatNo is the number of the beat in the bar, starting with 1
+if lastBeatNo = 0, then there is no lastBeatNo given
+*/
+func PositionTo32th(lastBeatNo uint, pos string) (completed string, num32th uint, err error) {
+
+	number, rest := GetQNNumberFromPos(pos)
+	completed = pos
+
+	if number == 0 {
+		if lastBeatNo < 0 {
+			err = fmt.Errorf("lastBeatNo must be given, if pos is incomplete")
+			return
+		}
+
+		number = lastBeatNo
+		completed = fmt.Sprintf("%v%s", number, rest)
+
+		//		fmt.Printf("lastPos: %q pos: %q completed: %q\n", lastPos, pos, completed)
+
+	}
+
+	num32th = uint((number - 1) * 8)
+
+	if rest == "" {
+		return
+	}
+
+	switch rest {
+	case ";":
+		num32th += 1
+	case ".":
+		num32th += 2
+	case ".;":
+		num32th += 3
+	case "&":
+		num32th += 4
+	case "&;":
+		num32th += 5
+	case "&.":
+		num32th += 6
+	case "&.;":
+		num32th += 7
+	default:
+		err = fmt.Errorf("invalid rest: %q in position %q", rest, pos)
+	}
+
+	return
+
+}
+
 // lastPos must either be "", then pos must be complete
 // (i.e. must start with a number) or lastPos must be complete
 // then pos may be derived from it
+/*
 func PositionTo32th(lastPos, pos string) (completed string, num32th uint, err error) {
 
 	number, rest := getQNNumberFromPos(pos)
@@ -464,6 +516,7 @@ func PositionTo32th(lastPos, pos string) (completed string, num32th uint, err er
 	return
 
 }
+*/
 
 func slice(start, end int, s [][]bool) [][]bool {
 	if end < 0 {

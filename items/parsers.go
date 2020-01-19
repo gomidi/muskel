@@ -83,10 +83,18 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			it = gl
 			return
 		case '"':
-			var ly = Lyric("")
-			l := &ly
-			err = l.Parse(data, posIn32th)
-			it = l
+			var ly Lyric
+			//l := &ly
+			switch data[len(data)-1] {
+			case '>':
+				ly.PosShift = 1
+				data = data[:len(data)-1]
+			case '<':
+				ly.PosShift = -1
+				data = data[:len(data)-1]
+			}
+			err = ly.Parse(data, posIn32th)
+			it = &ly
 			return
 		case '{':
 			var ntp = &NTuple{}
