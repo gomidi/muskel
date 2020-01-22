@@ -438,6 +438,8 @@ func (v Note) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
 		wr.BackupTimeline()
 	}
 
+	MIDITrack.SetStraight()
+
 	return addedNotes
 }
 

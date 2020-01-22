@@ -121,6 +121,7 @@ func (v MultiItem) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
 			addedNotes = append(addedNotes, added...)
 		}
 	}
+	MIDITrack.SetStraight()
 
 	MIDITrack.NoteOns = cachedNoteOns
 	return addedNotes

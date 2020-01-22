@@ -105,6 +105,8 @@ func (v MIDINote) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
 		//iw.wr.NoteOff(n)
 	}
 
+	MIDITrack.SetStraight()
+
 	return addedNotes
 }
 

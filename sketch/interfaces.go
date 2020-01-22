@@ -11,6 +11,7 @@ type Score interface {
 	HasTrack(name string) bool
 	GetTrack(track string) (*track.Track, error)
 	GetToken(name string) (string, error)
+	Embed(patterns ...string) error
 	GetMode(name string) items.Mode
 	FilterTrack(colName string, events []*Event) []*Event
 	Properties() map[string]interface{}

@@ -126,7 +126,56 @@ func (i *Include) WriteTo(f table.Formatter) error {
 	return f.WriteLine(line)
 }
 
+var embedRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$") + "embed")
+
+type Embed struct {
+	lineNo int
+	embed
+	score
+}
+
+type embed struct {
+	params []string
+}
+
+func (i *Embed) LineNo() int {
+	return i.lineNo
+}
+
+func (i *Embed) ParseLine(line string) error {
+	idx := strings.Index(line, "(")
+	if idx < 3 {
+		return fmt.Errorf("invalid include line: %q", line)
+	}
+
+	params := strings.Split(strings.TrimSpace(strings.TrimRight(line[idx+1:], ")")), ",")
+
+	i.params = nil
+
+	for _, p := range params {
+		i.params = append(i.params, strings.Trim(p, "\""))
+	}
+
+	return i.score.Embed(i.params...)
+}
+
+func (i *Embed) WriteTo(f table.Formatter) error {
+	var line strings.Builder
+	line.WriteString("$embed(")
+
+	for n, p := range i.params {
+		if n > 0 {
+			line.WriteString(",")
+		}
+		line.WriteString(fmt.Sprintf("%q", p))
+	}
+
+	line.WriteString(")")
+	return f.WriteLine(line.String())
+}
+
 var _ Part = &Include{}
+var _ Part = &Embed{}
 var _ Part = &table.Table{}
 var _ Part = EmptyLine(4)
 

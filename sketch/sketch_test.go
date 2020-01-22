@@ -447,6 +447,10 @@ type testScore struct {
 	getSketch func(name string) *Sketch
 }
 
+func (t testScore) Embed(p ...string) error {
+	return nil
+}
+
 func (t testScore) Lyric(s string, from, to int) ([]string, error) {
 	return nil, nil
 }

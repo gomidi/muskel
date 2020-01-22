@@ -1891,6 +1891,28 @@ $include("testdata/includes/score3")
     2                    | MN40::: |
 `,
 		},
+		{ // 59
+			`
+TRACK | drums |
+
+$include("drumnote")
+
+$embed("drums.*")
+
+$include("testdata/includes/score3")
+
+=SCORE   | drums |
+#
+1        | =template.drums(kd,sn) |
+
+`,
+			`
+=SCORE                   | drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+    2                    | MN40::: |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

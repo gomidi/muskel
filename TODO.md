@@ -1,22 +1,16 @@
 # nächste TODOs
 
-- fix: glissandi führen zu positionsverschiebungen
-
 - fix: microverschiebungen innerhalb von ntuples werden nicht korrekt vorgenommen aufgehoben 
   2   | {c,d<} |              
   2&  | *      |
 
-- fix: replace/overwrite nach taktwiederholungen mit .2. etc.
-
-
-- add $embed() command with params like drums.* (would allow all tokens in the drum table to be addressed without the drums. prefix)
-  or drums.sn (would only allow sn to be addressed without the drums. prefix). Multiple of these params could be passed to $embed.
-  multiple calls of embed could be done. it would be great, if these "globals" would only be globals for the current file/score.
-  but that would require the token resolving procedure to change a bit, I guess. (maybe its time to separate token resolving from pattern resolving, which also might make sense, since token resolving must not be recursive while pattern resolving may be)
-
 - tempowechsel und globale scalewechsel mitten im takt ermöglichen:
   in der positionsspalte hinter der position, durch leerzeichen abgetrennt, z.B.
   2& @220 \major^g#' diese müssen im takt gespeichert werden (mit ihrer position)
+
+- fix: replace/overwrite nach taktwiederholungen mit .2. etc.
+
+- überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
 
 - allow to use parts like patterns inside cols (via [part] syntax): 
   that allows to selectively repeat parts (just for some cols) and to override not fitting things
@@ -30,11 +24,9 @@
 - allow tempo changes inside columns of main score, independant from main tempo with @130 etc. to set back to the main tempo, use
   just @. also relative tempo possible, e.g. @50%
 
-- fix tests for tokens, sketches and patterns
-- fix schreiben in mehrere dateien
 - dokumentation aktualisieren
 - check and fix randomness
-- tests reanimieren und code cleanup, Packages, proper sketch/column definition (vielleicht wird column zu sketch und die sketchtable zu system)
+- tests reanimieren und code cleanup
 
 ## weiteres / Komplexeres
 

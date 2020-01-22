@@ -3046,6 +3046,242 @@ Ch      |1|
 [960] channel.NoteOff channel 0 key 52
 `,
 		},
+		{
+			// 109
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+1  |CC(35,10)~ |
+2  |CC(35,20) |
+3  |MN52 |
+4  |* |
+
+			`,
+			2,
+			false,
+			true,
+			`
+[0] channel.ControlChange channel 0 controller 101 ("Registered Parameter (MSB)") value 0
+[0] channel.ControlChange channel 0 controller 100 ("Registered Parameter (LSB)") value 0
+[0] channel.ControlChange channel 0 controller 6 ("Data Entry (MSB)") value 2
+[0] channel.ControlChange channel 0 controller 38 ("Data Entry (LSB)") value 0
+[0] channel.ControlChange channel 0 controller 101 ("Registered Parameter (MSB)") value 127
+[0] channel.ControlChange channel 0 controller 100 ("Registered Parameter (LSB)") value 127
+[0] channel.ControlChange channel 0 controller 35 value 10
+[60] channel.ControlChange channel 0 controller 35 value 11
+[60] channel.ControlChange channel 0 controller 35 value 11
+[60] channel.ControlChange channel 0 controller 35 value 12
+[60] channel.ControlChange channel 0 controller 35 value 13
+[60] channel.ControlChange channel 0 controller 35 value 13
+[60] channel.ControlChange channel 0 controller 35 value 14
+[60] channel.ControlChange channel 0 controller 35 value 14
+[60] channel.ControlChange channel 0 controller 35 value 15
+[60] channel.ControlChange channel 0 controller 35 value 16
+[60] channel.ControlChange channel 0 controller 35 value 16
+[60] channel.ControlChange channel 0 controller 35 value 17
+[60] channel.ControlChange channel 0 controller 35 value 18
+[60] channel.ControlChange channel 0 controller 35 value 18
+[60] channel.ControlChange channel 0 controller 35 value 19
+[60] channel.ControlChange channel 0 controller 35 value 19
+[60] channel.ControlChange channel 0 controller 35 value 20
+[0] channel.ControlChange channel 0 controller 35 value 20
+[960] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 110
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+1  |c~ |
+2  |d |
+3  |MN52 |
+4  |* |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[60] channel.Pitchbend channel 0 value 512 absValue 0
+[60] channel.Pitchbend channel 0 value 1024 absValue 0
+[60] channel.Pitchbend channel 0 value 1536 absValue 0
+[60] channel.Pitchbend channel 0 value 2048 absValue 0
+[60] channel.Pitchbend channel 0 value 2560 absValue 0
+[60] channel.Pitchbend channel 0 value 3072 absValue 0
+[60] channel.Pitchbend channel 0 value 3584 absValue 0
+[60] channel.Pitchbend channel 0 value 4096 absValue 0
+[60] channel.Pitchbend channel 0 value 4608 absValue 0
+[60] channel.Pitchbend channel 0 value 5120 absValue 0
+[60] channel.Pitchbend channel 0 value 5632 absValue 0
+[60] channel.Pitchbend channel 0 value 6144 absValue 0
+[60] channel.Pitchbend channel 0 value 6656 absValue 0
+[60] channel.Pitchbend channel 0 value 7168 absValue 0
+[60] channel.Pitchbend channel 0 value 7680 absValue 0
+[60] channel.Pitchbend channel 0 value 8191 absValue 0
+[960] channel.NoteOff channel 0 key 48
+[0] channel.Pitchbend channel 0 value 0 absValue 0
+[0] channel.NoteOn channel 0 key 52 dyn =
+[960] channel.NoteOff channel 0 key 52
+`,
+		},
+		{
+			// 111
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+    1    | d#+++                        |
+    1&.  | (d#+++ g+ a#++ d#'+++)  |
+    1&.; | *                             |
+    2&   | (d#+++ g+ a#++ d#'+++)  |
+    3;   | *                             |
+    3&   |                               |
+    3&.  | d+++                         |
+    4&   | (d+++ f+ b++ d'+++)     |
+    4&;  | *                             |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 51 dyn +++
+[720] channel.NoteOff channel 0 key 51
+[0] channel.NoteOn channel 0 key 51 dyn +++
+[0] channel.NoteOn channel 0 key 55 dyn +
+[0] channel.NoteOn channel 0 key 58 dyn ++
+[0] channel.NoteOn channel 0 key 63 dyn +++
+[120] channel.NoteOff channel 0 key 51
+[0] channel.NoteOff channel 0 key 55
+[0] channel.NoteOff channel 0 key 58
+[0] channel.NoteOff channel 0 key 63
+[600] channel.NoteOn channel 0 key 51 dyn +++
+[0] channel.NoteOn channel 0 key 55 dyn +
+[0] channel.NoteOn channel 0 key 58 dyn ++
+[0] channel.NoteOn channel 0 key 63 dyn +++
+[600] channel.NoteOff channel 0 key 51
+[0] channel.NoteOff channel 0 key 55
+[0] channel.NoteOff channel 0 key 58
+[0] channel.NoteOff channel 0 key 63
+[600] channel.NoteOn channel 0 key 50 dyn +++
+[720] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 50 dyn +++
+[0] channel.NoteOn channel 0 key 53 dyn +
+[0] channel.NoteOn channel 0 key 59 dyn ++
+[0] channel.NoteOn channel 0 key 62 dyn +++
+[120] channel.NoteOff channel 0 key 50
+[0] channel.NoteOff channel 0 key 53
+[0] channel.NoteOff channel 0 key 59
+[0] channel.NoteOff channel 0 key 62
+`,
+		},
+		{
+			// 112
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+    1    | d#+++                    |
+    1&.  | (d#+++ g+< a#++< d#'+++) |
+    1&.; | *                        |
+    2&   | (d#+++ g+< a#++< d#'+++) |
+    3;   | *                        |
+    3&.  | d+++                     |
+    4&   | (d+++ f+< b++ d'+++)    |
+    4&;  | *                        |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 51 dyn +++
+[720] channel.NoteOff channel 0 key 51
+[0] channel.NoteOn channel 0 key 55 dyn +
+[0] channel.NoteOn channel 0 key 58 dyn ++
+[0] channel.NoteOn channel 0 key 51 dyn +++
+[0] channel.NoteOn channel 0 key 63 dyn +++
+[120] channel.NoteOff channel 0 key 51
+[0] channel.NoteOff channel 0 key 55
+[0] channel.NoteOff channel 0 key 58
+[0] channel.NoteOff channel 0 key 63
+[570] channel.NoteOn channel 0 key 55 dyn +
+[0] channel.NoteOn channel 0 key 58 dyn ++
+[30] channel.NoteOn channel 0 key 51 dyn +++
+[0] channel.NoteOn channel 0 key 63 dyn +++
+[600] channel.NoteOff channel 0 key 51
+[0] channel.NoteOff channel 0 key 55
+[0] channel.NoteOff channel 0 key 58
+[0] channel.NoteOff channel 0 key 63
+[600] channel.NoteOn channel 0 key 50 dyn +++
+[720] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 50 dyn +++
+[0] channel.NoteOn channel 0 key 53 dyn +
+[0] channel.NoteOn channel 0 key 59 dyn ++
+[0] channel.NoteOn channel 0 key 62 dyn +++
+[120] channel.NoteOff channel 0 key 50
+[0] channel.NoteOff channel 0 key 53
+[0] channel.NoteOff channel 0 key 59
+[0] channel.NoteOff channel 0 key 62
+`,
+		},
+		/*
+					{
+						// 113
+						`
+			TRACK |p|
+			Ch      |1|
+
+			=SCORE |p |
+			#
+			    1    | d#+++:                        |
+			    1&   |                               |
+			    1&.  | (d#+++ g+::< a#++::< d#'+++)  |
+			    1&.; | *                             |
+			    2    |                               |
+			    2&   | (d#+++ g+::< a#++::< d#'+++)  |
+			    3    |                               |
+			    3;   | *                             |
+			    3&   |                               |
+			    3&.  | d+++:                         |
+			    4    |                               |
+			    4&   | (d+++ f+::< b++::< d'+++)     |
+			    4&;  | *                             |
+						`,
+						2,
+						false,
+						false,
+						`
+			`,
+					},
+		*/
+		/*
+		  1                                      | c++     |           |           | d#+++:                        | MN36+++:::  | MN46+++:::  |           |        |
+		    1&                                     |         |           |           |                               |             | MN42+++:::  |           |        |
+		    1&.                                    | D#:     |           |           | (d#+++ g+::< a#++::< d#'+++)  | MN40+++:::  |             |           |        |
+		    1&.;                                   |         |           |           | *                             |             |             |           |        |
+		    2                                      |         |           |           |                               | MN36++:::   | MN42+++:::  |           |        |
+		    2&                                     | c+      |           |           | (d#+++ g+::< a#++::< d#'+++)  | MN40+++:::  | MN46+++:::  |           |        |
+		    3                                      | c++     |           |           |                               | MN36+++:::  | MN42+++:::  |           |        |
+		    3;                                     |         |           |           | *                             |             |             |           |        |
+		    3&                                     |         |           |           |                               |             | MN42+++:::  |           |        |
+		    3&.                                    | D#:     |           |           | d+++:                         | MN36++:::   |             |           |        |
+		    4                                      |         |           |           |                               | MN40+++:::< | MN46+++:::  |           |        |
+		    4&                                     | c+      |           |           | (d+++ f+::< b++::< d'+++)     | MN36++:::   | MN42+++:::  |           |        |
+		    4&;                                    |         |           |           | *                             |             |             |           |        |
+		*/
+
 		/*
 			{ // 47
 						`
@@ -3078,7 +3314,7 @@ Ch      |1|
 
 	for i, test := range tests {
 
-		if i == 108 {
+		if i == 108 || i == 112 {
 			continue
 		}
 

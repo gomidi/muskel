@@ -861,6 +861,11 @@ func (p *Sketch) parseCommandLF(data string) error {
 		return err
 	}
 	switch c.Name {
+	case "embed":
+		err = p.Score.Embed(c.Params...)
+		if err != nil {
+			return err
+		}
 	case "include":
 		var parser items.Parser
 		it, err := parser.ParseItem("$"+data, 0)
@@ -918,8 +923,8 @@ func (p *Sketch) parseCommandLF(data string) error {
 		*/
 		return nil
 	default:
-		return fmt.Errorf("unsupported command in body: %q", c.Name)
 	}
+	return fmt.Errorf("unsupported command in body: %q", c.Name)
 }
 
 // parseEventsLine parses a non-bar line / event line

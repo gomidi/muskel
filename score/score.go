@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -901,6 +902,54 @@ func (sc *Score) GetSketch(name string) (*sketch.Sketch, error) {
 
 	return s, nil
 }
+
+func mkRegexp(s string) (*regexp.Regexp, error) {
+	s = strings.ReplaceAll(s, ".", "\\.")
+	s = strings.ReplaceAll(s, "*", ".*")
+	s = "^" + s + "$"
+	return regexp.Compile(s)
+}
+
+func getTokenShorty(token string) string {
+	if idx := strings.Index(token, "."); idx > 0 && len(token) > idx+1 {
+		return token[idx+1:]
+	}
+	return token
+}
+
+func (sc *Score) embed(patt string) error {
+	if idx := strings.Index(patt, "*"); idx >= 0 {
+		reg, err := mkRegexp(patt)
+		if err != nil {
+			return fmt.Errorf("invalid pattern syntax for embedding: %q", patt)
+		}
+		for k, v := range sc.tokens {
+			if reg.MatchString(k) {
+				sc.tokens[getTokenShorty(k)] = v
+			}
+		}
+		return nil
+	}
+
+	for k, v := range sc.tokens {
+		if k == patt {
+			sc.tokens[getTokenShorty(k)] = v
+		}
+	}
+
+	return nil
+}
+
+func (sc *Score) Embed(patterns ...string) error {
+	for _, patt := range patterns {
+		err := sc.embed(patt)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (sc *Score) Include(filename string, sketch string, params []string) error {
 	fname, err := sc.findInclude(filename)
 	if err != nil {

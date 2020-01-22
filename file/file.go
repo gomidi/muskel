@@ -200,6 +200,13 @@ func (f *File) findPart(line string) interface{} {
 			score:  f.Score,
 		}
 	}
+	
+	if embedRegExp.MatchString(strings.ToLower(line)) {
+		return &Embed{
+			lineNo: f.currentLine,
+			score:  f.Score,
+		}
+	}
 
 	idx := strings.Index(line, "|")
 	name := strings.TrimSpace(line)

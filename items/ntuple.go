@@ -142,8 +142,8 @@ func (v *NTuple) _writeMIDI(wr SMFWriter, endPos uint) (addedNotes []uint8, leng
 		comp = CalcNoteDelay(MIDITrack.ResolutionTicks())
 	}
 
+	MIDITrack.SetStraight()
 	MIDITrack.SetNoteDelayCompensation(comp)
-
 	MIDITrack.LastNum32th = MIDITrack.CurrentDistanceToStartOfBarIn32th + uint(length)
 	MIDITrack.StopNotes(wr)
 	wr.Undefined(0, nil)
