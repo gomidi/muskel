@@ -1,9 +1,5 @@
 # nächste TODOs
 
-- fix: microverschiebungen innerhalb von ntuples werden nicht korrekt vorgenommen aufgehoben 
-  2   | {c,d<} |              
-  2&  | *      |
-
 - tempowechsel und globale scalewechsel mitten im takt ermöglichen:
   in der positionsspalte hinter der position, durch leerzeichen abgetrennt, z.B.
   2& @220 \major^g#' diese müssen im takt gespeichert werden (mit ihrer position)
