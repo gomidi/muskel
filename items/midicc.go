@@ -2,11 +2,8 @@ package items
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
-
-	"gitlab.com/gomidi/midi/midimessage/channel"
 )
 
 type MIDICC struct {
@@ -36,50 +33,6 @@ func (m MIDICC) String() string {
 	}
 
 	return bf.String()
-}
-
-func (v MIDICC) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-
-	//fmt.Printf("MIDICC %v, %v\n", v[0], v[1])
-
-	if MIDITrack.ccGlide.active && v.Controller == MIDITrack.ccGlide.controller {
-		//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startCCGlissando) / float64(iw.wr.Ticks32th())))
-		distance := int64(math.Round(float64(wr.Position()+uint64(wr.Delta())-MIDITrack.ccGlide.startPosition) / float64(MIDITrack.GlideResolution(wr))))
-		diff := int64(v.Value) - int64(MIDITrack.ccGlide.startValue)
-
-		MIDITrack.ccGlide.glideFunc(wr, distance, diff, func(vl float64) {
-			vll := math.Round(vl + float64(MIDITrack.ccGlide.startValue))
-			if vll > 127 {
-				vll = 127
-			}
-
-			if vll < 0 {
-				vll = 0
-			}
-
-			wr.ControlChange(MIDITrack.ccGlide.controller, uint8(vll))
-		})
-		MIDITrack.ccGlide.active = false
-	}
-
-	wr.ControlChange(v.Controller, v.Value)
-
-	if len(v.Tilde) > 0 {
-		MIDITrack.ccGlide.controller = v.Controller
-		MIDITrack.ccGlide.startPosition = wr.Position()
-		MIDITrack.ccGlide.startValue = v.Value
-		MIDITrack.ccGlide.active = true
-		MIDITrack.ccGlide.glideFunc = linearGlide
-		if v.Tilde == "~~" {
-			MIDITrack.ccGlide.glideFunc = exponentialGlide
-		}
-		wr.BackupTimeline()
-	}
-
-	if v.Dotted != "" && v.Value > 0 {
-		wr.Plan(0, dottedLengths[v.Dotted][0], dottedLengths[v.Dotted][1], channel.Channel(wr.Channel()).ControlChange(v.Controller, 0))
-	}
-	return addedNotes
 }
 
 func (cc *MIDICC) Parse(data string, posIn32th uint) (err error) {

@@ -63,10 +63,6 @@ func (s *Scale) String() string {
 	return fmt.Sprintf("\\%s^%s", name, nt.String())
 }
 
-func (s *Scale) WriteMIDI(SMFWriter) []uint8 {
-	panic("don't call me")
-}
-
 func (s Scale) NoteToStep(note uint8) int8 {
 	if s.Mode == nil {
 		panic("mode not set / known")

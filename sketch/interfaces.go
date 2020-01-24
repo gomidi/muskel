@@ -13,7 +13,7 @@ type Score interface {
 	GetToken(name string) (string, error)
 	Embed(patterns ...string) error
 	GetMode(name string) items.Mode
-	FilterTrack(colName string, events []*Event) []*Event
+	FilterTrack(colName string, events []*items.Event) []*items.Event
 	Properties() map[string]interface{}
 	Lyric(part string, fromLine, toLine int) (tokens []string, err error)
 }

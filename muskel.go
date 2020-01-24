@@ -28,7 +28,7 @@ func Format(filename string, params []string, rd io.Reader, wr io.Writer, opts .
 func Unroll(mainFile string, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
 	sc := score.New(mainFile, params, opts...)
 	f := file.FromReader(rd, sc)
-	
+
 	err := f.Parse()
 	if err != nil {
 		return err

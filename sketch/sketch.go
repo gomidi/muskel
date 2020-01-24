@@ -75,8 +75,7 @@ func NewSketch(name string, sc Score) *Sketch {
 		Columns: map[string][]string{},
 		Parts:   map[string][2]uint{},
 
-		currentBarNo: -1,
-		//jumpInLineBefore:    true,
+		currentBarNo:        -1,
 		barChangeRequired:   true,
 		currentTimeSignatur: [2]uint8{4, 4},
 		currentTempo:        120,
@@ -125,7 +124,7 @@ func (s *Sketch) getRangeInBars(startbar, endBar int) (startPos, endPos int) {
 	return
 }
 
-func (s *Sketch) getEventsInBars(startbar, endBar int, evts []*Event) []*Event {
+func (s *Sketch) getEventsInBars(startbar, endBar int, evts []*items.Event) []*items.Event {
 	startPos, endPos := s.getRangeInBars(startbar, endBar)
 	if startPos < 0 {
 		return nil
@@ -150,49 +149,45 @@ func (s *Sketch) getBarIdxOf(pos uint) (baridx int) {
 }
 
 // loop = 0: column is not looped; loop > 0: column is looped n times
-func (s *Sketch) parseItems(data []string) (res []items.Item, loop uint, err error) {
-	var parser items.Parser
+func (s *Sketch) parseEvents(data []string) (res []*items.Event, loop uint, err error) {
+	//var parser items.Parser
 
 	var lastNoRestItem items.Item
 
 	for _, dat := range data {
 		//fmt.Printf("parseItem(%q)\n", dat)
-		it, err := parser.ParseItem(dat, 0)
+		var ev items.Event
+		err := ev.Parse(dat)
+		//it, err := parser.ParseItem(dat, 0)
 		if err != nil {
 			return nil, 0, err
 		}
 
-		if it == items.RepeatLastEvent {
-			it = lastNoRestItem
+		if ev.Item == items.RepeatLastEvent {
+			ev.Item = lastNoRestItem
 		}
 
-		if it != items.Rest {
-			lastNoRestItem = it
+		if ev.Item != items.Rest {
+			lastNoRestItem = ev.Item
 		}
 
-		if inc, isInc := it.(items.Include); isInc {
+		if inc, isInc := ev.Item.(items.Include); isInc {
 			_ = inc
 			panic("includes not allowed inside columns")
-			/*
-				sk, err := s.Score.GetIncludedSketch(inc.File, inc.Sketch)
-				if err != nil {
-					return nil, 0, fmt.Errorf("can't find sketch table %q in include %q", inc.Sketch, inc.File)
-				}
-
-				inc.Length32ths = sk.projectedBarEnd
-				it = inc
-			*/
 		}
 
 		//fmt.Printf("it: %#v\n", it)
 
-		il := isLoop(it)
+		il := isLoop(ev.Item)
 
 		if il >= 0 {
 			loop = uint(il)
 		}
 
-		res = append(res, rollTheDiceForAnItem(it))
+		ev.Item = rollTheDiceForAnItem(ev.Item)
+
+		//res = append(res, rollTheDiceForAnItem(it))
+		res = append(res, &ev)
 	}
 	// parse items and resolve randomness at this level
 	// TODO check, if it works
@@ -235,7 +230,7 @@ func (s *Sketch) newCol(colName string) *column {
 	}
 }
 
-func (s *Sketch) Unroll(colName string, params ...string) (*track.Track, []*Event, error) {
+func (s *Sketch) Unroll(colName string, params ...string) (*track.Track, []*items.Event, error) {
 	col := s.newCol(colName)
 	events, err := col.call(0, false, params...)
 	if err != nil {
@@ -257,7 +252,7 @@ func (s *Sketch) Unroll(colName string, params ...string) (*track.Track, []*Even
 	return tr, events, nil
 }
 
-func (s *Sketch) repeatBars(repevts []*Event, diff uint, stopPos uint) (out []*Event, nextBarPos uint) {
+func (s *Sketch) repeatBars(repevts []*items.Event, diff uint, stopPos uint) (out []*items.Event, nextBarPos uint) {
 	//fmt.Printf("repeatBars, diff: %v stopPos: %v\n", diff, stopPos)
 	lastPos := repevts[len(repevts)-1].Position
 	bidx := s.getBarIdxOf(lastPos)
@@ -562,7 +557,6 @@ func (s *Sketch) UnrolledBars() (unrolled []*Bar, err error) {
 func (p *Sketch) newBar(b *Bar) {
 	p.currentBarNo++
 	b.No = p.currentBarNo
-	// b.IsNaked = true
 	b.Position = p.projectedBarEnd
 	//fmt.Printf("parser: adding bar %v at %v time-sig: %v\n", p.currentBarNo, b.Position, b.TimeSig)
 	p.Bars = append(p.Bars, b)
@@ -600,25 +594,13 @@ func (t *Sketch) isTemplate() bool {
 
 // handleJump handles a jump
 func (p *Sketch) handleJump(data string) error {
-	/*
-		if p.isTemplate() {
-			return fmt.Errorf("jumps in templates not allowed for now (coming from template %q)", p.Name)
-		}
-	*/
-	//b := score.NewBar()
 	b := NewBar()
 	part := strings.TrimSpace(strings.Trim(data, "[]"))
-	/*
-		if _, has := p.Score.Parts[part]; !has {
-			return fmt.Errorf("could not jump to part %#v: not found", part)
-		}
-	*/
 
 	if p.inPart != "" {
 		old := p.Parts[p.inPart]
 		old[1] = p.projectedBarEnd
 		p.Parts[p.inPart] = old
-		//p.Table.score.Parts[part] = [2]int{p.Table.score.Parts[part][0], p.currentBarNo}
 		p.inPart = ""
 	}
 
@@ -665,15 +647,12 @@ func (p *Sketch) handleTimeSigChange(b *Bar, data string) error {
 		return fmt.Errorf("error in time signature %#v. must be in format n/m where n and m are numbers > 0", data)
 	}
 
-	//fmt.Printf("time signature: %v/%v at bar %v\n", num, denom, b.No)
-
 	b.TimeSigChange[0] = uint8(num)
 	b.TimeSigChange[1] = uint8(denom)
 	b.TimeSig = b.TimeSigChange
 
 	p.currentTimeSignatur = b.TimeSigChange
 
-	//	fmt.Println("new bar added based on time sig change")
 	p.newBar(b)
 	p.jumpInLineBefore = false
 	return nil
@@ -716,7 +695,7 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 						if errItt == nil {
 							switch vv := itt.(type) {
 							case *items.MultiItem:
-								for _, iiit := range vv.Items {
+								for _, iiit := range vv.Events {
 									res = append(res, iiit.String())
 								}
 							default:
@@ -733,7 +712,7 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 				}
 			case *items.MultiItem:
 				if v.Exploded {
-					for _, iit := range v.Items {
+					for _, iit := range v.Events {
 						res = append(res, iit.String())
 					}
 				} else {
@@ -801,7 +780,6 @@ func (p *Sketch) getColumnData(tabs []string) (colData []string, lastColumn stri
 
 // handleLastColumn handles the data of the last column in a non-bar line / event line
 func (p *Sketch) handlePart(data string) error {
-	//fmt.Printf("sketch %q handleLastColumn: %q\n", p.Name, data)
 
 	if data == "" {
 		return nil
@@ -829,7 +807,7 @@ func (s *Sketch) FirstColumn() (colName string) {
 	return
 }
 
-func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*Event, err error) {
+func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*items.Event, err error) {
 	sk, err := s.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
 	if err != nil {
 		return nil, fmt.Errorf("can't find sketch %q in file %q", inc.Sketch, inc.File)
@@ -841,7 +819,7 @@ func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*Event, e
 	return patt.call(0, false, inc.Params...)
 }
 
-func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts []*Event, err error) {
+func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts []*items.Event, err error) {
 	evts, err = s._includeCol(column, inc)
 	if err != nil {
 		return
@@ -887,40 +865,6 @@ func (p *Sketch) parseCommandLF(data string) error {
 		} else {
 			return fmt.Errorf("not a proper include: $%q", data)
 		}
-		/*
-			var inc items.Include
-			inc.Parse()
-				if inc, isInc := it.(items.Include); isInc {
-					incEvts, err := p.includeCol(inc)
-					if err != nil {
-						return nil, err
-					}
-					diff := includesDiff
-					if lastPos0 >= 0 {
-						br := s.Bars[lastPos0]
-						diff += br.Position + uint(br.Length32th())
-					}
-					if posDiff > 0 {
-						diff -= posDiff
-					}
-
-					incEvts = forwardEvents(incEvts, diff)
-					printEvents("after including in col "+p.name, incEvts)
-					evts = append(evts, incEvts...)
-					includesDiff += inc.Length32ths
-					s.projectedBarEnd += inc.Length32ths
-					continue
-				}
-				b := NewBar() //score.NewBar()
-
-				p.newBar(b)
-		*/
-		/*
-			for _, col := range p.colOrder {
-				p.Columns[col] = append(p.Columns[col], "$"+data)
-			}
-			p.Positions = append(p.Positions, [2]uint{uint(p.currentBarNo), 0})
-		*/
 		return nil
 	default:
 	}
@@ -935,12 +879,7 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 	colsData, lastColumn := s.getColumnData(tabs)
 	firstColumn := strings.TrimSpace(tabs[0])
 	_ = lastColumn
-	/*
-		if s.jumpInLineBefore {
-			s.newBar(NewBar())
-			s.jumpInLineBefore = false
-		}
-	*/
+
 	if firstColumn == "" && s.lastPosition != "" {
 		firstColumn = s.lastPosition
 	}
@@ -974,12 +913,6 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 			s.Columns[colName] = append(s.Columns[colName], data)
 		}
 	}
-
-	/*
-		if lastColumn != "" {
-			return s.handleLastColumn(lastColumn)
-		}
-	*/
 
 	return nil
 }

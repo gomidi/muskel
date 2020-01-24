@@ -33,7 +33,7 @@ func TestSimpleParse(t *testing.T) {
 		var p Call
 		//p.Parser = &pp
 
-		err := p.SimpleParse(test.data)
+		err := p.ParseTemplate(test.data, 0)
 
 		if err != nil {
 			t.Errorf("[%v] PatternCall.SimpleParse(%q,0) returns error: %s", i, test.data, err.Error())

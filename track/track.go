@@ -19,6 +19,7 @@ type Track struct {
 	PitchbendRange uint8
 	// velocity-scale property to refine velocity conversion (min, max, randomize-factor, step-width)
 	VelocityScale [5]uint8 // 0: min 1: max 2: randomize-factor 3: step-width, 4: center
+	EndPos        uint
 }
 
 func New(name string) *Track {

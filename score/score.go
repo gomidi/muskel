@@ -67,12 +67,12 @@ type Score struct {
 	Scales   map[string]items.Mode
 	Filters  map[string]*filter.Filter
 	Sketches map[string]*sketch.Sketch
-	Unrolled map[string][]*sketch.Event
+	Unrolled map[string][]*items.Event
 	Files    map[string]*file.File
 	Parent   *Score
 }
 
-func (s *Score) FilterTrack(colName string, events []*sketch.Event) []*sketch.Event {
+func (s *Score) FilterTrack(colName string, events []*items.Event) []*items.Event {
 	return events
 }
 
@@ -86,7 +86,7 @@ func New(filepath string, params []string, options ...Option) *Score {
 		Sketches:       map[string]*sketch.Sketch{},
 		Files:          map[string]*file.File{},
 		properties:     map[string]interface{}{},
-		Unrolled:       map[string][]*sketch.Event{},
+		Unrolled:       map[string][]*items.Event{},
 		Parts:          map[string][2]uint{},
 		tokens:         map[string]string{},
 		includedScores: map[string]*Score{},
@@ -407,6 +407,13 @@ func (sc *Score) Unroll() error {
 	for c, evts := range sc.Unrolled {
 		sc.Unrolled[c] = sc.replaceScalenotes(c, evts)
 	}
+
+	lastBar := sc.Bars[len(sc.Bars)-1]
+
+	endPos := lastBar.Position + uint(lastBar.Length32th())
+	for _, tr := range sc.Tracks {
+		tr.EndPos = endPos
+	}
 	return nil
 }
 
@@ -714,16 +721,19 @@ func convertScaleNotes(in items.Item, scale *items.Scale) items.Item {
 		}
 	case *items.NTuple:
 		n := v.Dup().(*items.NTuple)
-		for k, it := range n.Items {
-			n.Items[k] = convertScaleNotes(it, scale)
+		for k, it := range n.Events {
+			it.Item = convertScaleNotes(it.Item, scale)
+			n.Events[k] = it
 		}
 		return n
 
 	case *items.MultiItem:
 		mv := v.Dup().(*items.MultiItem)
 
-		for k, it := range mv.Items {
-			mv.Items[k] = convertScaleNotes(it, scale)
+		for k, it := range mv.Events {
+			_it := it
+			_it.Item = convertScaleNotes(it.Item, scale)
+			mv.Events[k] = _it
 		}
 		return mv
 	default:
@@ -731,8 +741,8 @@ func convertScaleNotes(in items.Item, scale *items.Scale) items.Item {
 	}
 }
 
-func (s *Score) replaceScalenotesForCol(colname string, evts []*sketch.Event) []*sketch.Event {
-	var res []*sketch.Event
+func (s *Score) replaceScalenotesForCol(colname string, evts []*items.Event) []*items.Event {
+	var res []*items.Event
 
 	//fmt.Printf("replaceScalenotesForCol %q called\n", colname)
 
@@ -767,8 +777,8 @@ func (s *Score) GetMode(name string) items.Mode {
 	return s.Scales[name]
 }
 
-func (s *Score) replaceScalenotes(colname string, evts []*sketch.Event) []*sketch.Event {
-	var res []*sketch.Event
+func (s *Score) replaceScalenotes(colname string, evts []*items.Event) []*items.Event {
+	var res []*items.Event
 
 	scale := s.Bars[0].Scale
 	if scale == nil {

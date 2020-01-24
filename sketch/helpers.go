@@ -99,7 +99,7 @@ func sketchFromEventsLine(name string, patternDef string, sc Score) (*Sketch, er
 	return sk, nil
 }
 
-func eventsFromPatternDef(name, patternDef string, sc Score, posshift int, posIn32th uint, params []string) (evts []*Event, err error) {
+func eventsFromPatternDef(name, patternDef string, sc Score, posshift int, posIn32th uint, params []string) (evts []*items.Event, err error) {
 	replaced := replaceParams(patternDef, params)
 	//fmt.Printf("eventsFromPatternDef replaced: %q\n", replaced)
 	sk, err := sketchFromEventsLine(name, replaced, sc)
@@ -122,7 +122,7 @@ func eventsFromPatternDef(name, patternDef string, sc Score, posshift int, posIn
 	//p.ParseEventsLine(replaceParams(patternDef, params), posshift, posIn32th)
 
 	for _, pev := range _evts {
-		ev := &Event{}
+		ev := &items.Event{}
 		ev.Position = pev.Position
 		ev.Item = pev.Item.Dup()
 		evts = append(evts, ev)
@@ -135,7 +135,7 @@ func eventsFromPatternDef(name, patternDef string, sc Score, posshift int, posIn
 	return
 }
 
-func mergeEventStreams(mixed []*eventStream, endPos uint) (evts []*Event) {
+func mergeEventStreams(mixed []*eventStream, endPos uint) (evts []*items.Event) {
 	var (
 		lastStreamPos uint
 		keepLooping   bool = true
@@ -181,7 +181,7 @@ func mergeEventStreams(mixed []*eventStream, endPos uint) (evts []*Event) {
 	return
 }
 
-func getEventsInPosRange(from, to uint, evts []*Event) (res []*Event) {
+func getEventsInPosRange(from, to uint, evts []*items.Event) (res []*items.Event) {
 	if DEBUG {
 		fmt.Printf("getEventsInPosRange(from: %v, to: %v)\n", from, to)
 	}
@@ -251,7 +251,7 @@ func isLoop(it items.Item) int {
 	}
 }
 
-func findEventThatIsNotRest(start int, evts []*Event) (found int) {
+func findEventThatIsNotRest(start int, evts []*items.Event) (found int) {
 	if start >= len(evts) {
 		return -1
 	}
@@ -264,7 +264,7 @@ func findEventThatIsNotRest(start int, evts []*Event) (found int) {
 }
 
 // sliceEvents slices the events according to the template call slice definition
-func sliceEvents(slice [2]int, all []*Event, projectedBarEnd uint) (evs []*Event, absoluteEnd uint) {
+func sliceEvents(slice [2]int, all []*items.Event, projectedBarEnd uint) (evs []*items.Event, absoluteEnd uint) {
 	first, last := slice[0], slice[1]
 	absoluteEnd = projectedBarEnd
 	if first < 0 {
@@ -304,8 +304,8 @@ func printBars(text string, bars ...*Bar) {
 }
 
 func multiHasNote(me *items.MultiItem) bool {
-	for _, it := range me.Items {
-		switch it.(type) {
+	for _, it := range me.Events {
+		switch it.Item.(type) {
 		case *items.Note, *items.MIDINote:
 			return true
 		default:
@@ -315,8 +315,8 @@ func multiHasNote(me *items.MultiItem) bool {
 }
 
 func ntupleHasNote(me *items.NTuple) bool {
-	for _, it := range me.Items {
-		switch it.(type) {
+	for _, it := range me.Events {
+		switch it.Item.(type) {
 		case *items.Note, *items.MIDINote:
 			return true
 		default:
@@ -325,7 +325,7 @@ func ntupleHasNote(me *items.NTuple) bool {
 	return false
 }
 
-func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
+func _applyLyric(ev *items.Event, lyric string) (applied *items.Event, wasApplied bool) {
 	applied = ev.Dup()
 	var l items.Lyric
 	l.Text = lyric
@@ -335,19 +335,32 @@ func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 		if !multiHasNote(v) {
 			return
 		}
-		v.Items = append(v.Items, &l)
+		var _ev = ev.Dup()
+		_ev.PosShift = 0
+		_ev.Item = &l
+		v.Events = append(v.Events, _ev)
 		applied.Item = v
 		wasApplied = true
 	case *items.Note:
 		var me = &items.MultiItem{}
-		l.PosShift = v.PosShift
-		me.Items = append(me.Items, ev.Item.Dup(), &l)
+		//l.PosShift = v.PosShift
+		_ev := ev.Dup()
+		_ev.PosShift = 0
+		_ev.Item = &l
+
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		me.Events = append(me.Events, _ev2, _ev)
 		applied.Item = me
 		wasApplied = true
 	case *items.MIDINote:
 		var me = &items.MultiItem{}
-		l.PosShift = v.PosShift
-		me.Items = append(me.Items, ev.Item.Dup(), &l)
+		_ev := ev.Dup()
+		_ev.PosShift = 0
+		_ev.Item = &l
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		me.Events = append(me.Events, _ev2, _ev)
 		applied.Item = me
 		wasApplied = true
 	case *items.NTuple:
@@ -355,8 +368,13 @@ func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 			return
 		}
 		var me = &items.MultiItem{}
-		l.PosShift = v.PosShift
-		me.Items = append(me.Items, ev.Item.Dup(), &l)
+		var _ev = ev.Dup()
+		_ev.Item = &l
+		_ev.PosShift = 0
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		//l.PosShift = v.PosShift
+		me.Events = append(me.Events, _ev2, _ev)
 		applied.Item = me
 		wasApplied = true
 	default:
@@ -365,7 +383,12 @@ func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 		}
 
 		var me = &items.MultiItem{}
-		me.Items = append(me.Items, ev.Item.Dup(), &l)
+		_ev := ev.Dup()
+		_ev.Item = &l
+		_ev.PosShift = 0
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		me.Events = append(me.Events, _ev2, _ev)
 		applied.Item = me
 		wasApplied = true
 	}
@@ -373,7 +396,7 @@ func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 }
 
 // applyLyrics applies the lyrics to the items of the pattern
-func applyLyrics(events []*Event, lyrics []string) (applied []*Event) {
+func applyLyrics(events []*items.Event, lyrics []string) (applied []*items.Event) {
 	if len(lyrics) == 0 {
 		return events
 	}
@@ -400,7 +423,7 @@ func forwardBars(bars []*Bar, diff uint) {
 	}
 }
 
-func forwardEvents(ins []*Event, diff uint) (outs []*Event) {
+func forwardEvents(ins []*items.Event, diff uint) (outs []*items.Event) {
 	if diff == 0 {
 		return ins
 	}
@@ -412,7 +435,7 @@ func forwardEvents(ins []*Event, diff uint) (outs []*Event) {
 	return
 }
 
-func moveBySyncFirst(ins []*Event) (out []*Event) {
+func moveBySyncFirst(ins []*items.Event) (out []*items.Event) {
 	var posDiff uint
 	for i, ev := range ins {
 		if ev == nil {
@@ -432,15 +455,11 @@ func moveBySyncFirst(ins []*Event) (out []*Event) {
 }
 
 // findNextNotEmptyPos finds the next non empty position in evts and adds forward to it
-func findNextPos(i int, forward int, evts []*Event) int {
+func findNextPos(i int, forward int, evts []*items.Event) int {
 	// TODO test, if it works
 	for j := i + 1; j < len(evts); j++ {
 		if evts[j].Item != nil {
-			//_, isOver := evts[j].Item.(*items.Override)
-
-			//if !isOver {
 			return int(evts[j].Position) + forward
-			//}
 		}
 	}
 
@@ -472,14 +491,12 @@ func rollTheDiceForAnItem(it items.Item) items.Item {
 	}
 }
 
-func rollTheDice(events []*Event) []*Event {
+func rollTheDice(events []*items.Event) []*items.Event {
 	// resolv remaining randomness
-	var evs = make([]*Event, len(events))
+	var evs = make([]*items.Event, len(events))
 	for i, ev := range events {
-		var nuEv = &Event{
-			Position: ev.Position,
-			Item:     rollTheDiceForAnItem(ev.Item),
-		}
+		var nuEv = ev.Dup()
+		nuEv.Item = rollTheDiceForAnItem(ev.Item)
 		evs[i] = nuEv
 	}
 

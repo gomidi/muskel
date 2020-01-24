@@ -16,8 +16,4 @@ func (v repeatLastEvent) Dup() Item {
 	return v
 }
 
-func (v repeatLastEvent) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	panic("don't call me")
-}
-
 var RepeatLastEvent = repeatLastEvent{}

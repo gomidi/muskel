@@ -24,10 +24,6 @@ func (r RandomProbability) String() string {
 	return fmt.Sprintf("?%v%%%s", r.Prob, r.Item.String())
 }
 
-func (v RandomProbability) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	panic("don't call me")
-}
-
 func (rp *RandomProbability) Parse(data string, posIn32th uint) (err error) {
 	idx := strings.Index(data, "%")
 	if idx < 0 {
@@ -106,8 +102,4 @@ func (r RandomChooser) String() string {
 	bd.WriteString(")")
 
 	return bd.String()
-}
-
-func (v RandomChooser) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	panic("don't call me")
 }

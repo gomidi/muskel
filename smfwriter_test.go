@@ -502,12 +502,12 @@ Ch      |1        |
 			false,
 			false,
 			`
-[3870] channel.NoteOn channel 0 key 48 dyn =
+[3840] channel.NoteOn channel 0 key 48 dyn =
 [1600] channel.NoteOff channel 0 key 48
 [0] channel.NoteOn channel 0 key 52 dyn =
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
-[1570] channel.NoteOff channel 0 key 56
+[1600] channel.NoteOff channel 0 key 56
 [0] meta.Undefined type:  0
 `,
 		},
@@ -530,12 +530,12 @@ Ch |1  |
 			false,
 			false,
 			`
-[3810] channel.NoteOn channel 0 key 48 dyn =
+[3840] channel.NoteOn channel 0 key 48 dyn =
 [1600] channel.NoteOff channel 0 key 48
 [0] channel.NoteOn channel 0 key 52 dyn =
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
-[1630] channel.NoteOff channel 0 key 56
+[1600] channel.NoteOff channel 0 key 56
 [0] meta.Undefined type:  0
 `,
 		},
@@ -1053,8 +1053,8 @@ Ch |1  |
 			`
 [0] channel.NoteOn channel 0 key 69 dyn =
 [0] channel.NoteOn channel 0 key 71 dyn =
-[7680] channel.NoteOff channel 0 key 69
-[0] channel.NoteOff channel 0 key 71
+[7680] channel.NoteOff channel 0 key 71
+[0] channel.NoteOff channel 0 key 69
 [0] channel.NoteOn channel 0 key 72 dyn =
 [3840] channel.NoteOff channel 0 key 72
 `,
@@ -1156,9 +1156,9 @@ Ch |1  |
 [0] channel.NoteOn channel 0 key 69 dyn =
 [0] channel.NoteOn channel 0 key 71 dyn =
 [0] channel.NoteOn channel 0 key 72 dyn =
-[3840] channel.NoteOff channel 0 key 69
-[0] channel.NoteOff channel 0 key 71
+[3840] channel.NoteOff channel 0 key 71
 [0] channel.NoteOff channel 0 key 72
+[3840] channel.NoteOff channel 0 key 69
 `,
 		},
 		{
@@ -1313,8 +1313,8 @@ Ch |1  |
 			false,
 			false,
 			`
-[930] channel.NoteOn channel 0 key 48 dyn =
-[990] channel.NoteOff channel 0 key 48
+[960] channel.NoteOn channel 0 key 48 dyn =
+[960] channel.NoteOff channel 0 key 48
 `,
 		},
 		{
@@ -2329,8 +2329,8 @@ Channel | 3     |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 2 key 52 dyn =
 [0] channel.NoteOn channel 2 key 53 dyn =
+[0] channel.NoteOn channel 2 key 52 dyn =
 [1920] channel.NoteOff channel 2 key 53
 [960] channel.NoteOff channel 2 key 52
 `,
@@ -2353,8 +2353,8 @@ Channel | 3     |
 			false,
 			false,
 			`
-[0] channel.NoteOn channel 2 key 52 dyn =
 [0] channel.NoteOn channel 2 key 53 dyn =
+[0] channel.NoteOn channel 2 key 52 dyn =
 [1920] channel.NoteOff channel 2 key 53
 [960] channel.NoteOff channel 2 key 52
 `,
@@ -2783,8 +2783,8 @@ TRACK   | Vocals |
 			`
 [0] channel.NoteOn channel 0 key 57 dyn =
 [0] meta.Lyric: "a"
-[0] channel.NoteOff channel 0 key 57
-[30] channel.NoteOn channel 0 key 59 dyn =
+[30] channel.NoteOff channel 0 key 57
+[0] channel.NoteOn channel 0 key 59 dyn =
 [0] meta.Lyric: "b"
 [930] channel.NoteOff channel 0 key 59
 [0] channel.NoteOn channel 0 key 48 dyn =
@@ -2818,8 +2818,8 @@ TRACK   | Vocals | Drums |
 			`
 [0] channel.NoteOn channel 0 key 57 dyn =
 [0] meta.Lyric: "a"
-[0] channel.NoteOff channel 0 key 57
-[30] channel.NoteOn channel 0 key 59 dyn =
+[30] channel.NoteOff channel 0 key 57
+[0] channel.NoteOn channel 0 key 59 dyn =
 [0] meta.Lyric: "b"
 [930] channel.NoteOff channel 0 key 59
 [0] channel.NoteOn channel 0 key 48 dyn =
@@ -3025,6 +3025,8 @@ Ch      |1|
 
 =SCORE |p |
 #
+1 | |
+#
 1  |{MN48,MN46<} |
 2  |MN50 |
 3  |MN52 |
@@ -3035,10 +3037,10 @@ Ch      |1|
 			false,
 			false,
 			`
-[30] channel.NoteOn channel 0 key 48 dyn =
+[3840] channel.NoteOn channel 0 key 48 dyn =
 [450] channel.NoteOff channel 0 key 48
-[30] channel.NoteOn channel 0 key 46 dyn =
-[450] channel.NoteOff channel 0 key 46
+[0] channel.NoteOn channel 0 key 46 dyn =
+[510] channel.NoteOff channel 0 key 46
 [0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 50 dyn =
 [960] channel.NoteOff channel 0 key 50
@@ -3207,10 +3209,10 @@ Ch      |1|
 			false,
 			`
 [0] channel.NoteOn channel 0 key 51 dyn +++
-[720] channel.NoteOff channel 0 key 51
+[690] channel.NoteOff channel 0 key 51
 [0] channel.NoteOn channel 0 key 55 dyn +
 [0] channel.NoteOn channel 0 key 58 dyn ++
-[0] channel.NoteOn channel 0 key 51 dyn +++
+[30] channel.NoteOn channel 0 key 51 dyn +++
 [0] channel.NoteOn channel 0 key 63 dyn +++
 [120] channel.NoteOff channel 0 key 51
 [0] channel.NoteOff channel 0 key 55
@@ -3225,9 +3227,9 @@ Ch      |1|
 [0] channel.NoteOff channel 0 key 58
 [0] channel.NoteOff channel 0 key 63
 [600] channel.NoteOn channel 0 key 50 dyn +++
-[720] channel.NoteOff channel 0 key 50
-[0] channel.NoteOn channel 0 key 50 dyn +++
+[690] channel.NoteOff channel 0 key 50
 [0] channel.NoteOn channel 0 key 53 dyn +
+[30] channel.NoteOn channel 0 key 50 dyn +++
 [0] channel.NoteOn channel 0 key 59 dyn ++
 [0] channel.NoteOn channel 0 key 62 dyn +++
 [120] channel.NoteOff channel 0 key 50
@@ -3312,12 +3314,33 @@ Ch      |1|
 		*/
 	}
 
+	skip := map[int]bool{}
+
+	//sketch.DEBUG = true
+
 	for i, test := range tests {
 
-		if i == 108 || i == 112 {
+		/*
+				if i == 108 || i == 112 {
+					continue
+				}
+
+			if i != 18 {
+				continue
+			}
+		*/
+
+		if skip[i] {
 			continue
 		}
 
+		/*
+			if i != 52 {
+				continue
+			}
+		*/
+		/*
+		 */
 		//sketch.DEBUG = true
 
 		//fmt.Println("##############")

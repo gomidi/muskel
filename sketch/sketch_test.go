@@ -455,7 +455,7 @@ func (t testScore) Lyric(s string, from, to int) ([]string, error) {
 	return nil, nil
 }
 
-func (t testScore) FilterTrack(s string, ev []*Event) []*Event {
+func (t testScore) FilterTrack(s string, ev []*items.Event) []*items.Event {
 	return ev
 }
 

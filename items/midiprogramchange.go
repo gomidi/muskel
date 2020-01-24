@@ -20,11 +20,6 @@ func (m MIDIProgramChange) String() string {
 	return fmt.Sprintf("PC(%v)", m.Value)
 }
 
-func (v MIDIProgramChange) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	wr.ProgramChange(v.Value)
-	return
-}
-
 func (at *MIDIProgramChange) Parse(data string, posIn32th uint) (err error) {
 	dt := strings.Trim(data, "()")
 	var val int

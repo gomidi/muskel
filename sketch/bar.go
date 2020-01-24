@@ -15,10 +15,7 @@ type Bar struct {
 	// real time sig (inherited or changed)
 	TimeSig [2]uint8
 	JumpTo  string
-	//Include string
-	Scale *items.Scale
-	//IsEmpty bool
-	//IsNaked bool
+	Scale   *items.Scale
 	Tilde   string
 	Include *items.Include
 	Comment string
@@ -37,9 +34,7 @@ func (b *Bar) Dup() (nuB *Bar) {
 		Comment:       b.Comment,
 		Part:          b.Part,
 		Scale:         b.Scale,
-		// IsEmpty: b.IsEmpty,
-		// IsNaked: b.IsNaked,
-		Tilde: b.Tilde,
+		Tilde:         b.Tilde,
 	}
 }
 
@@ -75,24 +70,3 @@ func (b *Bar) Length32th() int {
 }
 
 var eventDebug bool
-
-func (e *Event) String() string {
-	if e.Item == nil {
-		if eventDebug {
-			return items.Pos32thToString(e.Position) + "[nil]"
-		}
-		return ""
-	}
-
-	if eventDebug {
-		return items.Pos32thToString(e.Position) + e.Item.String()
-	}
-	return e.Item.String()
-}
-
-func (e *Event) Dup() *Event {
-	return &Event{
-		Item:     e.Item.Dup(),
-		Position: e.Position,
-	}
-}

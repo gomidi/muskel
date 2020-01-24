@@ -2,16 +2,12 @@ package items
 
 import (
 	"fmt"
-	"math/rand"
 	"regexp"
 	"strconv"
-
-	"gitlab.com/gomidi/midi/midimessage/channel"
 )
 
 type MIDINote struct {
-	Note int8
-	//Velocity int8
+	Note     int8
 	Dynamic  string
 	Dotted   string
 	PosShift int // 0 = no, 1 = laidback, -1 = ahead of time
@@ -53,61 +49,6 @@ func (m MIDINote) String() string {
 
 func (mn MIDINote) Dup() Item {
 	return &mn
-}
-
-func (v MIDINote) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	switch v.PosShift {
-	case 0:
-		MIDITrack.SetStraight()
-	case 1:
-		MIDITrack.SetLaidBack()
-	case -1:
-		MIDITrack.SetAhead()
-	}
-
-	MIDITrack.noteGlide.active = false
-	if !v.NoteOff && !v.NoteOn {
-		MIDITrack.StopNotes(wr)
-	}
-
-	vscale := MIDITrack.VelocityScale
-	vel := DynamicToVelocity(v.Dynamic, int8(vscale[0]), int8(vscale[1]), int8(vscale[2]), int8(vscale[3]), int8(vscale[4]))
-
-	if vel < 0 {
-		vel = MIDITrack.PrevVel
-	}
-
-	MIDITrack.PrevVel = vel
-
-	vl := uint8(vel + int8(rand.Intn(int(vscale[2]))))
-	n := uint8(v.Note)
-	//fmt.Printf("MIDINoteOn %v\n", n)
-	if MIDITrack.noteGlide.startNote != 0 {
-		MIDITrack.noteGlide.startNote = 0
-		wr.Pitchbend(0)
-	}
-
-	if !v.NoteOff {
-		MIDITrack.writeNoteOn(wr, n, vl)
-	}
-
-	if !v.NoteOff && !v.NoteOn {
-		if v.Dotted != "" {
-			// TODO what about planned noteoffs? how to track them in filternotes????
-			wr.Plan(0, dottedLengths[v.Dotted][0], dottedLengths[v.Dotted][1], channel.Channel(wr.Channel()).NoteOff(n))
-		} else {
-			addedNotes = append(addedNotes, n)
-		}
-	}
-
-	if v.NoteOff {
-		MIDITrack.writeNoteOff(wr, n)
-		//iw.wr.NoteOff(n)
-	}
-
-	MIDITrack.SetStraight()
-
-	return addedNotes
 }
 
 var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("=") + "]*)(:{0,3})([<>]{0,1})$")

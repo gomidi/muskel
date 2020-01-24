@@ -46,7 +46,3 @@ func (p *CommandCall) Parse(call string, posIn32th uint) error {
 
 	return nil
 }
-
-func (v CommandCall) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	panic("don't call me")
-}

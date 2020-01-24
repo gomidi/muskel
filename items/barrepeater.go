@@ -46,7 +46,3 @@ func (b *BarRepeater) Parse(data string, posIn32th uint) (err error) {
 	}
 	return fmt.Errorf("unsupported syntax: %q", "."+data)
 }
-
-func (v BarRepeater) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	panic("don't call me")
-}

@@ -3,7 +3,6 @@ package items
 type Item interface {
 	String() string
 	Parse(data string, posIn32th uint) error
-	WriteMIDI(wr SMFWriter) (addedNotes []uint8)
 	Dup() Item
 }
 

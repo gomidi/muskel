@@ -5,7 +5,6 @@ import (
 	"io"
 	"strings"
 
-	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/sketch"
@@ -37,19 +36,12 @@ func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwr
 		}
 	}
 
-	options = append(
-		[]smfwriter.Option{
-			smfwriter.TimeFormat(smf.MetricTicks(960)),
-			smfwriter.NumTracks(numTracks),
-		}, options...)
-
 	if DEBUG_TEST {
 		options = append(options, smfwriter.Debug(debugLog{}))
 	}
 
-	sw := newWriter(s, filegroup)
-
-	return sw.write(smfwriter.New(wr, options...))
+	sw := newSMF(s, filegroup, newWriter(wr, numTracks, 960, options...))
+	return sw.write()
 
 }
 
@@ -66,16 +58,6 @@ func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (er
 		}
 	}()
 
-	/*
-		if !s.IsUnrolled {
-			ur, err := sketch.Unroll(s)
-			if err != nil {
-				return err
-			}
-			return WriteFile(ur, midifile, options...)
-		}
-	*/
-
 	hasPlaceholder := strings.Index(midifile, "%s") > -1
 
 	if !hasPlaceholder {
@@ -84,8 +66,6 @@ func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (er
 
 	var fileGroups = map[string]string{}
 	for _, track := range s.Tracks {
-		//for colName, col := range s.Columns {
-		//track := s.GetTrack(colName)
 		fileGroups[track.FileGroup] = fmt.Sprintf(midifile, track.FileGroup)
 	}
 

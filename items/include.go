@@ -38,8 +38,4 @@ func (i Include) Parse(data string, posIn32th uint) error {
 	panic("don't call me")
 }
 
-func (i Include) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	panic("don't call me")
-}
-
 var _ Item = Include{}

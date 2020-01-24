@@ -13,7 +13,7 @@ type call struct {
 }
 
 //func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, diff uint, absoluteEnd uint, err error) {
-func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, absoluteEnd uint, err error) {
+func (pc *call) unrollPattern(start uint, until uint) (evt []*items.Event, absoluteEnd uint, err error) {
 	p := pc.column
 	tc := pc.call
 	evts, err := p.call(until, tc.SyncFirst, tc.Params...)
@@ -21,10 +21,14 @@ func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, absoluteEnd
 		return
 	}
 
+	for _, ev := range evts {
+		ev.PosShift += tc.PosShift
+	}
+
 	printEvents(fmt.Sprintf("after call.call(until: %v, syncfirst: %v, params: %v)\n", until, tc.SyncFirst, tc.Params), evts)
 
 	//_evt, diff, absoluteEnd = pc.modifyEvents(start, until, evts)
-	var _evt []*Event
+	var _evt []*items.Event
 	_evt, absoluteEnd, err = pc.modifyEvents(start, until, evts)
 	if err != nil {
 		return
@@ -44,7 +48,7 @@ func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, absoluteEnd
 		repeat = 1
 	}
 
-	var __evts []*Event
+	var __evts []*items.Event
 
 	for i := 0; i < repeat; i++ {
 		if DEBUG {
@@ -114,9 +118,6 @@ func (c *call) modifyItem(it items.Item) (items.Item, error) {
 		if c != nil {
 			it := v.Dup().(*items.NTuple)
 			it, err := c.column.replaceNtupleTokens(v)
-			if it.PosShift == 0 && cc.PosShift != 0 {
-				it.PosShift = cc.PosShift
-			}
 
 			if err != nil {
 				return nil, err
@@ -131,7 +132,7 @@ func (c *call) modifyItem(it items.Item) (items.Item, error) {
 	}
 }
 
-func (c *call) applyLyrics(evts []*Event) ([]*Event, error) {
+func (c *call) applyLyrics(evts []*items.Event) ([]*items.Event, error) {
 	cc := c.call
 
 	if !cc.IsLyrics() {
@@ -154,28 +155,22 @@ func (c *call) applyLyrics(evts []*Event) ([]*Event, error) {
 	return applyLyrics(evts, l), nil
 }
 
-//func (pc *call) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, diff uint, end uint) {
-func (pc *call) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint, err error) {
-	//p := pc.column
+func (pc *call) modifyEvents(start uint, until uint, evts []*items.Event) (evt []*items.Event, end uint, err error) {
 	projectedBarEnd := pc.column.sketch.projectedBarEnd
 	for _, ev := range evts {
 		pos := start + ev.Position
 		if until > 0 && pos >= until {
-			//diff = 0
 			break
 		}
-		//diff += ev.Position
 		nuEv := ev.Dup()
 		nuEv.Position = pos
 		nuEv.Item, err = pc.modifyItem(ev.Item)
 		if err != nil {
 			return
 		}
-		//nuEv := modEventByTemplateCall(ev, pos, tc)
 		evt = append(evt, nuEv)
 	}
 
-	//fmt.Printf("slice: %v\n", pc.call.Slice)
 	evt, end = sliceEvents(pc.call.Slice, evt, projectedBarEnd)
 
 	if pc.call.Slice[0] > 0 {
@@ -183,34 +178,10 @@ func (pc *call) modifyEvents(start uint, until uint, evts []*Event) (evt []*Even
 		evt = forwardEvents(evt, start)
 	}
 
-	//fmt.Printf("sliced events: %v\n", evt)
-
-	/*
-		Each Sketch Column may have the repetition signs including the "endless repetitions" .n. and ... somewhere in the middle or
-		at the end. an "endless repetition" is tracked in the column. When Call is called, the next breaking event or if there is
-		none, the last position from the outermost table is passed and a callback function is called that may overwrite the events.
-	*/
-
-	// TODO rewrite replaceEvents (or remove it) since we convert back and forth between Events and TemplatePositionedEvents
-	// evts = replaceEvents(absPos, tc, evts)
-	/*
-		Houston, we have a problem here: Replacements imply that we do reparse the replaced strings after doing
-		the replacement. therefor we need to reparse the items after that replacement / need the strings inside the
-		TemplatePositionedEvents. It would be the best to have all this slice and replace and repeat junk here in the sketch
-		and let TemplateCall just be simply the parsed call definition
-
-		MAYBE instead of replacements we allow a special character to be placed before an item to mean "override at the current position
-		without interrupting the underlying template or (bar)repetitions". This could be an alternative way to have fills etc. esp. when used with templates
-		"pausing" underlying templates for the duration of the overriding template.
-
-		It also makes the syntax more simple.
-
-		The special precharacter could be / since it is free if we remove replaceEvents.
-	*/
 	return
 }
 
-func printEvents(message string, evts []*Event) {
+func printEvents(message string, evts []*items.Event) {
 	if DEBUG {
 		fmt.Printf("##> Events %s\n", message)
 		for _, ev := range evts {
@@ -255,7 +226,7 @@ func (pc *call) _getEventStream(start uint, endPos uint, isOverride bool) (*even
 	return es, nil
 }
 
-func (c *call) unroll(start uint, until uint) (evt []*Event, diff uint, end uint, err error) {
+func (c *call) unroll(start uint, until uint) (evt []*items.Event, diff uint, end uint, err error) {
 	cc := c.call
 
 	switch cc.Name[0] {
@@ -282,20 +253,19 @@ func (c *call) unroll(start uint, until uint) (evt []*Event, diff uint, end uint
 			return
 		}
 
-		items, loop, err2 := c.column.sketch.parseItems([]string{sc})
+		pEvents, loop, err2 := c.column.sketch.parseEvents([]string{sc})
 		if err2 != nil {
 			err = err2
 			return
 		}
 		_ = loop
-		for _, it := range items {
-			ev := &Event{}
-			ev.Position = start
-			ev.Item, err = c.modifyItem(it)
+		for _, pEvent := range pEvents {
+			pEvent.Position = start
+			pEvent.Item, err = c.modifyItem(pEvent.Item)
 			if err != nil {
 				return
 			}
-			evt = append(evt, ev)
+			evt = append(evt, pEvent)
 		}
 		end = c.column.sketch.projectedBarEnd
 		return

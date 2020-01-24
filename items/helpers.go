@@ -20,14 +20,14 @@ func calcAdd2(distance int64, diff float64) float64 {
 	return diff / (float64(distance) * float64(distance))
 }
 
-var dottedLengths = map[string][2]uint32{
+var DottedLengths = map[string][2]uint32{
 	//".":   [2]uint32{1, 8},
 	":":   [2]uint32{1, 16},
 	"::":  [2]uint32{1, 32},
 	":::": [2]uint32{1, 64},
 }
 
-func linearGlide(wr SMFWriter, distance int64, noteDiff int64, callback func(val float64)) {
+func LinearGlide(distance int64, noteDiff int64, callback func(step uint, val float64)) {
 
 	// pitch0      = f(0)        =  note0
 	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance * step
@@ -36,11 +36,9 @@ func linearGlide(wr SMFWriter, distance int64, noteDiff int64, callback func(val
 	// m                         =  (noteTarget-note0)/distance
 
 	m := calcAdd(distance, float64(noteDiff))
-	wr.RestoreTimeline()
 
 	for step := int64(1); step <= distance; step++ {
-		MIDITrack.GlideForward(wr)
-		callback(m * float64(step))
+		callback(uint(step), m*float64(step))
 	}
 }
 
@@ -48,7 +46,7 @@ func CalcNoteDelay(resolution smf.MetricTicks) (delay int32) {
 	return int32(math.Round(float64(resolution.Ticks4th()) * 4 / 128))
 }
 
-func exponentialGlide(wr SMFWriter, distance int64, noteDiff int64, callback func(val float64)) {
+func ExponentialGlide(distance int64, noteDiff int64, callback func(pos uint, val float64)) {
 	// y             f(x)        =  a     +      m                       * x²
 	// pitch0      = f(0)        =  note0
 	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance² * step²
@@ -56,15 +54,13 @@ func exponentialGlide(wr SMFWriter, distance int64, noteDiff int64, callback fun
 	// m                         =  (noteTarget-note0)/distance²
 
 	m := calcAdd2(distance, float64(noteDiff))
-	wr.RestoreTimeline()
 
 	for step := int64(1); step <= distance; step++ {
-		MIDITrack.GlideForward(wr)
-		callback(m * float64(step) * float64(step))
+		callback(uint(step), m*float64(step)*float64(step))
 	}
 }
 
-func LinearTempoChange(wr SMFWriter, distance int64, diff float64, callback func(val float64)) {
+func LinearTempoChange(distance int64, diff float64, callback func(step uint, val float64)) {
 
 	// pitch0      = f(0)        =  note0
 	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance * step
@@ -73,22 +69,13 @@ func LinearTempoChange(wr SMFWriter, distance int64, diff float64, callback func
 	// m                         =  (noteTarget-note0)/distance
 
 	m := calcAdd(distance, diff)
-	//fmt.Printf("linearGlissando: m = %0.5f\n", m)
-	wr.RestoreTimeline()
-	//var pb int16
 
 	for step := int64(1); step <= distance; step++ {
-		//iw.wr.Forward(0, 1, 32)
-		wr.Forward(0, 1, 16)
-		callback(m * float64(step))
-		//pb = halfTonesToPitchbend(m*float64(step), iw.instr.PitchbendRange)
-		//iw.wr.Pitchbend(pb)
+		callback(uint(step), m*float64(step))
 	}
-
-	//iw.prevPitchbend = pb
 }
 
-func ExponentialTempoChange(wr SMFWriter, distance int64, diff float64, callback func(val float64)) {
+func ExponentialTempoChange(distance int64, diff float64, callback func(step uint, val float64)) {
 	// y             f(x)        =  a     +      m                       * x²
 	// pitch0      = f(0)        =  note0
 	// pitch       = f(step)     =  note0 + (noteTarget-note0)/distance² * step²
@@ -96,18 +83,9 @@ func ExponentialTempoChange(wr SMFWriter, distance int64, diff float64, callback
 	// m                         =  (noteTarget-note0)/distance²
 
 	m := calcAdd2(distance, diff)
-	wr.RestoreTimeline()
-	//var pb int16
-
 	for step := int64(1); step <= distance; step++ {
-		//iw.wr.Forward(0, 1, 32)
-		wr.Forward(0, 1, 16)
-		callback(m * float64(step) * float64(step))
-		//pb = halfTonesToPitchbend(m*float64(step)*float64(step), iw.instr.PitchbendRange)
-		//iw.wr.Pitchbend(pb)
+		callback(uint(step), m*float64(step)*float64(step))
 	}
-
-	//iw.prevPitchbend = pb
 }
 
 func stripNoteOnOff(data string) (noteOn bool, noteOff bool, rest string) {

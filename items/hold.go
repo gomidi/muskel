@@ -16,7 +16,3 @@ func (h hold) Dup() Item {
 func (r hold) String() string {
 	return ":"
 }
-
-func (v hold) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	return nil
-}

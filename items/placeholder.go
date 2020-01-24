@@ -24,10 +24,6 @@ func (l Placeholder) String() string {
 	return fmt.Sprintf("#%v", int(l))
 }
 
-func (v Placeholder) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	return
-}
-
 func (v Placeholder) Dup() Item {
 	return &v
 }

@@ -2,11 +2,8 @@ package items
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
-
-	"gitlab.com/gomidi/midi/midimessage/channel"
 )
 
 type MIDIPolyAftertouch struct {
@@ -36,49 +33,6 @@ func (m MIDIPolyAftertouch) String() string {
 	}
 
 	return bf.String()
-}
-
-func (v MIDIPolyAftertouch) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	ki := uint8(int8(v.Key) + MIDITrack.Track.MIDITranspose)
-
-	if MIDITrack.polyaftertouchGlide.active && v.Key == MIDITrack.polyaftertouchGlide.key {
-		distance := int64(math.Round(float64(wr.Position()+uint64(wr.Delta())-MIDITrack.polyaftertouchGlide.startPosition) / float64(MIDITrack.GlideResolution(wr))))
-		diff := int64(v.Value) - int64(MIDITrack.polyaftertouchGlide.startValue)
-
-		MIDITrack.polyaftertouchGlide.glideFunc(wr, distance, diff, func(vl float64) {
-			vll := math.Round(vl + float64(MIDITrack.polyaftertouchGlide.startValue))
-			if vll > 127 {
-				vll = 127
-			}
-
-			if vll < 0 {
-				vll = 0
-			}
-
-			wr.PolyAftertouch(MIDITrack.polyaftertouchGlide.key, uint8(vll))
-		})
-		MIDITrack.polyaftertouchGlide.active = false
-	}
-
-	wr.PolyAftertouch(ki, v.Value)
-
-	if len(v.Tilde) > 0 {
-		MIDITrack.polyaftertouchGlide.key = ki
-		MIDITrack.polyaftertouchGlide.startPosition = wr.Position()
-		MIDITrack.polyaftertouchGlide.startValue = v.Value
-		MIDITrack.polyaftertouchGlide.active = true
-		MIDITrack.polyaftertouchGlide.glideFunc = linearGlide
-		if v.Tilde == "~~" {
-			MIDITrack.polyaftertouchGlide.glideFunc = exponentialGlide
-		}
-		wr.BackupTimeline()
-	}
-
-	if v.Dotted != "" && v.Value != 0 {
-		wr.Plan(0, dottedLengths[v.Dotted][0], dottedLengths[v.Dotted][1], channel.Channel(wr.Channel()).PolyAftertouch(ki, 0))
-	}
-
-	return addedNotes
 }
 
 func (pt *MIDIPolyAftertouch) Parse(data string, posIn32th uint) (err error) {

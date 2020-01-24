@@ -2,18 +2,20 @@ package sketch
 
 import (
 	"fmt"
+
+	"gitlab.com/gomidi/muskel/items"
 )
 
 // eventStream simulates a column of events
 type eventStream struct {
-	start      uint     // start position of the sketch column
-	events     []*Event // the events (each character is an event)
-	isOverride bool     // simulates wether the sketch column call is an override
+	start      uint           // start position of the sketch column
+	events     []*items.Event // the events (each character is an event)
+	isOverride bool           // simulates wether the sketch column call is an override
 	isTemplate bool
 	end        uint
 }
 
-func newEventStream(start, end uint, isTemplate bool, events ...*Event) *eventStream {
+func newEventStream(start, end uint, isTemplate bool, events ...*items.Event) *eventStream {
 	if DEBUG {
 		fmt.Printf("newEventStream(start: %v, end: %v, isTemplate: %v, events: %v)\n", start, end, isTemplate, events)
 	}
@@ -26,7 +28,7 @@ func newEventStream(start, end uint, isTemplate bool, events ...*Event) *eventSt
 	}
 }
 
-func newEventStreamOverride(start, end uint, isTemplate bool, events ...*Event) *eventStream {
+func newEventStreamOverride(start, end uint, isTemplate bool, events ...*items.Event) *eventStream {
 	return &eventStream{
 		start:      start,
 		end:        end,
@@ -46,7 +48,7 @@ func (p eventStream) inRange(from, to uint) bool {
 	return res
 }
 
-func (l *eventStream) getEvents(from, to uint) (result []*Event) {
+func (l *eventStream) getEvents(from, to uint) (result []*items.Event) {
 	for _, ev := range l.events {
 		if ev.Position >= uint(from) && ev.Position < uint(to) {
 			result = append(result, ev)

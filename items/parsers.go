@@ -85,14 +85,16 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 		case '"':
 			var ly Lyric
 			//l := &ly
-			switch data[len(data)-1] {
-			case '>':
-				ly.PosShift = 1
-				data = data[:len(data)-1]
-			case '<':
-				ly.PosShift = -1
-				data = data[:len(data)-1]
-			}
+			/*
+				switch data[len(data)-1] {
+				case '>':
+					ly.PosShift = 1
+					data = data[:len(data)-1]
+				case '<':
+					ly.PosShift = -1
+					data = data[:len(data)-1]
+				}
+			*/
 			err = ly.Parse(data, posIn32th)
 			it = &ly
 			return
@@ -274,8 +276,8 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 
 			if regExTemplate0.MatchString(data) || regExTemplate1.MatchString(data) {
 				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
-				pc := NewCall(p)
-				pc.Parser = p
+				pc := &Call{}
+				//pc.Parser = p
 				if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
 					//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
 					pc.Exploded = true

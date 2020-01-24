@@ -17,10 +17,3 @@ func (r rest) Dup() Item {
 }
 
 var _ Item = Rest
-
-func (v rest) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	MIDITrack.noteGlide.active = false
-	MIDITrack.StopNotes(wr)
-	MIDITrack.SetStraight()
-	return nil
-}

@@ -35,7 +35,3 @@ func (m OSCMessage) String() string {
 
 	return bf.String()
 }
-
-func (v OSCMessage) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	return nil
-}

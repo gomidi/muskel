@@ -3,13 +3,9 @@ package items
 import (
 	"bytes"
 	"fmt"
-	"math"
-	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
-
-	"gitlab.com/gomidi/midi/midimessage/channel"
 )
 
 // TODO translate augmentation symbols like ^ and ° to pitchbend messages
@@ -316,131 +312,6 @@ func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 	nt.Dynamic = dynamic
 
 	return
-}
-
-func (v Note) WriteMIDI(wr SMFWriter) (addedNotes []uint8) {
-	vscale := MIDITrack.VelocityScale
-	vel := DynamicToVelocity(v.Dynamic, int8(vscale[0]), int8(vscale[1]), int8(vscale[2]), int8(vscale[3]), int8(vscale[4]))
-
-	if vel < 0 {
-		vel = MIDITrack.PrevVel
-	}
-
-	MIDITrack.PrevVel = vel
-
-	vl := uint8(vel + int8(rand.Intn(int(vscale[2]))))
-
-	// fmt.Printf("%#v\n", v)
-
-	var n uint8
-	n = v.ToMIDI()
-
-	switch v.PosShift {
-	case 0:
-		MIDITrack.SetStraight()
-	case 1:
-		MIDITrack.SetLaidBack()
-	case -1:
-		MIDITrack.SetAhead()
-	}
-
-	//	}
-
-	// only add MIDITranspose to Notes not to MIDINotes
-	n = uint8(int8(n) + MIDITrack.Track.MIDITranspose)
-	MIDITrack.PrevKey = n
-
-	if MIDITrack.noteGlide.active {
-		/*
-			1. get the distance to the previous note
-			2. calc the diff in semitones
-			3. make a line of 32ths in steps of the factor
-		*/
-		//distance := int64(math.Round(float64(iw.wr.Position()+uint64(iw.wr.Delta())-iw.startGlissando) / float64(iw.wr.Ticks32th())))
-		distance := int64(math.Round(float64(wr.Position()+uint64(wr.Delta())-MIDITrack.noteGlide.startPosition) / float64(MIDITrack.GlideResolution(wr))))
-		noteDiff := int64(n) - int64(MIDITrack.noteGlide.startNote)
-
-		var pb int16
-
-		MIDITrack.noteGlide.glideFunc(wr, distance, noteDiff, func(vl float64) {
-			pb = HalfTonesToPitchbend(vl, MIDITrack.Track.PitchbendRange)
-			wr.Pitchbend(pb)
-		})
-
-		MIDITrack.PrevPitchbend = pb
-		/*
-			addStep := calc32thsAdd(distance, noteDiff)
-			iw.wr.RestoreTimeline()
-
-			for step := int64(1); step <= distance; step++ {
-				iw.wr.Forward(0, 1, 32)
-				iw.wr.Pitchbend(halfTonesToPitchbend(float64(step)*addStep, iw.instr.PitchbendRange))
-			}
-		*/
-
-		delete(MIDITrack.NoteOns, MIDITrack.noteGlide.startNote)
-	}
-
-	if !v.NoteOn && !v.NoteOff {
-		MIDITrack.StopNotes(wr)
-	}
-
-	//fmt.Printf("NoteOn %v\n", n)
-	if !MIDITrack.noteGlide.active {
-		if MIDITrack.noteGlide.startNote != 0 {
-			MIDITrack.noteGlide.startNote = 0
-			wr.Pitchbend(0)
-			MIDITrack.PrevPitchbend = 0
-		}
-
-		if !v.NoteOff {
-			MIDITrack.writeNoteOn(wr, n, vl)
-			// iw.wr.NoteOn(n, vl)
-		}
-
-		if !v.NoteOn && !v.NoteOff {
-			if v.Dotted != "" {
-				// TODO what about planned noteoffs? how to track them in filternotes????
-				wr.Plan(0, dottedLengths[v.Dotted][0], dottedLengths[v.Dotted][1], channel.Channel(wr.Channel()).NoteOff(n))
-			} else {
-				addedNotes = append(addedNotes, n)
-			}
-		}
-	}
-
-	if v.NoteOff {
-		MIDITrack.writeNoteOff(wr, n)
-		// iw.wr.NoteOff(n)
-	}
-
-	if MIDITrack.noteGlide.active && !v.NoteOff && !v.NoteOn {
-		//  set pitchbend back to 0
-		MIDITrack.noteGlide.active = false
-		if v.Dotted != "" {
-			wr.Pitchbend(MIDITrack.PrevPitchbend)
-			// TODO what about planned noteoffs? how to track them in filternotes????
-			wr.Plan(0, dottedLengths[v.Dotted][0], dottedLengths[v.Dotted][1], channel.Channel(wr.Channel()).NoteOff(MIDITrack.noteGlide.startNote))
-			//iw.wr.NoteOff(iw.startGlissandoNote)
-		} else {
-			addedNotes = append(addedNotes, MIDITrack.noteGlide.startNote)
-		}
-	}
-
-	if v.GlissandoStart && !v.NoteOff && !v.NoteOn {
-		//iw.startGlissandoDelta = iw.wr.DeltaTime()
-		MIDITrack.noteGlide.startPosition = wr.Position()
-		MIDITrack.noteGlide.startNote = n
-		MIDITrack.noteGlide.active = true
-		MIDITrack.noteGlide.glideFunc = linearGlide
-		if v.GlissandoExp {
-			MIDITrack.noteGlide.glideFunc = exponentialGlide
-		}
-		wr.BackupTimeline()
-	}
-
-	MIDITrack.SetStraight()
-
-	return addedNotes
 }
 
 var regScaleNote = regexp.MustCompile("^(-){0,1}([0-9]+)(.*)$")
