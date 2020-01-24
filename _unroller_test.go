@@ -1225,9 +1225,11 @@ templ: 1e 2&f#
 
 	for i, test := range tests {
 
-		if i > 0 {
-			continue
-		}
+		/*
+			if i > 0 {
+				continue
+			}
+		*/
 		/*
 			if i == 11 || i == 12 {
 				continue

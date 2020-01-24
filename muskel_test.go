@@ -561,7 +561,7 @@ TRACK    | voc | bass |
 
 }
 
-func TestPropertie(t *testing.T) {
+func TestProperty(t *testing.T) {
 	//t.Skip()
 	tests := []struct {
 		input    string
@@ -593,10 +593,11 @@ a        | d     |
 
 	for i, test := range tests {
 
-		if i > 3 {
-			continue
-		}
-
+		/*
+			if i > 3 {
+				continue
+			}
+		*/
 		fl := _newFile(test.input)
 		err := fl.Parse()
 

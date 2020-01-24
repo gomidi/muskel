@@ -1626,11 +1626,11 @@ TRACK   | Vocals |
   1    | =melody@lyr.V1 |
 `,
 			`
-=SCORE                   | Vocals    |
+=SCORE                   | Vocals   |
  # 4/4 @120.00 \major^c'
-    1                    | (a "a")   |
-    1                    | (b> "b">) |
-    2                    | (c "c")   |
+    1                    | (a "a")  |
+    1                    | (b "b")> |
+    2                    | (c "c")  |
 `,
 		},
 		{ // 48
@@ -1652,11 +1652,11 @@ TRACK   | Vocals | Drums |
   1    | =melody@lyr.V1 |       |
 `,
 			`
-=SCORE                   | Drums | Vocals    |
+=SCORE                   | Drums | Vocals   |
  # 4/4 @120.00 \major^c'
-    1                    |       | (a "a")   |
-    1                    |       | (b> "b">) |
-    2                    |       | (c "c")   |
+    1                    |       | (a "a")  |
+    1                    |       | (b "b")> |
+    2                    |       | (c "c")  |
 `,
 		},
 		{ // 49
@@ -1678,11 +1678,11 @@ TRACK    | Vocals | Drums |
     1    |           |   =melody@lyr.V1    |
 `,
 			`
-=SCORE                   | Drums | Vocals    |
+=SCORE                   | Drums | Vocals   |
  # 4/4 @120.00 \major^c'
-    1                    |       | (a "a")   |
-    1                    |       | (b> "b">) |
-    2                    |       | (c "c")   |
+    1                    |       | (a "a")  |
+    1                    |       | (b "b")> |
+    2                    |       | (c "c")  |
 `,
 		},
 		{ // 50
@@ -1952,9 +1952,6 @@ $include("testdata/includes/score3")
 
 	skip := map[int]bool{
 		36: true,
-		47: true,
-		48: true,
-		49: true,
 	}
 
 	for i, test := range tests {
