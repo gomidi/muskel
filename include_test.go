@@ -1944,6 +1944,40 @@ TRACK | flute |
  #
  `,
 		},
+		{ // 61
+			`
+TRACK | flute | gita |
+
+=SCORE | flute | gita |
+#A 4/4
+ 1     | a     | g    |
+ 2     | c     | f#   |
+#
+ 3     | d     | e    |
+#B 
+ 1     | [A]   | d#   |
+#
+ 2     |       | c    |
+*2
+
+`,
+			`
+=SCORE                    | flute | gita |
+ #A 4/4 @120.00 \major^c'
+    1                     | a     | g    |
+    2                     | c     | f#   |
+ #
+    3                     | d     | e    |
+ #B
+    1                     | a     | d#   |
+    2                     | c     |      |
+ #
+    2                     |       | c    |
+    3                     | d     |      |
+ #
+ #
+ `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
