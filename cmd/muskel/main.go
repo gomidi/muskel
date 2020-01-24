@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	cfg = config.MustNew("muskel", "0.9.90", "muskel is a musical sketch language")
+	cfg = config.MustNew("muskel", "0.9.95", "muskel is a musical sketch language")
 
 	argFile   = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
 	argSketch = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
