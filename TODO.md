@@ -1,5 +1,9 @@
 # nächste TODOs
 
+- allow to use parts like patterns inside cols (via [part] syntax): 
+  that allows to selectively repeat parts (just for some cols) and to override not fitting things
+  -> die müssen vermischt werden mit den folgenden events der befüllten takte, so dass sie gestoppt werden oder ggf überschrieben durch overrides
+
 - tempowechsel und globale scalewechsel mitten im takt ermöglichen:
   in der positionsspalte hinter der position, durch leerzeichen abgetrennt, z.B.
   2& @220 \major^g#' diese müssen im takt gespeichert werden (mit ihrer position)
@@ -8,8 +12,6 @@
 
 - überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
 
-- allow to use parts like patterns inside cols (via [part] syntax): 
-  that allows to selectively repeat parts (just for some cols) and to override not fitting things
     
 - cleanup scalenotes: make nt.ScaleNote a *int8 and copy it when duplicating. when it is not set, it is no scale note. otherwise it
   is the step (counting from 0). parsing makes 1->0 2->1 etc but -1->-1 this should make scale calculations and transpositions easier.

@@ -67,6 +67,14 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 	default:
 		// fmt.Printf("data[0]: %#v\n", string(data[0]))
 		switch data[0] {
+		case '[':
+			var pt PartRepeat
+			err = pt.Parse(data[1:], posIn32th)
+			if err != nil {
+				err = fmt.Errorf("invalid part repeat: %#v", data)
+			}
+			it = &pt
+			return
 		case '#':
 			var p Placeholder
 			var ph = &p

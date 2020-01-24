@@ -329,10 +329,16 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.E
 
 	printEvents("after unrollIncludedBars of events", events)
 	//fmt.Printf("unrolled: %v\n", events)
-	events, err = c.unrollPartRepetitions(events, endPos)
+	events, err = c.unrollPartRepetitionsOfBars(events, endPos)
 	if err != nil {
 		return nil, err
 	}
+
+	events, err = c.unrollPartRepetitions(events)
+	if err != nil {
+		return nil, err
+	}
+
 	//fmt.Printf(unrolledPartRepetitions: %v\n", events)
 	printBars("after unrollPartRepetitions of events", c.sketch.Bars...)
 	printEvents("after call of col "+c.name+" in sketch "+c.sketch.Name+" in file "+c.sketch.File, events)
@@ -385,7 +391,62 @@ func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
 	return res
 }
 
-func (p *column) unrollPartRepetitions(evts []*items.Event, stopPos uint) ([]*items.Event, error) {
+func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event, err error) {
+	s := p.sketch
+
+	for _, evt := range evts {
+		if evt.Position > s.projectedBarEnd {
+			continue
+		}
+
+		if evt.Item != nil {
+			if partItem, is := evt.Item.(*items.PartRepeat); is {
+				partname := partItem.Part
+				part, has := s.Parts[partname]
+				if !has {
+					return nil, fmt.Errorf("can't repeat part %q at %v: part is not defined", partname, evt.Position)
+				}
+
+				//fmt.Printf("part %q: %v\n", bar.JumpTo, part)
+				startPos := part[0]
+				endPos := part[1]
+				//diff := (endPos - startPos) - uint(bar.Length32th())
+				//_ = diff
+				if endPos > s.projectedBarEnd {
+					endPos = s.projectedBarEnd
+				}
+
+				partEvents := getEventsInPosRange(startPos, endPos, evts)
+
+				// TODO:
+				//
+				// 1. handle overrides somehow
+				// 2. handle repeats of parts (like Calls)
+				var nevts []*items.Event
+
+				for _, ev := range partEvents {
+					nue := ev.Dup()
+					nue.Position += evt.Position
+					if partItem.SyncFirst {
+						nue.Position -= startPos
+					}
+					nevts = append(nevts, nue)
+				}
+
+				printEvents("nevts", nevts)
+
+				res = append(res, nevts...)
+
+			} else {
+				res = append(res, evt)
+			}
+		}
+	}
+
+	return
+}
+
+func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) ([]*items.Event, error) {
 
 	s := p.sketch
 

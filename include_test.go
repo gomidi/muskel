@@ -1913,6 +1913,37 @@ $include("testdata/includes/score3")
     2                    | MN40::: |
 `,
 		},
+		{ // 60
+			`
+TRACK | flute |
+
+=SCORE | flute |
+#A 4/4
+ 1     | a     |
+ 2     | c     |
+#
+ 3     | d     |
+#B 
+ 1     | [A]   |
+*3
+
+`,
+			`
+=SCORE                    | flute |
+ #A 4/4 @120.00 \major^c'
+    1                     | a     |
+    2                     | c     |
+ #
+    3                     | d     |
+ #B
+    1                     | a     |
+    2                     | c     |
+ #
+    3                     | d     |
+ #
+ #
+ `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
