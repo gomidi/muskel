@@ -15,6 +15,7 @@ func TestEventParse(t *testing.T) {
 		{"MN32>>>", "*items.MIDINote", 3},
 		{"MN32>>><<", "*items.MIDINote", 1},
 		{"MN32>>><<<", "*items.MIDINote", 0},
+		{"[A]%2", "*items.PartRepeat", 0},
 	}
 
 	for i, test := range tests {

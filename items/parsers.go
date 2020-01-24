@@ -71,7 +71,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			var pt PartRepeat
 			err = pt.Parse(data[1:], posIn32th)
 			if err != nil {
-				err = fmt.Errorf("invalid part repeat: %#v", data)
+				err = fmt.Errorf("invalid part repeat: %#v: %v", data, err)
 			}
 			it = &pt
 			return

@@ -69,41 +69,9 @@ func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err e
 	return out, nil
 }
 
-func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string) (unrolled []*items.Event, err error) {
+func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unrolled []*items.Event, err error) {
+
 	s := p.sketch
-
-	var evts []*items.Event
-	for i, inEv := range inputEvents {
-		if inEv.Item == nil || err != nil {
-			continue
-		}
-
-		if inc, isInc := inEv.Item.(items.Include); isInc {
-			_ = inc
-			panic(fmt.Sprintf("unsupported: includes in columns"))
-		}
-
-		pos := s.Positions[i]
-		//var ev Event
-		inEv.Position = s.getAbsPos(pos[0], pos[1])
-
-		//		fmt.Printf("item: %T %v\n", it, it)
-		evts = append(evts, inEv)
-	}
-
-	if err != nil {
-		return
-	}
-
-	//fmt.Printf("rolledEvts: %v\n", rolledEvts)
-	//fmt.Printf(">> rolledEvts\n")
-
-	/*
-		for _, ev := range rolledEvts {
-			fmt.Printf("at %v: %v\n", ev.Position, ev)
-		}
-	*/
-	//fmt.Printf("<< rolledEvts\n")
 
 	var forward uint
 
@@ -169,6 +137,161 @@ func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string
 			nev.PosShift = 0
 			nev.Item = newItm
 			posEv = newEventStream(nev.Position, uint(until), false, nev)
+		case *items.BarRepeater:
+			//	fmt.Printf("bar repeater: %v endPos: %v\n", v, endPos)
+			stopPos := endPos
+			if i < len(evts)-1 {
+				stBarIdx := s.getBarIdxOf(evts[i+1].Position)
+				stBarPos := s.Bars[stBarIdx].Position
+				if stBarPos < stopPos {
+					stopPos = stBarPos
+				}
+			}
+			//fmt.Printf("stopPos: %v\n", stopPos)
+			bidx := s.getBarIdxOf(ev.Position)
+			startBar := bidx - v.LastN
+			repevts := s.getEventsInBars(startBar, bidx-1, evts)
+			if len(repevts) == 0 {
+				fmt.Printf("no repevts\n")
+				continue
+			}
+
+			currentPos := s.Bars[bidx].Position
+
+			diff := currentPos - s.Bars[startBar].Position
+			repevts, err = p._unroll(repevts, stopPos, nil)
+			if err != nil {
+				fmt.Printf("error while unrolling: %v\n", err)
+				return nil, err
+			}
+
+			//DEBUG = true
+			printEvents("bar repeater I, after unroll", repevts)
+			//DEBUG = false
+
+			var res []*items.Event
+
+			//fmt.Printf("stopPos: %v\n", stopPos)
+			origDiff := diff
+			endOfStream := origDiff
+
+			//res, currentPos = s.repeatBars(repevts, diff, stopPos)
+			res, currentPos = s.repeatBars(repevts, diff)
+			if len(res) == 0 {
+				//fmt.Printf("no repeatBars\n")
+				continue
+			}
+
+			//DEBUG = true
+			printEvents("bar repeater I, after repeatBars", res)
+			//DEBUG = false
+
+			var all []*items.Event
+
+			all = append(all, res...)
+
+			//mixed = append(mixed, newEventStream(s.Bars[bidx].Position, currentPos, true, res...))
+			//out = append(out, res...)
+
+			var repetitions uint = 1
+
+			if !v.OnlyOnce {
+			barRepeatLoop:
+				for {
+					/*
+						barIdx := s.getBarIdxOf(res[len(res)-1].Position)
+						if barIdx+1 >= len(s.Bars)-1 {
+							break
+						}
+
+						currentPos = s.Bars[barIdx+1].Position
+
+
+					*/
+					if currentPos >= stopPos {
+						break barRepeatLoop
+					}
+					repetitions++
+					endOfStream += origDiff
+					//diff = currentPos - s.Bars[startBar].Position
+					//oldStart := currentPos
+					//res, currentPos = s.repeatBars(repevts, diff, stopPos)
+					res, currentPos = s.repeatBars(repevts, diff*repetitions)
+
+					//printEvents("bar repeater II, after repeatBars", res)
+					all = append(all, res...)
+					/*
+						res, err = p._unroll(res, s.projectedBarEnd, nil)
+						if err != nil {
+							return nil, err
+						}
+					*/
+					//printEvents("bar repeater II, after unroll", res)
+					//mixed = append(mixed, newEventStream(oldStart, currentPos, true, res...))
+					//out = append(out, res...)
+				}
+			}
+
+			//sorted := items.SortEvents(all)
+			//sort.Sort(sorted)
+
+			//DEBUG = true
+			//printEvents("bar repeater II, sorted", sorted)
+			//DEBUG = false
+			//fmt.Printf("bar repeat: create stream events from %v to %v\n", s.Bars[bidx].Position, currentPos)
+			//mixed = append(mixed, newEventStream(s.Bars[bidx].Position, currentPos, true, sorted...))
+			mixed = append(mixed, newEventStream(s.Bars[bidx].Position, currentPos, true, all...))
+			posEv = nil
+
+		case *items.PartRepeat:
+			partname := v.Part
+			part, has := s.Parts[partname]
+			if !has {
+				return nil, fmt.Errorf("can't repeat part %q at %v: part is not defined", partname, ev.Position)
+			}
+
+			//fmt.Printf("part %q: %v\n", bar.JumpTo, part)
+			startPos := part[0]
+			endPos := part[1]
+			diff := (endPos - startPos) //- uint(bar.Length32th())
+			//_ = diff
+			if endPos > s.projectedBarEnd {
+				endPos = s.projectedBarEnd
+			}
+
+			/*
+				if endPos >= ev.Position {
+					endPos = ev.Position - 1
+				}
+			*/
+			partEvents := getEventsInPosRange(startPos, endPos, evts)
+
+			partEvents, err = p._unroll(partEvents, endPos, nil)
+			if err != nil {
+				return nil, err
+			}
+
+			printEvents(fmt.Sprintf("partEvents from %v to %v", startPos, endPos), partEvents)
+
+			for r := 0; r < int(v.Repeat); r++ {
+				var nevts []*items.Event
+
+				for _, _ev := range partEvents {
+					nue := _ev.Dup()
+					nue.Position += ev.Position + uint(r)*diff
+					if v.SyncFirst {
+						nue.Position -= startPos
+					}
+					nevts = append(nevts, nue)
+				}
+
+				totalStart := startPos + ev.Position + (uint(r) * diff)
+
+				mixed = append(mixed, newEventStream(totalStart, totalStart+diff, true, nevts...))
+			}
+
+			posEv = nil
+
 		case *items.MultiItem:
 			// TODO look inside each item and replace random things and templatecalls if there
 			var until = findNextPos(i, int(forward), evts)
@@ -239,7 +362,9 @@ func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string
 			nev.Position = ev.Position + forward
 			posEv = newEventStream(nev.Position, uint(until), false, nev)
 		}
-		mixed = append(mixed, posEv)
+		if posEv != nil {
+			mixed = append(mixed, posEv)
+		}
 	}
 
 	if DEBUG {
@@ -263,6 +388,55 @@ func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string
 		}
 		fmt.Printf("<< after merge\n")
 	}
+
+	return
+}
+
+func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string) (unrolled []*items.Event, err error) {
+	s := p.sketch
+
+	var evts []*items.Event
+	for i, inEv := range inputEvents {
+		if inEv.Item == nil || err != nil {
+			continue
+		}
+
+		if inc, isInc := inEv.Item.(items.Include); isInc {
+			_ = inc
+			panic(fmt.Sprintf("unsupported: includes in columns"))
+		}
+
+		pos := s.Positions[i]
+		//var ev Event
+		inEv.Position = s.getAbsPos(pos[0], pos[1])
+
+		//		fmt.Printf("item: %T %v\n", it, it)
+		evts = append(evts, inEv)
+	}
+
+	if err != nil {
+		return
+	}
+
+	/*
+		unrolled, err = p._unroll(evts, endPos, params)
+
+		if err != nil {
+			return
+		}
+	*/
+
+	return p._unroll(evts, endPos, params)
+
+	//fmt.Printf("rolledEvts: %v\n", rolledEvts)
+	//fmt.Printf(">> rolledEvts\n")
+
+	/*
+		for _, ev := range rolledEvts {
+			fmt.Printf("at %v: %v\n", ev.Position, ev)
+		}
+	*/
+	//fmt.Printf("<< rolledEvts\n")
 
 	// fmt.Printf("«««««««««««««« UNROLL %v endPos: %v\n", p.sketch.Name+"."+p.name, endPos)
 
@@ -322,8 +496,8 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.E
 	printEvents("after unroll of events", events)
 
 	//fmt.Println("returning from unrolled")
-	events = c.unrollBarRepetitions(events, endPos)
-	printEvents("after unrollBarRepetitions of events", events)
+	//events = c.unrollBarRepetitions(events, endPos)
+	//printEvents("after unrollBarRepetitions of events", events)
 
 	events = c.unrollIncludedBars(events)
 
@@ -334,10 +508,12 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.E
 		return nil, err
 	}
 
-	events, err = c.unrollPartRepetitions(events)
-	if err != nil {
-		return nil, err
-	}
+	/*
+		events, err = c.unrollPartRepetitions(events)
+		if err != nil {
+			return nil, err
+		}
+	*/
 
 	//fmt.Printf(unrolledPartRepetitions: %v\n", events)
 	printBars("after unrollPartRepetitions of events", c.sketch.Bars...)
@@ -394,6 +570,10 @@ func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
 func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event, err error) {
 	s := p.sketch
 
+	var skipPos uint
+
+	var mixed []*eventStream
+
 	for _, evt := range evts {
 		if evt.Position > s.projectedBarEnd {
 			continue
@@ -410,7 +590,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 				//fmt.Printf("part %q: %v\n", bar.JumpTo, part)
 				startPos := part[0]
 				endPos := part[1]
-				//diff := (endPos - startPos) - uint(bar.Length32th())
+				diff := (endPos - startPos) //- uint(bar.Length32th())
 				//_ = diff
 				if endPos > s.projectedBarEnd {
 					endPos = s.projectedBarEnd
@@ -433,17 +613,45 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 					nevts = append(nevts, nue)
 				}
 
-				printEvents("nevts", nevts)
+				mixed = append(mixed, newEventStream(startPos, endPos, true, nevts...))
 
-				res = append(res, nevts...)
+				//printEvents("nevts", nevts)
+
+				// overrides
+				otherEvents := getEventsInPosRange(endPos, endPos+diff, evts)
+
+				for _, otherE := range otherEvents {
+					switch otherE.Item.(type) {
+					case *items.PartRepeat:
+						// ignore
+					case *items.Override:
+						fmt.Printf("got override: %v\n", otherE)
+						oes := newEventStream(otherE.Position, otherE.Position+1, false, otherE)
+						oes.isOverride = true
+						mixed = append(mixed, oes)
+					default:
+						nes := newEventStream(otherE.Position, otherE.Position+1, false, otherE)
+						mixed = append(mixed, nes)
+					}
+				}
+
+				skipPos = endPos + diff
+
+				//res = append(res, nevts...)
 
 			} else {
-				res = append(res, evt)
+				if evt.Position >= skipPos {
+					nes := newEventStream(evt.Position, evt.Position+1, false, evt)
+					mixed = append(mixed, nes)
+				}
+				//res = append(res, evt)
 			}
 		}
 	}
 
-	return
+	unrolled := mergeEventStreams(mixed, s.projectedBarEnd)
+
+	return unrolled, nil
 }
 
 func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) ([]*items.Event, error) {
@@ -519,82 +727,4 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 
 	// TODO check if it is correct
 	return res, nil
-}
-
-func (p *column) unrollBarRepetitions(ins []*items.Event, endPos uint) (out []*items.Event) {
-	s := p.sketch
-
-	for i, ev := range ins {
-		switch v := ev.Item.(type) {
-		case *items.BarRepeater:
-			//	fmt.Printf("bar repeater: %v endPos: %v\n", v, endPos)
-			stopPos := endPos
-			if i < len(ins)-1 {
-				stBarIdx := s.getBarIdxOf(ins[i+1].Position)
-				stBarPos := s.Bars[stBarIdx].Position
-				if stBarPos < stopPos {
-					stopPos = stBarPos
-				}
-			}
-			//fmt.Printf("stopPos: %v\n", stopPos)
-			bidx := s.getBarIdxOf(ev.Position)
-			startBar := bidx - v.LastN
-			repevts := s.getEventsInBars(startBar, bidx-1, out)
-			if len(repevts) == 0 {
-				//fmt.Printf("no repevts\n")
-				continue
-			}
-
-			currentPos := s.Bars[bidx].Position
-
-			diff := currentPos - s.Bars[startBar].Position
-			var res []*items.Event
-			res, currentPos = s.repeatBars(repevts, diff, stopPos)
-			if len(res) == 0 {
-				continue
-			}
-			out = append(out, res...)
-
-			if !v.OnlyOnce {
-				for {
-					/*
-						barIdx := s.getBarIdxOf(res[len(res)-1].Position)
-						if barIdx+1 >= len(s.Bars)-1 {
-							break
-						}
-
-						currentPos = s.Bars[barIdx+1].Position
-
-
-					*/
-					if currentPos >= stopPos {
-						break
-					}
-					diff = currentPos - s.Bars[startBar].Position
-					res, currentPos = s.repeatBars(repevts, diff, stopPos)
-					out = append(out, res...)
-				}
-			}
-
-			/*
-				for _, rev := range repevts {
-					nev := rev.Dup()
-					nev.Position += diff
-					out = append(out, nev)
-				}
-			*/
-			// TODO handle v.OnlyOnce
-		default:
-			out = append(out, ev.Dup())
-		}
-	}
-
-	/*
-		fmt.Printf(">>>>>>>>>>>>>[%q] endpos: %v\n", s.Name, endPos)
-		for i, e := range out {
-			fmt.Printf("unrollBarRepetitions event %v pos: %v ev: %v\n", i, e.Position, e)
-		}
-		fmt.Printf("<<<<<<<<<<<<<[%q]\n", s.Name)
-	*/
-	return
 }

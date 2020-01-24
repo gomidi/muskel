@@ -252,7 +252,8 @@ func (s *Sketch) Unroll(colName string, params ...string) (*track.Track, []*item
 	return tr, events, nil
 }
 
-func (s *Sketch) repeatBars(repevts []*items.Event, diff uint, stopPos uint) (out []*items.Event, nextBarPos uint) {
+//func (s *Sketch) repeatBars(repevts []*items.Event, diff uint, stopPos uint) (out []*items.Event, nextBarPos uint) {
+func (s *Sketch) repeatBars(repevts []*items.Event, diff uint) (out []*items.Event, nextBarPos uint) {
 	//fmt.Printf("repeatBars, diff: %v stopPos: %v\n", diff, stopPos)
 	lastPos := repevts[len(repevts)-1].Position
 	bidx := s.getBarIdxOf(lastPos)
@@ -261,10 +262,12 @@ func (s *Sketch) repeatBars(repevts []*items.Event, diff uint, stopPos uint) (ou
 	for _, rev := range repevts {
 		nev := rev.Dup()
 		nev.Position += diff
-		if nev.Position >= stopPos {
-			//	fmt.Printf("nev.Position: %v >= stopPos: %v returning\n", nev.Position, stopPos)
-			break
-		}
+		/*
+			if nev.Position >= stopPos {
+				//	fmt.Printf("nev.Position: %v >= stopPos: %v returning\n", nev.Position, stopPos)
+				break
+			}
+		*/
 		out = append(out, nev)
 	}
 

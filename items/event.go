@@ -123,3 +123,47 @@ func (e *Event) AbsPosTicks(ticks4th uint32, trackDelay int) uint {
 
 	return uint(res)
 }
+
+/*
+
+type SortEvents []*Event
+
+func (s SortEvents) Len() int {
+	return len(s)
+}
+
+func (s SortEvents) Swap(a, b int) {
+	s[a], s[b] = s[b], s[a]
+}
+
+var typeSortEventPriority = map[string]int{
+	// all others are 0
+	"*items.Scale": 20,
+}
+
+func (s SortEvents) Less(a, b int) bool {
+	if s[a].Position == s[b].Position {
+		typeA := fmt.Sprintf("%T", s[a].Item)
+		typeB := fmt.Sprintf("%T", s[b].Item)
+		prioA := typeSortEventPriority[typeA]
+		prioB := typeSortEventPriority[typeB]
+
+		//fmt.Printf("types: %q vs %q prios: %v vs %v\n", typeA, typeB, prioA, prioB)
+		if typeA != typeB {
+			return prioA > prioB
+		}
+
+		switch v := s[a].Item.(type) {
+		case *MIDICC:
+			other := s[b].Item.(*MIDICC)
+			return v.Controller < other.Controller
+		default:
+			return false
+		}
+
+	}
+
+	//fmt.Printf("types: %T vs %T pos: %v vs %v\n", e[a].message, e[b].message, e[a].position, e[b].position)
+	return s[a].Position < s[b].Position
+}
+*/

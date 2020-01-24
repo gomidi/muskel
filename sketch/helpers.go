@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -135,6 +136,50 @@ func eventsFromPatternDef(name, patternDef string, sc Score, posshift int, posIn
 	return
 }
 
+func getFirstType(es *eventStream) string {
+	if es == nil || len(es.events) == 0 || es.events[0] == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%T", es.events[0].Item)
+}
+
+type sortedEventStream []*eventStream
+
+func (s sortedEventStream) Less(a, b int) bool {
+	if s[a].start == s[b].start {
+		if s[a].isOverride {
+			return false
+		}
+
+		ta := getFirstType(s[a])
+		tb := getFirstType(s[b])
+
+		//fmt.Printf("%q vs %q\n", ta, tb)
+
+		if ta == "*items.Scale" {
+			return true
+		}
+
+		if tb == "*items.Scale" {
+			return false
+		}
+
+		return false
+
+	}
+
+	return s[a].start < s[b].start
+}
+
+func (s sortedEventStream) Swap(a, b int) {
+	s[a], s[b] = s[b], s[a]
+}
+
+func (s sortedEventStream) Len() int {
+	return len(s)
+}
+
 func mergeEventStreams(mixed []*eventStream, endPos uint) (evts []*items.Event) {
 	var (
 		lastStreamPos uint
@@ -143,8 +188,10 @@ func mergeEventStreams(mixed []*eventStream, endPos uint) (evts []*items.Event) 
 	)
 
 	lastStream = nil
+	sorted := sortedEventStream(mixed)
+	sort.Sort(sorted)
 
-	for idx, stream := range mixed {
+	for idx, stream := range sorted {
 
 		if keepLooping && lastStream != nil {
 			if lastStream.inRange(lastStreamPos, stream.start) {

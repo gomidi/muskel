@@ -36,22 +36,22 @@ func (pr *PartRepeat) Parse(data string, posIn32th uint) (err error) {
 
 	orig := data
 
-	idx := strings.LastIndex(data, "]")
+	idx := strings.Index(data, "]")
 
 	if idx <= 0 {
-		return fmt.Errorf("invalid part repeat: %#v", "["+orig)
+		return fmt.Errorf("invalid part repeat: %q", "["+data)
 	}
 
 	pr.Repeat = 1
 
 	if idx < len(data)+2 {
 		dt := data[idx+1:]
-		if idx2 := strings.LastIndex(dt, "%"); idx2 > -1 {
-			numstr := dt[idx2:]
+		if idx2 := strings.Index(dt, "%"); idx2 > -1 {
+			numstr := dt[idx2+1:]
 			var repeat int
 			repeat, err = strconv.Atoi(numstr)
 			if err != nil {
-				err = fmt.Errorf("invalid repeat syntax: %q is not a number", numstr)
+				err = fmt.Errorf("invalid repeat syntax in %q: %q is not a number", "["+orig, numstr)
 				return
 			}
 

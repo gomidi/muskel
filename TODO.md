@@ -1,14 +1,8 @@
 # nächste TODOs
 
-- allow to use parts like patterns inside cols (via [part] syntax): 
-  that allows to selectively repeat parts (just for some cols) and to override not fitting things
-  -> die müssen vermischt werden mit den folgenden events der befüllten takte, so dass sie gestoppt werden oder ggf überschrieben durch overrides
-
 - tempowechsel und globale scalewechsel mitten im takt ermöglichen:
   in der positionsspalte hinter der position, durch leerzeichen abgetrennt, z.B.
   2& @220 \major^g#' diese müssen im takt gespeichert werden (mit ihrer position)
-
-- fix: replace/overwrite nach taktwiederholungen mit .2. etc.
 
 - überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
 

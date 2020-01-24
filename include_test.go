@@ -1248,7 +1248,7 @@ TRACK | x |
 3     | e' |
 4     | f' |
 #
-1     | .1. |
+1     | .1.|
 
 short |
 ba    | (b' A)
@@ -1260,7 +1260,7 @@ ba    | (b' A)
 #
 #
  1     | .2. |
- 2     | /ba |
+ 2     | /short.ba |
 #
   
 `,
@@ -1978,6 +1978,190 @@ TRACK | flute | gita |
  #
  `,
 		},
+		{ // 62
+			`
+TRACK | flute | gita |
+
+=SCORE | flute | gita |
+#A 4/4
+ 1     | a     | g    |
+ 2     | c     | f#   |
+#
+ 3     | d     | e    |
+#B 
+ 1     | [A]   | d#   |
+#
+ 2     | G      | c    |
+*2
+
+`,
+			`
+=SCORE                    | flute | gita |
+ #A 4/4 @120.00 \major^c'
+    1                     | a     | g    |
+    2                     | c     | f#   |
+ #
+    3                     | d     | e    |
+ #B
+    1                     | a     | d#   |
+    2                     | c     |      |
+ #
+    2                     | G     | c    |
+ #
+ #
+ `,
+		},
+		{ // 63
+			`
+TRACK | flute | gita |
+
+=SCORE | flute | gita |
+#A 4/4
+ 1     | a     | g    |
+ 2     | c     | f#   |
+#
+ 3     | d     | e    |
+#B 
+ 1     | [A]   | d#   |
+#
+ 2     | /G    | c    |
+*2
+
+`,
+			`
+=SCORE                    | flute | gita |
+ #A 4/4 @120.00 \major^c'
+    1                     | a     | g    |
+    2                     | c     | f#   |
+ #
+    3                     | d     | e    |
+ #B
+    1                     | a     | d#   |
+    2                     | c     |      |
+ #
+    2                     | G     | c    |
+    3                     | d     |      |
+ #
+ #
+ `,
+		},
+		{ // 64
+			`
+TRACK | flute | gita |
+
+=SCORE | flute | gita |
+#A 4/4
+ 1     | a     | g    |
+ 2     | c     | f#   |
+#
+ 3     | d     | e    |
+#B 
+ 1     | [A]   | d#   |
+ 1&    |       | [!A] |
+#
+ 2     | /G    | c    |
+*2
+
+`,
+			`
+=SCORE                    | flute | gita |
+ #A 4/4 @120.00 \major^c'
+    1                     | a     | g    |
+    2                     | c     | f#   |
+ #
+    3                     | d     | e    |
+ #B
+    1                     | a     | d#   |
+    1&                    |       | g    |
+    2                     | c     |      |
+    2&                    |       | f#   |
+ #
+    2                     | G     | c    |
+    3                     | d     |      |
+ #
+ #
+ `,
+		},
+		{ // 65
+			`
+TRACK | flute | gita |
+
+=SCORE | flute | gita |
+#A 4/4
+ 1     | a     | g    |
+ 2     | c     | f#   |
+#
+ 3     | d     | e    |
+#B 
+ 1     | [A]%2   | d#   |
+ 1&    |       | [!A] |
+#
+ 2     |       | c    |
+*2
+
+`,
+			`
+=SCORE                    | flute | gita |
+ #A 4/4 @120.00 \major^c'
+    1                     | a     | g    |
+    2                     | c     | f#   |
+ #
+    3                     | d     | e    |
+ #B
+    1                     | a     | d#   |
+    1&                    |       | g    |
+    2                     | c     |      |
+    2&                    |       | f#   |
+ #
+    2                     |       | c    |
+    3                     | d     |      |
+ #
+    1                     | a     |      |
+    2                     | c     |      |
+ #
+    3                     | d     |      |
+ `,
+		},
+		{ // 66
+			`
+TRACK | flute | gita |
+
+=SCORE | flute | gita |
+#A 4/4
+ 1     | a     | g    |
+ 2     | c     | f#   |
+#
+ 3     | d     | e    |
+#B 
+ 1     | [A]%2   | d#   |
+ 1&    |       | [!A] |
+#
+ 2     | /G    | c    |
+*2
+
+`,
+			`
+=SCORE                    | flute | gita |
+ #A 4/4 @120.00 \major^c'
+    1                     | a     | g    |
+    2                     | c     | f#   |
+ #
+    3                     | d     | e    |
+ #B
+    1                     | a     | d#   |
+    1&                    |       | g    |
+    2                     | c     |      |
+    2&                    |       | f#   |
+ #
+    2                     | G     | c    |
+    3                     | d     |      |
+ #
+    1                     | a     |      |
+    2                     | c     |      |
+ #
+    3                     | d     |      |
+ `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -2016,7 +2200,7 @@ TRACK | flute | gita |
 	//sketch.DEBUG = true
 
 	skip := map[int]bool{
-		36: true,
+		//36: true,
 	}
 
 	for i, test := range tests {
@@ -2027,7 +2211,7 @@ TRACK | flute | gita |
 			   if i != 54 {
 			     continue
 			   }
-			if i == 36 {
+			if i != 36 {
 				continue
 			}
 		*/
