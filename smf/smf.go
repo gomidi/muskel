@@ -190,6 +190,45 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 				}
 			}
 		}
+
+		if len(b.InnerTempoChanges) > 0 {
+			sortedTc := sortInternalTempoChanges(b.InnerTempoChanges)
+
+			for _, tc := range sortedTc {
+				evts = append(evts, &event{position: s.posToTicks(b.Position + tc.relPos), message: meta.Tempo(tc.bpm)})
+			}
+		}
 	}
 	return
+}
+
+type internalTempoChange struct {
+	relPos uint
+	bpm    float64
+}
+
+type internalTempoChanges []internalTempoChange
+
+func (i internalTempoChanges) Swap(a, b int) {
+	i[a], i[b] = i[b], i[a]
+}
+
+func (i internalTempoChanges) Less(a, b int) bool {
+	return i[a].relPos < i[b].relPos
+}
+
+func (i internalTempoChanges) Len() int {
+	return len(i)
+}
+
+func sortInternalTempoChanges(tc map[uint]float64) internalTempoChanges {
+	var sorted internalTempoChanges
+
+	for pos, t := range tc {
+		sorted = append(sorted, internalTempoChange{relPos: pos, bpm: t})
+	}
+
+	sort.Sort(sorted)
+
+	return sorted
 }

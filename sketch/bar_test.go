@@ -1,7 +1,8 @@
 package sketch
 
 import (
-	"reflect"
+	"fmt"
+	"sort"
 	"strings"
 	"testing"
 
@@ -32,15 +33,15 @@ func TestBars(t *testing.T) {
 
 	tests := []struct {
 		lines    string
-		expected []*Bar
+		expected []string
 	}{
 		{ // 0
 			`
 #
 1 | a | c |
 `,
-			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{4, 4}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00",
 			},
 		},
 		{ // 1
@@ -48,8 +49,8 @@ func TestBars(t *testing.T) {
 # 4/4
 1 | a | c |
 `,
-			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00 4/4",
 			},
 		},
 		{ // 2
@@ -57,8 +58,8 @@ func TestBars(t *testing.T) {
 # 3/4
 1 | a | c |
 `,
-			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00 3/4",
 			},
 		},
 		{ // 3
@@ -66,8 +67,8 @@ func TestBars(t *testing.T) {
 # 3/6
 1 | a | c |
 `,
-			[]*Bar{
-				&Bar{Position: 0, TimeSig: [2]uint8{3, 6}, TimeSigChange: [2]uint8{3, 6}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00 3/6",
 			},
 		},
 		{ // 4
@@ -80,11 +81,11 @@ func TestBars(t *testing.T) {
 # 6/8
 1 | f | g |
 `,
-			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{4, 4}, Part: "A", TempoChange: 120},
-				&Bar{No: 1, Position: 32, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "B", TempoChange: 120},
-				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4}, JumpTo: "A"},
-				&Bar{No: 3, Position: 88, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00 [A]",
+				"[32] #1 @120.00 3/4 [B]",
+				"[56] #2 @0.00 [->A]",
+				"[88] #3 @120.00 6/8",
 			},
 		},
 		{ // 5
@@ -97,11 +98,11 @@ func TestBars(t *testing.T) {
 # 6/8
 1 | f | g |
 `,
-			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Comment: "tester#1", Part: "A", TempoChange: 120},
-				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},
-				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4}, JumpTo: "A"},
-				&Bar{No: 3, Position: 80, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00 3/4 [A] // tester#1",
+				"[24] #1 @120.00 4/4 [B]",
+				"[56] #2 @0.00 [->A]",
+				"[80] #3 @120.00 6/8",
 			},
 		},
 		{ // 6
@@ -116,18 +117,13 @@ $include("testinclude")
 [B]
 # 4/4
 `,
-			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "A", TempoChange: 120},
-				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},
-				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4}, Include: &items.Include{
-					File:        "testinclude",
-					Sketch:      "=SCORE",
-					Length32ths: 40,
-				},
-				},
-				&Bar{No: 3, Position: 96, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, Part: "C", TempoChange: 120},
-				&Bar{No: 4, Position: 120, TimeSig: [2]uint8{4, 4}, JumpTo: "B"},
-				&Bar{No: 5, Position: 192, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00 3/4 [A]",
+				"[24] #1 @120.00 4/4 [B]",
+				`[56] #2 @0.00 ("testinclude"."=SCORE" len: 40)`,
+				"[96] #3 @120.00 6/8 [C]",
+				"[120] #4 @0.00 [->B]",
+				"[192] #5 @120.00 4/4",
 			},
 		},
 		{ // 7
@@ -143,26 +139,36 @@ $include("testinclude")
 [B]
 # 4/4
 `,
-			[]*Bar{
-				&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Part: "A", TempoChange: 120},
-				&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},
-				&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4},
-					Include: &items.Include{
-						File:        "testinclude",
-						Sketch:      "=SCORE",
-						Length32ths: 40,
-					},
-				},
-				&Bar{No: 3, Position: 96, TimeSig: [2]uint8{4, 4},
-					Include: &items.Include{
-						File:        "testinclude",
-						Sketch:      "=SCORE",
-						Length32ths: 40,
-					},
-				},
-				&Bar{No: 4, Position: 136, TimeSig: [2]uint8{6, 8}, TimeSigChange: [2]uint8{6, 8}, TempoChange: 120},
-				&Bar{No: 5, Position: 160, TimeSig: [2]uint8{4, 4}, JumpTo: "B"},
-				&Bar{No: 6, Position: 296, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, TempoChange: 120},
+			[]string{
+				"[0] #0 @120.00 3/4 [A]",
+				"[24] #1 @120.00 4/4 [B]",
+				`[56] #2 @0.00 ("testinclude"."=SCORE" len: 40)`,
+				`[96] #3 @0.00 ("testinclude"."=SCORE" len: 40)`,
+				"[136] #4 @120.00 6/8",
+				"[160] #5 @0.00 [->B]",
+				"[296] #6 @120.00 4/4",
+			},
+		},
+		{ // 8
+			`
+# 3/4
+1& @130 | a | c |
+`,
+			[]string{
+				"[0] #0 @120.00 3/4 {[04] @130.00}",
+			},
+		},
+		{ // 9
+			`
+# 3/4
+1& @130 | a | c |
+2 \minor^a' |b | d |
+4  @135 |   |  |
+# 4/4 @140
+`,
+			[]string{
+				`[0] #0 @120.00 3/4 {[04] @130.00,[24] @135.00} {[08] \\minor^a'}`,
+				"[24] #1 @140.00 4/4",
 			},
 		},
 	}
@@ -180,25 +186,96 @@ $include("testinclude")
 			}
 		}
 
-		for k, bar := range test.expected {
-			if !reflect.DeepEqual(bar, sk.Bars[k]) {
+		if len(sk.Bars) != len(test.expected) {
+			t.Errorf("[%v] expected %v bars, got %v", i, len(test.expected), len(sk.Bars))
+			continue
+		}
+
+		for k, bar := range sk.Bars {
+
+			//if !reflect.DeepEqual(bar, sk.Bars[k]) {
+			if barToString(bar) != test.expected[k] {
 				t.Errorf(`
 [%v] bar %v:
 %s
 %#v // expected
 %#v
-include:
-%#v vs
-%#v
-Position:
-%v vs
-%v`, i, k, strings.TrimSpace(test.lines),
-					sk.Bars[k], bar,
-					sk.Bars[k].Include, bar.Include,
-					sk.Bars[k].Position, bar.Position,
+`, i, k, strings.TrimSpace(test.lines),
+					barToString(bar), test.expected[k],
+					//sk.Bars[k].Include, bar.Include,
+					//sk.Bars[k].Position, bar.Position,
 				)
 			}
 		}
 
 	}
+}
+
+func internalScalesToString(scales map[uint]*items.Scale) string {
+	var lines []string
+
+	for pos, sc := range scales {
+		lines = append(lines, fmt.Sprintf("[%02d] %s", pos, sc.String()))
+	}
+
+	sort.Strings(lines)
+
+	return strings.Join(lines, ",")
+}
+
+func internalTempoChangesToString(tc map[uint]float64) string {
+	var lines []string
+
+	for pos, t := range tc {
+		lines = append(lines, fmt.Sprintf("[%02d] @%0.2f", pos, t))
+	}
+
+	sort.Strings(lines)
+
+	return strings.Join(lines, ",")
+}
+
+func barToString(b *Bar) string {
+	/*
+		&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Comment: "tester#1", Part: "A", TempoChange: 120},
+						&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},
+						&Bar{No: 2, Position: 56, TimeSig: [2]uint8{4, 4}, JumpTo: "A"},
+	*/
+
+	var bd strings.Builder
+	bd.WriteString(fmt.Sprintf("[%v] #%v @%0.2f", b.Position, b.No, b.TempoChange))
+	if b.TimeSigChange[0] > 0 && b.TimeSigChange[1] > 0 {
+		bd.WriteString(fmt.Sprintf(" %v/%v", b.TimeSigChange[0], b.TimeSigChange[1]))
+	}
+	if b.Part != "" {
+		bd.WriteString(" [" + b.Part + "]")
+	}
+	if b.JumpTo != "" {
+		bd.WriteString(" [->" + b.JumpTo + "]")
+	}
+
+	if b.Include != nil {
+		/*
+			Include: &items.Include{
+							File:        "testinclude",
+							Sketch:      "=SCORE",
+							Length32ths: 40,
+						},
+		*/
+		bd.WriteString(fmt.Sprintf(" (%q.%q len: %v)", b.Include.File, b.Include.Sketch, b.Include.Length32ths))
+	}
+
+	if len(b.InnerTempoChanges) > 0 {
+		bd.WriteString(" {" + internalTempoChangesToString(b.InnerTempoChanges) + "}")
+	}
+
+	if len(b.InnerScales) > 0 {
+		bd.WriteString(" {" + internalScalesToString(b.InnerScales) + "}")
+	}
+
+	if b.Comment != "" {
+		bd.WriteString(" // " + b.Comment)
+	}
+
+	return bd.String()
 }

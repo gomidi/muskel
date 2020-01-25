@@ -3238,6 +3238,75 @@ Ch      |1|
 [0] channel.NoteOff channel 0 key 62
 `,
 		},
+		{
+			// 113
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+# @110
+    1    | d#                    |
+# @130
+  1 | e |
+			`,
+			1,
+			true,
+			false,
+			`
+[0] meta.TrackSequenceName: "BPM"
+[0] meta.Tempo BPM: 545454.55
+[3840] meta.Tempo BPM: 461538.46
+`,
+		},
+		{
+			// 114
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+# @110
+    1    | d#                    |
+    2 @130 | |
+# @140
+  1 | e |
+			`,
+			1,
+			true,
+			false,
+			`
+[0] meta.TrackSequenceName: "BPM"
+[0] meta.Tempo BPM: 545454.55
+[960] meta.Tempo BPM: 461538.46
+[2880] meta.Tempo BPM: 428571.43
+`,
+		},
+		{
+			// 115
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+# @110
+    1    | d#                    |
+    2 @130 | |
+    3 @135 ||
+# @140
+  1 | e |
+			`,
+			1,
+			true,
+			false,
+			`
+[0] meta.TrackSequenceName: "BPM"
+[0] meta.Tempo BPM: 545454.55
+[960] meta.Tempo BPM: 461538.46
+[960] meta.Tempo BPM: 444444.44
+[1920] meta.Tempo BPM: 428571.43
+`,
+		},
 		/*
 					{
 						// 113
@@ -3433,7 +3502,7 @@ func (l *logger) format(val interface{}) string {
 func (l *logger) Printf(format string, vals ...interface{}) {
 	if len(vals) > 1 && vals[1] == meta.EndOfTrack {
 		l.currentTrack++
-		if l.includeMeta {
+		if l.includeMeta && vals[1] != meta.EndOfTrack {
 			fmt.Fprintf(&l.bf, "[%v] %s\n", vals[0], l.format(vals[1]))
 		}
 		return

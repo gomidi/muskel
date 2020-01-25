@@ -13,28 +13,32 @@ type Bar struct {
 
 	No int
 	// real time sig (inherited or changed)
-	TimeSig [2]uint8
-	JumpTo  string
-	Scale   *items.Scale
-	Tilde   string
-	Include *items.Include
-	Comment string
-	Part    string
+	TimeSig           [2]uint8
+	JumpTo            string
+	Scale             *items.Scale
+	Tilde             string
+	Include           *items.Include
+	Comment           string
+	Part              string
+	InnerTempoChanges map[uint]float64
+	InnerScales       map[uint]*items.Scale
 }
 
 func (b *Bar) Dup() (nuB *Bar) {
 	return &Bar{
-		TempoChange:   b.TempoChange,
-		Position:      b.Position,
-		TimeSigChange: b.TimeSigChange,
-		No:            b.No,
-		TimeSig:       b.TimeSig,
-		JumpTo:        b.JumpTo,
-		Include:       b.Include,
-		Comment:       b.Comment,
-		Part:          b.Part,
-		Scale:         b.Scale,
-		Tilde:         b.Tilde,
+		TempoChange:       b.TempoChange,
+		Position:          b.Position,
+		TimeSigChange:     b.TimeSigChange,
+		No:                b.No,
+		TimeSig:           b.TimeSig,
+		JumpTo:            b.JumpTo,
+		Include:           b.Include,
+		Comment:           b.Comment,
+		Part:              b.Part,
+		Scale:             b.Scale,
+		Tilde:             b.Tilde,
+		InnerTempoChanges: b.InnerTempoChanges,
+		InnerScales:       b.InnerScales,
 	}
 }
 
@@ -53,7 +57,9 @@ func (b *Bar) String() string {
 
 func NewBar() *Bar {
 	return &Bar{
-		TimeSig: [2]uint8{4, 4},
+		TimeSig:           [2]uint8{4, 4},
+		InnerTempoChanges: map[uint]float64{},
+		InnerScales:       map[uint]*items.Scale{},
 	}
 }
 

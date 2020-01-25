@@ -874,14 +874,8 @@ func (p *Sketch) parseCommandLF(data string) error {
 	return fmt.Errorf("unsupported command in body: %q", c.Name)
 }
 
-// parseEventsLine parses a non-bar line / event line
-func (s *Sketch) parseEventsLine(tabs []string) error {
-	if s.barChangeRequired {
-		return fmt.Errorf("bar change # needed")
-	}
-	colsData, lastColumn := s.getColumnData(tabs)
-	firstColumn := strings.TrimSpace(tabs[0])
-	_ = lastColumn
+func (s *Sketch) parsePosition(firstColumn string) (err error) {
+	firstColumn = strings.TrimSpace(firstColumn)
 
 	if firstColumn == "" && s.lastPosition != "" {
 		firstColumn = s.lastPosition
@@ -891,7 +885,31 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 		return fmt.Errorf("can't start with an empty position")
 	}
 
-	pos, pos32ths, err := items.PositionTo32th(s.currentBeat, firstColumn)
+	p := strings.Split(firstColumn, " ")
+	var posRaw string
+	var tempoChange float64
+	var scale string
+
+	for _, _p := range p {
+
+		_p = strings.TrimSpace(_p)
+
+		switch {
+		case _p == "":
+			// ignore
+		case _p[0] == '\\':
+			scale = _p
+		case _p[0] == '@':
+			tempoChange, err = strconv.ParseFloat(_p[1:], 64)
+			if err != nil {
+				return fmt.Errorf("position %q contains invalid tempo", firstColumn)
+			}
+		default:
+			posRaw = _p
+		}
+	}
+
+	pos, pos32ths, err := items.PositionTo32th(s.currentBeat, posRaw)
 
 	if err != nil {
 		return err
@@ -904,6 +922,36 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 
 	s.currentPosIn32ths += pos32ths
 	s.Positions = append(s.Positions, [2]uint{uint(s.currentBarNo), pos32ths})
+	if tempoChange > 0 {
+		s.Bars[s.currentBarNo].InnerTempoChanges[pos32ths] = tempoChange
+	}
+	if scale != "" {
+		var sc items.Scale
+
+		err := sc.Parse(scale, 0)
+		if err != nil {
+			return fmt.Errorf("position %q contains invalid scale: %v", firstColumn, err)
+		}
+
+		s.currentScale = &sc
+		s.Bars[s.currentBarNo].InnerScales[pos32ths] = &sc
+	}
+	return nil
+}
+
+// parseEventsLine parses a non-bar line / event line
+func (s *Sketch) parseEventsLine(tabs []string) error {
+	if s.barChangeRequired {
+		return fmt.Errorf("bar change # needed")
+	}
+	colsData, _ := s.getColumnData(tabs)
+	firstColumn := strings.TrimSpace(tabs[0])
+	err := s.parsePosition(firstColumn)
+
+	if err != nil {
+		return err
+	}
+
 	//fmt.Printf("s.colOrder: %v colsData: %v\n", s.colOrder, colsData)
 
 	for i, data := range colsData {
