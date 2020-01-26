@@ -27,6 +27,29 @@ var DottedLengths = map[string][2]uint32{
 	":::": [2]uint32{1, 64},
 }
 
+func VelocityToDynamic(vel uint8) (dyn string) {
+	switch {
+	case vel >= 119:
+		return "++++"
+	case vel >= 104:
+		return "+++"
+	case vel >= 89:
+		return "++"
+	case vel >= 74:
+		return "+"
+	case vel >= 59:
+		return "="
+	case vel >= 44:
+		return "-"
+	case vel >= 29:
+		return "--"
+	case vel >= 14:
+		return "---"
+	default:
+		return "----"
+	}
+}
+
 func LinearGlide(distance int64, noteDiff int64, callback func(step uint, val float64)) {
 
 	// pitch0      = f(0)        =  note0

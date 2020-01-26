@@ -898,7 +898,7 @@ func (s *Sketch) parsePosition(firstColumn string) (err error) {
 		case _p == "":
 			// ignore
 		case _p[0] == '\\':
-			scale = _p
+			scale = _p[1:]
 		case _p[0] == '@':
 			tempoChange, err = strconv.ParseFloat(_p[1:], 64)
 			if err != nil {

@@ -1,7 +1,8 @@
 # nächste TODOs
 
-- globale scalewechsel mitten im takt ermöglichen:
-  Parsing ist erledigt, es fehlt noch die umsetzung im score (für die scales)
+- convert smf to muskel
+
+- require .mskl ending for includes to allow other kinds of files (really?)
 
 - überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
     

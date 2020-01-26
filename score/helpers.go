@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"gitlab.com/gomidi/muskel/items"
 )
 
 func FileExists(file string) bool {
@@ -15,6 +17,25 @@ func FileExists(file string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+type internalScaleChange struct {
+	relPos uint
+	scale  *items.Scale
+}
+
+type internalScaleChanges []internalScaleChange
+
+func (i internalScaleChanges) Swap(a, b int) {
+	i[a], i[b] = i[b], i[a]
+}
+
+func (i internalScaleChanges) Less(a, b int) bool {
+	return i[a].relPos < i[b].relPos
+}
+
+func (i internalScaleChanges) Len() int {
+	return len(i)
 }
 
 func findInclude(relDir string, file string) (resolved string, err error) {

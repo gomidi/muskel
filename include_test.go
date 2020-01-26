@@ -2162,6 +2162,30 @@ TRACK | flute | gita |
     3                     | d     |      |
  `,
 		},
+		{ // 67
+			`
+TRACK | flute | 
+
+=SCORE | flute | 
+# \major^g'
+ 1     | ^1    |
+ 1& \major^c' | ^1 |
+ 2     | ^2     | 
+#
+ 3     | ^2     | 
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^g'
+    1                    | g'    |
+    1& \major^c'         | c'    |
+    2                    | d'    |
+ # \major^c'
+    3                    | d'    |
+ `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -2211,7 +2235,7 @@ TRACK | flute | gita |
 			   if i != 54 {
 			     continue
 			   }
-			if i != 36 {
+			if i != 67 {
 				continue
 			}
 		*/

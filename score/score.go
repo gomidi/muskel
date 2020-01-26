@@ -664,7 +664,13 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 			sk.AddLine([]string{lin.cols[0]})
 			lastBarStart = lin.pos
 		} else {
+			relPos := lin.pos - lastBarStart
 			l := []string{items.Pos32thToString(lin.pos - lastBarStart)}
+			bidx := sc.GetBarIdxOf(lastBarStart)
+			scale := sc.Bars[bidx].InnerScales[relPos]
+			if scale != nil {
+				l[0] = l[0] + " " + scale.String()
+			}
 			l = append(l, lin.cols...)
 			sk.AddLine(l)
 			//fmt.Printf("adding line %q\n", l)
@@ -682,7 +688,7 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 
 // gets the bar idx of an event at the given position
 // returns -1, if no bar could be found
-func (s *Score) getBarIdxOf(pos uint) (baridx int) {
+func (s *Score) GetBarIdxOf(pos uint) (baridx int) {
 	baridx = -1
 
 	for idx, b := range s.Bars {
@@ -790,9 +796,10 @@ func (s *Score) replaceScalenotes(colname string, evts []*items.Event) []*items.
 	//fmt.Printf("replaceScalenotes %q starting with scale: %s\n", colname, scale.String())
 
 	for _, ev := range evts {
-		bidx := s.getBarIdxOf(ev.Position)
+		bidx := s.GetBarIdxOf(ev.Position)
 		if s.Bars[bidx].Scale != nil {
 			scale = s.Bars[bidx].Scale.Dup().(*items.Scale)
+			//fmt.Printf("I scale %q\n", scale.Name)
 			//fmt.Printf("replaceScalenotes %q found scale: %s at bar %s\n", colname, scale.String(), s.Bars[bidx].String())
 			if scale.Mode == nil {
 				sm, has := s.Scales[scale.Name]
@@ -802,6 +809,36 @@ func (s *Score) replaceScalenotes(colname string, evts []*items.Event) []*items.
 				scale.Mode = sm
 			}
 		}
+
+		barPos := s.Bars[bidx].Position
+
+		if len(s.Bars[bidx].InnerScales) != 0 {
+			var scChanges internalScaleChanges
+
+			for pos, sc := range s.Bars[bidx].InnerScales {
+				scChanges = append(scChanges, internalScaleChange{relPos: pos, scale: sc})
+			}
+
+			sort.Sort(scChanges)
+
+			for _, scCh := range scChanges {
+				if scCh.relPos+barPos > ev.Position {
+					break
+				}
+
+				scale = scCh.scale.Dup().(*items.Scale)
+				//fmt.Printf("II scale %q\n", scale.Name)
+				if scale.Mode == nil {
+					sm, has := s.Scales[scale.Name]
+					if !has {
+						panic("can't find scale with name " + scale.Name)
+					}
+					scale.Mode = sm
+				}
+			}
+		}
+
+		//fmt.Printf("event: %s scale: %v\n", ev, scale)
 
 		nev := ev.Dup()
 		nev.Item = convertScaleNotes(nev.Item, scale)
