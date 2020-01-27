@@ -1,13 +1,38 @@
 package muskel
 
 import (
+	"fmt"
 	"io"
+	"os"
 
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/smf"
+	"gitlab.com/gomidi/muskel/smfimport"
 )
+
+func Import(srcFile string, targetFile string) error {
+	fh, err := os.Open(srcFile)
+
+	if err != nil {
+		return fmt.Errorf("can't open file %q: %s", srcFile, err.Error())
+	}
+
+	defer fh.Close()
+
+	im := smfimport.New(srcFile, fh)
+
+	tg, err := os.Create(targetFile)
+
+	if err != nil {
+		return fmt.Errorf("can't create file %q: %s", targetFile, err.Error())
+	}
+
+	defer tg.Close()
+
+	return im.WriteMsklTo(tg)
+}
 
 func newFile(filename string, params []string, rd io.Reader, opts ...score.Option) *file.File {
 	sc := score.New(filename, params, opts...)

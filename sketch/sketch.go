@@ -904,6 +904,7 @@ func (s *Sketch) parsePosition(firstColumn string) (err error) {
 			if err != nil {
 				return fmt.Errorf("position %q contains invalid tempo", firstColumn)
 			}
+			s.currentTempo = tempoChange
 		default:
 			posRaw = _p
 		}

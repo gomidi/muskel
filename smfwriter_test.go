@@ -3255,8 +3255,8 @@ Ch      |1|
 			false,
 			`
 [0] meta.TrackSequenceName: "BPM"
-[0] meta.Tempo BPM: 545454.55
-[3840] meta.Tempo BPM: 461538.46
+[0] meta.Tempo BPM: 110.00
+[3840] meta.Tempo BPM: 130.00
 `,
 		},
 		{
@@ -3277,9 +3277,9 @@ Ch      |1|
 			false,
 			`
 [0] meta.TrackSequenceName: "BPM"
-[0] meta.Tempo BPM: 545454.55
-[960] meta.Tempo BPM: 461538.46
-[2880] meta.Tempo BPM: 428571.43
+[0] meta.Tempo BPM: 110.00
+[960] meta.Tempo BPM: 130.00
+[2880] meta.Tempo BPM: 140.00
 `,
 		},
 		{
@@ -3301,10 +3301,10 @@ Ch      |1|
 			false,
 			`
 [0] meta.TrackSequenceName: "BPM"
-[0] meta.Tempo BPM: 545454.55
-[960] meta.Tempo BPM: 461538.46
-[960] meta.Tempo BPM: 444444.44
-[1920] meta.Tempo BPM: 428571.43
+[0] meta.Tempo BPM: 110.00
+[960] meta.Tempo BPM: 130.00
+[960] meta.Tempo BPM: 135.00
+[1920] meta.Tempo BPM: 140.00
 `,
 		},
 		/*

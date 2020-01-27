@@ -2180,9 +2180,83 @@ TRACK | flute |
 =SCORE                   | flute |
  # 4/4 @120.00 \major^g'
     1                    | g'    |
-    1& \major^c'         | c'    |
+    1& \major^c'         |       |
+    1&                   | c'    |
     2                    | d'    |
- # \major^c'
+ #
+    3                    | d'    |
+ `,
+		},
+		{ // 68
+			`
+TRACK | flute | 
+
+=SCORE | flute | 
+# @110
+ 1     | ^1    |
+ 1& @115 | ^1 |
+ 2     | ^2     | 
+#
+ 3     | ^2     | 
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @110.00 \major^c'
+    1                    | c'    |
+    1& @115.00           |       |
+    1&                   | c'    |
+    2                    | d'    |
+ #
+    3                    | d'    |
+ `,
+		},
+		{ // 69
+			`
+TRACK | flute | 
+
+=SCORE | flute | 
+# @110
+ 1     | ^1    |
+ 1& @115 |  |
+ 2     | ^2     | 
+#
+ 3     | ^2     | 
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @110.00 \major^c'
+    1                    | c'    |
+    1& @115.00           |       |
+    2                    | d'    |
+ #
+    3                    | d'    |
+ `,
+		},
+		{ // 70
+			`
+TRACK | flute | 
+
+=SCORE | flute | 
+# \major^g'
+ 1     | ^1    |
+ 1& \major^c' |  |
+ 2     | ^2     | 
+#
+ 3     | ^2     | 
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^g'
+    1                    | g'    |
+    1& \major^c'         |       |
+    2                    | d'    |
+ #
     3                    | d'    |
  `,
 		},

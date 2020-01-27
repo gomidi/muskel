@@ -172,13 +172,13 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 					evts = append(evts,
 						&event{
 							position: glissStartPos + s.posToTicks(step*2),
-							message:  meta.Tempo(bpm + glissStartBPM),
+							message:  meta.FractionalBPM(bpm + glissStartBPM),
 						})
 				})
 				inGliss = false
 			}
 
-			evts = append(evts, &event{position: s.posToTicks(b.Position), message: meta.Tempo(b.TempoChange)})
+			evts = append(evts, &event{position: s.posToTicks(b.Position), message: meta.FractionalBPM(b.TempoChange)})
 
 			if len(b.Tilde) > 0 {
 				glissStartPos = b.Position
@@ -195,7 +195,7 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 			sortedTc := sortInternalTempoChanges(b.InnerTempoChanges)
 
 			for _, tc := range sortedTc {
-				evts = append(evts, &event{position: s.posToTicks(b.Position + tc.relPos), message: meta.Tempo(tc.bpm)})
+				evts = append(evts, &event{position: s.posToTicks(b.Position + tc.relPos), message: meta.FractionalBPM(tc.bpm)})
 			}
 		}
 	}

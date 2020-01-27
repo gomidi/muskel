@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	cfg = config.MustNew("muskel", "0.9.96", "muskel is a musical sketch language")
+	cfg = config.MustNew("muskel", "0.9.97", "muskel is a musical sketch language")
 
 	argFile   = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
 	argSketch = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
@@ -45,6 +45,10 @@ var (
 
 	cmdSMF      = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
 	argSMFTicks = cmdSMF.NewInt32("ticks", "resolution of SMF file in ticks", config.Default(int32(960)))
+
+	cmdImport        = cfg.MustCommand("import", "convert a Standard MIDI file to a muskel file").Relax("file")
+	argImportSMF     = cmdImport.NewString("smf", "path of the Standard MIDI file file.", config.Shortflag('i'), config.Required)
+	argOutMuskelFile = cmdImport.NewString("mskl", "path of the muskel file.", config.Shortflag('o'), config.Required)
 
 	//cmdAddTrack     = cfg.MustCommand("addtrack", "add a track")
 	//argAddTrackName = cmdAddTrack.NewString("name", "name of the track", config.Required)
@@ -600,6 +604,10 @@ func run() error {
 	if err != nil {
 		fmt.Println(cfg.Usage())
 		return err
+	}
+
+	if cfg.ActiveCommand() == cmdImport {
+		return muskel.Import(argImportSMF.Get(), argOutMuskelFile.Get())
 	}
 
 	if cfg.ActiveCommand() == cmdTemplate {

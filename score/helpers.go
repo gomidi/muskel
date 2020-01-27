@@ -140,6 +140,10 @@ func (s sortedLines) Less(a, b int) bool {
 		return true
 	}
 
+	if len(s[a].cols) == 0 {
+		return true
+	}
+
 	return false
 }
 

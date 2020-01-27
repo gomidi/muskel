@@ -54,7 +54,7 @@ type Score struct {
 	lyrics         map[string][]string
 	properties     map[string]interface{}
 	tokens         map[string]string
-	isUnrolled     bool
+	IsUnrolled     bool
 	exclSketch     map[string]string
 
 	printBarComments bool
@@ -318,7 +318,7 @@ func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []strin
 }
 
 func (sc *Score) Unroll() error {
-	if sc.isUnrolled {
+	if sc.IsUnrolled {
 		return nil
 	}
 
@@ -402,7 +402,7 @@ func (sc *Score) Unroll() error {
 		return err
 	}
 	sc.Parts = sketch.Parts
-	sc.isUnrolled = true
+	sc.IsUnrolled = true
 
 	for c, evts := range sc.Unrolled {
 		sc.Unrolled[c] = sc.replaceScalenotes(c, evts)
@@ -650,6 +650,18 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		}
 
 		sorted = append(sorted, line{pos: bar.Position, cols: []string{s}})
+
+		for relPos, tc := range bar.InnerTempoChanges {
+			_ = tc
+			lastTempoChange = tc
+			sorted = append(sorted, line{pos: bar.Position + relPos, cols: []string{}})
+		}
+
+		for relPos, sc := range bar.InnerScales {
+			_ = sc
+			lastScale = sc
+			sorted = append(sorted, line{pos: bar.Position + relPos, cols: []string{}})
+		}
 	}
 
 	//fmt.Printf("sorted: %#v\n", sorted)
@@ -667,12 +679,21 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 			relPos := lin.pos - lastBarStart
 			l := []string{items.Pos32thToString(lin.pos - lastBarStart)}
 			bidx := sc.GetBarIdxOf(lastBarStart)
-			scale := sc.Bars[bidx].InnerScales[relPos]
-			if scale != nil {
-				l[0] = l[0] + " " + scale.String()
+			if bidx >= 0 && len(lin.cols) == 0 {
+				if tc, hasTc := sc.Bars[bidx].InnerTempoChanges[relPos]; hasTc {
+					l[0] = l[0] + fmt.Sprintf(" @%0.2f", tc)
+				}
+
+				scale := sc.Bars[bidx].InnerScales[relPos]
+				if scale != nil {
+					l[0] = l[0] + " " + scale.String()
+				}
+				//l = append(l, lin.cols...)
+				sk.AddLine(l)
+			} else {
+				l = append(l, lin.cols...)
+				sk.AddLine(l)
 			}
-			l = append(l, lin.cols...)
-			sk.AddLine(l)
 			//fmt.Printf("adding line %q\n", l)
 		}
 	}

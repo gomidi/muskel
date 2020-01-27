@@ -1,8 +1,13 @@
 # nächste TODOs
 
-- convert smf to muskel
-
+- eigenes package für pattern commands, streamline them
 - require .mskl ending for includes to allow other kinds of files (really?)
+- convert csv to muskel
+- export to csv
+- export to xls for printing
+- import from xls
+- make converter a separate package, reading from stdin and writing to stdout
+- make muskel binary read from stdin and write to stdout
 
 - überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
     
