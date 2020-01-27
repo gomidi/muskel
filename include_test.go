@@ -2260,6 +2260,64 @@ TRACK | flute |
     3                    | d'    |
  `,
 		},
+		{ // 71
+			`
+TRACK | flute |
+
+=test | flute |
+#
+1     | c     |
+2     | d     |
+3     | e     |
+3&    | f     |
+4     | g     | 
+
+=SCORE | flute | 
+#
+ 1     | $reverse(=test.flute) |
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | g     |
+    2                    | f     |
+    3                    | e     |
+    3&                   | d     |
+    4                    | c     |
+ `,
+		},
+		{ // 72
+			`
+TRACK | flute |
+
+=test | flute |
+#
+1     | c     |
+2     | d     |
+#
+3     | e     |
+3&    | f     |
+4     | g     | 
+
+=SCORE | flute | 
+#
+ 1     | $reverse(=test.flute) |
+#
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | g     |
+    2                    | f     |
+ #
+    3                    | e     |
+    3&                   | d     |
+    4                    | c     |
+ `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

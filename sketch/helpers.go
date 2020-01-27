@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gitlab.com/gomidi/muskel/items"
+	"gitlab.com/gomidi/muskel/patterncommands"
 )
 
 func parseEventsLineItem(posItem string) (pos, value string, err error) {
@@ -554,3 +555,47 @@ func findPattern(fromSketch *Sketch, fromCol string, patternName string) (sk *Sk
 	var rs = &patternFinder{fromSketch}
 	return rs.FindPattern(fromCol, patternName)
 }
+
+type patterncmdHelper struct {
+	cmdName    string
+	column     *column
+	params     []string
+	pipeEvents []*items.Event
+	inPipe     bool
+}
+
+func (p *patterncmdHelper) GetPipeEvents() ([]*items.Event, error) {
+	if !p.inPipe {
+		return nil, fmt.Errorf("no in pattern command pipe")
+	}
+	return p.pipeEvents, nil
+}
+
+func (p *patterncmdHelper) GetPatternDefEvents(pos uint, patternDef string) ([]*items.Event, error) {
+	return eventsFromPatternDef(p.cmdName, patternDef, p.column.sketch.Score, 0, pos, p.params)
+
+}
+
+func (p *patterncmdHelper) GetCallEvents(pos uint, endPos uint, callDef string) ([]*items.Event, error) {
+	pc := &items.Call{}
+	//pc.Parser = p
+	if idx := strings.Index(callDef, "..."); idx > 0 && idx+3 == len(callDef) {
+		//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
+		pc.Exploded = true
+		callDef = callDef[:idx] //+ data[idx+3:]
+	}
+	//fmt.Printf("data cleaned: %q\n", data)
+	err := pc.Parse(callDef, pos)
+	if err != nil {
+		return nil, err
+	}
+	pcc := p.column.newCall(pc)
+	if endPos == 0 {
+		endPos = p.column.sketch.projectedBarEnd
+		//fmt.Printf("endPos: %v\n", endPos)
+	}
+	evts, _, _, err := pcc.unroll(pos, endPos)
+	return evts, err
+}
+
+var _ patterncommands.Helper = &patterncmdHelper{}

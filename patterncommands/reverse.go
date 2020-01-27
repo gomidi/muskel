@@ -20,7 +20,7 @@ func reverse(pos uint, params []string, helper Helper) (res []*items.Event, err 
 	if params[0] == "=" {
 		evts, err = helper.GetPipeEvents()
 	} else {
-		evts, err = helper.GetCallEvents(pos, params[0])
+		evts, err = helper.GetCallEvents(pos, 0, params[0])
 	}
 
 	if err != nil {

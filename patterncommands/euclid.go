@@ -9,5 +9,5 @@ func euclid(pos uint, params []string, helper Helper) (res []*items.Event, err e
 		return nil, err
 	}
 
-	return helper.GetCallEvents(pos, eu.PatternDef)
+	return helper.GetPatternDefEvents(pos, eu.PatternDef)
 }

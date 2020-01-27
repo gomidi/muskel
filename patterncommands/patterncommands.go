@@ -54,7 +54,7 @@ var Commands = map[string]Command{
 }
 
 type Helper interface {
-	GetCallEvents(position uint, callDef string) ([]*items.Event, error)
+	GetCallEvents(position uint, endPos uint, callDef string) ([]*items.Event, error)
 	GetPipeEvents() ([]*items.Event, error)
 	GetPatternDefEvents(position uint, def string) ([]*items.Event, error)
 }

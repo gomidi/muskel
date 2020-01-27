@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"gitlab.com/gomidi/muskel/items"
+	"gitlab.com/gomidi/muskel/patterncommands"
 )
 
 type column struct {
@@ -90,23 +91,20 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 		//case *items.BarRepeater:
 		//	fmt.Printf("bar repeater: %v mixed: %v\n", v, mixed)
 		case *items.CommandCall:
-			switch v.Name {
-			case "euclid":
-				var eu items.EuclideanRhythm
-				err = eu.Parse(v.Position, v.Params...)
+			if fn, hasCmd := patterncommands.Commands[v.Name]; hasCmd {
+				helper := &patterncmdHelper{
+					cmdName: v.Name,
+					column:  p,
+					params:  params,
+				}
+
+				_evts, err := fn(v.Position, v.Params, helper)
+
 				if err != nil {
 					continue
 				}
 
-				_evts, err := eventsFromPatternDef(v.Name, eu.PatternDef, p.sketch.Score, 0, v.Position, params)
-
-				//DEBUG = true
-				printEvents("from euclid", _evts)
-				//DEBUG = false
-
-				if err != nil {
-					continue
-				}
+				printEvents(v.Name, _evts)
 
 				if len(_evts) == 0 {
 					continue
@@ -115,9 +113,40 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				if err != nil {
 					continue
 				}
-			default:
+			} else {
 				continue
 			}
+
+			/*
+				switch v.Name {
+				case "euclid":
+					var eu items.EuclideanRhythm
+					err = eu.Parse(v.Position, v.Params...)
+					if err != nil {
+						continue
+					}
+
+					_evts, err := eventsFromPatternDef(v.Name, eu.PatternDef, p.sketch.Score, 0, v.Position, params)
+
+					//DEBUG = true
+					printEvents("from euclid", _evts)
+					//DEBUG = false
+
+					if err != nil {
+						continue
+					}
+
+					if len(_evts) == 0 {
+						continue
+					}
+					posEv, err = p.euclidEventStream(forward+ev.Position, endPos, _evts)
+					if err != nil {
+						continue
+					}
+				default:
+					continue
+				}
+			*/
 		case *items.NTuple:
 			// TODO look inside each item and replace random things and templatecalls if there
 			var until = findNextPos(i, int(forward), evts)

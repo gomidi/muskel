@@ -2,7 +2,6 @@
 
 - piping via $cmd()/$cmd()/...
 
-- eigenes package für pattern commands, streamline them
 - require .mskl ending for includes to allow other kinds of files (really?)
 
 later:
