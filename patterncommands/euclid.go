@@ -2,12 +2,12 @@ package patterncommands
 
 import "gitlab.com/gomidi/muskel/items"
 
-func euclid(pos uint, params []string, helper Helper) (res []*items.Event, err error) {
+func euclid(params []string, helper Helper) (res []*items.Event, err error) {
 	var eu items.EuclideanRhythm
-	err = eu.Parse(pos, params...)
+	err = eu.Parse(0, params...)
 	if err != nil {
 		return nil, err
 	}
 
-	return helper.GetPatternDefEvents(pos, eu.PatternDef)
+	return helper.GetPatternDefEvents(eu.PatternDef)
 }

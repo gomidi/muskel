@@ -46,15 +46,16 @@ cut(patt,fromPos,toPos)
 // Command is a command that receives different arguments (there might be pattern names within)
 // and returns events
 // we provide different functions to the PatternCMD
-type Command func(pos uint, params []string, helper Helper) ([]*items.Event, error)
+type Command func(params []string, helper Helper) ([]*items.Event, error)
 
 var Commands = map[string]Command{
 	"reverse": reverse,
 	"euclid":  euclid,
+	"merge":   merge,
 }
 
 type Helper interface {
-	GetCallEvents(position uint, endPos uint, callDef string) ([]*items.Event, error)
+	GetCallEvents(endPos uint, callDef string) ([]*items.Event, error)
 	GetPipeEvents() ([]*items.Event, error)
-	GetPatternDefEvents(position uint, def string) ([]*items.Event, error)
+	GetPatternDefEvents(def string) ([]*items.Event, error)
 }

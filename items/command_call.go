@@ -8,7 +8,7 @@ type CommandCall struct {
 	Name     string
 	Params   []string
 	original string
-	Position uint
+	//Position uint
 }
 
 func (c CommandCall) Dup() Item {
@@ -22,7 +22,7 @@ func (c CommandCall) String() string {
 func (p *CommandCall) Parse(call string, posIn32th uint) error {
 	call = strings.TrimSpace(call)
 	p.original = call
-	p.Position = posIn32th
+	//p.Position = posIn32th
 	params := ""
 
 	if idx := strings.Index(call, "("); idx > 0 {

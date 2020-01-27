@@ -90,6 +90,38 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 		switch v := ev.Item.(type) {
 		//case *items.BarRepeater:
 		//	fmt.Printf("bar repeater: %v mixed: %v\n", v, mixed)
+		case *items.PipedPatternCommands:
+			//fmt.Printf("got: *items.PipedPatternCommands\n")
+			helper := &patterncmdHelper{
+				column: p,
+				params: params,
+				inPipe: true,
+			}
+
+			for _, cmd := range v.Cmds {
+				//fmt.Printf("command: %q\n", cmd.Name)
+				if fn, hasCmd := patterncommands.Commands[cmd.Name[1:]]; hasCmd {
+					//fmt.Printf("found command: %q\n", cmd.Name)
+					helper.cmdName = cmd.Name[1:]
+					_evts, err := fn(cmd.Params, helper)
+
+					if err != nil {
+						return nil, err
+					}
+
+					printEvents(cmd.Name, _evts)
+
+					helper.pipeEvents = _evts
+				} else {
+					return nil, fmt.Errorf("unknown command %q", cmd.Name)
+				}
+			}
+
+			posEv, err = p.euclidEventStream(forward+ev.Position, endPos, helper.pipeEvents)
+			if err != nil {
+				return nil, err
+			}
+
 		case *items.CommandCall:
 			if fn, hasCmd := patterncommands.Commands[v.Name]; hasCmd {
 				helper := &patterncmdHelper{
@@ -98,10 +130,10 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 					params:  params,
 				}
 
-				_evts, err := fn(v.Position, v.Params, helper)
+				_evts, err := fn(v.Params, helper)
 
 				if err != nil {
-					continue
+					return nil, err
 				}
 
 				printEvents(v.Name, _evts)
@@ -111,10 +143,10 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				}
 				posEv, err = p.euclidEventStream(forward+ev.Position, endPos, _evts)
 				if err != nil {
-					continue
+					return nil, err
 				}
 			} else {
-				continue
+				return nil, fmt.Errorf("unknown command %q", v.Name)
 			}
 
 			/*

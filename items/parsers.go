@@ -113,26 +113,38 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			it = ntp
 			return
 		case '$':
-			var cmd = &CommandCall{}
-			err = cmd.Parse(data[1:], posIn32th)
-			if err != nil {
+			piidx := strings.Index(data, "/")
+			//fmt.Printf("piidx: %v, data[1]: %q\n", piidx, data)
+			if data[1] != '$' && piidx > 0 {
+				var piped PipedPatternCommands
+				err = piped.Parse(data, posIn32th)
+				if err != nil {
+					return
+				}
+				it = &piped
 				return
-			}
-			switch cmd.Name {
-			case "$include":
-				sketch := "=SCORE"
-				if len(cmd.Params) > 1 {
-					sketch = strings.Trim(cmd.Params[1], `"'`)
+			} else {
+				var cmd = &CommandCall{}
+				err = cmd.Parse(data[1:], posIn32th)
+				if err != nil {
+					return
 				}
-				var inc Include
-				inc.File = strings.Trim(cmd.Params[0], `"'`)
-				inc.Sketch = sketch
-				if len(cmd.Params) > 2 {
-					inc.Params = cmd.Params[2:]
+				switch cmd.Name {
+				case "$include":
+					sketch := "=SCORE"
+					if len(cmd.Params) > 1 {
+						sketch = strings.Trim(cmd.Params[1], `"'`)
+					}
+					var inc Include
+					inc.File = strings.Trim(cmd.Params[0], `"'`)
+					inc.Sketch = sketch
+					if len(cmd.Params) > 2 {
+						inc.Params = cmd.Params[2:]
+					}
+					it = inc
+				default:
+					it = cmd
 				}
-				it = inc
-			default:
-				it = cmd
 			}
 			return
 		case '(':

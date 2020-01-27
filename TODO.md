@@ -1,8 +1,26 @@
 # nächste TODOs
 
-- piping via $cmd()/$cmd()/...
+- force tokens to begin with a dot, then we can allow Ab Db ebb etc.
+- allow repeat last event sign to alter volume and scale mounting %++ etc
+- add repeat last pattern %% also with modifiers, e.g. %%++< or %%^2-->
+  or with command pipe, e.g. %%/$reverse(=)
+- überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
+- überschreiben nur mit transposition erlauben z.B. /^1 erhöht die "darunterliegende Note" um einen schritt
+- transponieren mit Halbtönen erlauben, z.B. 
+  ^1# transponiert um einen schritt und eine MIDInote aufwärts 
+  ^-1## transponiert um einen schritt und zwei MIDInoten abwärts 
+  ^2#3 transponiert um einen schritt und drei MIDInoten aufwärts
+  ^#3 transponiert um drei MIDInoten aufwärts
+  ^-#3 transponiert um drei MIDInoten abwärts
+- dokumentation aktualisieren
+- check and fix randomness
 
-- require .mskl ending for includes to allow other kinds of files (really?)
+    
+- cleanup scalenotes: make nt.ScaleNote a *int8 and copy it when duplicating. when it is not set, it is no scale note. otherwise it is the step (counting from 0). parsing makes 1->0 2->1 etc but -1->-1 this should make scale calculations and transpositions easier.
+
+- fix mounting patterns / scale notes within patterns
+- allow tempo changes inside columns of main score, independant from main tempo with @130 etc. to set back to the main tempo, use
+  just @. also relative tempo possible, e.g. @50%
 
 later:
 - convert csv to muskel
@@ -11,20 +29,6 @@ later:
 - import from xls
 - make converter a separate package, reading from stdin and writing to stdout
 - make muskel binary read from stdin and write to stdout
-
-- überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
-    
-- cleanup scalenotes: make nt.ScaleNote a *int8 and copy it when duplicating. when it is not set, it is no scale note. otherwise it
-  is the step (counting from 0). parsing makes 1->0 2->1 etc but -1->-1 this should make scale calculations and transpositions easier.
-
-- improve/fix scale definition syntax in a way that chords could also be defined as a scale
-- fix mounting patterns / scale notes within patterns
-- allow repeat last event sign to alter volume and scale mounting
-- allow tempo changes inside columns of main score, independant from main tempo with @130 etc. to set back to the main tempo, use
-  just @. also relative tempo possible, e.g. @50%
-
-- dokumentation aktualisieren
-- check and fix randomness
 - tests reanimieren
 
 ## weiteres / Komplexeres
@@ -33,6 +37,8 @@ later:
 - Ducking?
 
 ## erledigt
+
+- piping via $cmd()/$cmd()/...
 
 - pattern aufrufsyntax bereinigen/erweitern:
   folgende Spaltennamen sind in patterns nicht zulässig: ".","~","-","*","+"

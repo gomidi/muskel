@@ -101,7 +101,7 @@ func sketchFromEventsLine(name string, patternDef string, sc Score) (*Sketch, er
 	return sk, nil
 }
 
-func eventsFromPatternDef(name, patternDef string, sc Score, posshift int, posIn32th uint, params []string) (evts []*items.Event, err error) {
+func eventsFromPatternDef(name, patternDef string, sc Score, params []string) (evts []*items.Event, err error) {
 	replaced := replaceParams(patternDef, params)
 	//fmt.Printf("eventsFromPatternDef replaced: %q\n", replaced)
 	sk, err := sketchFromEventsLine(name, replaced, sc)
@@ -566,17 +566,17 @@ type patterncmdHelper struct {
 
 func (p *patterncmdHelper) GetPipeEvents() ([]*items.Event, error) {
 	if !p.inPipe {
-		return nil, fmt.Errorf("no in pattern command pipe")
+		return nil, fmt.Errorf("not in pattern command pipe")
 	}
 	return p.pipeEvents, nil
 }
 
-func (p *patterncmdHelper) GetPatternDefEvents(pos uint, patternDef string) ([]*items.Event, error) {
-	return eventsFromPatternDef(p.cmdName, patternDef, p.column.sketch.Score, 0, pos, p.params)
+func (p *patterncmdHelper) GetPatternDefEvents(patternDef string) ([]*items.Event, error) {
+	return eventsFromPatternDef(p.cmdName, patternDef, p.column.sketch.Score, p.params)
 
 }
 
-func (p *patterncmdHelper) GetCallEvents(pos uint, endPos uint, callDef string) ([]*items.Event, error) {
+func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string) ([]*items.Event, error) {
 	pc := &items.Call{}
 	//pc.Parser = p
 	if idx := strings.Index(callDef, "..."); idx > 0 && idx+3 == len(callDef) {
@@ -585,7 +585,7 @@ func (p *patterncmdHelper) GetCallEvents(pos uint, endPos uint, callDef string) 
 		callDef = callDef[:idx] //+ data[idx+3:]
 	}
 	//fmt.Printf("data cleaned: %q\n", data)
-	err := pc.Parse(callDef, pos)
+	err := pc.Parse(callDef, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -594,7 +594,7 @@ func (p *patterncmdHelper) GetCallEvents(pos uint, endPos uint, callDef string) 
 		endPos = p.column.sketch.projectedBarEnd
 		//fmt.Printf("endPos: %v\n", endPos)
 	}
-	evts, _, _, err := pcc.unroll(pos, endPos)
+	evts, _, _, err := pcc.unroll(0, endPos)
 	return evts, err
 }
 

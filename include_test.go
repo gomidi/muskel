@@ -2318,6 +2318,101 @@ TRACK | flute |
     4                    | c     |
  `,
 		},
+		{ // 73
+			`
+TRACK | flute |
+
+=test | a  | b  |
+#
+1     | a  |    |
+1&    |    | b  |
+2     | A  |    |
+2&    |    | B  |
+3     | a  |    |
+3&    |    | b  |
+4     | a' |    |
+4&    |    | b' |
+
+=SCORE | flute | 
+#
+ 1     | $merge(=test.a,=test.b) |
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | a     |
+    1&                   | b     |
+    2                    | A     |
+    2&                   | B     |
+    3                    | a     |
+    3&                   | b     |
+    4                    | a'    |
+    4&                   | b'    |
+ `,
+		},
+		{ // 74
+			`
+TRACK | flute |
+
+=test | a  | b  |
+#
+1     | a  |    |
+1&    |    | b  |
+2     | A  |    |
+2&    |    | B  |
+3     | a  |    |
+3&    |    | b  |
+4     | a' |    |
+4&    |    | b' |
+
+=SCORE | flute | 
+#
+ 1     | $merge(=test.a,=test.b)/$reverse(=) |
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | b'    |
+    1&                   | a'    |
+    2                    | b     |
+    2&                   | a     |
+    3                    | B     |
+    3&                   | A     |
+    4                    | b     |
+    4&                   | a     |
+ `,
+		},
+		{ // 75
+			`
+TRACK | flute |
+
+=arp |   |
+#
+1     | #1  |
+1&    | #3  |
+2     | #2  |
+
+chords |
+ T     | (^1 ^3 ^5)
+
+=SCORE | flute | 
+#
+ 1     | =arp(chords.T...) |
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | c'    |
+    1&                   | g'    |
+    2                    | e'    |
+ `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -2361,7 +2456,7 @@ TRACK | flute |
 
 	for i, test := range tests {
 
-		// fmt.Printf("############ %v ###############\n", i)
+		//fmt.Printf("############ %v ###############\n", i)
 
 		/*
 			   if i != 54 {

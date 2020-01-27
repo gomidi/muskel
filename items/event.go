@@ -1,6 +1,7 @@
 package items
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -124,8 +125,6 @@ func (e *Event) AbsPosTicks(ticks4th uint32, trackDelay int) uint {
 	return uint(res)
 }
 
-/*
-
 type SortEvents []*Event
 
 func (s SortEvents) Len() int {
@@ -166,4 +165,3 @@ func (s SortEvents) Less(a, b int) bool {
 	//fmt.Printf("types: %T vs %T pos: %v vs %v\n", e[a].message, e[b].message, e[a].position, e[b].position)
 	return s[a].Position < s[b].Position
 }
-*/
