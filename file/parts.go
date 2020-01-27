@@ -67,7 +67,7 @@ func (e EmptyLine) WriteTo(f table.Formatter) error {
 	return f.WriteLine("")
 }
 
-var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$") + "include")
+var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$$") + "include")
 
 type Include struct {
 	lineNo int
@@ -119,14 +119,14 @@ func (i *Include) WriteTo(f table.Formatter) error {
 	var line string
 	switch i.include.part {
 	case "":
-		line = fmt.Sprintf("$include(%q)", i.include.file)
+		line = fmt.Sprintf("$$include(%q)", i.include.file)
 	default:
-		line = fmt.Sprintf("$include(%q,%q)", i.include.part, i.include.file)
+		line = fmt.Sprintf("$$include(%q,%q)", i.include.part, i.include.file)
 	}
 	return f.WriteLine(line)
 }
 
-var embedRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$") + "embed")
+var embedRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$$") + "embed")
 
 type Embed struct {
 	lineNo int
@@ -161,7 +161,7 @@ func (i *Embed) ParseLine(line string) error {
 
 func (i *Embed) WriteTo(f table.Formatter) error {
 	var line strings.Builder
-	line.WriteString("$embed(")
+	line.WriteString("$$embed(")
 
 	for n, p := range i.params {
 		if n > 0 {

@@ -91,7 +91,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 		//	fmt.Printf("bar repeater: %v mixed: %v\n", v, mixed)
 		case *items.CommandCall:
 			switch v.Name {
-			case "_euclid":
+			case "euclid":
 				var eu items.EuclideanRhythm
 				err = eu.Parse(v.Position, v.Params...)
 				if err != nil {
@@ -101,7 +101,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				_evts, err := eventsFromPatternDef(v.Name, eu.PatternDef, p.sketch.Score, 0, v.Position, params)
 
 				//DEBUG = true
-				printEvents("from _euclid", _evts)
+				printEvents("from euclid", _evts)
 				//DEBUG = false
 
 				if err != nil {

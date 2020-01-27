@@ -111,7 +111,7 @@ func TestBars(t *testing.T) {
 1 | a | c |
 #B 4/4
 1 | c | d |
-$include("testinclude")
+$$include("testinclude")
 #C 6/8
 1 | f | g |
 [B]
@@ -132,8 +132,8 @@ $include("testinclude")
 1 | a | c |
 #B 4/4
 1 | c | d |
-$include("testinclude")
-$include("testinclude")
+$$include("testinclude")
+$$include("testinclude")
 # 6/8
 1 | f | g |
 [B]

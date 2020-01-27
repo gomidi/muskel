@@ -326,7 +326,7 @@ drums |
 
 =rhythm |euclid |
 #
-1       |$_euclid(3,12,&) |
+1       |$euclid(3,12,&) |
 
 PROPERTY |
 a            | b
@@ -349,9 +349,9 @@ type  | *         |
 drums    |
  kd      | MN34++
 
-=rhythm  | euclid           |
+=rhythm  | euclid          |
  #
-    1    | $_euclid(3,12,&) |
+    1    | $euclid(3,12,&) |
 
 PROPERTY |
  a       | b

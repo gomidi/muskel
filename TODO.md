@@ -1,7 +1,11 @@
 # nächste TODOs
 
+- piping via $cmd()/$cmd()/...
+
 - eigenes package für pattern commands, streamline them
 - require .mskl ending for includes to allow other kinds of files (really?)
+
+later:
 - convert csv to muskel
 - export to csv
 - export to xls for printing
@@ -22,11 +26,9 @@
 
 - dokumentation aktualisieren
 - check and fix randomness
-- tests reanimieren und code cleanup
+- tests reanimieren
 
 ## weiteres / Komplexeres
-
-- konvertieren: SMF zu muskel
 - tuning
 - timbres
 - Ducking?

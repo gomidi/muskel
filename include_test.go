@@ -15,7 +15,7 @@ func TestInclude(t *testing.T) {
 	}{
 		{ // 0
 			`
-$include("drumnote")
+$$include("drumnote")
 
 TRACK | Voc | Drums | Piano |
 
@@ -37,8 +37,8 @@ TRACK | Voc | Drums | Piano |
 		},
 		{ // 1
 			`
-$include("testdata/includes/header")
-$include("drumnote")
+$$include("testdata/includes/header")
+$$include("drumnote")
 
 =hu |a|
 #
@@ -66,12 +66,12 @@ TRACK | Voc | Drums | Piano |
 		},
 		{ // 2
 			`
-$include("testdata/includes/header")
-$include("drumnote")
+$$include("testdata/includes/header")
+$$include("drumnote")
 
 =rhythm |a|
 #
-1   |$_euclid(3,12,&)| 
+1   |$euclid(3,12,&)| 
 *3
 
 TRACK | Voc | Drums | Piano |
@@ -103,12 +103,12 @@ TRACK | Voc | Drums | Piano |
 		},
 		{ // 3
 			`
-$include("testdata/includes/header")
-$include("drumnote")
+$$include("testdata/includes/header")
+$$include("drumnote")
 
 =rhythm |a|
 #
-1&  | $_euclid(3,12,&) | 
+1&  | $euclid(3,12,&) | 
 *3
 
 TRACK | Voc | Drums | Piano |
@@ -147,7 +147,7 @@ TRACK | Voc | Drums | Piano |
 # 3/4
 1        | a"  | d    | b"    |
 2&       | c   |      | d     |
-$include("testdata/includes/score")
+$$include("testdata/includes/score")
 #
 1        | d   |      |       | B
 `,
@@ -168,7 +168,7 @@ $include("testdata/includes/score")
 TRACK | Voc | Drums | Piano |
 
 =SCORE  | Voc | Drums | Piano |
-$include("testdata/includes/score")
+$$include("testdata/includes/score")
 #
 1       | d   |       |       | B
 `,
@@ -186,8 +186,8 @@ $include("testdata/includes/score")
 TRACK | Voc | Drums | Piano |
 
 =SCORE | Voc | Drums   | Piano |
-$include("testdata/includes/score")
-$include("testdata/includes/score")
+$$include("testdata/includes/score")
+$$include("testdata/includes/score")
 `,
 			`
 =SCORE                   | Drums | Piano | Voc |
@@ -207,8 +207,8 @@ TRACK | Voc | Drums | Piano |
 # 4/4
 1        | a"  | d    | b"    |
 2&       | c   |      | d     |
-$include("testdata/includes/score")
-$include("testdata/includes/score")
+$$include("testdata/includes/score")
+$$include("testdata/includes/score")
 #
 1        | d   |      |       | B
 
@@ -1429,11 +1429,11 @@ TRACK | x |
 		},
 		{ // 42
 			`
-$include("drumnote")
+$$include("drumnote")
 
 =rhythm |a|
 #
-1   |$_euclid(3,12,&)| 
+1   |$euclid(3,12,&)| 
 *3
 
 TRACK | Drums |
@@ -1465,11 +1465,11 @@ TRACK | Drums |
 		},
 		{ // 43
 			`
-$include("drumnote")
+$$include("drumnote")
 
 =rhythm |a|
 #
-1   |$_euclid(3,12,&)| 
+1   |$euclid(3,12,&)| 
 *3
 
 TRACK | Drums |
@@ -1501,11 +1501,11 @@ TRACK | Drums |
 		},
 		{ // 44
 			`
-$include("drumnote")
+$$include("drumnote")
 
 =rhythm |a|
 #
-1   |$_euclid(3,12,&)| 
+1   |$euclid(3,12,&)| 
 *3
 
 TRACK | Drums |
@@ -1537,11 +1537,11 @@ TRACK | Drums |
 		},
 		{ // 45
 			`
-$include("drumnote")
+$$include("drumnote")
 
 =rhythm |a|
 #
-1   |$_euclid(3,12,&)| 
+1   |$euclid(3,12,&)| 
 *3
 
 TRACK | Drums |
@@ -1573,11 +1573,11 @@ TRACK | Drums |
 		},
 		{ // 46
 			`
-$include("drumnote")
+$$include("drumnote")
 
 =rhythm |a|
 #
-1   |$_euclid(3,12,&)| 
+1   |$euclid(3,12,&)| 
 *3
 
 TRACK | Drums |
@@ -1709,7 +1709,7 @@ TRACK   | Vocals |
 		{ // 51
 			`
       
-$include("testdata/includes/lyrics")
+$$include("testdata/includes/lyrics")
 
 =melody | Verse1 |
  #
@@ -1741,7 +1741,7 @@ TRACK   | Voc    | Piano | Drums |
  # 4/4 @100
   1    | (a "Hi-") |       |       |
   2    | (c "ho")  |       |       |
-$include("testdata/includes/score2")
+$$include("testdata/includes/score2")
 `,
 			`
 =SCORE                    | Drums | Piano | Voc       |
@@ -1760,7 +1760,7 @@ $include("testdata/includes/score2")
 TRACK | Voc | Drums | Piano |
 
 =SCORE   | Voc | Drums   | Piano |
-$include("testdata/includes/score2")
+$$include("testdata/includes/score2")
 #
 1        | d   |      |     B  |
 
@@ -1782,7 +1782,7 @@ $include("testdata/includes/score2")
 TRACK | Voc | Piano |
 
 =SCORE   | Voc | Piano |
-$include("testdata/includes/score3")
+$$include("testdata/includes/score3")
 #
 1        | d   |      |    
 
@@ -1812,7 +1812,7 @@ TRACK | Voc | Piano |
 =SCORE   | Voc | Piano |
 # \minor^c
 1        | ^1  | ^2    |
-$include("testdata/includes/score3", "=something")
+$$include("testdata/includes/score3", "=something")
 #
 1        | ^1   |  ^2    |    
 
@@ -1834,7 +1834,7 @@ TRACK | Voc | Piano |
 =SCORE   | Voc | Piano |
 # \minor^c
 1        | ^1  | ^2    |
-$include("testdata/includes/score3", "=something2")
+$$include("testdata/includes/score3", "=something2")
 #
 1        | ^1   |  ^2    |    
 
@@ -1876,8 +1876,8 @@ TRACK | Voc | Piano |
 			`
 TRACK | drums |
 
-$include("drumnote")
-$include("testdata/includes/score3")
+$$include("drumnote")
+$$include("testdata/includes/score3")
 
 =SCORE   | drums |
 #
@@ -1895,11 +1895,11 @@ $include("testdata/includes/score3")
 			`
 TRACK | drums |
 
-$include("drumnote")
+$$include("drumnote")
 
-$embed("drums.*")
+$$embed("drums.*")
 
-$include("testdata/includes/score3")
+$$include("testdata/includes/score3")
 
 =SCORE   | drums |
 #
@@ -2379,7 +2379,7 @@ func TestInclude2(t *testing.T) {
 	}{
 		{ // 0
 			`
-$include("drumnote")
+$$include("drumnote")
 
 TRACK | Voc | Drums | Piano |
 
@@ -2391,7 +2391,7 @@ TRACK | Voc | Drums | Piano |
 1      |     | drums.ho    |       |
 `,
 			`
-$include("drumnote")
+$$include("drumnote")
 
 TRACK    | Voc | Drums | Piano |
 
@@ -2406,8 +2406,8 @@ TRACK    | Voc | Drums | Piano |
 		},
 		{ // 1
 			`
-$include("testdata/includes/header")
-$include("drumnote")
+$$include("testdata/includes/header")
+$$include("drumnote")
 
 =hu | a        |
 #
@@ -2425,8 +2425,8 @@ TRACK | Voc | Drums | Piano |
 
 `,
 			`
-$include("testdata/includes/header")
-$include("drumnote")
+$$include("testdata/includes/header")
+$$include("drumnote")
 
 =hu      | a        |
  #
@@ -2452,7 +2452,7 @@ TRACK | Voc | Drums | Piano |
 # 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
-$include("testdata/includes/score")
+$$include("testdata/includes/score")
 #
 1  | d   |      |       |
 
@@ -2464,7 +2464,7 @@ TRACK    | Voc | Drums | Piano |
  # 4/4
     1    | a"  | d     | b"    |
     2&   | c   |       | d     |
- $include("testdata/includes/score")
+ $$include("testdata/includes/score")
  #
     1    | d   |       |       |
 
@@ -2478,8 +2478,8 @@ TRACK | Voc | Drums | Piano |
 # 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
-$include("testdata/includes/score")
-$include("testdata/includes/score")
+$$include("testdata/includes/score")
+$$include("testdata/includes/score")
 #
 1  | d   |      |       |
 
@@ -2491,8 +2491,8 @@ TRACK    | Voc | Drums | Piano |
  # 4/4
     1    | a"  | d     | b"    |
     2&   | c   |       | d     |
- $include("testdata/includes/score")
- $include("testdata/includes/score")
+ $$include("testdata/includes/score")
+ $$include("testdata/includes/score")
  #
     1    | d   |       |       |
 `,

@@ -119,7 +119,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 				return
 			}
 			switch cmd.Name {
-			case "include":
+			case "$include":
 				sketch := "=SCORE"
 				if len(cmd.Params) > 1 {
 					sketch = strings.Trim(cmd.Params[1], `"'`)

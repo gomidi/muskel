@@ -1675,7 +1675,7 @@ Ch |1  |
 			`
 =rhythm | x |
 #
-1       | $_euclid(3,8,&) |
+1       | $euclid(3,8,&) |
 
 TRACK |p|
 Ch |1  |
@@ -1713,7 +1713,7 @@ Ch |1  |
 			`
 =rhythm |x|
 #
-1 | $_euclid(3,8,1) |
+1 | $euclid(3,8,1) |
 *2
 
 TRACK |p|
@@ -2897,7 +2897,7 @@ TRACK   | Vocals |
 		{
 			// 104
 			`
-$include("cc")
+$$include("cc")
 
 TRACK   | Vocals | 
  Channel| 1      |      

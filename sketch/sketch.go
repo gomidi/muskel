@@ -842,12 +842,12 @@ func (p *Sketch) parseCommandLF(data string) error {
 		return err
 	}
 	switch c.Name {
-	case "embed":
+	case "$embed":
 		err = p.Score.Embed(c.Params...)
 		if err != nil {
 			return err
 		}
-	case "include":
+	case "$include":
 		var parser items.Parser
 		it, err := parser.ParseItem("$"+data, 0)
 		if err != nil {
