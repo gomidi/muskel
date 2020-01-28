@@ -158,7 +158,7 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 
 	if uint(endPos) < lastPosition {
 		fmt.Printf("endPos: %v lastPosition: %v\n", endPos, lastPosition)
-		panic("must not happend endPos less than lastPosition")
+		//panic("must not happend endPos less than lastPosition")
 	}
 
 	if endPos > 0 {
@@ -174,5 +174,9 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 	}
 	wr.currentTrack++
 	wr.smf.SetDelta(wr.delta)
-	return wr.smf.Write(meta.EndOfTrack)
+	err = wr.smf.Write(meta.EndOfTrack)
+	if err == smfpkg.ErrFinished {
+		return nil
+	}
+	return err
 }
