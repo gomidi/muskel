@@ -3144,12 +3144,12 @@ Ch      |1|
 =SCORE |p |
 #
     1    | d#+++                        |
-    1&.  | (d#+++ g+ a#++ d#'+++)  |
-    1&.; | *                             |
+    1&,  | (d#+++ g+ a#++ d#'+++)  |
+    1&,; | *                             |
     2&   | (d#+++ g+ a#++ d#'+++)  |
     3;   | *                             |
     3&   |                               |
-    3&.  | d+++                         |
+    3&,  | d+++                         |
     4&   | (d+++ f+ b++ d'+++)     |
     4&;  | *                             |
 			`,
@@ -3196,11 +3196,11 @@ Ch      |1|
 =SCORE |p |
 #
     1    | d#+++                    |
-    1&.  | (d#+++ g+< a#++< d#'+++) |
-    1&.; | *                        |
+    1&,  | (d#+++ g+< a#++< d#'+++) |
+    1&,; | *                        |
     2&   | (d#+++ g+< a#++< d#'+++) |
     3;   | *                        |
-    3&.  | d+++                     |
+    3&,  | d+++                     |
     4&   | (d+++ f+< b++ d'+++)    |
     4&;  | *                        |
 			`,
@@ -3307,6 +3307,136 @@ Ch      |1|
 [1920] meta.Tempo BPM: 140.00
 `,
 		},
+		{
+			// 116
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+    1    | c                    |
+    1;   | d                    |
+    1,    | e                    |
+    1,;    | f                    |
+    1&    | g                    |
+    1&;    | a                    |
+    1&,    | b                    |
+    1&,;    | c'                    |
+     2    | c"                    |
+    2;   | d"                    |
+    2,    | e"                    |
+    2,;    | f"                    |
+    2&    | g"                    |
+    2&;    | a"                    |
+    2&,    | b"                    |
+    2&,;    | c"'                    |
+    3  | * |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[120] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[120] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 53 dyn =
+[120] channel.NoteOff channel 0 key 53
+[0] channel.NoteOn channel 0 key 55 dyn =
+[120] channel.NoteOff channel 0 key 55
+[0] channel.NoteOn channel 0 key 57 dyn =
+[120] channel.NoteOff channel 0 key 57
+[0] channel.NoteOn channel 0 key 59 dyn =
+[120] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 60 dyn =
+[120] channel.NoteOff channel 0 key 60
+[0] channel.NoteOn channel 0 key 72 dyn =
+[120] channel.NoteOff channel 0 key 72
+[0] channel.NoteOn channel 0 key 74 dyn =
+[120] channel.NoteOff channel 0 key 74
+[0] channel.NoteOn channel 0 key 76 dyn =
+[120] channel.NoteOff channel 0 key 76
+[0] channel.NoteOn channel 0 key 77 dyn =
+[120] channel.NoteOff channel 0 key 77
+[0] channel.NoteOn channel 0 key 79 dyn =
+[120] channel.NoteOff channel 0 key 79
+[0] channel.NoteOn channel 0 key 81 dyn =
+[120] channel.NoteOff channel 0 key 81
+[0] channel.NoteOn channel 0 key 83 dyn =
+[120] channel.NoteOff channel 0 key 83
+[0] channel.NoteOn channel 0 key 84 dyn =
+[120] channel.NoteOff channel 0 key 84
+`,
+		},
+		{
+			// 117
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+    1    | c                    |
+    1.125   | d                    |
+    1.25    | e                    |
+    1.375    | f                    |
+    1.5    | g                    |
+    1.625    | a                    |
+    1.75    | b                    |
+    1.875    | c'                    |
+     2    | c"                    |
+    2.125   | d"                    |
+    2.25    | e"                    |
+    2.375   | f"                    |
+    2.5    | g"                    |
+    2.625    | a"                    |
+    2.75    | b"                    |
+    2.875    | c"'                    |
+    3  | * |
+
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[120] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[120] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[120] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 53 dyn =
+[120] channel.NoteOff channel 0 key 53
+[0] channel.NoteOn channel 0 key 55 dyn =
+[120] channel.NoteOff channel 0 key 55
+[0] channel.NoteOn channel 0 key 57 dyn =
+[120] channel.NoteOff channel 0 key 57
+[0] channel.NoteOn channel 0 key 59 dyn =
+[120] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 60 dyn =
+[120] channel.NoteOff channel 0 key 60
+[0] channel.NoteOn channel 0 key 72 dyn =
+[120] channel.NoteOff channel 0 key 72
+[0] channel.NoteOn channel 0 key 74 dyn =
+[120] channel.NoteOff channel 0 key 74
+[0] channel.NoteOn channel 0 key 76 dyn =
+[120] channel.NoteOff channel 0 key 76
+[0] channel.NoteOn channel 0 key 77 dyn =
+[120] channel.NoteOff channel 0 key 77
+[0] channel.NoteOn channel 0 key 79 dyn =
+[120] channel.NoteOff channel 0 key 79
+[0] channel.NoteOn channel 0 key 81 dyn =
+[120] channel.NoteOff channel 0 key 81
+[0] channel.NoteOn channel 0 key 83 dyn =
+[120] channel.NoteOff channel 0 key 83
+[0] channel.NoteOn channel 0 key 84 dyn =
+[120] channel.NoteOff channel 0 key 84
+`,
+		},
 		/*
 					{
 						// 113
@@ -3383,7 +3513,9 @@ Ch      |1|
 		*/
 	}
 
-	skip := map[int]bool{}
+	skip := map[int]bool{
+		//104: true,
+	}
 
 	//sketch.DEBUG = true
 

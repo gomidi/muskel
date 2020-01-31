@@ -1858,7 +1858,7 @@ TRACK | Voc | Piano |
 1        | c  | d    |
 &        | g  | a    |
 #
-2.        | b   |  g    |    
+2,        | b   |  g    |    
 &        | d | f |
 
 `,
@@ -1868,7 +1868,7 @@ TRACK | Voc | Piano |
     1                    | d     | c   |
     1&                   | a     | g   |
  #
-    2.                   | g     | b   |
+    2,                   | g     | b   |
     2&                   | f     | d   |
 `,
 		},
@@ -2401,6 +2401,31 @@ chords |
 
 =SCORE | flute | 
 #
+ 1     | =arp(chords.T...) |
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | c'    |
+    1&                   | g'    |
+    2                    | e'    |
+ `,
+		},
+		{ // 76
+			`
+TRACK | flute |
+
+=arp |   |
+1     | #1  |
+1&    | #3  |
+2     | #2  |
+
+chords |
+ T     | (^1 ^3 ^5)
+
+=SCORE | flute | 
  1     | =arp(chords.T...) |
 
 

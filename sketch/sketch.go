@@ -943,8 +943,22 @@ func (s *Sketch) parsePosition(firstColumn string) (err error) {
 // parseEventsLine parses a non-bar line / event line
 func (s *Sketch) parseEventsLine(tabs []string) error {
 	if s.barChangeRequired {
-		return fmt.Errorf("bar change # needed")
+		if len(s.Bars) == 0 {
+			b := NewBar()
+			b.TempoChange = 120
+			s.currentTempo = b.TempoChange
+			s.currentTimeSignatur = b.TimeSig
+			s.newBar(b)
+			s.barChangeRequired = false
+		} else {
+			return fmt.Errorf("bar change # needed")
+		}
 	}
+
+	if len(tabs) == 1 {
+		return nil
+	}
+
 	colsData, _ := s.getColumnData(tabs)
 	firstColumn := strings.TrimSpace(tabs[0])
 	err := s.parsePosition(firstColumn)
@@ -984,6 +998,13 @@ func (p *Sketch) ParseLine(tabs []string) error {
 	}
 
 	first := strings.TrimSpace(tabs[0])
+
+	if first != "" {
+		switch first[0] {
+		case '1', '2', '3', '4', '5', '6', '7', '8', '9', '&':
+			return p.parseEventsLine(tabs)
+		}
+	}
 
 	if len(tabs) == 1 || (first != "" && first[0] == '#') {
 		return p.parseBarLine(first)

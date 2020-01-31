@@ -28,7 +28,7 @@ func TestFormatSimple(t *testing.T) {
 	}{
 		// 0
 		{`
-TRACK   | Voc | Git | Bass |
+TRACK   | Voc | - | Bass |
 Channel | 2 | 3 | 4 |
 Delay   | 1/8 | 1/5 | -1/5 |
 
@@ -41,9 +41,9 @@ x          | y
 1 | |
 
 `, `
-TRACK    | Voc | Git | Bass |
- Channel | 2   | 3   | 4    |
- Delay   | 1/8 | 1/5 | -1/5 |
+TRACK    | Voc | Bass |
+ Channel | 2   | 4    |
+ Delay   | 1/8 | -1/5 |
 
 
 PROPERTY |
@@ -172,7 +172,7 @@ a            | b
 //1 | |
 2 |b|
 //3 | |
-4&. |b|
+4&, |b|
 
 `, `
 PROPERTY |
@@ -188,7 +188,7 @@ PROPERTY |
 //1 | |
     2    | b |   |   |
 //3 | |
-    4&.  | b |   |   |
+    4&,  | b |   |   |
 
 `},
 		// 6
@@ -201,10 +201,10 @@ a        | b
 1 | | | |C
 */
 
-=test | c | b | c
+=test | a | - | c
 #
 //1 | |
-2 |b|||D
+2 |b||c|
 //3 | |
 4 |b|
 
@@ -217,12 +217,12 @@ PROPERTY |
 1 | | | |C
 */
 
-=test    | c | b | c |
+=test    | a | c |
  #
 //1 | |
-    2    | b |   |   | D
+    2    | b | c |
 //3 | |
-    4    | b |   |   |
+    4    | b |   |
 
 `},
 		// 7
@@ -234,6 +234,11 @@ TRACK |voc|git|bass|
 Channel |1|2|3|
 Program |10|20|30|
 
+=SCORE | voc | git |
+#
+1
+2 |c | d|
+
 `, `
 PROPERTY |
  a       | b
@@ -241,6 +246,11 @@ PROPERTY |
 TRACK    | voc | git | bass |
  Channel | 1   | 2   | 3    |
  Program | 10  | 20  | 30   |
+
+=SCORE   | voc | git |
+ #
+    1    |     |     |
+    2    | c   | d   |
 
 `},
 		// 8
@@ -522,6 +532,40 @@ TRACK    | voc | bass |
  *3
  # 4/4 @120 // ## | voc | bass |
     2             | d'  |      |
+`},
+		// 18
+		{`
+TRACK | voc | bass |
+ch  | 1 |
+
+=SCORE | voc | bass |
+#
+1.625    | c#" |
+2.5 | d |
+`, `
+TRACK    | voc | bass |
+ ch      | 1   |      |
+
+=SCORE   | voc | bass |
+ #
+    1.625| c#" |      |
+    2.5  | d   |      |
+`},
+		// 19
+		{`
+TRACK | voc | bass |
+ch  | 1 |
+
+=SCORE | voc | bass |
+1.625    | c#" |
+2.5 | d |
+`, `
+TRACK    | voc | bass |
+ ch      | 1   |      |
+
+=SCORE   | voc | bass |
+    1.625| c#" |      |
+    2.5  | d   |      |
 `},
 	}
 

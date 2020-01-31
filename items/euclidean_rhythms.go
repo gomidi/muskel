@@ -44,7 +44,7 @@ func (e *EuclideanRhythm) Parse(startPos32th uint, params ...string) error {
 		switch params[2] {
 		case "&":
 			e.Duration32th = 4
-		case ".":
+		case ",":
 			e.Duration32th = 2
 		case ";":
 			e.Duration32th = 1

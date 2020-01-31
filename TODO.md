@@ -1,6 +1,9 @@
 # nächste TODOs
 
-- force tokens to begin with a dot, then we can allow Ab Db ebb etc.
+- some improvements to make it faster to write:
+ 4. check that position goes not beyond bar length
+
+- force tokens to begin with a dot, then we can allow Ab Db ebb etc., also token table name would start with .
 - allow repeat last event sign to alter volume and scale mounting %++ etc
 - add repeat last pattern %% also with modifiers, e.g. %%++< or %%^2-->
   or with command pipe, e.g. %%/$reverse(=)
@@ -38,6 +41,12 @@ later:
 
 ## erledigt
 
+  3. allow first barsign (#) to be missing, if time signature is 4/4 and tempo 120  
+  2. allow floats as position indicator, e.g. 1.5 (==1&) 2.25 (==2,)  3.75 (==3&.) 1,125 (==1;), but allow only the given
+     numbers (or round to the next allowed number when parsing/formatting)
+  1. change the dot to a comma, for postion: 2&, instead of 2&.
+  3. allow a position without pipes and add the missing pipes
+  4. when a column has the name - then it is a "skip column" and will be deleted when parsing/formatting (for every table)
 - piping via $cmd()/$cmd()/...
 
 - pattern aufrufsyntax bereinigen/erweitern:

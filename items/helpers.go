@@ -296,7 +296,7 @@ func (f *templateFragment) parse(s string) {
 }
 
 // syntax for params:  #1 #2 etc.
-var regPos = regexp.MustCompile("^([1-9]?[0-9]?)([&;" + regexp.QuoteMeta(".") + "]*)")
+var regPos = regexp.MustCompile("^([1-9]?[0-9]?)([&;" + regexp.QuoteMeta(",") + regexp.QuoteMeta(",") + "]*)")
 
 func splitItems(def string) (items []string) {
 	def = strings.TrimSpace(def)
@@ -341,7 +341,7 @@ func Pos32thToString(pos uint) string {
 	rest = rest % 2
 
 	if sixteenth > 0 {
-		fmt.Fprint(&bf, ".")
+		fmt.Fprint(&bf, ",")
 	}
 
 	if rest > 0 {
@@ -438,20 +438,50 @@ func PositionTo32th(lastBeatNo uint, pos string) (completed string, num32th uint
 		return
 	}
 
+	if rest[0] == '.' {
+		var fl float64
+		fl, err = strconv.ParseFloat("0"+rest, 64)
+
+		if err != nil {
+			err = fmt.Errorf("invalid float position %q", pos)
+			return
+		}
+
+		switch fl {
+		case 0.125:
+			num32th += 1
+		case 0.25:
+			num32th += 2
+		case 0.375:
+			num32th += 3
+		case 0.5:
+			num32th += 4
+		case 0.625:
+			num32th += 5
+		case 0.75:
+			num32th += 6
+		case 0.875:
+			num32th += 7
+		default:
+			err = fmt.Errorf("invalid float position %q", pos)
+		}
+		return
+	}
+
 	switch rest {
 	case ";":
 		num32th += 1
-	case ".":
+	case ",":
 		num32th += 2
-	case ".;":
+	case ",;":
 		num32th += 3
 	case "&":
 		num32th += 4
 	case "&;":
 		num32th += 5
-	case "&.":
+	case "&,":
 		num32th += 6
-	case "&.;":
+	case "&,;":
 		num32th += 7
 	default:
 		err = fmt.Errorf("invalid rest: %q in position %q", rest, pos)

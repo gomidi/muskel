@@ -12,12 +12,13 @@ type Table struct {
 	lineNo          int
 	firstLineParsed bool
 	cols            []string
+	skipCols        map[int]bool
 	Data            [][]string // lines -> cols
 	colWidths       []int
 }
 
 func NewTable(name string, lineNo int, sc Score) *Table {
-	return &Table{name: name, lineNo: lineNo, Score: sc}
+	return &Table{name: name, lineNo: lineNo, Score: sc, skipCols: map[int]bool{}}
 }
 
 func (t *Table) Name() string {
@@ -148,13 +149,30 @@ func (t *Table) ParseLine(line string) error {
 			return fmt.Errorf("invalid syntax table name: %q", tName)
 		}
 
-		t.cols = tableHeader(line)
+		cols := tableHeader(line)
+		for i, col := range cols {
+			if strings.TrimSpace(col) == "-" {
+				t.skipCols[i+1] = true
+			} else {
+				t.cols = append(t.cols,col)
+			}
+		}
+		//t.cols
 		t.firstLineParsed = true
 		return nil
 	}
 
 	//fmt.Printf("add to data: %v\n", t.tabs(line))
-	t.Data = append(t.Data, t.tabs(line))
+	_tabs := t.tabs(line)
+    var tabs []string
+    
+    for i,tab := range _tabs {
+    	if !t.skipCols[i] {
+			tabs = append(tabs, tab)
+		}
+    }
+	
+	t.Data = append(t.Data, tabs)
 	return nil
 }
 
