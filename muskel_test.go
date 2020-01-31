@@ -331,7 +331,7 @@ TIMBRE     | legato[vocals] | staccato[vocals] |
 `},
 		// 11
 		{`
-drums |
+.drums |
  kd   | MN34++
 
 =rhythm |euclid |
@@ -356,7 +356,7 @@ min    | 20        |
 type  | *         |
 
 `, `
-drums    |
+.drums   |
  kd      | MN34++
 
 =rhythm  | euclid          |
@@ -572,10 +572,12 @@ TRACK    | voc | bass |
 	for i, test := range tests {
 
 		/*
-			if i > 10 {
+			if i != 11 {
 				continue
 			}
 		*/
+		/*
+		 */
 		//fmt.Printf("######### %v #############\n", i)
 
 		fl := _newFile(test.input)
@@ -673,7 +675,7 @@ func TestParseParts(t *testing.T) {
 		{"//=a: b\n=texter | a | b | c\n#\n1 | |\n//c |d|\n2 | |\n\n", []string{"Sketch", "EmptyLine"}},
 		{"//=a: b\n=texter | a | b | c\n#\n1 | |\n/*\nc |d|\n*/\n2 | |\n\n", []string{"Sketch", "EmptyLine"}},
 		{"PROPERTY | \nwhow | yeah \n/*\n=texter | a | b | c\n#\n1 | |\n*/\n\n", []string{"Properties", "EmptyLine"}},
-		{"drums | a |\nkd | MN12++|\n/*\n=texter | a | b | c\n#\n1 | |\n*/\n\n", []string{"Tokens", "EmptyLine"}},
+		{".drums | a |\nkd | MN12++|\n/*\n=texter | a | b | c\n#\n1 | |\n*/\n\n", []string{"Tokens", "EmptyLine"}},
 		//{"rythm: $euclid(3,5,&)\n/*\ntexter: | a | b | c\n#\n1 | |\n*/\n\n", []string{"CommandSketch", "EmptyLine"}},
 	}
 
@@ -711,8 +713,8 @@ func TestParseTableHeader(t *testing.T) {
 	}{
 		{"=texter |a|b|c|\n#\n1 | | | |", "=texter", []string{"a", "b", "c"}},
 		{"=tex_ter | a | B | c |\n#\n1 | | | |\n", "=tex_ter", []string{"a", "B", "c"}},
-		{"test\nx|y\nc|d", "test", nil},
-		{"test ||\nx|y|\nc|d|", "test", nil},
+		{".test\nx|y\nc|d", ".test", nil},
+		{".test ||\nx|y|\nc|d|", ".test", nil},
 	}
 
 	for i, test := range tests {

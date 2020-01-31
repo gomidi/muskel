@@ -30,7 +30,7 @@ func parseEventsLineItem(posItem string) (pos, value string, err error) {
 		}
 
 		switch {
-		case strings.IndexRune("1234567890&;:.", rn) >= 0:
+		case strings.IndexRune("1234567890&;:,", rn) >= 0:
 			if !positionFound {
 				positionBf.WriteRune(rn)
 			} else {
@@ -58,7 +58,7 @@ func sketchFromEventsLine(name string, patternDef string, sc Score) (*Sketch, er
 	var sk = NewSketch(name, sc)
 	sk.AddColumn("pattern")
 	err := sk.ParseLine([]string{"#"})
-	//fmt.Printf("ParseLine: #\n")
+	//	fmt.Printf("ParseLine: %q\n", patternDef)
 	if err != nil {
 		return nil, err
 	}

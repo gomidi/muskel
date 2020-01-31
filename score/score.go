@@ -220,6 +220,7 @@ func (sc *Score) AddToken(key string, value string) {
 }
 
 func (sc *Score) GetToken(name string) (string, error) {
+	//fmt.Printf("find token: %q in %v\n", name, sc.tokens)
 	tk, has := sc.tokens[name]
 	if !has {
 		if sc.Parent != nil {
@@ -979,13 +980,14 @@ func mkRegexp(s string) (*regexp.Regexp, error) {
 }
 
 func getTokenShorty(token string) string {
-	if idx := strings.Index(token, "."); idx > 0 && len(token) > idx+1 {
+	if idx := strings.Index(token[1:], "."); idx > 0 && len(token) > idx+2 {
 		return token[idx+1:]
 	}
 	return token
 }
 
 func (sc *Score) embed(patt string) error {
+	//fmt.Printf("embed: %q\n", patt)
 	if idx := strings.Index(patt, "*"); idx >= 0 {
 		reg, err := mkRegexp(patt)
 		if err != nil {
@@ -993,6 +995,7 @@ func (sc *Score) embed(patt string) error {
 		}
 		for k, v := range sc.tokens {
 			if reg.MatchString(k) {
+				//fmt.Printf("register I: %q\n", getTokenShorty(k))
 				sc.tokens[getTokenShorty(k)] = v
 			}
 		}
@@ -1001,6 +1004,7 @@ func (sc *Score) embed(patt string) error {
 
 	for k, v := range sc.tokens {
 		if k == patt {
+			//fmt.Printf("register II: %q\n", getTokenShorty(k))
 			sc.tokens[getTokenShorty(k)] = v
 		}
 	}

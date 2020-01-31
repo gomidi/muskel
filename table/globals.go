@@ -7,7 +7,7 @@ import (
 var DEBUG bool
 
 var _tableNameRegEx = "^(" +
-	"[=@]?" +
+	"[=" + regexp.QuoteMeta(".") + "@]?" +
 	"[a-zA-Z]{2}" +
 	"[-!~._a-zA-Z0-9]*" +
 	")$"

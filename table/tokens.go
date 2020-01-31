@@ -9,7 +9,7 @@ type Tokens struct {
 }
 
 func NewTokens(name string, lineNo int, sc Score) *Tokens {
-	if name[0] == '=' {
+	if name[0] != '.' {
 		panic(fmt.Sprintf("invalid token table name %q", name))
 	}
 

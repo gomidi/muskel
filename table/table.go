@@ -18,6 +18,7 @@ type Table struct {
 }
 
 func NewTable(name string, lineNo int, sc Score) *Table {
+	//fmt.Printf("new table %q\n", name)
 	return &Table{name: name, lineNo: lineNo, Score: sc, skipCols: map[int]bool{}}
 }
 
@@ -26,10 +27,12 @@ func (t *Table) Name() string {
 }
 
 func (t *Table) AddCol(name string) {
+	//fmt.Printf("table %q addCol %q\n", t.name, name)
 	t.cols = append(t.cols, name)
 }
 
 func (t *Table) AddLine(data []string) {
+	//fmt.Printf("table %q addLine %q\n", t.name, data)
 	t.Data = append(t.Data, data)
 }
 
@@ -154,7 +157,7 @@ func (t *Table) ParseLine(line string) error {
 			if strings.TrimSpace(col) == "-" {
 				t.skipCols[i+1] = true
 			} else {
-				t.cols = append(t.cols,col)
+				t.cols = append(t.cols, col)
 			}
 		}
 		//t.cols
@@ -164,14 +167,14 @@ func (t *Table) ParseLine(line string) error {
 
 	//fmt.Printf("add to data: %v\n", t.tabs(line))
 	_tabs := t.tabs(line)
-    var tabs []string
-    
-    for i,tab := range _tabs {
-    	if !t.skipCols[i] {
+	var tabs []string
+
+	for i, tab := range _tabs {
+		if !t.skipCols[i] {
 			tabs = append(tabs, tab)
 		}
-    }
-	
+	}
+
 	t.Data = append(t.Data, tabs)
 	return nil
 }

@@ -21,10 +21,10 @@ TRACK | Voc | Drums | Piano |
 
 =SCORE | Voc | Drums | Piano |
 #
-1  | a"  | drums.kd    | b"    |
-2& | c   | drums.sn    | d     |
+1  | a"  | .drums.kd    | b"    |
+2& | c   | .drums.sn    | d     |
 #
-1  |     | drums.ho    |       |
+1  |     | .drums.ho    |       |
 `,
 			`
 =SCORE                   | Drums   | Piano | Voc |
@@ -42,15 +42,15 @@ $$include("drumnote")
 
 =hu |a|
 #
-1   |drums.sn| 
-2   |drums.kd|
+1   |.drums.sn| 
+2   |.drums.kd|
 
 TRACK | Voc | Drums | Piano |
 
 =SCORE   | Voc | Drums   | Piano |
 #
-1  | a"  | drums.kd    | b"    |
-2& | c   | drums.sn    | d     |
+1  | a"  | .drums.kd    | b"    |
+2& | c   | .drums.sn    | d     |
 #
 1  |     | =hu.a    |       |
 `,
@@ -1160,14 +1160,14 @@ TRACK | x |
 #
 1     | .1. |
 
-short |
+.short |
 ba    | (b' A)
 
 
 =SCORE | x  | 
 #
  1     | =long.p%2| 
-       | /ba |
+       | /.short.ba |
 #
 #
  1     | | 
@@ -1205,14 +1205,14 @@ TRACK | x |
 #
 1     | .1. |
 
-short |
+.short |
 ba    | (b' A)
 
 
 =SCORE | x  | 
 #
  1     | =long.p%2| 
- 2     | /ba |
+ 2     | /.short.ba |
 #
 #
  1     | | 
@@ -1250,7 +1250,7 @@ TRACK | x |
 #
 1     | .1.|
 
-short |
+.short |
 ba    | (b' A)
 
 
@@ -1260,7 +1260,7 @@ ba    | (b' A)
 #
 #
  1     | .2. |
- 2     | /short.ba |
+ 2     | /.short.ba |
 #
   
 `,
@@ -1326,12 +1326,12 @@ TRACK | x |
 3     | #1 |
 4     | #3 |
 
-chords |
+.chords |
 test   | (a b c)
 
 =SCORE | x  | 
 #
- 1     | =patt(test...)| 
+ 1     | =patt(.chords.test...)| 
   
 `,
 			`
@@ -1440,7 +1440,7 @@ TRACK | Drums |
 
 =SCORE |  Drums                      |
 #
-1      |  =rhythm(f",drums.sn) |
+1      |  =rhythm(f",.drums.sn) |
 2&     |                             |
 #
 1      |                             |
@@ -1476,7 +1476,7 @@ TRACK | Drums |
 
 =SCORE |  Drums                      |
 #
-1      |  =rhythm((f" g),drums.sn) |
+1      |  =rhythm((f" g),.drums.sn) |
 2&     |                             |
 #
 1      |                             |
@@ -1512,7 +1512,7 @@ TRACK | Drums |
 
 =SCORE |  Drums                      |
 #
-1      |  =rhythm(drums.kd,(drums.sn drums.kd)) |
+1      |  =rhythm(.drums.kd,(.drums.sn .drums.kd)) |
 2&     |                             |
 #
 1      |                             |
@@ -1548,7 +1548,7 @@ TRACK | Drums |
 
 =SCORE |  Drums                      |
 #
-1      |  =rhythm(drums.kd,{a,b}) |
+1      |  =rhythm(.drums.kd,{a,b}) |
 2&     |                             |
 #
 1      |                             |
@@ -1584,7 +1584,7 @@ TRACK | Drums |
 
 =SCORE |  Drums                      |
 #
-1      |  =rhythm(drums.kd,{drums.kd,b}) |
+1      |  =rhythm(.drums.kd,{.drums.kd,b}) |
 2&     |                             |
 #
 1      |                             |
@@ -1881,7 +1881,7 @@ $$include("testdata/includes/score3")
 
 =SCORE   | drums |
 #
-1        | =template.drums(drums.kd,drums.sn) |
+1        | =template.drums(.drums.kd,.drums.sn) |
 
 `,
 			`
@@ -1897,13 +1897,13 @@ TRACK | drums |
 
 $$include("drumnote")
 
-$$embed("drums.*")
+$$embed(".drums.*")
 
 $$include("testdata/includes/score3")
 
 =SCORE   | drums |
 #
-1        | =template.drums(kd,sn) |
+1        | =template.drums(.kd,.sn) |
 
 `,
 			`
@@ -2396,12 +2396,12 @@ TRACK | flute |
 1&    | #3  |
 2     | #2  |
 
-chords |
- T     | (^1 ^3 ^5)
+.chords |
+ T      | (^1 ^3 ^5)
 
 =SCORE | flute | 
 #
- 1     | =arp(chords.T...) |
+ 1     | =arp(.chords.T...) |
 
 
 `,
@@ -2422,11 +2422,11 @@ TRACK | flute |
 1&    | #3  |
 2     | #2  |
 
-chords |
- T     | (^1 ^3 ^5)
+.chords |
+ T      | (^1 ^3 ^5)
 
 =SCORE | flute | 
- 1     | =arp(chords.T...) |
+ 1     | =arp(.chords.T...) |
 
 
 `,
@@ -2436,6 +2436,25 @@ chords |
     1                    | c'    |
     1&                   | g'    |
     2                    | e'    |
+ `,
+		},
+		{ // 77
+			`
+TRACK | flute |
+
+=SCORE | flute | 
+ 1     | (cb c#) |
+ 2     | c#      |
+ 3     | db      |
+
+
+`,
+			`
+=SCORE                   | flute   |
+ # 4/4 @120.00 \major^c'
+    1                    | (cb c#) |
+    2                    | c#      |
+    3                    | db      |
  `,
 		},
 

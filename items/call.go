@@ -137,6 +137,9 @@ func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
 
 	mt := regTemplateCallNameDyn.FindStringSubmatch(call)
 	p.Name = mt[1]
+	if p.Name[0] != '=' && p.Name[0] != '.' && p.Name[0] != '@' {
+		return fmt.Errorf("invalid template name: %q", p.Name)
+	}
 
 	if mt[2] != "" && mt[2][0] == '%' {
 		repeat, repErr := strconv.Atoi(mt[2][1:])
@@ -255,7 +258,7 @@ func (p *Call) AddDynamic(orig string) (nu string) {
 
 var TemplateReg = regexp.MustCompile(regexp.QuoteMeta("#") + "([0-9]+)")
 
-var regTempStr = "^([=@a-zA-Z][._~a-zA-Z0-9]+)(" +
+var regTempStr = "^([=+" + regexp.QuoteMeta(".") + "@a-zA-Z][._~a-zA-Z0-9]+)(" +
 	regexp.QuoteMeta("%") +
 	"?[0-9]*)(" +
 	regexp.QuoteMeta("^") +
@@ -267,8 +270,11 @@ var regTempStr = "^([=@a-zA-Z][._~a-zA-Z0-9]+)(" +
 
 var regTemplateCallNameDyn = regexp.MustCompile(regTempStr)
 
-var regExTemplate0 = regexp.MustCompile("^([=]?[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
+var regExTemplate0 = regexp.MustCompile("^(=[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 var regExTemplate1 = regexp.MustCompile("^(" + regexp.QuoteMeta("=") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
+
+var regExToken0 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
+var regExToken1 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 
 func (pc *Call) Parse(data string, positionIn32th uint) (err error) {
 	return pc.ParseTemplate(data, positionIn32th)

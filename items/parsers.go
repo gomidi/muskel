@@ -231,9 +231,27 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 				return
 		*/
 		case '.':
-			var rp = &BarRepeater{}
-			err = rp.Parse(data[1:], posIn32th)
-			it = rp
+			if len(data) == 3 && data[2] == '.' {
+				var rp = &BarRepeater{}
+				err = rp.Parse(data[1:], posIn32th)
+				it = rp
+				return
+			}
+			
+			if regExToken0.MatchString(data) || regExToken1.MatchString(data) {
+				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
+				pc := &Call{}
+				//pc.Parser = p
+				if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
+					//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
+					pc.Exploded = true
+					data = data[:idx] //+ data[idx+3:]
+				}
+				//fmt.Printf("data cleaned: %q\n", data)
+				err = pc.Parse(data, posIn32th)
+				it = pc
+				return
+			}
 			return
 
 		default:

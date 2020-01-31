@@ -4,7 +4,7 @@ var SketchesAndTokens = map[string]string{
 	"drumnote": `
 // some shortcuts for drums (GM)
 
-drums
+.drums
 // agogo hi
 ah    | MN67:::
 // agogo low
@@ -51,36 +51,36 @@ st    | MN37:::
  `,
 	"chord": `
 
-chord
-I    | *^1*^3*^5*
-I7   | *^1*^3*^5*^7*
-II   | *^2*^4*^6*
-II7  | *^2*^4*^6*^7*
-III  | *^3*^5*^7*
-III7 | *^3*^5*^7*^9*
-IV   | *^4*^6*^8*
-IV7  | *^4*^6*^8*^10*
-V    | *^5*^7*^9*
-V7   | *^5*^7*^9*^11*
-VI   | *^6*^8*^10*
-VI7  | *^6*^8*^10*^12*
-VII  | *^7*^9*^11*
-VII7 | *^7*^9*^11*^13*
-T    | I
-D    | V
-S    | IV
-DP   | III
-SP   | II
-DG   | VII
-SG   | VI
-TP   | VI
-TG   | III
+.chord
+I    | (^1 ^3 ^5)
+I7   | (^1 ^3 ^5 ^7)
+II   | (^2 ^4 ^6)
+II7  | (^2 ^4 ^6 ^7)
+III  | (^3 ^5 ^7)
+III7 | (^3 ^5 ^7 ^9)
+IV   | (^4 ^6 ^8)
+IV7  | (^4 ^6 ^8 ^10)
+V    | (^5 ^7 ^9)
+V7   | (^5 ^7 ^9 ^11)
+VI   | (^6 ^8 ^10)
+VI7  | (^6 ^8 ^10 ^12)
+VII  | (^7 ^9 ^11)
+VII7 | (^7 ^9 ^11 ^13)
+T    | (^1 ^3 ^5)
+D    | (^5 ^7 ^9)
+S    | (^4 ^6 ^8)
+DP   | (^3 ^5 ^7)
+SP   | (^2 ^4 ^6)
+DG   | (^7 ^9 ^11)
+SG   | (^6 ^8 ^10)
+TP   | (^6 ^8 ^10)
+TG   | (^3 ^5 ^7)
 
 `,
 	"learn": `
 =learn  | melody                                          | pattern | names                                                                     |
 # 4/4
-1       | =learn.pattern(g#,b,c',a,a#,f#,g,f,d,d#,c#,e,c) | #1      | =learn.pattern("g#","b","c'","a","a#","f#","g","f","d","d#","c#","e","c") |
+1       | =.pattern(g#,b,c',a,a#,f#,g,f,d,d#,c#,e,c) | #1      | =.pattern("g#","b","c'","a","a#","f#","g","f","d","d#","c#","e","c") |
 1&      |                                                 | #2      |                                                                           |
 2       |                                                 | #3      |                                                                           |
 3       |                                                 | #4      |                                                                           |
@@ -224,7 +224,7 @@ TG   | III
 `,
 	"cc": `
 // some shortcuts for controllers
-cc              |
+.cc             |
  bank           | CC(0,#1)
  modulation     | CC(1,#1)
  mod            | CC(1,#1)
@@ -359,25 +359,25 @@ cc              |
  sw4.on         | CC(83,127)
  sw4.off        | CC(83,0)
 
-=nrpn | nrpn            | reset            | inc             | dec             |
+=nrpn | nrpn             | reset             | inc              | dec              |
  #
- 1    | cc.nrpn(#1)     | cc.nrpn(127)     | cc.nrpn(#1)     | cc.nrpn(#1)     |
- 1;   | cc.nrpn.lsb(#2) | cc.nrpn.lsb(127) | cc.nrpn.lsb(#2) | cc.nrpn.lsb(#2) |
-//    | set value msb   |
- 1,   | CC(6,#3)        |                  | CC(96,0)        | CC(97,0)        |
-//    | set value lsb   |
- 1,;  | CC(38,#4)       |                  | =!.reset        | =!.reset        |
- 1&   | =!.reset        |                  |                 |                 |
+ 1    | .cc.nrpn(#1)     | .cc.nrpn(127)     | .cc.nrpn(#1)     | .cc.nrpn(#1)     |
+ 1;   | .cc.nrpn.lsb(#2) | .cc.nrpn.lsb(127) | .cc.nrpn.lsb(#2) | .cc.nrpn.lsb(#2) |
+//    | set value msb    |
+ 1,   | CC(6,#3)         |                   | CC(96,0)         | CC(97,0)         |
+//    | set value lsb    |
+ 1,;  | CC(38,#4)        |                   | =!.reset         | =!.reset         |
+ 1&   | =!.reset         |                   |                  |                  |
 
-=rpn | rpn            | reset           | inc            | dec            |
+=rpn | rpn             | reset            | inc             | dec             |
  #
- 1   | cc.rpn(#1)     | cc.rpn(127)     | cc.rpn(#1)     | cc.rpn(#1)     |
- 1;  | cc.rpn.lsb(#2) | cc.rpn.lsb(127) | cc.rpn.lsb(#2) | cc.rpn.lsb(#2) |
-//   | set value msb  |
- 1,  | CC(6,#3)       |                 | CC(96,0)       | CC(97,0)       |
-//   | set value lsb  |
- 1,; | CC(38,#4)      |                 | =!.reset       | =!.reset       |
- 1&  | =!.reset       |                 |                |                |
+ 1   | .cc.rpn(#1)     | .cc.rpn(127)     | .cc.rpn(#1)     | .cc.rpn(#1)     |
+ 1;  | .cc.rpn.lsb(#2) | .cc.rpn.lsb(127) | .cc.rpn.lsb(#2) | .cc.rpn.lsb(#2) |
+//   | set value msb   |
+ 1,  | CC(6,#3)        |                  | CC(96,0)        | CC(97,0)        |
+//   | set value lsb   |
+ 1,; | CC(38,#4)       |                  | =!.reset        | =!.reset        |
+ 1&  | =!.reset        |                  |                 |                 |
 
 
 =tuning | fine             | coarse           | program          | bank             |
@@ -388,12 +388,12 @@ cc              |
  #
   1        | =rpn(0,0,#1,#2) |
 
-=reset | reset                                            |
+=reset | reset                                                |
  #
-  1    | cc.bank(#1)                                      |
-  1,   | PC(#2)                                           |
-  1,;  | cc.ctrl.off                                      |
-  1&   | (cc.vol(100) cc.exp(127) cc.hold.off cc.pan(64)) | 
-  1&,  | =!pitchbend.range(2,0)                           |
+  1    | .cc.bank(#1)                                         |
+  1,   | PC(#2)                                               |
+  1,;  | .cc.ctrl.off                                         |
+  1&   | (.cc.vol(100) .cc.exp(127) .cc.hold.off .cc.pan(64)) | 
+  1&,  | =!pitchbend.range(2,0)                               |
 `,
 }

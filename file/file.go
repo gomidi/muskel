@@ -164,16 +164,16 @@ func (f *File) WriteTo(output io.Writer) (err error) {
 	return nil
 }
 
-func (f *File) findPart(line string) interface{} {
+func (f *File) findPart(line string) (interface{}, error) {
 	if len(line) > 1 && line[:2] == "/*" {
 		if f.currentMultiLineComment != nil {
-			return nil
+			return nil, nil
 		}
-		return &MultiLineComment{lineNo: f.currentLine}
+		return &MultiLineComment{lineNo: f.currentLine}, nil
 	}
 
 	if f.currentMultiLineComment != nil {
-		return f.currentMultiLineComment
+		return f.currentMultiLineComment, nil
 	}
 
 	/*
@@ -183,29 +183,29 @@ func (f *File) findPart(line string) interface{} {
 	*/
 
 	if len(line) > 1 && line[:2] == "//" {
-		return line
+		return line, nil
 	}
 
 	if strings.TrimSpace(line) == "" {
-		return EmptyLine(f.currentLine)
+		return EmptyLine(f.currentLine), nil
 	}
 
 	if f.currentTable != nil {
-		return f.currentTable
+		return f.currentTable, nil
 	}
 
 	if includeRegExp.MatchString(strings.ToLower(line)) {
 		return &Include{
 			lineNo: f.currentLine,
 			score:  f.Score,
-		}
+		}, nil
 	}
-	
+
 	if embedRegExp.MatchString(strings.ToLower(line)) {
 		return &Embed{
 			lineNo: f.currentLine,
 			score:  f.Score,
-		}
+		}, nil
 	}
 
 	idx := strings.Index(line, "|")
@@ -219,25 +219,27 @@ func (f *File) findPart(line string) interface{} {
 	//case strings.Contains(rest, "|"):
 	switch name {
 	case "TRACK":
-		return table.NewTracks(f.currentLine, f.Score)
+		return table.NewTracks(f.currentLine, f.Score), nil
 	case "SCALE":
-		return table.NewScales(f.currentLine, f.Score)
+		return table.NewScales(f.currentLine, f.Score), nil
 	case "TUNING":
-		return table.NewTunings(f.currentLine, f.Score)
+		return table.NewTunings(f.currentLine, f.Score), nil
 	case "TIMBRE":
-		return table.NewTimbres(f.currentLine, f.Score)
+		return table.NewTimbres(f.currentLine, f.Score), nil
 	case "FILTER":
-		return table.NewFilters(f.currentLine, f.Score)
+		return table.NewFilters(f.currentLine, f.Score), nil
 	case "PROPERTY":
-		return table.NewProperties(f.currentLine, f.Score)
+		return table.NewProperties(f.currentLine, f.Score), nil
 	default:
 		switch name[0] {
 		case '=':
-			return table.NewSketch(name, f.currentLine, f.Score)
+			return table.NewSketch(name, f.currentLine, f.Score), nil
 		case '@':
-			return table.NewLyrics(name, f.currentLine, f.Score)
+			return table.NewLyrics(name, f.currentLine, f.Score), nil
+		case '.':
+			return table.NewTokens(name, f.currentLine, f.Score), nil
 		default:
-			return table.NewTokens(name, f.currentLine, f.Score)
+			return nil, fmt.Errorf("invalid table name: %q", name)
 		}
 	}
 	//case strings.Contains(rest, "$"):
@@ -247,7 +249,7 @@ func (f *File) findPart(line string) interface{} {
 	//return &ShortCut{lineNo: f.currentLine, name: name, score: f.Score, value: rest}
 	//}
 
-	return nil
+	return nil, nil
 }
 
 func (f *File) Close() {
@@ -263,10 +265,12 @@ func (f *File) Parse() (err error) {
 	for f.Input.Scan() {
 		err = f.Input.Err()
 		if err != nil {
+			//fmt.Printf("error while scanning: %v\n", err)
 			break
 		}
 
 		line := strings.TrimSpace(f.Input.Text())
+		//fmt.Printf("[%v] line: %q\n", f.currentLine, line)
 
 		if len(line) > 1 && line[:2] == "*/" && f.currentMultiLineComment != nil {
 			//	fmt.Printf("[%v] multicomment end reached\n", f.currentLine)
@@ -275,10 +279,19 @@ func (f *File) Parse() (err error) {
 			continue
 		}
 
-		part := f.findPart(line)
+		var part interface{}
+
+		part, err = f.findPart(line)
+
+		if err != nil {
+			fmt.Printf("error in line %v: %v", f.currentLine, err)
+			err = fmt.Errorf("error in line %v: %v", f.currentLine, err)
+			break
+		}
 
 		if part == nil {
 			err = fmt.Errorf("invalid / unexpected line: %q", line)
+			//fmt.Printf("error in line %v: %v", f.currentLine, err)
 			//fmt.Printf("got err: %v\n", err)
 			break
 		}

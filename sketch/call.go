@@ -274,7 +274,7 @@ func (c *call) unroll(start uint, until uint) (evt []*items.Event, diff uint, en
 
 func (pc *call) getToken() (val string, err error) {
 	var table, colname string
-	idx := strings.Index(pc.call.Name, ".")
+	idx := strings.Index(pc.call.Name[1:], ".")
 
 	switch {
 	case idx < 0:
@@ -283,7 +283,7 @@ func (pc *call) getToken() (val string, err error) {
 		err = fmt.Errorf("invalid token %q", pc.call.Name)
 		return
 	default:
-		table, colname = pc.call.Name[:idx], pc.call.Name[idx+1:]
+		table, colname = pc.call.Name[:idx+1], pc.call.Name[idx+2:]
 	}
 
 	var token = table

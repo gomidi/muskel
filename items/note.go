@@ -60,6 +60,10 @@ func (note Note) ToMIDI() (midinote_ uint8) {
 	case "":
 	case "#":
 		midinote += 1
+	//case "^":
+	//case "°":
+	case "b":
+		midinote -= 1
 		//case "^":
 		//case "°":
 	}
@@ -240,6 +244,15 @@ func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 		}
 	}
 
+	if len(data) > 0 && data[0] == 'b' {
+		nt.Augmenter = "b"
+		if len(data) > 1 {
+			data = data[1:]
+		} else {
+			data = ""
+		}
+	}
+
 	if idx := strings.Index(data, "^"); idx >= 0 {
 		if len(data) < 2 {
 			err = fmt.Errorf("invalid note: %#v II", original)
@@ -386,14 +399,16 @@ func (nt *Note) parseScale(data string) (err error) {
 			nt.GlissandoStart = true
 		case '#':
 			nt.Augmenter += "#"
+		case 'b':
+			nt.Augmenter += "b"
 		//case '^':
 		//nt.Augmenter += "^"
 		//case '°':
 		//nt.Augmenter += "°"
 		case '>':
-			nt.PosShift = 1
+			nt.PosShift += 1
 		case '<':
-			nt.PosShift = -1
+			nt.PosShift -= 1
 		/*
 			case '#':
 				nt.augmenter = "#"

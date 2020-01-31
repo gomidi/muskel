@@ -12,8 +12,8 @@ func TestSimpleParse(t *testing.T) {
 		params []string
 		_slice [2]int
 	}{
-		{"hiho(a,d,e)", "hiho", []string{"a", "d", "e"}, [2]int{-1, -1}},
-		{"hi.ho(a,d,e)", "hi.ho", []string{"a", "d", "e"}, [2]int{-1, -1}},
+		{".hiho(a,d,e)", ".hiho", []string{"a", "d", "e"}, [2]int{-1, -1}},
+		{".hi.ho(a,d,e)", ".hi.ho", []string{"a", "d", "e"}, [2]int{-1, -1}},
 		{"=hiho(a,d,e)", "=hiho", []string{"a", "d", "e"}, [2]int{-1, -1}},
 		{"=hi.ho(a,d,e)", "=hi.ho", []string{"a", "d", "e"}, [2]int{-1, -1}},
 		{"@hiho(a,d,e)", "@hiho", []string{"a", "d", "e"}, [2]int{-1, -1}},

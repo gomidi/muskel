@@ -1,20 +1,22 @@
 # nächste TODOs
 
+- allow Ab Db ebb etc.
 - some improvements to make it faster to write:
  4. check that position goes not beyond bar length
 
-- force tokens to begin with a dot, then we can allow Ab Db ebb etc., also token table name would start with .
+- transponieren mit Halbtönen erlauben, z.B. 
+  ^1# transponiert um einen schritt und eine MIDInote aufwärts 
+  ^1bb transponiert um einen schritt und zwei MIDInoten abwärts 
+  ^2#3 transponiert um einen schritt und drei MIDInoten aufwärts
+  ^#3 transponiert um drei MIDInoten aufwärts
+  ^b3 transponiert um drei MIDInoten abwärts
+
 - allow repeat last event sign to alter volume and scale mounting %++ etc
 - add repeat last pattern %% also with modifiers, e.g. %%++< or %%^2-->
   or with command pipe, e.g. %%/$reverse(=)
 - überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
 - überschreiben nur mit transposition erlauben z.B. /^1 erhöht die "darunterliegende Note" um einen schritt
-- transponieren mit Halbtönen erlauben, z.B. 
-  ^1# transponiert um einen schritt und eine MIDInote aufwärts 
-  ^-1## transponiert um einen schritt und zwei MIDInoten abwärts 
-  ^2#3 transponiert um einen schritt und drei MIDInoten aufwärts
-  ^#3 transponiert um drei MIDInoten aufwärts
-  ^-#3 transponiert um drei MIDInoten abwärts
+
 - dokumentation aktualisieren
 - check and fix randomness
 

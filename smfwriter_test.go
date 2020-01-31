@@ -408,12 +408,12 @@ Ch      |1|
 TRACK |p|
 Ch      |1|
 
-cc |
-sc | MN48+
+.cc |
+sc  | MN48+
 
 =SCORE |p |
 #
-1  |cc.sc |
+1  |.cc.sc |
 2  |MN50< |
 3  |MN52 |
 4  |* |
@@ -571,7 +571,7 @@ Ch |1  |
 			// 21
 			`
 
-tt |
+.tt |
 a|c
 b|e
 c|g#
@@ -581,7 +581,7 @@ Ch |1  |
 
 =SCORE |p|
 #
-1  |{tt.a,tt.b,tt.c}|
+1  |{.tt.a,.tt.b,.tt.c}|
 2  |*|
 			`,
 			2,
@@ -600,7 +600,7 @@ Ch |1  |
 		{
 			// 22
 			`
-dr |
+.dr |
 ta | MN48
 tb | MN52
 tc | MN56
@@ -610,7 +610,7 @@ Ch |1  |
 
 =SCORE |p|
 #
-1  |{dr.ta,dr.tb,dr.tc} |
+1  |{.dr.ta,.dr.tb,.dr.tc} |
 2  |*|
 			`,
 			2,
@@ -629,7 +629,7 @@ Ch |1  |
 		{
 			// 23
 			`
-dr |
+.dr |
 ta | MN48
 tb | MN52
 tc | MN56
@@ -640,7 +640,7 @@ Ch |1  |
 
 =SCORE |p|
 #
-1  |{dr.ta+,dr.tb-,dr.tc--} |
+1  |{.dr.ta+,.dr.tb-,.dr.tc--} |
 2  |*|
 			`,
 			2,
@@ -2679,7 +2679,7 @@ Ch      |1 |
 TRACK |p |
 Ch      |1 |
 
-sh |
+.sh |
 xx | c
 yy | e
 zz | g
@@ -2687,7 +2687,7 @@ pp | b
 
 =SCORE |p        |
 #
-1      |{sh.xx,sh.yy,{sh.xx,sh.yy,sh.xx,{sh.zz,sh.pp}},sh.xx} |
+1      |{.sh.xx,.sh.yy,{.sh.xx,.sh.yy,.sh.xx,{.sh.zz,.sh.pp}},.sh.xx} |
 3      |*        |
 
 			`,
@@ -2722,7 +2722,7 @@ pp | b
 TRACK |p |
 Ch      |1 |
 
-sh |
+.sh |
 xx | c
 yy | e
 zz | g
@@ -2730,7 +2730,7 @@ pp | b
 
 =SCORE |p        |
 #
-1      |{sh.xx,sh.yy,{sh.xx,:,sh.xx,{sh.zz,sh.pp}},sh.xx} |
+1      |{.sh.xx,.sh.yy,{.sh.xx,:,.sh.xx,{.sh.zz,.sh.pp}},.sh.xx} |
 3      |*        |
 
 			`,
@@ -3435,6 +3435,28 @@ Ch      |1|
 [120] channel.NoteOff channel 0 key 83
 [0] channel.NoteOn channel 0 key 84 dyn =
 [120] channel.NoteOff channel 0 key 84
+`,
+		},
+		{
+			// 118
+			`
+TRACK |p|
+Ch      |1|
+
+=SCORE |p |
+#
+    1    | d#+                    |
+  2      | eb-                    |
+3 | * |
+			`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 51 dyn +
+[960] channel.NoteOff channel 0 key 51
+[0] channel.NoteOn channel 0 key 51 dyn -
+[960] channel.NoteOff channel 0 key 51
 `,
 		},
 		/*
