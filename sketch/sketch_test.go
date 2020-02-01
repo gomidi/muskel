@@ -499,7 +499,7 @@ func TestSketchFromEventsLine(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	_, evts, err := sk.Unroll("pattern", "a", "b")
+	evts, err := sk.Unroll(nil, "pattern", "a", "b")
 	_ = evts
 	if err != nil {
 		t.Errorf(err.Error())

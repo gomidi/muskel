@@ -2457,6 +2457,69 @@ TRACK | flute |
     3                    | db      |
  `,
 		},
+		{ // 78
+			`
+TRACK | flute |
+
+.test     | a  | b   |
+X         | a" | b"' |
+
+=SCORE | flute | 
+ 1     | .test.X.a |
+ 2     | .test.X.b      |
+ 3     | *      |
+
+
+`,
+			`
+=SCORE                   | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | a"    |
+    2                    | b"'   |
+    3                    | *     |
+ `,
+		},
+		{ // 79
+			`
+TRACK | bass | flute |
+
+.test     | flute  | bass   |
+X         | a" | b"' |
+
+=SCORE | bass     | flute    |
+ 1     | .test.X. | .test.X. |
+ 2     | *        | *        |
+
+
+`,
+			`
+=SCORE                   | bass | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | b"'  | a"    |
+    2                    | *    | *     |
+ `,
+		},
+		{ // 80
+			`
+TRACK  | bass | flute |
+Import |      | bass  |
+
+.test     | flute  | bass   |
+X         | a" | b"' |
+
+=SCORE | bass     |
+ 1     | .test.X. |
+ 2     | *        |
+
+
+`,
+			`
+=SCORE                   | bass | flute |
+ # 4/4 @120.00 \major^c'
+    1                    | b"'  | a"    |
+    2                    | *    | *     |
+ `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

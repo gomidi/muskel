@@ -14,7 +14,7 @@ import (
 )
 
 func TestSMFImport(t *testing.T) {
-
+	// t.Skip()
 	var tests = []struct {
 		msklIn               string
 		midiOut              string
@@ -50,6 +50,7 @@ TRACK           | bass--8                                   | git--7            
  Delay          |                                           |                                           |
  PitchbendRange |                                           |                                           |
  VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Import         |                                           |                                           |
 
 =SCORE     | bass--8 | git--7 |
  # @120.00
@@ -65,8 +66,9 @@ TRACK           | bass--8                                   | git--7            
 		},
 		{ // 1
 			`
-TRACK | bass | git |
-Channel | 9   | 8   |
+TRACK | bass | git | git2 |
+Channel | 9   | 8   | 7   |
+Import  |     |     | git |
 
 =SCORE | bass | git |
 #
@@ -80,23 +82,24 @@ Channel | 9   | 8   |
 [3840] channel.NoteOff channel 8 key 48
 `,
 			`
-TRACK           | bass--8                                   | git--7                                    |
- File           |                                           |                                           |
- Channel        | 9                                         | 8                                         |
- Program        | 1                                         | 1                                         |
- Bank           | 1                                         | 1                                         |
- Transpose      |                                           |                                           |
- Volume         | 1                                         | 1                                         |
- Delay          |                                           |                                           |
- PitchbendRange |                                           |                                           |
- VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+TRACK           | bass--8                                   | git--7                                    | git2--6                                   |
+ File           |                                           |                                           |                                           |
+ Channel        | 9                                         | 8                                         | 7                                         |
+ Program        | 1                                         | 1                                         | 1                                         |
+ Bank           | 1                                         | 1                                         | 1                                         |
+ Transpose      |                                           |                                           |                                           |
+ Volume         | 1                                         | 1                                         | 1                                         |
+ Delay          |                                           |                                           |                                           |
+ PitchbendRange |                                           |                                           |                                           |
+ VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Import         |                                           |                                           |                                           |
 
-=SCORE     | bass--8 | git--7 |
+=SCORE     | bass--8 | git--7 | git2--6 |
  # @120.00
-    1      | c=_     | d=_    |
+    1      | c=_     | d=_    | d=_     |
  # 3/4
-    1      | _c      |        |
-    2      |         | _d     |
+    1      | _c      |        |         |
+    2      |         | _d     | _d      |
 
 `,
 			2,
@@ -130,6 +133,7 @@ TRACK           | bass--8                                   | git--7            
  Delay          |                                           |                                           |
  PitchbendRange |                                           |                                           |
  VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Import         |                                           |                                           |
 
 =SCORE         | bass--8 | git--7 |
  # 3/4 @110.00
@@ -170,6 +174,7 @@ TRACK           | bass--8                                   | git--7            
  Delay          |                                           |                                           |
  PitchbendRange |                                           |                                           |
  VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Import         |                                           |                                           |
 
 =SCORE         | bass--8 | git--7 |
  # 3/4 @110.00

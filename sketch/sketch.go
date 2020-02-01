@@ -223,22 +223,22 @@ func (s *Sketch) getAbsPos(bar, pos32ths uint) uint {
 	return pos + pos32ths
 }
 
-func (s *Sketch) newCol(colName string) *column {
+func (s *Sketch) newCol(tr *track.Track, colName string) *column {
 	return &column{
 		sketch: s,
 		name:   colName,
+		track:  tr,
 	}
 }
 
-func (s *Sketch) Unroll(colName string, params ...string) (*track.Track, []*items.Event, error) {
-	col := s.newCol(colName)
+func (s *Sketch) Unroll(_tr *track.Track, colName string, params ...string) ([]*items.Event, error) {
+	col := s.newCol(_tr, colName)
 	events, err := col.call(0, false, params...)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	tr, _ := s.Score.GetTrack(strings.Trim(colName, "!"))
 	if events == nil {
-		return tr, nil, nil
+		return nil, nil
 	}
 
 	printEvents("Sketch.Unroll: after column "+colName+" call of sketch "+s.Name+" in file "+s.File, events)
@@ -249,7 +249,7 @@ func (s *Sketch) Unroll(colName string, params ...string) (*track.Track, []*item
 	//printEvents("after replaceScalenotes "+colName, events)
 	events = s.Score.FilterTrack(colName, events)
 	//printEvents("after FilterTrack "+colName, events)
-	return tr, events, nil
+	return events, nil
 }
 
 //func (s *Sketch) repeatBars(repevts []*items.Event, diff uint, stopPos uint) (out []*items.Event, nextBarPos uint) {
@@ -818,7 +818,12 @@ func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*items.Ev
 	if !sk.Score.HasTrack(column) {
 		return nil, nil
 	}
-	var patt = sk.newCol(column)
+
+	tr, err := sk.Score.GetTrack(column)
+	if err != nil {
+		return nil, nil
+	}
+	var patt = sk.newCol(tr, column)
 	return patt.call(0, false, inc.Params...)
 }
 

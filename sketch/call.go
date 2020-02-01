@@ -240,7 +240,8 @@ func (c *call) unroll(start uint, until uint) (evt []*items.Event, diff uint, en
 		if err != nil {
 			return
 		}
-		var patt = sk.newCol(colname)
+		tr, _ := c.column.sketch.Score.GetTrack(colname)
+		var patt = sk.newCol(tr, colname)
 		var pcc = patt.newCall(cc)
 		//evt, diff, end, err = pcc.unrollPattern(start, until)
 		evt, end, err = pcc.unrollPattern(start, until)
@@ -288,6 +289,13 @@ func (pc *call) getToken() (val string, err error) {
 
 	var token = table
 	if colname != "" {
+		if colname[len(colname)-1] == '.' {
+			if pc.column.track == nil {
+				colname += pc.column.name
+			} else {
+				colname += pc.column.track.Name
+			}
+		}
 		token += "." + colname
 	}
 

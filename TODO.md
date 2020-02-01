@@ -1,6 +1,7 @@
 # nächste TODOs
 
-- allow Ab Db ebb etc.
+- dokumentation aktualisieren
+
 - some improvements to make it faster to write:
  4. check that position goes not beyond bar length
 
@@ -17,7 +18,6 @@
 - überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
 - überschreiben nur mit transposition erlauben z.B. /^1 erhöht die "darunterliegende Note" um einen schritt
 
-- dokumentation aktualisieren
 - check and fix randomness
 
     
@@ -43,6 +43,45 @@ later:
 
 ## erledigt
 
+- allow token tables to have multiple columns and to address them like this
+  .table.row.col
+  this way we could have "linked" parameters like
+
+.short | bass      | git   | voc |
+on     | CC(7,127) | c++   | d++ |
+off    | CC(7,0)   | *     | *   |
+
+$$embed(.short.*)
+
+=SCORE  | bass       | git   | voc   |
+1       | .on.bass   | .on.  | .on.  |
+2       | .off.bass  | .off. | .off. |
+#
+1       | ...       | ...    | ...    |
+*3
+
+in .on. the dot inside the square brackets refers to the name of the current column
+in combination with track imports we could write it like this
+
+TRACK  | bass | git | voc |
+// bass and voc tracks will be created without having a col in score
+import | git  |     | git |
+
+.short | bass      | git   | voc |
+on     | CC(7,127) | c++   | d++ |
+off    | CC(7,0)   | *     | *   |
+
+$$embed(.short.*)
+
+=SCORE  | git   |
+1       | .on.  |
+2       | .off. |
+#
+1       | ...   |
+*3
+
+
+  - allow Ab Db ebb etc.
   3. allow first barsign (#) to be missing, if time signature is 4/4 and tempo 120  
   2. allow floats as position indicator, e.g. 1.5 (==1&) 2.25 (==2,)  3.75 (==3&.) 1,125 (==1;), but allow only the given
      numbers (or round to the next allowed number when parsing/formatting)

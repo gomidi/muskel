@@ -160,6 +160,8 @@ func (t *Table) ParseLine(line string) error {
 				t.cols = append(t.cols, col)
 			}
 		}
+
+		//fmt.Printf("cols: %v\n", t.cols)
 		//t.cols
 		t.firstLineParsed = true
 		return nil

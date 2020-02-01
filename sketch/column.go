@@ -5,11 +5,13 @@ import (
 
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/patterncommands"
+	"gitlab.com/gomidi/muskel/track"
 )
 
 type column struct {
 	name   string
 	sketch *Sketch
+	track  *track.Track
 }
 
 func (p *column) newCall(pc *items.Call) *call {

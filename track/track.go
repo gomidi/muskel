@@ -7,9 +7,9 @@ import (
 )
 
 type Track struct {
-	Name      string
-	FileGroup string
-	//Import         string
+	Name           string
+	FileGroup      string
+	Import         string
 	MIDIChannel    int8
 	MIDIProgram    int8
 	MIDIBank       int8
@@ -33,17 +33,15 @@ func New(name string) *Track {
 	tr.PitchbendRange = 2
 	tr.VelocityScale = DefaultVeloctiyScale
 	tr.FileGroup = ""
-	// tr.Import = ""
+	tr.Import = ""
 	tr.Name = name
 	return tr
 }
 
-/*
 func (t *Track) SetImport(importFrom string) error {
 	t.Import = importFrom
 	return nil
 }
-*/
 
 var DefaultVeloctiyScale = [5]uint8{1, 127, 4, 15, 63}
 

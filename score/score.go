@@ -242,6 +242,7 @@ func (sc *Score) HasTrack(track string) bool {
 }
 
 func (sc *Score) GetTrack(track string) (*track.Track, error) {
+	track = strings.Trim(track, "!")
 	// fmt.Printf("looking for track %q\n", track)
 	tr, has := sc.Tracks[track]
 	if !has {
@@ -357,11 +358,9 @@ func (sc *Score) Unroll() error {
 
 	switch {
 	case col != "":
-		//fmt.Printf("col is %q\n", col)
-		tr, events, err := sketch.Unroll(col, params[col]...)
-		if err != nil {
-			return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", col, sketch.Name, params[col], err.Error())
-		}
+		_col := col
+		//tr, _ := sc.GetTrack(strings.Trim(col, "!"))
+		tr, _ := sc.GetTrack(col)
 		if tr == nil {
 			//fmt.Printf("could not find track for col %q\n", col)
 			trackName := sc.findMostExclamedTrack()
@@ -377,6 +376,13 @@ func (sc *Score) Unroll() error {
 				sc.Tracks[trackName] = tr
 			}
 		}
+
+		//fmt.Printf("col is %q\n", col)
+		events, err := sketch.Unroll(tr, _col, params[_col]...)
+		if err != nil {
+			return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", col, sketch.Name, params[col], err.Error())
+		}
+
 		sc.Tracks = map[string]*track.Track{
 			tr.Name: tr,
 		}
@@ -385,16 +391,30 @@ func (sc *Score) Unroll() error {
 	default:
 		//fmt.Printf("%v\n", sc.Tracks)
 		for c := range sketch.Columns {
-			tr, events, err := sketch.Unroll(c, params[c]...)
-			if err != nil {
-				return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", c, sketch.Name, params[c], err.Error())
-			}
-
+			//tr, _ := sc.GetTrack(strings.Trim(c, "!"))
+			tr, _ := sc.GetTrack(c)
 			if tr == nil {
 				//panic(fmt.Sprintf("could not find track %q\n", col))
 				return fmt.Errorf("could not find track %q\n", c)
 			}
+
+			events, err := sketch.Unroll(tr, c, params[c]...)
+			if err != nil {
+				return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", c, sketch.Name, params[c], err.Error())
+			}
+
 			sc.Unrolled[tr.Name] = sc.replaceScalenotesForCol(tr.Name, events)
+		}
+
+		for trackname, tr := range sc.Tracks {
+			if tr != nil && tr.Import != "" {
+				events, err := sketch.Unroll(tr, tr.Import, params[trackname]...)
+				if err != nil {
+					return fmt.Errorf("error while unrolling track %q importing %q of sketch %q with params %v: %s", trackname, tr.Import, sketch.Name, params[trackname], err.Error())
+				}
+
+				sc.Unrolled[trackname] = sc.replaceScalenotesForCol(tr.Import, events)
+			}
 		}
 	}
 
@@ -545,6 +565,15 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		v = fmt.Sprintf("min: %v max: %v random: %v step: %v center: %v", val[0], val[1], val[2], val[3], val[4])
 		data = append(data, v)
 	}
+	trks.AddLine(data)
+
+	data = []string{"Import"}
+	for _, tr := range tracks {
+		//fmt.Printf("track %q import: %q\n", tr, sc.Tracks[tr].Import)
+		val := sc.Tracks[tr].Import
+		data = append(data, val)
+	}
+
 	trks.AddLine(data)
 
 	fm := &formatter{wr}

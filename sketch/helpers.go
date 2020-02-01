@@ -110,7 +110,7 @@ func eventsFromPatternDef(name, patternDef string, sc Score, params []string) (e
 		return nil, err
 	}
 
-	_, _evts, err := sk.Unroll("pattern")
+	_evts, err := sk.Unroll(nil, "pattern")
 
 	if err != nil {
 		return nil, err

@@ -47,6 +47,8 @@ func (t *Tracks) Finish() (err error) {
 					err = tr.SetVelScale(val)
 				case "file", "filegroup":
 					err = tr.SetFileGroup(val)
+				case "import":
+					err = tr.SetImport(val)
 				default:
 					err = fmt.Errorf("unknown property %q in tracks table", line[0])
 				}

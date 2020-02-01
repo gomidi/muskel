@@ -567,12 +567,34 @@ TRACK    | voc | bass |
     1.625| c#" |      |
     2.5  | d   |      |
 `},
+		// 20
+		{`
+TRACK | voc | bass |
+ch  | 1 |
+
+.test | a  | b |
+X     | c' | d' |
+
+=SCORE   | voc       | bass      |
+1.625    | .test.X.a | .test.X.b |
+2.5      | d         |           |
+`, `
+TRACK    | voc | bass |
+ ch      | 1   |      |
+
+.test    | a  | b  |
+ X       | c' | d' |
+
+=SCORE   | voc       | bass      |
+    1.625| .test.X.a | .test.X.b |
+    2.5  | d         |           |
+`},
 	}
 
 	for i, test := range tests {
 
 		/*
-			if i != 11 {
+			if i != 20 {
 				continue
 			}
 		*/
@@ -713,8 +735,8 @@ func TestParseTableHeader(t *testing.T) {
 	}{
 		{"=texter |a|b|c|\n#\n1 | | | |", "=texter", []string{"a", "b", "c"}},
 		{"=tex_ter | a | B | c |\n#\n1 | | | |\n", "=tex_ter", []string{"a", "B", "c"}},
-		{".test\nx|y\nc|d", ".test", nil},
-		{".test ||\nx|y|\nc|d|", ".test", nil},
+		{".test\nx|y\nc|d", ".test", []string{".test"}},
+		{".test ||\nx|y|\nc|d|", ".test", []string{""}},
 	}
 
 	for i, test := range tests {
