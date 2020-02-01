@@ -60,12 +60,30 @@ func (e *EuclideanRhythm) Parse(startPos32th uint, params ...string) error {
 	case 0:
 		return fmt.Errorf("invalid duration")
 	default:
-		qn, err := strconv.Atoi(params[2])
-		if err != nil {
-			return fmt.Errorf("invalid duration: %#v", params[3])
-		}
+		if idx := strings.Index(params[2], "."); idx > 0 {
+			f, err := strconv.ParseFloat(params[2], 64)
+			if err != nil {
+				return fmt.Errorf("invalid duration: %#v", params[2])
+			}
 
-		e.Duration32th = 8 * qn
+			switch f {
+			case 0.5:
+				e.Duration32th = 4
+			case 0.25:
+				e.Duration32th = 2
+			case 0.125:
+				e.Duration32th = 1
+			default:
+				return fmt.Errorf("invalid duration: %#v", params[2])
+			}
+		} else {
+			qn, err := strconv.Atoi(params[2])
+			if err != nil {
+				return fmt.Errorf("invalid duration: %#v", params[2])
+			}
+
+			e.Duration32th = 8 * qn
+		}
 	}
 
 	var bf strings.Builder

@@ -3459,6 +3459,95 @@ Ch      |1|
 [960] channel.NoteOff channel 0 key 51
 `,
 		},
+		{
+			// 119
+			`
+$$include(drumnote)
+			
+TRACK  | dr |
+Ch     | 1  |
+
+=test     | 1                | 2   |
+1         | $euclid(3,8,0.5) | =.1(.drums.kd++,.drums.sn+) |
+#
+1         |                   |...       |
+#
+#
+
+=SCORE | dr     |
+ 1     | =test.2 |
+ *3
+            `,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+[420] channel.NoteOn channel 0 key 36 dyn ++
+[60] channel.NoteOff channel 0 key 36
+[420] channel.NoteOn channel 0 key 40 dyn +
+[60] channel.NoteOff channel 0 key 40
+`,
+		},
 		/*
 					{
 						// 113

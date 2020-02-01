@@ -1,5 +1,9 @@
 # nächste TODOs
 
+- BUGS:
+  - glides/glissandi confuse the rhythm (fast is too slow, bass)
+  - sometimes, invalid smf files will be generated (be my roast, outro)
+
 - dokumentation aktualisieren
 
 - some improvements to make it faster to write:
