@@ -284,8 +284,8 @@ func (f *File) Parse() (err error) {
 		part, err = f.findPart(line)
 
 		if err != nil {
-			fmt.Printf("error in line %v: %v", f.currentLine, err)
-			err = fmt.Errorf("error in line %v: %v", f.currentLine, err)
+			//fmt.Printf("error in line %v: %v", f.currentLine, err)
+			err = fmt.Errorf("error in line %v: %v", f.currentLine+1, err)
 			break
 		}
 
