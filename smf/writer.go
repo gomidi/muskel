@@ -53,7 +53,7 @@ func (wr *writer) stopNotes(all bool) (didStop bool, err error) {
 	sort.Ints(stoppable)
 
 	for _, nt := range stoppable {
-		//	fmt.Printf("stopping note: %v\n", nt)
+		//fmt.Printf("stopping note: %v at delta: %v\n", nt, wr.delta)
 		wr.smf.SetDelta(wr.delta)
 		err = wr.smf.Write(channel.Channel(wr.channel).NoteOff(uint8(nt)))
 		if err != nil {
@@ -61,6 +61,7 @@ func (wr *writer) stopNotes(all bool) (didStop bool, err error) {
 			return
 		}
 		wr.delta = 0
+		//fmt.Printf("stopping note: setting delta to 0\n")
 	}
 	return
 }
@@ -80,6 +81,8 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 
 	for _, ev := range evts {
 
+		//fmt.Printf("[writer] pos: %v msg: %v stopnotes: %v\n", ev.position, ev.message, ev.stopNotes)
+
 		if ev == nil || (!ev.stopNotes && ev.message == nil) {
 			continue
 		}
@@ -91,6 +94,7 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 		}
 
 		wr.delta = uint32(ev.position - lastPosition)
+		//fmt.Printf("ev.position: %v wr.delta: %v\n message: %v\n", ev.position, wr.delta, ev.message)
 
 		//		fmt.Printf("ev: %T, %#v\n", ev.message, ev)
 
@@ -114,8 +118,8 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 			}
 		}
 
-		lastPosition = ev.position
-		//fmt.Printf("setting lastPosition to: %v for %v\n", ev.position, ev.message)
+		var writeLastPos bool
+
 		wr.smf.SetDelta(wr.delta)
 
 		switch v := ev.message.(type) {
@@ -128,6 +132,8 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 					return fmt.Errorf("could not stop repeating note %v: %s at tick %v", v.Key(), err, ev.position)
 				}
 				wr.smf.SetDelta(0)
+			} else {
+				writeLastPos = true
 			}
 			//fmt.Printf("setting noteOn tracking for note %v\n", v.Key())
 			wr.noteOns[v.Key()] = ev.monitor
@@ -140,6 +146,7 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 				//fmt.Printf("remove note via noteoff %v\n", v.Key())
 				delete(wr.noteOns, v.Key())
 				err = wr.smf.Write(ev.message)
+				writeLastPos = true
 			}
 			if err != nil {
 				return fmt.Errorf("could not write message %v at tick %v: %v", ev.message, ev.position, err)
@@ -149,10 +156,16 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 			if err != nil {
 				return fmt.Errorf("could not write message %v at tick %v: %v", ev.message, ev.position, err)
 			}
+			writeLastPos = true
 		}
 
 		if err != nil {
 			return fmt.Errorf("could not write message %v at tick %v: %v", ev.message, ev.position, err)
+		}
+
+		if writeLastPos {
+			lastPosition = ev.position
+			//fmt.Printf("setting lastPosition to: %v for %v\n", ev.position, ev.message)
 		}
 	}
 

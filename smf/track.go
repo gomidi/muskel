@@ -86,6 +86,8 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 
 	pos := sketchEvent.AbsPosTicks(t.smf.writer.ticks, trackDelay)
 
+	//fmt.Printf("pos: %v, event: %s\n", pos, sketchEvent)
+
 	if sketchEvent.Item == items.Rest {
 		evts = append(evts, &event{position: pos, stopNotes: true, message: nil})
 		return

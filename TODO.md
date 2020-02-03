@@ -1,13 +1,15 @@
 # nächste TODOs
 
 - BUGS:
-  - glides/glissandi confuse the rhythm (fast is too slow, bass)
-  - sometimes, invalid smf files will be generated (be my roast, outro)
-
+  - allow columns to indicate their end via _ (for repetitions etc)
+  - invalid file: sometimes position is longer than endpos (try to fix cause)
+    kommt z.B. vor, wenn 8 taktiges pattern nach 4 takten auf .4. wiederholt wird (2.Wiederholung)
+    oder wenn 8 taktiges pattern mit %10 wiederholt wird (was am anfang eines parts steht) und dieser part wiederholt wird
+  
 - dokumentation aktualisieren
 
 - some improvements to make it faster to write:
- 4. check that position goes not beyond bar length
+  - check that position goes not beyond bar length
 
 - transponieren mit Halbtönen erlauben, z.B. 
   ^1# transponiert um einen schritt und eine MIDInote aufwärts 

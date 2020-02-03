@@ -3548,6 +3548,73 @@ Ch     | 1  |
 [60] channel.NoteOff channel 0 key 40
 `,
 		},
+		{
+			// 120
+			`
+TRACK    | a | 
+Ch       | 1 | 
+ 
+=patt    | a    | 
+    1    | c++  | 
+    4    | D~~  |
+    4&   | E+   | 
+    4&,  | *    |
+
+=SCORE   | a          | 
+ #
+    1    | =patt.a%2 | 
+ #
+    1&   | *         |
+
+            `,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn ++
+[2880] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 38 dyn =
+[60] channel.Pitchbend channel 0 value 128 absValue 0
+[60] channel.Pitchbend channel 0 value 512 absValue 0
+[60] channel.Pitchbend channel 0 value 1152 absValue 0
+[60] channel.Pitchbend channel 0 value 2048 absValue 0
+[60] channel.Pitchbend channel 0 value 3200 absValue 0
+[60] channel.Pitchbend channel 0 value 4608 absValue 0
+[60] channel.Pitchbend channel 0 value 6272 absValue 0
+[60] channel.Pitchbend channel 0 value 8191 absValue 0
+[240] channel.NoteOff channel 0 key 38
+[240] channel.Pitchbend channel 0 value 0 absValue 0
+[0] channel.NoteOn channel 0 key 48 dyn ++
+[480] channel.NoteOff channel 0 key 48
+`,
+		},
+		/*
+
+
+			TRACK    | bass | dr  |
+			 Channel | 1    | 10  |
+			 Volume  |      | 127 |
+
+			$$include("drumnote")
+			$$embed(".drums.*")
+
+			=patt    | bass | drums  |
+			    1    | E++  | .kd+++ |
+			    2    |      | .sn+   |
+			    3    |      | .kd+   |
+			    3,;  | *    |        |
+			    3&   | B'++ |        |
+			    4    | D~~  | .sn+   |
+			    4&   | E+   |        |
+			    4&,  | *    |        |
+
+			=SCORE   | bass          | dr             |
+			 #
+			    1    | =patt.bass%10 | =patt.drums%10 |
+			 *9
+
+		*/
+
 		/*
 					{
 						// 113
@@ -3637,7 +3704,7 @@ Ch     | 1  |
 					continue
 				}
 
-			if i != 18 {
+			if i != 120 {
 				continue
 			}
 		*/
