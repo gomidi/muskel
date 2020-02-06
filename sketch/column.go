@@ -21,12 +21,12 @@ func (p *column) newCall(pc *items.Call) *call {
 	}
 }
 
-func (p *column) euclidEventStream(start uint, endPos uint, evts []*items.Event) (*eventStream, error) {
+func (p *column) pipedEventStream(start uint, endPos uint, evts []*items.Event) (*eventStream, error) {
 	var cl items.Call
 	pc := p.newCall(&cl)
-	printEvents("euclidEventStream before modifyEvents", evts)
+	printEvents("pipedEventStream before modifyEvents", evts)
 	evts, absoluteEnd, err := pc.modifyEvents(start, endPos, evts)
-	printEvents("euclidEventStream after modifyEvents", evts)
+	printEvents("pipedEventStream after modifyEvents", evts)
 	if err != nil {
 		return nil, err
 	}
@@ -119,7 +119,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				}
 			}
 
-			posEv, err = p.euclidEventStream(forward+ev.Position, endPos, helper.pipeEvents)
+			posEv, err = p.pipedEventStream(forward+ev.Position, endPos, helper.pipeEvents)
 			if err != nil {
 				return nil, err
 			}
@@ -143,7 +143,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				if len(_evts) == 0 {
 					continue
 				}
-				posEv, err = p.euclidEventStream(forward+ev.Position, endPos, _evts)
+				posEv, err = p.pipedEventStream(forward+ev.Position, endPos, _evts)
 				if err != nil {
 					return nil, err
 				}
@@ -151,36 +151,6 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				return nil, fmt.Errorf("unknown command %q", v.Name)
 			}
 
-			/*
-				switch v.Name {
-				case "euclid":
-					var eu items.EuclideanRhythm
-					err = eu.Parse(v.Position, v.Params...)
-					if err != nil {
-						continue
-					}
-
-					_evts, err := eventsFromPatternDef(v.Name, eu.PatternDef, p.sketch.Score, 0, v.Position, params)
-
-					//DEBUG = true
-					printEvents("from euclid", _evts)
-					//DEBUG = false
-
-					if err != nil {
-						continue
-					}
-
-					if len(_evts) == 0 {
-						continue
-					}
-					posEv, err = p.euclidEventStream(forward+ev.Position, endPos, _evts)
-					if err != nil {
-						continue
-					}
-				default:
-					continue
-				}
-			*/
 		case *items.NTuple:
 			// TODO look inside each item and replace random things and templatecalls if there
 			var until = findNextPos(i, int(forward), evts)
@@ -215,7 +185,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 			startBar := bidx - v.LastN
 			repevts := s.getEventsInBars(startBar, bidx-1, evts)
 			if len(repevts) == 0 {
-				fmt.Printf("no repevts\n")
+				//fmt.Printf("no repevts\n")
 				continue
 			}
 

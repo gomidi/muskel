@@ -171,7 +171,10 @@ func (wr *writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 
 	if uint(endPos) < lastPosition {
 		fmt.Printf("endPos: %v lastPosition: %v\n", endPos, lastPosition)
-		//panic("must not happend endPos less than lastPosition")
+		if lastPosition-uint(endPos) > 3000000 {
+			panic("must not happend endPos less than lastPosition")
+		}
+		endPos = int(lastPosition)
 	}
 
 	if endPos > 0 {

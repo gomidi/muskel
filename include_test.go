@@ -2578,6 +2578,172 @@ TRACK  | dr |
     4&                   | MN40+:::  |
  `,
 		},
+		{ // 82
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | #1 |
+  2   | #3 |
+#
+  1&  | #4 |
+
+=SCORE | voc     |
+ 1     | $rabbit(=patt,c',3,80%,5) |
+ *2
+
+`,
+			`
+=SCORE                   | voc |
+ # 4/4 @120.00 \major^c'
+    1                    | c'  |
+    2                    | A#" |
+ # \major^c'
+    1&                   | C#" |
+ #
+  `,
+		},
+		{ // 83
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | e' |
+  2   | f' |
+#
+  1&  | c' |
+
+=SCORE | voc                       |
+ 1     | $mirror(=patt,d') |
+ *2
+
+`,
+			`
+=SCORE                   | voc |
+ # 4/4 @120.00 \major^c'
+    1                    | c'  |
+    2                    | b   |
+ # \major^c'
+    1&                   | e'  |
+ #
+  `,
+		},
+		{ // 84
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | (e' f' c') |
+
+=SCORE | voc                       |
+ 1     | $mirror(=patt,d') |
+
+`,
+			`
+=SCORE                   | voc       |
+ # 4/4 @120.00 \major^c'
+    1                    | (c' b e') |
+  `,
+		},
+		{ // 85
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | {e',f',c'} |
+  1&  | *          |
+
+=SCORE | voc                       |
+ 1     | $mirror(=patt,d') |
+
+`,
+			`
+=SCORE                   | voc       |
+ # 4/4 @120.00 \major^c'
+    1                    | {c',b,e'} |
+    1&                   | *         |
+  `,
+		},
+		{ // 86
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | (f a c') |
+
+=SCORE | voc                       |
+ 1     | $negative(=patt,c') |
+
+`,
+			`
+=SCORE                   | voc         |
+ # 4/4 @120.00 \major^c'
+    1                    | (d" a#' g') |
+  `,
+		},
+		{ // 87
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | (A C# E G) |
+
+=SCORE | voc                       |
+ 1     | $negative(=patt,c') |
+
+`,
+			`
+=SCORE                   | voc                 |
+ # 4/4 @120.00 \major^c'
+    1                    | (a#" f#"' d#"' c"') |
+  `,
+		},
+		{ // 88
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | (E B e g) |
+  2   | (G B d f) |
+  3   | (C G c e) |
+
+=SCORE | voc                       |
+ 1     | $negative(=patt,c) |
+
+`,
+			`
+=SCORE                   | voc           |
+ # 4/4 @120.00 \major^c'
+    1                    | (d#' g# d# c) |
+    2                    | (c' g# f d)   |
+    3                    | (g' c' g d#)  |
+  `,
+		},
+		{ // 89
+			`
+TRACK  | voc |
+
+=patt |  |
+#
+  1   | {C,D,E,F,G,A,B,c} |
+
+=SCORE | voc                       |
+ 1     | $negative(=patt,C) |
+
+`,
+			`
+=SCORE                   | voc                     |
+ # 4/4 @120.00 \major^c'
+    1                    | {G,F,D#,D,C,A#',G#',G'} |
+  `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

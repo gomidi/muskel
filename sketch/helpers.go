@@ -576,7 +576,7 @@ func (p *patterncmdHelper) GetPatternDefEvents(patternDef string) ([]*items.Even
 
 }
 
-func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string) ([]*items.Event, error) {
+func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string, params ...string) ([]*items.Event, error) {
 	pc := &items.Call{}
 	//pc.Parser = p
 	if idx := strings.Index(callDef, "..."); idx > 0 && idx+3 == len(callDef) {
@@ -589,6 +589,9 @@ func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string) ([]*items.
 	if err != nil {
 		return nil, err
 	}
+
+	pc.Params = params
+
 	pcc := p.column.newCall(pc)
 	if endPos == 0 {
 		endPos = p.column.sketch.projectedBarEnd
