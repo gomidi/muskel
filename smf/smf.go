@@ -3,6 +3,7 @@ package smf
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -109,6 +110,8 @@ func (s *smf) posToTicks(pos uint) uint {
 	return (pos * uint(s.writer.ticks) / 8)
 }
 
+var regNumBarComment = regexp.MustCompile("^#[0-9]+$")
+
 func (s *smf) meterTrack() (evts []*event, err error) {
 
 	var bf strings.Builder
@@ -140,8 +143,10 @@ func (s *smf) meterTrack() (evts []*event, err error) {
 			markers = append(markers, b.Part)
 		}
 
-		if b.Comment != "" {
-			markers = append(markers, "// "+b.Comment)
+		comment := strings.TrimSpace(b.Comment)
+
+		if !regNumBarComment.MatchString(comment) {
+			markers = append(markers, "// "+comment)
 		}
 
 		if len(markers) > 0 {
