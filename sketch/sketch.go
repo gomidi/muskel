@@ -149,19 +149,28 @@ func (s *Sketch) getBarIdxOf(pos uint) (baridx int) {
 }
 
 // loop = 0: column is not looped; loop > 0: column is looped n times
-func (s *Sketch) parseEvents(data []string) (res []*items.Event, loop uint, err error) {
+func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event, loop uint, err error) {
 	//var parser items.Parser
+	//endPos = origEndPos
 
 	var lastNoRestItem items.Item
 
 	for _, dat := range data {
 		//fmt.Printf("parseItem(%q)\n", dat)
 		var ev items.Event
-		err := ev.Parse(dat)
+		err = ev.Parse(dat)
 		//it, err := parser.ParseItem(dat, 0)
 		if err != nil {
 			return nil, 0, err
 		}
+
+		/*
+			if ev.Item == items.End {
+				endPos = ev.Position
+				fmt.Printf("endPos: %v\n", endPos)
+				return
+			}
+		*/
 
 		if ev.Item == items.RepeatLastEvent {
 			ev.Item = lastNoRestItem
@@ -233,7 +242,7 @@ func (s *Sketch) newCol(tr *track.Track, colName string) *column {
 
 func (s *Sketch) Unroll(_tr *track.Track, colName string, params ...string) ([]*items.Event, error) {
 	col := s.newCol(_tr, colName)
-	events, err := col.call(0, false, params...)
+	events, _, err := col.call(0, false, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -810,25 +819,25 @@ func (s *Sketch) FirstColumn() (colName string) {
 	return
 }
 
-func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*items.Event, err error) {
+func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*items.Event, end uint, err error) {
 	sk, err := s.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
 	if err != nil {
-		return nil, fmt.Errorf("can't find sketch %q in file %q", inc.Sketch, inc.File)
+		return nil, 0, fmt.Errorf("can't find sketch %q in file %q", inc.Sketch, inc.File)
 	}
 	if !sk.Score.HasTrack(column) {
-		return nil, nil
+		return nil, 0, nil
 	}
 
 	tr, err := sk.Score.GetTrack(column)
 	if err != nil {
-		return nil, nil
+		return nil, 0, nil
 	}
 	var patt = sk.newCol(tr, column)
 	return patt.call(0, false, inc.Params...)
 }
 
 func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts []*items.Event, err error) {
-	evts, err = s._includeCol(column, inc)
+	evts, _, err = s._includeCol(column, inc)
 	if err != nil {
 		return
 	}

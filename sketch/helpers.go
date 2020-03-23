@@ -233,6 +233,12 @@ func getEventsInPosRange(from, to uint, evts []*items.Event) (res []*items.Event
 	if DEBUG {
 		fmt.Printf("getEventsInPosRange(from: %v, to: %v)\n", from, to)
 	}
+	/*
+		if to < from {
+			fmt.Printf("getEventsInPosRange(from: %v, to: %v)\n", from, to)
+			panic("invalid pos range")
+		}
+	*/
 	for _, ev := range evts {
 		//fmt.Printf("event %v at %v: %v\n", i, ev.Position, ev)
 		if ev.Position >= to {

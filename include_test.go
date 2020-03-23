@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/sketch"
 )
 
 func TestInclude(t *testing.T) {
@@ -2744,6 +2745,48 @@ TRACK  | voc |
     1                    | {G,F,D#,D,C,A#',G#',G'} |
   `,
 		},
+		{ // 90
+			`
+TRACK  | voc | git |
+
+=patt | 1 | 2 |
+#
+  1   | c | d |
+  2   | d |   |
+#
+  1   | _ | e |
+#
+  1   |   | f |
+
+=SCORE | git       | voc       |
+#
+ 1     | =patt.1%5 | =patt.2%2 |
+*4
+#
+ 1     | *         | *         |
+
+`,
+			`
+=SCORE                   | git | voc |
+ # 4/4 @120.00 \major^c'
+    1                    | c   | d   |
+    2                    | d   |     |
+ #
+    1                    | c   | e   |
+    2                    | d   |     |
+ #
+    1                    | c   | f   |
+    2                    | d   |     |
+ #
+    1                    | c   | d   |
+    2                    | d   |     |
+ #
+    1                    | c   | e   |
+    2                    | d   |     |
+ #
+    1                    | *   | *   |
+  `,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -2783,6 +2826,7 @@ TRACK  | voc |
 
 	skip := map[int]bool{
 		//36: true,
+		//90: true,
 	}
 
 	for i, test := range tests {
@@ -2790,9 +2834,12 @@ TRACK  | voc |
 		//fmt.Printf("############ %v ###############\n", i)
 
 		/*
-			   if i != 54 {
-			     continue
-			   }
+			if i != 36 {
+				continue
+			}
+		*/
+
+		/*
 			if i != 67 {
 				continue
 			}
@@ -2853,6 +2900,8 @@ TRACK  | voc |
 			//      t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
 		}
 	}
+
+	sketch.DEBUG = false
 }
 
 func TestInclude2(t *testing.T) {

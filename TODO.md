@@ -1,19 +1,21 @@
 # nächste TODOs
 
+- allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
+- allow columns to indicate their end via _ (for repetitions etc)
+
 - BUGS:
-  - allow columns to indicate their end via _ (for repetitions etc)
   - invalid file: sometimes position is longer than endpos (try to fix cause)
     kommt z.B. vor, wenn 8 taktiges pattern nach 4 takten auf .4. wiederholt wird (2.Wiederholung)
     oder wenn 8 taktiges pattern mit %10 wiederholt wird (was am anfang eines parts steht) und dieser part wiederholt wird
   
 - $$save(key,what...) erlaubt speichern von Werten in einer Token-Tabelle. Key ist .table.token.col von einer Tokentabelle, die existieren muss.
   bei .table.token. wird die spalte der aktuellen Spalte verwendet. what kann folgendes sein:
-  ^1 ^2 etc. Scalenwert der aktuellen Scala in dieser Spalte in dieser Zeitposition
-  CC(12) der aktuelle Controllerwert für den Controller 12 in dieser Spalte in dieser Zeitposition
-  PB der aktuelle Pitchbendwert in dieser Spalte in dieser Zeitposition
-  AT der aktuelle Aftertouchwert in dieser Spalte in dieser Zeitposition
-  PT(12) der aktuelle Polyaftertouchwert für Taste 12 in dieser Spalte in dieser Zeitposition
-  % die aktuelle Note (letzte geschlagene Note oder Pause)
+  - ^1 ^2 etc. Scalenwert der aktuellen Scala in dieser Spalte in dieser Zeitposition
+  - CC(12) der aktuelle Controllerwert für den Controller 12 in dieser Spalte in dieser Zeitposition
+  - PB der aktuelle Pitchbendwert in dieser Spalte in dieser Zeitposition
+  - AT der aktuelle Aftertouchwert in dieser Spalte in dieser Zeitposition
+  - PT(12) der aktuelle Polyaftertouchwert für Taste 12 in dieser Spalte in dieser Zeitposition
+  - % die aktuelle Note (letzte geschlagene Note oder Pause)
   gesetzt werden die platzhalter. wenn mehr platzhalter vorhanden sind, als werte, werden die überschüssigen parameter 
   beim aufruf gesetzt, z.B. .table.token.col(c')
   auf die gleiche Weise kann auch in Pattern tabellen gespeichert werden. Hierbei ist der key dann =pattern.col
@@ -22,61 +24,42 @@
   münden, die den aktuellen kontext (parameter, Zeitposition etc.) speichern und letztlich erst am Schluss aufgelöst wird
   (beim unrolling). das wird wahrscheinlich erstmal extrem komplex, aber es wird es ermöglichen, alles mit jedem zu kombinieren
 
+- es fehlt die Möglichkeit, innerhalb der Score Tabelle die Tracks in den Spalten zu wechseln. Ein Spaltenwechsel impliziert immer auch das Ende der vorangehenden Spalte (d.h. eine Pause am Ende). Ein Spaltenwechsel besteht aus einer Zeile, die wieder mit =SCORE beginnt. Nur jene Spalten, die nicht leer sind, werden gewechselt.
 
+- weitere Änderungen (gründlich überlegen): 
+  - Das ^ vor den Stufen wegnehmen. Damit wären die nackten Zahlen Stufennoten
+  - (ggf. Spezialsyntax für slicing wegnehmen und durch $slice funktion ersetzen)
+
+- Aufruf des Templates mit geschweiften Klammern: Parameter werden nicht anhand ihrer Nummer ersetzt, sondern nach der Reihenfolge, in der sie im Template erscheinen (d.h. es müssen alle angegeben werden unabhängig von der Nummer). So kann man dann das gleiche Template mal mit vordefinierten Wiederholungen verwenden und mal diese Überschreiben. Ausserdem kann man auch Platzhalter ohne Nummer verwenden; diese werden dann fortlaufend nummeriert, man kann auch beides kombinieren.
+Die Taktwiederholungszeichen kann man auch innerhalb der Parameter verwenden: 
+ - ... wiederholt den letzten Parameter, bis alle Parameter ausgefüllt sind.
+ - .n. wiederholt die letzten n Parameter, bis alle Parameter ausgefüllt sind
+
+# Was fehlt mir bei muskel?
+
+1. Die Möglichkeit, den aktuellen Ton zu hören und ändern zu können 
+2. Die Visualisierung der Melodie
+3. Es gibt keine Möglichkeit, auf einfachem Wege Noten in Spalten "nach unten" oder "nach oben" zu schieben.
+
+# Lösungen:
+
+## zu 2:
+
+Man könnte die Konvention haben, dass wenn ein Spaltenname auf `<` endet, die Spalte "expanded" ist, d.h. der Spaltenname beinhaltet nicht das `<`, aber die Anordnung der Töne spiegelt durch Padding den Tonhöhenverlauf wider (von links nach rechts mit minimalen Abständen).
+
+## zu 1:
+
+Wir brauchen die Möglichkeit, einen Sinuston zu spielen, basierend auf einer Zeilen und Spaltenposition.
+Dann brauchen wir die Möglichkeit, aus einem Editor heraus einen Befehl aufzurufen und Dateiname, Zeile und Spalte anzugeben. Oder wir haben ein Sonderzeichen, dass beim Parsen zum abspielen führt (z.B. `==`)
+
+## zu 3:
+
+Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang und Ende der zu verschiebenden Noten markieren können. z.B. `^+(` für _Start verschieben nach unten_ mit Menge an Pluszeichen = Anzahl der Verschiebepositionen und analog `^-(` für _Start verschieben nach oben_ und `^)` für das _Ende der letzten Verschiebegruppe_ (kann am Ende der Spalte weggelassen werden)
+ 
 - wir brauchen bei den tracks einen ambitus: from: to: type: (ignore,fit,mirror)
   ignore entfernt noten, die nicht reinpassen, fit verwendet die nächste passende note der skala, mirror spiegelt die note
   octaven nach unten/oben (solange, bis es passt)
 
-- $mirror(c', =patt)
-  mirror the intervals of =patt to the axis c'
-- $negatve(\major^c', =patt)
-  make the negative melody or chords of =patt based on the given scale
-- generalbassfunktion: (siehe https://de.wikipedia.org/wiki/Generalbass) z.B.
-  $gb(^2,6,4)     => (^2 ^8 ^6)
-  $gb(^2)         => (^2 ^4 ^6) 
-  $gb(^2,2)       => (^2 ^3 ^8 ^6) 
-  bekommt eine Stufe (für den Bass) und die Generalbassziffern für die Tonleitereigenen Intervalle
-  kann dann einem Pattern als Parameter übergeben werden, z.B.
-  =patt($gb(^2,6,4)...)
-  oder $gb(^2,6,4).../$call(=patt)
-
-  man könnte auch eine $arp() funktion schaffen, die ein pattern nimmt, welches aus Akkorden besteht
-  und bei jedem Akkord, diesen an das Arpeggiator-Pattern übergibt (mit Dots) und das Ergebnis
-  zurückgibt.
-
-  also z.B.
-
-  =patt |  |
-  1     |#1|
-  1&    |#2|
-  2     |#3|
-
-  =chords |            |
-  1       | (^1 ^3 ^5) |
-  #
-  1       | (^9 ^4 ^6) |
-  #
-  1       | (^3 ^5 ^-1) |
-
-  =SCORE |                       |
-  1      |$arp(=patt,=chords...) |
-
-  würde resultieren in 
-
-  =SCORE |   |
-  1      |^1 |
-  1&     |^3 |
-  2      |^5 |
-  #
-  1      |^9 |
-  1&     |^4 |
-  2      |^6 |
-  #
-  1      |^3 |
-  1&     |^5 |
-  2      |^-1|
-
-- dann könnte man patterns für die oktavregel in dur und moll (jeweils auf und absteigend) anlegen (siehe https://de.wikipedia.org/wiki/Oktavregel)
 
 
 - dokumentation aktualisieren

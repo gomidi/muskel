@@ -130,11 +130,13 @@ func (s *smf) meterTrack() (evts []*event, err error) {
 	num := uint8(4)
 	denom := uint8(4)
 
-	for _, b := range s.score.Bars {
+	for i, b := range s.score.Bars {
 		if b.TimeSigChange[0] > 0 {
-			num = b.TimeSigChange[0]
-			denom = b.TimeSigChange[1]
-			evts = append(evts, &event{position: s.posToTicks(b.Position), message: meter.Meter(num, denom)})
+			if b.TimeSigChange[0] != num || b.TimeSigChange[1] != denom || i == 0 {
+				num = b.TimeSigChange[0]
+				denom = b.TimeSigChange[1]
+				evts = append(evts, &event{position: s.posToTicks(b.Position), message: meter.Meter(num, denom)})
+			}
 		}
 
 		var markers []string
@@ -145,7 +147,7 @@ func (s *smf) meterTrack() (evts []*event, err error) {
 
 		comment := strings.TrimSpace(b.Comment)
 
-		if !regNumBarComment.MatchString(comment) {
+		if comment != "" && !regNumBarComment.MatchString(comment) {
 			markers = append(markers, "// "+comment)
 		}
 
@@ -165,8 +167,9 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 	var glissStartBPM float64
 	var inGliss bool
 	var glissFn func(int64, float64, func(uint, float64))
+	lastTempo := float64(120)
 
-	for _, b := range s.score.Bars {
+	for i, b := range s.score.Bars {
 
 		if b.TempoChange > 0 {
 			if inGliss {
@@ -183,7 +186,10 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 				inGliss = false
 			}
 
-			evts = append(evts, &event{position: s.posToTicks(b.Position), message: meta.FractionalBPM(b.TempoChange)})
+			if b.TempoChange != lastTempo || i == 0 {
+				evts = append(evts, &event{position: s.posToTicks(b.Position), message: meta.FractionalBPM(b.TempoChange)})
+				lastTempo = b.TempoChange
+			}
 
 			if len(b.Tilde) > 0 {
 				glissStartPos = b.Position

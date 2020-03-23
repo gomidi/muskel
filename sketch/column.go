@@ -72,7 +72,9 @@ func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err e
 	return out, nil
 }
 
-func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unrolled []*items.Event, err error) {
+func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []string) (unrolled []*items.Event, endPos uint, err error) {
+
+	endPos = originalEndPos
 
 	s := p.sketch
 
@@ -84,6 +86,12 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 		//fmt.Printf("################## %v event: %v ##################\n", i, ev)
 		if ev.Item == nil {
 			continue
+		}
+
+		if ev.Item == items.End {
+			//fmt.Printf("###### END ITEM in col %q of sketch %q ##########\n", p.name, p.sketch.Name)
+			endPos = ev.Position
+			break
 		}
 
 		// fmt.Printf("[%v] ev.Item %T\n", i, ev.Item)
@@ -108,20 +116,20 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 					_evts, err := fn(cmd.Params, helper)
 
 					if err != nil {
-						return nil, err
+						return nil, endPos, err
 					}
 
 					printEvents(cmd.Name, _evts)
 
 					helper.pipeEvents = _evts
 				} else {
-					return nil, fmt.Errorf("unknown command %q", cmd.Name)
+					return nil, endPos, fmt.Errorf("unknown command %q", cmd.Name)
 				}
 			}
 
 			posEv, err = p.pipedEventStream(forward+ev.Position, endPos, helper.pipeEvents)
 			if err != nil {
-				return nil, err
+				return nil, endPos, err
 			}
 
 		case *items.CommandCall:
@@ -135,7 +143,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				_evts, err := fn(v.Params, helper)
 
 				if err != nil {
-					return nil, err
+					return nil, endPos, err
 				}
 
 				printEvents(v.Name, _evts)
@@ -145,10 +153,10 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				}
 				posEv, err = p.pipedEventStream(forward+ev.Position, endPos, _evts)
 				if err != nil {
-					return nil, err
+					return nil, endPos, err
 				}
 			} else {
-				return nil, fmt.Errorf("unknown command %q", v.Name)
+				return nil, endPos, fmt.Errorf("unknown command %q", v.Name)
 			}
 
 		case *items.NTuple:
@@ -161,7 +169,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 			// fmt.Printf("inside ntuple: %v\n", v)
 			newItm, err := p.replaceNtupleTokens(v)
 			if err != nil {
-				return nil, err
+				return nil, endPos, err
 			}
 
 			//v.Items = newItsm
@@ -171,7 +179,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 			nev.Item = newItm
 			posEv = newEventStream(nev.Position, uint(until), false, nev)
 		case *items.BarRepeater:
-			//	fmt.Printf("bar repeater: %v endPos: %v\n", v, endPos)
+			//fmt.Printf("bar repeater: %v endPos: %v in col %q of sketch %q\n", v, endPos, p.name, p.sketch.Name)
 			stopPos := endPos
 			if i < len(evts)-1 {
 				stBarIdx := s.getBarIdxOf(evts[i+1].Position)
@@ -179,8 +187,8 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 				if stBarPos < stopPos {
 					stopPos = stBarPos
 				}
+				//fmt.Printf("stopPos: %v next bars position: %v in col %q of sketch %q\n", stopPos, stBarPos, p.name, p.sketch.Name)
 			}
-			//fmt.Printf("stopPos: %v\n", stopPos)
 			bidx := s.getBarIdxOf(ev.Position)
 			startBar := bidx - v.LastN
 			repevts := s.getEventsInBars(startBar, bidx-1, evts)
@@ -192,10 +200,13 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 			currentPos := s.Bars[bidx].Position
 
 			diff := currentPos - s.Bars[startBar].Position
-			repevts, err = p._unroll(repevts, stopPos, nil)
+			var ignoreEndPos uint
+			repevts, ignoreEndPos, err = p._unroll(repevts, stopPos, nil)
+			_ = ignoreEndPos
+			//fmt.Printf("setting endPos to %v from BarRepeater in col %q of sketch %q via stopPos %v\n", endPos, p.name, p.sketch.Name, stopPos)
 			if err != nil {
-				fmt.Printf("error while unrolling: %v\n", err)
-				return nil, err
+				//fmt.Printf("error while unrolling: %v\n", err)
+				return nil, endPos, err
 			}
 
 			//DEBUG = true
@@ -280,16 +291,16 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 			partname := v.Part
 			part, has := s.Parts[partname]
 			if !has {
-				return nil, fmt.Errorf("can't repeat part %q at %v: part is not defined", partname, ev.Position)
+				return nil, endPos, fmt.Errorf("can't repeat part %q at %v: part is not defined", partname, ev.Position)
 			}
 
 			//fmt.Printf("part %q: %v\n", bar.JumpTo, part)
 			startPos := part[0]
-			endPos := part[1]
-			diff := (endPos - startPos) //- uint(bar.Length32th())
+			_endPos := part[1]
+			diff := (_endPos - startPos) //- uint(bar.Length32th())
 			//_ = diff
-			if endPos > s.projectedBarEnd {
-				endPos = s.projectedBarEnd
+			if _endPos > s.projectedBarEnd {
+				_endPos = s.projectedBarEnd
 			}
 
 			/*
@@ -297,14 +308,14 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 					endPos = ev.Position - 1
 				}
 			*/
-			partEvents := getEventsInPosRange(startPos, endPos, evts)
+			partEvents := getEventsInPosRange(startPos, _endPos, evts)
 
-			partEvents, err = p._unroll(partEvents, endPos, nil)
+			partEvents, _endPos, err = p._unroll(partEvents, _endPos, nil)
 			if err != nil {
-				return nil, err
+				return nil, endPos, err
 			}
 
-			printEvents(fmt.Sprintf("partEvents from %v to %v", startPos, endPos), partEvents)
+			printEvents(fmt.Sprintf("partEvents from %v to %v", startPos, _endPos), partEvents)
 
 			for r := 0; r < int(v.Repeat); r++ {
 				var nevts []*items.Event
@@ -340,7 +351,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 					pc := p.newCall(vv)
 					posEv, err = pc.getEventStream(forward+ev.Position, endPos)
 					if err != nil {
-						return nil, err
+						return nil, endPos, err
 					}
 					// fmt.Printf("got item: %v\n", posEv.events[0].Item)
 					newItsm[itidx] = posEv.events[0]
@@ -360,7 +371,7 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 			pc := p.newCall(v)
 			posEv, err = pc.getEventStream(forward+ev.Position, endPos)
 			if err != nil {
-				return nil, err
+				return nil, endPos, err
 			}
 
 		case *items.Override:
@@ -373,10 +384,10 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 					posEv, err = pc.getOverrideEventStream(forward+ev.Position, forward+ev.Position+1)
 				}
 				if err != nil {
-					return nil, err
+					return nil, endPos, err
 				}
 			case *items.Scale:
-				return nil, fmt.Errorf("item type not allowed in override: %#v", vv)
+				return nil, endPos, fmt.Errorf("item type not allowed in override: %#v", vv)
 			default:
 				nev := ev.Dup()
 				nev.Item = vv
@@ -425,8 +436,9 @@ func (p *column) _unroll(evts []*items.Event, endPos uint, params []string) (unr
 	return
 }
 
-func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string) (unrolled []*items.Event, err error) {
+func (p *column) unroll(inputEvents []*items.Event, originalEndPos uint, params []string) (unrolled []*items.Event, endPos uint, err error) {
 	s := p.sketch
+	//endPos = originalEndPos
 
 	var evts []*items.Event
 	for i, inEv := range inputEvents {
@@ -459,7 +471,7 @@ func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string
 		}
 	*/
 
-	return p._unroll(evts, endPos, params)
+	return p._unroll(evts, originalEndPos, params)
 
 	//fmt.Printf("rolledEvts: %v\n", rolledEvts)
 	//fmt.Printf(">> rolledEvts\n")
@@ -481,8 +493,9 @@ func (p *column) unroll(inputEvents []*items.Event, endPos uint, params []string
 // Call parameterizes the sketch in the given column, parses and unrolls it and returns the resulting events
 // as absolut positioned items. If the column does not exist, nil is returned
 // endPos is the absolute end position of the piece. If 0, the last bar of the SketchTable is used
-func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.Event, error) {
+func (c *column) call(originalEndPos uint, syncFirst bool, params ...string) (events []*items.Event, endPos uint, err error) {
 	s := c.sketch
+	endPos = originalEndPos
 	if c.name == "" {
 		for i, col := range s.colOrder {
 			if i == 0 || col[0] == '!' {
@@ -491,10 +504,14 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.E
 		}
 	}
 
+	//if DEBUG {
+	//fmt.Printf("at start of call in col %q of sketch %q originalEndPos: %v\n", c.name, c.sketch.Name, originalEndPos)
+	//}
+
 	col, has := s.Columns[c.name]
 	if !has {
 		//fmt.Printf("has no column: %q\n", col)
-		return nil, fmt.Errorf("has no column: %q\n", col)
+		return nil, endPos, fmt.Errorf("has no column: %q\n", col)
 	}
 
 	//fmt.Printf("raw data of col %q: %#v\n", colName, col)
@@ -508,19 +525,29 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.E
 
 	data := c.sketch.injectParams(col, params)
 
+	var loop uint
+
 	//fmt.Printf("data: %v\n", data)
-	events, loop, err := s.parseEvents(data)
+	events, loop, err = s.parseEvents(data, endPos)
 
 	if err != nil {
-		return nil, err
+		return nil, endPos, err
 	}
 
 	//fmt.Printf("items: %v loop: %v\n", items, loop)
 	_ = loop
-	events, err = c.unroll(events, endPos, params) // replaces template calls and imports
+	//if DEBUG {
+	//fmt.Printf("before unroll in col %q of sketch %q endPos: %v\n", c.name, c.sketch.Name, endPos)
+	//}
+
+	events, endPos, err = c.unroll(events, endPos, params) // replaces template calls and imports
 	if err != nil {
-		return nil, err
+		return nil, endPos, err
 	}
+
+	//if DEBUG {
+	//fmt.Printf("after unroll in col %q of sketch %q endPos: %v\n", c.name, c.sketch.Name, endPos)
+	//}
 
 	if syncFirst {
 		events = moveBySyncFirst(events)
@@ -536,9 +563,12 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.E
 
 	printEvents("after unrollIncludedBars of events", events)
 	//fmt.Printf("unrolled: %v\n", events)
+	//if DEBUG {
+	//fmt.Printf("unrollPartRepetitionsOfBars in col %q of sketch %q\n", c.name, c.sketch.Name)
+	//}
 	events, err = c.unrollPartRepetitionsOfBars(events, endPos)
 	if err != nil {
-		return nil, err
+		return nil, endPos, err
 	}
 
 	/*
@@ -551,7 +581,7 @@ func (c *column) call(endPos uint, syncFirst bool, params ...string) ([]*items.E
 	//fmt.Printf(unrolledPartRepetitions: %v\n", events)
 	printBars("after unrollPartRepetitions of events", c.sketch.Bars...)
 	printEvents("after call of col "+c.name+" in sketch "+c.sketch.Name+" in file "+c.sketch.File, events)
-	return events, nil
+	return events, endPos, nil
 }
 
 func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
@@ -741,6 +771,7 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 
 		} else {
 			endPos := bar.Position + uint(bar.Length32th())
+			//fmt.Printf("endPos: %v s.projectedBarEnd: %v stopPos: %v\n", endPos, s.projectedBarEnd, stopPos)
 			if endPos > s.projectedBarEnd {
 				endPos = s.projectedBarEnd
 			}

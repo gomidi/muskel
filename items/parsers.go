@@ -55,6 +55,8 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			err = gl.Parse("", posIn32th)
 			it = gl
 			return
+		case '_':
+			return End, nil
 		default:
 			var nt = &Note{}
 			err = nt.Parse(data, posIn32th)
@@ -237,7 +239,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 				it = rp
 				return
 			}
-			
+
 			if regExToken0.MatchString(data) || regExToken1.MatchString(data) {
 				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
 				pc := &Call{}

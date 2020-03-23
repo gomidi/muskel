@@ -16,7 +16,8 @@ type call struct {
 func (pc *call) unrollPattern(start uint, until uint) (evt []*items.Event, absoluteEnd uint, err error) {
 	p := pc.column
 	tc := pc.call
-	evts, err := p.call(until, tc.SyncFirst, tc.Params...)
+	var evts []*items.Event
+	evts, absoluteEnd, err = p.call(until, tc.SyncFirst, tc.Params...)
 	if err != nil {
 		return
 	}
@@ -29,10 +30,13 @@ func (pc *call) unrollPattern(start uint, until uint) (evt []*items.Event, absol
 
 	//_evt, diff, absoluteEnd = pc.modifyEvents(start, until, evts)
 	var _evt []*items.Event
-	_evt, absoluteEnd, err = pc.modifyEvents(start, until, evts)
+	_evt, absoluteEnd, err = pc.modifyEvents(start, absoluteEnd, evts)
 	if err != nil {
 		return
 	}
+
+	//fmt.Printf("until: %v absoluteEnd: %v\n", until, absoluteEnd)
+	// TODO check, if until and absoluteEnd is correct
 
 	// TODO check if length is correct
 	length := absoluteEnd //- start
@@ -60,6 +64,10 @@ func (pc *call) unrollPattern(start uint, until uint) (evt []*items.Event, absol
 
 	printEvents("after repeat", __evts)
 
+	if DEBUG {
+		fmt.Printf("absoluteEnd: %v start: %v until: %v length: %v\n", absoluteEnd, start, until, length)
+	}
+
 	for _, ev := range __evts {
 		if ev.Position < until {
 			evt = append(evt, ev)
@@ -71,6 +79,10 @@ func (pc *call) unrollPattern(start uint, until uint) (evt []*items.Event, absol
 	}
 
 	printEvents("after unrollPattern", evt)
+
+	if DEBUG {
+		fmt.Printf("absoluteEnd: %v start: %v until: %v length: %v\n", absoluteEnd, start, until, length)
+	}
 
 	return
 }
@@ -157,6 +169,11 @@ func (c *call) applyLyrics(evts []*items.Event) ([]*items.Event, error) {
 
 func (pc *call) modifyEvents(start uint, until uint, evts []*items.Event) (evt []*items.Event, end uint, err error) {
 	projectedBarEnd := pc.column.sketch.projectedBarEnd
+
+	if until < projectedBarEnd {
+		projectedBarEnd = until
+	}
+
 	for _, ev := range evts {
 		pos := start + ev.Position
 		if until > 0 && pos >= until {
@@ -254,9 +271,11 @@ func (c *call) unroll(start uint, until uint) (evt []*items.Event, diff uint, en
 			return
 		}
 
-		pEvents, loop, err2 := c.column.sketch.parseEvents([]string{sc})
-		if err2 != nil {
-			err = err2
+		var pEvents []*items.Event
+		var loop uint
+
+		pEvents, loop, err = c.column.sketch.parseEvents([]string{sc}, c.column.sketch.projectedBarEnd)
+		if err != nil {
 			return
 		}
 		_ = loop
