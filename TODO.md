@@ -1,11 +1,6 @@
 # nächste TODOs
 
 - allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
-
-- BUGS:
-  - invalid file: sometimes position is longer than endpos (try to fix cause)
-    kommt z.B. vor, wenn 8 taktiges pattern nach 4 takten auf .4. wiederholt wird (2.Wiederholung)
-    oder wenn 8 taktiges pattern mit %10 wiederholt wird (was am anfang eines parts steht) und dieser part wiederholt wird
   
 - $$save(key,what...) erlaubt speichern von Werten in einer Token-Tabelle. Key ist .table.token.col von einer Tokentabelle, die existieren muss.
   bei .table.token. wird die spalte der aktuellen Spalte verwendet. what kann folgendes sein:
