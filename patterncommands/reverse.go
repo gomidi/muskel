@@ -6,7 +6,8 @@ import (
 	"gitlab.com/gomidi/muskel/items"
 )
 
-func reverse(params []string, helper Helper) (res []*items.Event, err error) {
+// $revers(=patt) reverses the events in the given pattern
+func Reverse(params []string, helper Helper) (res []*items.Event, err error) {
 	if len(params) != 1 {
 		return nil, fmt.Errorf("reverse just needs one parameter: a pattern")
 	}
@@ -17,12 +18,7 @@ func reverse(params []string, helper Helper) (res []*items.Event, err error) {
 
 	var evts []*items.Event
 
-	if params[0] == "=" {
-		//fmt.Printf("reverse getting pipe events\n")
-		evts, err = helper.GetPipeEvents()
-	} else {
-		evts, err = helper.GetCallEvents(0, params[0])
-	}
+	evts, err = patternEvents(params[0], helper)
 
 	if err != nil {
 		return nil, err

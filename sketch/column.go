@@ -579,7 +579,7 @@ func (c *column) call(originalEndPos uint, syncFirst bool, params ...string) (ev
 	*/
 
 	//fmt.Printf(unrolledPartRepetitions: %v\n", events)
-	printBars("after unrollPartRepetitions of events", c.sketch.Bars...)
+	//printBars("after unrollPartRepetitions of events", c.sketch.Bars...)
 	printEvents("after call of col "+c.name+" in sketch "+c.sketch.Name+" in file "+c.sketch.File, events)
 	return events, endPos, nil
 }
@@ -731,6 +731,9 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 		}
 
 		lastBarEnd = bar.Position + uint(bar.Length32th())
+		if DEBUG {
+			fmt.Printf("setting lastBarEnd to: %v\n", lastBarEnd)
+		}
 
 		if bar.JumpTo != "" {
 			part, has := s.Parts[bar.JumpTo]
@@ -760,8 +763,14 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 				nevts = append(nevts, nue)
 			}
 
-			printEvents("nevts", nevts)
-
+			printEvents(fmt.Sprintf("bar %v jumped to %q nevts", bar.No, bar.JumpTo), nevts)
+			_lastBarEnd := 2*endPos - startPos
+			if lastBarEnd < _lastBarEnd {
+				lastBarEnd = _lastBarEnd
+				if DEBUG {
+					fmt.Printf("setting lastBarEnd to 2*endPos  - startPos: %v\n", lastBarEnd)
+				}
+			}
 			/*
 				for _, nv := range nevts {
 					fmt.Printf("partEvent at %v: %v\n", nv.Position, nv)

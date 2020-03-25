@@ -11,6 +11,7 @@ import (
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/score"
+	"gitlab.com/gomidi/muskel/sketch"
 	"gitlab.com/gomidi/muskel/smf"
 )
 
@@ -3588,6 +3589,146 @@ Ch       | 1 |
 [480] channel.NoteOff channel 0 key 48
 `,
 		},
+		{ // 121
+			`
+TRACK  | voc | git |
+Ch     | 1   | 2   |
+
+=patt | 1  |
+#
+  1   | c  |
+#
+  1   | d  |
+#
+  1   | e  |
+#
+  1   | f  |
+#
+  1   | g  |
+#
+  1   | b  |
+#
+  1   | c# |
+#
+  1   | d# |
+
+=SCORE | voc     | git        |
+#A
+ 1     | =patt.1 | =patt.1%10 |
+*3
+#
+ 1     | .4.     |            |
+*3
+[A]
+  `,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 1 key 48 dyn =
+[3840] channel.NoteOff channel 1 key 48
+[0] channel.NoteOn channel 1 key 50 dyn =
+[3840] channel.NoteOff channel 1 key 50
+[0] channel.NoteOn channel 1 key 52 dyn =
+[3840] channel.NoteOff channel 1 key 52
+[0] channel.NoteOn channel 1 key 53 dyn =
+[3840] channel.NoteOff channel 1 key 53
+[0] channel.NoteOn channel 1 key 55 dyn =
+[3840] channel.NoteOff channel 1 key 55
+[0] channel.NoteOn channel 1 key 59 dyn =
+[3840] channel.NoteOff channel 1 key 59
+[0] channel.NoteOn channel 1 key 49 dyn =
+[3840] channel.NoteOff channel 1 key 49
+[0] channel.NoteOn channel 1 key 51 dyn =
+[3840] channel.NoteOff channel 1 key 51
+[0] channel.NoteOn channel 1 key 48 dyn =
+[3840] channel.NoteOff channel 1 key 48
+[0] channel.NoteOn channel 1 key 50 dyn =
+[3840] channel.NoteOff channel 1 key 50
+[0] channel.NoteOn channel 1 key 52 dyn =
+[3840] channel.NoteOff channel 1 key 52
+[0] channel.NoteOn channel 1 key 53 dyn =
+[3840] channel.NoteOff channel 1 key 53
+[0] channel.NoteOn channel 1 key 55 dyn =
+[3840] channel.NoteOff channel 1 key 55
+[0] channel.NoteOn channel 1 key 59 dyn =
+[3840] channel.NoteOff channel 1 key 59
+[0] channel.NoteOn channel 1 key 49 dyn =
+[3840] channel.NoteOff channel 1 key 49
+[0] channel.NoteOn channel 1 key 51 dyn =
+[3840] channel.NoteOff channel 1 key 51
+`,
+		},
+		{ // 122
+			`
+TRACK  | voc | git |
+Ch     | 2   | 1   |
+
+=patt | 1  |
+#
+  1   | c  |
+#
+  1   | d  |
+#
+  1   | e  |
+#
+  1   | f  |
+#
+  1   | g  |
+#
+  1   | b  |
+#
+  1   | c# |
+#
+  1   | d# |
+
+=SCORE | voc     | git        |
+#A
+ 1     | =patt.1 | =patt.1%10 |
+*3
+#
+ 1     | .4.     |            |
+*3
+[A]
+  `,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 48 dyn =
+[3840] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[3840] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[3840] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 53 dyn =
+[3840] channel.NoteOff channel 0 key 53
+[0] channel.NoteOn channel 0 key 55 dyn =
+[3840] channel.NoteOff channel 0 key 55
+[0] channel.NoteOn channel 0 key 59 dyn =
+[3840] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 49 dyn =
+[3840] channel.NoteOff channel 0 key 49
+[0] channel.NoteOn channel 0 key 51 dyn =
+[3840] channel.NoteOff channel 0 key 51
+[0] channel.NoteOn channel 0 key 48 dyn =
+[3840] channel.NoteOff channel 0 key 48
+[0] channel.NoteOn channel 0 key 50 dyn =
+[3840] channel.NoteOff channel 0 key 50
+[0] channel.NoteOn channel 0 key 52 dyn =
+[3840] channel.NoteOff channel 0 key 52
+[0] channel.NoteOn channel 0 key 53 dyn =
+[3840] channel.NoteOff channel 0 key 53
+[0] channel.NoteOn channel 0 key 55 dyn =
+[3840] channel.NoteOff channel 0 key 55
+[0] channel.NoteOn channel 0 key 59 dyn =
+[3840] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 49 dyn =
+[3840] channel.NoteOff channel 0 key 49
+[0] channel.NoteOn channel 0 key 51 dyn =
+[3840] channel.NoteOff channel 0 key 51
+`,
+		},
 		/*
 
 
@@ -3692,6 +3833,10 @@ Ch       | 1 |
 	}
 
 	skip := map[int]bool{
+		//122: true,
+		//121: true,
+		//79: true,
+		//80: true,
 		//104: true,
 	}
 
@@ -3704,7 +3849,7 @@ Ch       | 1 |
 					continue
 				}
 
-			if i != 120 {
+			if i != 79 {
 				continue
 			}
 		*/
@@ -3762,6 +3907,8 @@ Ch       | 1 |
 		}
 
 	}
+
+	sketch.DEBUG = false
 }
 
 type logger struct {

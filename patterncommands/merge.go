@@ -6,18 +6,15 @@ import (
 	"gitlab.com/gomidi/muskel/items"
 )
 
-func merge(params []string, helper Helper) (res []*items.Event, err error) {
-	//merge(patt1,patt2)
+// $merge(=patt1,=patt2,...)
+// merges the given patterns
+func Merge(params []string, helper Helper) (res []*items.Event, err error) {
 	var sorted items.SortEvents
+	var evts []*items.Event
 
 	for _, param := range params {
-		var evts []*items.Event
 
-		if param == "=" {
-			evts, err = helper.GetPipeEvents()
-		} else {
-			evts, err = helper.GetCallEvents(0, param)
-		}
+		evts, err = patternEvents(param, helper)
 
 		if err != nil {
 			return nil, err

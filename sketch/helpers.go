@@ -270,9 +270,11 @@ func getBarsInPosRange(from, to uint, bars []*Bar) (res []*Bar) {
 
 //func replaceParams(s string, params []interface{}) string {
 func replaceParams(s string, params []string) string {
-	if DEBUG {
-		fmt.Printf("should replace params %#v in %q\n", params, s)
-	}
+	/*
+		if DEBUG {
+			fmt.Printf("should replace params %#v in %q\n", params, s)
+		}
+	*/
 	if len(params) == 0 {
 		return s
 	}

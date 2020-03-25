@@ -2787,6 +2787,147 @@ TRACK  | voc | git |
     1                    | *   | *   |
   `,
 		},
+		{ // 91
+			`
+TRACK  | voc | git |
+
+=patt | 1  |
+#
+  1   | c  |
+#
+  1   | d  |
+#
+  1   | e  |
+
+=SCORE | voc     |
+#A
+ 1     | =patt.1 |
+*1
+#
+ 1     | .2.     |
+*1
+[A]
+
+`,
+			`
+=SCORE                    | voc |
+ #A 4/4 @120.00 \major^c'
+    1                     | c   |
+ #
+    1                     | d   |
+ #
+    1                     | c   |
+ #
+    1                     | d   |
+ #
+    1                     | c   |
+ #
+    1                     | d   |
+ #
+    1                     | c   |
+ #
+    1                     | d   |
+  `,
+		},
+		{ // 92
+			`
+TRACK  | voc | git |
+
+=patt | 1  |
+#
+  1   | c  |
+#
+  1   | d  |
+#
+  1   | e  |
+#
+  1   | f  |
+#
+  1   | g  |
+#
+  1   | b  |
+#
+  1   | c# |
+#
+  1   | d# |
+
+=SCORE | voc     | git        |
+#A
+ 1     | =patt.1 | =patt.1%10 |
+*3
+#
+ 1     | .4.     |            |
+*3
+[A]
+
+`,
+			`
+=SCORE                    | git | voc |
+ #A 4/4 @120.00 \major^c'
+    1                     | c   | c   |
+ #
+    1                     | d   | d   |
+ #
+    1                     | e   | e   |
+ #
+    1                     | f   | f   |
+ #
+    1                     | g   | c   |
+ #
+    1                     | b   | d   |
+ #
+    1                     | c#  | e   |
+ #
+    1                     | d#  | f   |
+ #
+    1                     | c   | c   |
+ #
+    1                     | d   | d   |
+ #
+    1                     | e   | e   |
+ #
+    1                     | f   | f   |
+ #
+    1                     | g   | c   |
+ #
+    1                     | b   | d   |
+ #
+    1                     | c#  | e   |
+ #
+    1                     | d#  | f   |
+  `,
+		},
+		{ // 93
+			`
+TRACK |p|
+Ch |1  |
+
+=SCORE |p|
+#A
+1  |c" |
+2  |d  |
+[A]
+#
+1  | c' |
+2 |* |
+[A]
+			`,
+			`
+=SCORE                    | p  |
+ #A 4/4 @120.00 \major^c'
+    1                     | c" |
+    2                     | d  |
+ #
+    1                     | c" |
+    2                     | d  |
+ #
+    1                     | c' |
+    2                     | *  |
+ #
+    1                     | c" |
+    2                     | d  |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -2826,7 +2967,8 @@ TRACK  | voc | git |
 
 	skip := map[int]bool{
 		//36: true,
-		//90: true,
+		//91: true,
+		//92: true,
 	}
 
 	for i, test := range tests {
@@ -2834,13 +2976,11 @@ TRACK  | voc | git |
 		//fmt.Printf("############ %v ###############\n", i)
 
 		/*
-			if i != 36 {
-				continue
-			}
-		*/
+				if i != 36 {
+					continue
+				}
 
-		/*
-			if i != 67 {
+			if i != 93 {
 				continue
 			}
 		*/

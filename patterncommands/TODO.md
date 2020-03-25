@@ -4,8 +4,6 @@ further ideas for patterncommands
 $generate(everydistance, item, times)
 $stretch(patt,factor) // time streching
 $chance(patt,percentage) // set the chance that something happens for randomness in the pattern. e.g. for ?30%a' a chance of 20% means nope and 31% means yes, or for ?(a,b,c) a chance of 20% means a, 45% means b and 80% means c
-$rabbit(x0,factor,percentage,number) generates a chord of number items by the formula x(n+1) = x(0)*factor * (1-p) where p is the percentage as decimal e.g. $rabbit(c#',2.5,80%,10)
-$merge(patt1,patt2) // on same time patt2 overrides patt1
 $append(patt1, patt2)
 $take(patt1,n) // take every nth item of pattern
 $transpose(patt, num)
@@ -15,7 +13,6 @@ $slice(patt, from, to)
 $repeat(patt, times, distanceBetweenRepetitions)
 $moveAll(patt, distance)
 $moveNotes(patt, distance)
-$mirror(patt,zeroNote)
 $rotate(patt, every, times)
 $addVelocity(patt,every,velDiff)
 $addVelocityPos(patt,posDiff,velDiff)
@@ -32,6 +29,7 @@ $addPos(patt,posDiff,items...)
 $delete(patt, every)
 $deletePos(patt, posDiff)
 $cut(patt,fromPos,toPos)
+$call(=patt,params,...) call the pattern with params, e.g. same as =patt(params,...) but could also be piped
 
 $pick(=source,=picker) picks events from =source at the positions in =picker where there are placeholders. Any other events in  =picker will be taken as is. Should also work as pipe.
 

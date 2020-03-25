@@ -224,10 +224,11 @@ func (s *Sketch) getAbsPos(bar, pos32ths uint) uint {
 		//pos += uint(b.Length32th())
 	}
 
-	if DEBUG {
-		fmt.Printf("getAbsPos(bar: %v, pos32ths: %v) = %v\n", bar, pos32ths, pos+pos32ths)
-	}
-
+	/*
+		if DEBUG {
+			fmt.Printf("getAbsPos(bar: %v, pos32ths: %v) = %v\n", bar, pos32ths, pos+pos32ths)
+		}
+	*/
 	//fmt.Printf("getAbsPos(bar: %v, pos32ths: %v) called: %v\n", bar, pos32ths, pos+pos32ths)
 	return pos + pos32ths
 }
@@ -326,7 +327,7 @@ func (p *Sketch) parseBarLine(data string) error {
 		if p.currentBarNo == -1 {
 			return fmt.Errorf("can't start with a jump: we need bars and parts first")
 		}
-		p.finishPart(p.projectedBarEnd)
+		//p.finishPart(p.projectedBarEnd)
 		return p.handleJump(data)
 
 	}
@@ -432,10 +433,12 @@ func (p *Sketch) parseBarLine(data string) error {
 }
 
 func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
-	if DEBUG {
-		//fmt.Printf("unrollPartBars called for bars \n")
-		printBars("unrollPartBars start", bars...)
-	}
+	/*
+		if DEBUG {
+			//fmt.Printf("unrollPartBars called for bars \n")
+			printBars("unrollPartBars start", bars...)
+		}
+	*/
 	var res []*Bar
 	var lastBarEnd uint
 	var i int
@@ -459,7 +462,7 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 			//diff := (endPos - startPos) - uint(bar.Length32th())
 
 			partBars := getBarsInPosRange(startPos, endPos, bars)
-			printBars("partsBars Part "+bar.JumpTo, partBars...)
+			//printBars("partsBars Part "+bar.JumpTo, partBars...)
 
 			var nbars []*Bar
 
@@ -474,7 +477,7 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 				i++
 			}
 
-			printBars("nbars Part "+bar.JumpTo, nbars...)
+			//printBars("nbars Part "+bar.JumpTo, nbars...)
 
 			res = append(res, nbars...)
 
@@ -494,7 +497,7 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 				nbars = append(nbars, nub)
 				i++
 			}
-			printBars("brs ", nbars...)
+			//printBars("brs ", nbars...)
 			res = append(res, nbars...)
 		}
 
@@ -557,12 +560,12 @@ func (s *Sketch) UnrolledBars() (unrolled []*Bar, err error) {
 	if err != nil {
 		return nil, err
 	}
-	printBars("after unrolling included", unrolled...)
+	//printBars("after unrolling included", unrolled...)
 	unrolled, err = s.unrollPartBars(unrolled)
 	if err != nil {
 		return nil, err
 	}
-	printBars("after unrolling PartBars", unrolled...)
+	//printBars("after unrolling PartBars", unrolled...)
 	return
 }
 
@@ -591,7 +594,9 @@ func (p *Sketch) handleEmptyBarChange(comment, part string) {
 
 func (p *Sketch) finishPart(end uint) {
 	if p.inPart != "" {
-		//fmt.Printf("finishPart %q at %v\n", p.inPart, end)
+		if DEBUG {
+			fmt.Printf("finishPart %q at %v\n", p.inPart, end)
+		}
 		if old := p.Parts[p.inPart]; old[1] == 0 {
 			old[1] = end
 			p.Parts[p.inPart] = old
@@ -606,6 +611,7 @@ func (t *Sketch) isTemplate() bool {
 
 // handleJump handles a jump
 func (p *Sketch) handleJump(data string) error {
+	p.finishPart(p.projectedBarEnd)
 	b := NewBar()
 	part := strings.TrimSpace(strings.Trim(data, "[]"))
 

@@ -1,7 +1,6 @@
 # nächste TODOs
 
 - allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
-- allow columns to indicate their end via _ (for repetitions etc)
 
 - BUGS:
   - invalid file: sometimes position is longer than endpos (try to fix cause)
@@ -38,29 +37,19 @@ Die Taktwiederholungszeichen kann man auch innerhalb der Parameter verwenden:
 # Was fehlt mir bei muskel?
 
 1. Die Möglichkeit, den aktuellen Ton zu hören und ändern zu können 
-2. Die Visualisierung der Melodie
-3. Es gibt keine Möglichkeit, auf einfachem Wege Noten in Spalten "nach unten" oder "nach oben" zu schieben.
-
-# Lösungen:
-
-## zu 2:
-
-Man könnte die Konvention haben, dass wenn ein Spaltenname auf `<` endet, die Spalte "expanded" ist, d.h. der Spaltenname beinhaltet nicht das `<`, aber die Anordnung der Töne spiegelt durch Padding den Tonhöhenverlauf wider (von links nach rechts mit minimalen Abständen).
-
-## zu 1:
-
 Wir brauchen die Möglichkeit, einen Sinuston zu spielen, basierend auf einer Zeilen und Spaltenposition.
 Dann brauchen wir die Möglichkeit, aus einem Editor heraus einen Befehl aufzurufen und Dateiname, Zeile und Spalte anzugeben. Oder wir haben ein Sonderzeichen, dass beim Parsen zum abspielen führt (z.B. `==`)
 
-## zu 3:
+2. Die Visualisierung der Melodie
+Man könnte die Konvention haben, dass wenn ein Spaltenname auf `<` endet, die Spalte "expanded" ist, d.h. der Spaltenname beinhaltet nicht das `<`, aber die Anordnung der Töne spiegelt durch Padding den Tonhöhenverlauf wider (von links nach rechts mit minimalen Abständen).
 
+3. Es gibt keine Möglichkeit, auf einfachem Wege Noten in Spalten "nach unten" oder "nach oben" zu schieben.
 Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang und Ende der zu verschiebenden Noten markieren können. z.B. `^+(` für _Start verschieben nach unten_ mit Menge an Pluszeichen = Anzahl der Verschiebepositionen und analog `^-(` für _Start verschieben nach oben_ und `^)` für das _Ende der letzten Verschiebegruppe_ (kann am Ende der Spalte weggelassen werden)
+
  
 - wir brauchen bei den tracks einen ambitus: from: to: type: (ignore,fit,mirror)
   ignore entfernt noten, die nicht reinpassen, fit verwendet die nächste passende note der skala, mirror spiegelt die note
   octaven nach unten/oben (solange, bis es passt)
-
-
 
 - dokumentation aktualisieren
 

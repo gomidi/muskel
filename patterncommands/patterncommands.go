@@ -18,12 +18,12 @@ import (
 type Command func(params []string, helper Helper) ([]*items.Event, error)
 
 var Commands = map[string]Command{
-	"reverse":  reverse,
-	"euclid":   euclid,
-	"merge":    merge,
-	"rabbit":   rabbit,
-	"mirror":   mirror,
-	"negative": negative,
+	"reverse":  Reverse,
+	"euclid":   Euclid,
+	"merge":    Merge,
+	"rabbit":   Rabbit,
+	"mirror":   Mirror,
+	"negative": Negative,
 }
 
 type Helper interface {
