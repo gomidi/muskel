@@ -1,8 +1,76 @@
+# größere Überarbeitung
+
+- einzelne Zahlen sind die Position in der Scala (also ohne vorangehendes Dach ^), dafür müssen wir vorher die kurzschreibweise abschaffen oder ändern
+- das Dach kann an eine Zahl drangehängt werden, gefolgt von einer weiteren Zahl, die die Verschiebung
+  um die Anzahl an Stufen ausdrückt (wichtig: wir zählen die Stufen jetzt von der 0 ausgehend: 0: 1.Stufe, 1: 2. Stufe etc.)
+
+    0^2
+
+  wäre die Stufe 1, verschoben um zwei Stufen aufwärts, also Stufe 3
+
+    2^-2
+
+  wäre Stufe 3, verschoben um zwei Stufen abwärts, also Stufe 1
+
+    -2^4
+
+  wäre 2, also Stufe 3
+
+    5^0
+
+  wäre 5, also Stufe 6
+
+- damit kann man auch in Patterns das "einhängen" auf bestimmten Stufen ermöglichen, z.B.
+
+    =pt  |      | 1     | 2     |
+    #
+    1    | #1   | =.(1) | =.(2) |
+    1&   | #1^2 |       |       |
+    2    | #1^1 |       |       |
+    2&   | #1^3 |       |       |
+    3    | #1^2 |       |       |
+    3&   | #1^4 |       |       |
+    4    | #1^3 |       |       |
+    4&   | #1^5 |       |       |
+
+
+
 # nächste TODOs
 
-- allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
+- frei stehende Plus- und Minuszeichen erlauben "aufgepropfte" Dynamik/Dynamikverläufe, z.B.
+
+    =pt  | piano |
+    #
+      1  | c'++  |
+      2  | d-    |
+
+    =SCORE | piano       | piano-dyn |
+    #
+      1    | =pt.piano%4 | +++       |
+    #
+      2    |             | --        |
+    #                   // exponentieller Dynamikverlauf
+      1    |             | =~~       |
+    #
+      1    |             | ++        |
+    
+Die Plus- und Minuszeichen werden einfach auf die darunterliegende Dynamik "aufaddiert".
+
+- Tempoverläufe scheinen nicht zu funktionieren
+
+- make a scale out of a multiitem:
+
+    =SCORE    | p |
+    # \(c e g)  // below comes the g
+      1       | 2 |
+    
+    
+
+- allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  
+  (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
   
-- $$save(key,what...) erlaubt speichern von Werten in einer Token-Tabelle. Key ist .table.token.col von einer Tokentabelle, die existieren muss.
+- $$save(key,what...) erlaubt speichern von Werten in einer Token-Tabelle. Key ist .table.token.col von 
+  einer Tokentabelle, die existieren muss.
   bei .table.token. wird die spalte der aktuellen Spalte verwendet. what kann folgendes sein:
   - ^1 ^2 etc. Scalenwert der aktuellen Scala in dieser Spalte in dieser Zeitposition
   - CC(12) der aktuelle Controllerwert für den Controller 12 in dieser Spalte in dieser Zeitposition
