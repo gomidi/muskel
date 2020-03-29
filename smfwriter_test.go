@@ -3729,6 +3729,47 @@ Ch     | 2   | 1   |
 [3840] channel.NoteOff channel 0 key 51
 `,
 		},
+		{ // 123
+			`
+TRACK  | voc |
+Ch     | 1   |
+
+=SCORE | voc  |
+#
+  1   | 1  |
+#
+  1   | 2  |
+#
+  1   | 1' |
+#
+  1   | 2"  |
+#
+  1   | -1  |
+#
+  1   | -1'  |
+#
+  1   | -2" |
+`,
+			2,
+			false,
+			false,
+			`
+[0] channel.NoteOn channel 0 key 60 dyn =
+[3840] channel.NoteOff channel 0 key 60
+[0] channel.NoteOn channel 0 key 62 dyn =
+[3840] channel.NoteOff channel 0 key 62
+[0] channel.NoteOn channel 0 key 72 dyn =
+[3840] channel.NoteOff channel 0 key 72
+[0] channel.NoteOn channel 0 key 86 dyn =
+[3840] channel.NoteOff channel 0 key 86
+[0] channel.NoteOn channel 0 key 59 dyn =
+[3840] channel.NoteOff channel 0 key 59
+[0] channel.NoteOn channel 0 key 47 dyn =
+[3840] channel.NoteOff channel 0 key 47
+[0] channel.NoteOn channel 0 key 33 dyn =
+[3840] channel.NoteOff channel 0 key 33
+`,
+		},
 		/*
 
 

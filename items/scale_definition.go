@@ -56,14 +56,75 @@ func (m *ScaleDefinition) findStep(basenote uint8, note int) (step int8) {
 resultiert in (halbton-differenz zum Nullpunkt)  -7,-5,-3 ,-2, 0,3
 */
 
-/*
-type Mode interface {
-	Name() string
-	NoteToStep(basenote, note uint8) (step int8)
-	StepToNote(basenote uint8, step int8) (note uint8)
+type inplaceScale struct {
+	notes []*Note
 }
 
-*/
+func (s *inplaceScale) Dup() Item {
+	return &inplaceScale{
+		notes: s.notes,
+	}
+}
+
+var _ Mode = &inplaceScale{}
+var _ Item = &inplaceScale{}
+
+func (ip *inplaceScale) Parse(data string, pos uint) error {
+
+	nt := strings.Split(data, " ")
+
+	for _, n := range nt {
+		var nn Note
+		err := nn.Parse(strings.TrimSpace(n), 0)
+		if err != nil {
+			return fmt.Errorf("can't parse in place scale: not a note: %q", n)
+		}
+		ip.notes = append(ip.notes, &nn)
+	}
+
+	return nil
+}
+
+func (i *inplaceScale) Name() string {
+	var bd strings.Builder
+
+	bd.WriteString("(")
+
+	for j, n := range i.notes {
+		if j > 0 {
+			bd.WriteString(" ")
+		}
+		bd.WriteString(n.String())
+	}
+
+	bd.WriteString(")")
+	return bd.String()
+}
+
+func (i *inplaceScale) String() string {
+	return "\\" + i.Name()
+}
+
+func (i *inplaceScale) All(basenote uint8) (notes []uint8) {
+	for _, n := range i.notes {
+		notes = append(notes, n.ToMIDI())
+	}
+	return
+}
+
+func (i *inplaceScale) NoteToStep(basenote, note uint8) (step int8) {
+	for s, n := range i.notes {
+		if n.ToMIDI() == note {
+			return int8(s)
+		}
+	}
+	return -1
+}
+
+func (i *inplaceScale) StepToNote(basenote uint8, step int8) (note uint8) {
+	s := int(step) % len(i.notes)
+	return i.notes[s].ToMIDI()
+}
 
 var _ Mode = &ScaleDefinition{}
 
@@ -106,9 +167,9 @@ func keyToNote(key uint8) (nt Note) {
 func (s *ScaleDefinition) StepToNote(basenote uint8, step int8) (note uint8) {
 	var x int
 	/*
-	if step >= 0 {
-		step += 1
-	}
+		if step >= 0 {
+			step += 1
+		}
 	*/
 
 	//fmt.Printf("StepToNote(basenote: %s, step %v)\n", keyToNote(basenote), step)
@@ -117,7 +178,7 @@ func (s *ScaleDefinition) StepToNote(basenote uint8, step int8) (note uint8) {
 	case step == 0:
 		return basenote
 	case step > 0:
-		x = int(step)  + s.zeroIdx
+		x = int(step) + s.zeroIdx
 	case step < 0:
 		x = s.zeroIdx + int(step)
 	default:

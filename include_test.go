@@ -2928,6 +2928,52 @@ Ch |1  |
     2                     | d  |
 `,
 		},
+		{ // 94
+			`
+TRACK |p|
+Ch |1  |
+
+=SCORE |p|
+#
+1  | \(c e g) |
+2  | (1 2 3)   |
+#
+1  | \(g a b) |
+2  | (2 3)     |
+3  | *         |
+			`,
+			`
+=SCORE                   | p       |
+ # 4/4 @120.00 \major^c'
+    2                    | (c e g) |
+ #
+    2                    | (a b)   |
+    3                    | *       |
+`,
+		},
+		{ // 95
+			`
+TRACK |p|
+Ch |1  |
+
+=SCORE |p|
+# \(c e g)
+1  |  |
+2  | (1 2 3)   |
+# \(g a b)
+1  |  |
+2  | (2 3)     |
+3  | *         |
+			`,
+			`
+=SCORE                  | p       |
+ # 4/4 @120.00 \(c e g)
+    2                   | (c e g) |
+ # \(g a b)
+    2                   | (a b)   |
+    3                   | *       |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

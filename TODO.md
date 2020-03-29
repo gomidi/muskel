@@ -2,13 +2,7 @@
 
 ## nächstes 
 
-- bei scale notes sind " und ' als oktavierungszeichen aktiv. d.h. wenn die scalenote > 0 wird aufwärts oktaviert und wenn sie < 0, wird abwärts oktaviert
 - Tempoverläufe scheinen nicht zu funktionieren
-- make a scale out of a multiitem:
-
-    =SCORE    | p |
-    # \(c e g)  // below comes the g
-      1       | 2 |
 
 - allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  
   (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
@@ -97,8 +91,8 @@ Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang 
 - some improvements to make it faster to write:
   - check that position goes not beyond bar length
 - check and fix randomness
-- allow tempo changes inside columns of main score, independant from main tempo with @130 etc. to set back to the main tempo, use
-  just @. also relative tempo possible, e.g. @50%
+- allow tempo changes inside columns of main score, independant from main tempo with @130 etc. 
+  to set back to the main tempo, use just @. also relative tempo possible, e.g. @50%
 
 ## later
 - convert csv to muskel
@@ -115,6 +109,14 @@ Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang 
 - Ducking?
 
 # erledigt
+
+- bei scale notes sind " und ' als oktavierungszeichen aktiv. d.h. wenn die scalenote > 0 wird aufwärts oktaviert und wenn sie < 0, wird abwärts oktaviert
+
+- make a scale out of a multiitem:
+
+    =SCORE    | p |
+    # \(c e g)  // below comes the g
+      1       | 2 |
 
 - einzelne Zahlen sind die Position in der Scala (also ohne vorangehendes Dach ^)
 - das Dach kann an eine Zahl drangehängt werden, gefolgt von einer weiteren Zahl, die die Verschiebung

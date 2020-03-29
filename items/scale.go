@@ -33,6 +33,15 @@ func (s *Scale) All() []uint8 {
 }
 
 func (s *Scale) Parse(data string, pos uint) error {
+	//fmt.Printf("parsing scale %q\n", data)
+	if idx := strings.Index(data, ")"); idx > 0 && data[0] == '(' {
+		//fmt.Printf("parsing InplaceScale: %q\n", data)
+		var is inplaceScale
+		err := is.Parse(data[1:idx], 0)
+		s.Mode = &is
+		return err
+	}
+
 	idx := strings.Index(data, "^")
 	if idx < 1 {
 		return fmt.Errorf("invalid scale syntax: \\%s", data)
@@ -59,6 +68,10 @@ func (s *Scale) String() string {
 	name := s.Name
 	if name == "" {
 		name = s.Mode.Name()
+	}
+
+	if _, isInPlace := s.Mode.(*inplaceScale); isInPlace {
+		return fmt.Sprintf("\\%s", name)
 	}
 	return fmt.Sprintf("\\%s^%s", name, nt.String())
 }

@@ -189,6 +189,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			return
 		case '\\': // scale
 			var sc Scale
+			//fmt.Printf("parsing Scale: %q\n", data)
 			if idx := strings.Index(data, "..."); idx > 0 {
 				sc.Exploded = true
 				data = data[:idx]

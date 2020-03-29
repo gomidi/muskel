@@ -768,6 +768,13 @@ func convertScaleNotes(in items.Item, scale *items.Scale) items.Item {
 			if aug == "#" {
 				key++
 			}
+			if aug == "b" {
+				key--
+			}
+			if v.Octave != 0 {
+				//fmt.Printf("setting octave for scaleNote: %v\n", v.ScaleNote)
+				key = uint8(int(key) + 12*v.Octave)
+			}
 			nt.Letter, nt.Augmenter, nt.Octave = items.KeyToNote(key)
 			//fmt.Printf("convert scalenote %v to %s via %#v\n", v.ScaleNote-1, nt.String(), scale)
 			return nt
