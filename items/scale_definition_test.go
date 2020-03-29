@@ -5,6 +5,7 @@ import (
 )
 
 func TestScaleDefinitionNoteToStep(t *testing.T) {
+	//t.Skip()
 	var tests = []struct {
 		definition string
 		baseNote   string
@@ -15,63 +16,63 @@ func TestScaleDefinitionNoteToStep(t *testing.T) {
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`a"`,
-			1,
+			0,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`b"`,
-			2,
+			1,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`c"'`,
-			3,
+			2,
 		},
 
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`d"'`,
-			4,
+			3,
 		},
 
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`e"'`,
-			5,
+			4,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`f"'`,
-			6,
+			5,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`g"'`,
-			7,
+			6,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`a"'`,
-			8,
+			7,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`b"'`,
-			9,
+			8,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
 			`a"`,
 			`c""`,
-			10,
+			9,
 		},
 		{
 			`c",d",e",f",g",a",b"`,
@@ -175,6 +176,7 @@ func TestScaleDefinitionNoteToStep(t *testing.T) {
 }
 
 func TestScaleDefinitionStepToNote(t *testing.T) {
+	//t.Skip()
 	var tests = []struct {
 		definition string
 		baseNote   string

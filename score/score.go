@@ -758,13 +758,11 @@ func convertScaleNotes(in items.Item, scale *items.Scale) items.Item {
 	}
 	switch v := in.(type) {
 	case *items.Note:
-		if v.ScaleNote != 0 && scale != nil {
+		if v.IsScaleNote && scale != nil {
 			nt := v.Dup().(*items.Note)
+			nt.IsScaleNote = false
 			nt.ScaleNote = 0
 			sn := v.ScaleNote
-			if sn > 0 {
-				sn -= 1
-			}
 			aug := nt.Augmenter
 			key := scale.StepToNote(sn)
 			if aug == "#" {

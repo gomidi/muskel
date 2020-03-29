@@ -6,24 +6,24 @@ import (
 
 func TestScaleNote(t *testing.T) {
 	tests := []string{
-		"^1",
-		"^2~",
-		"^-1:",
-		"^-10+",
-		"^10++",
-		"^10+++",
-		"^10++++",
-		"^10-",
-		"^10--",
-		"^10---",
-		"^10----",
-		"^10=",
-		"^10=:~",
+		"1",
+		"2~",
+		"-1:",
+		"-10+",
+		"10++",
+		"10+++",
+		"10++++",
+		"10-",
+		"10--",
+		"10---",
+		"10----",
+		"10=",
+		"10=:~",
 	}
 
 	for _, test := range tests {
 		var nt = &Note{}
-		err := nt.parseScale(test[1:])
+		err := nt.parseScale(test)
 
 		if err != nil {
 			t.Errorf("could not parse note %q: %s", test, err.Error())
@@ -52,7 +52,6 @@ func TestNote(t *testing.T) {
 		"c\"'++++",
 		"c\"'-",
 		"C\"'--",
-		"C^2\"'--",
 		"C\"'---",
 		"C#\"'----",
 		"C#\"'=",
@@ -67,7 +66,7 @@ func TestNote(t *testing.T) {
 		}
 
 		var n2 = nt.Dup().(*Note)
-		n2.Transposition = 0
+		//n2.Transposition = 0
 		// n2.velocity = -1
 
 		n2.Letter, n2.Augmenter, n2.Octave = KeyToNote(nt.ToMIDI())

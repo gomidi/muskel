@@ -2368,8 +2368,8 @@ Channel | 3     |
 
 =SCORE  | Voice                     |
 # 4/4 @120
-1       | ^1 |
-2       | ^2  |
+1       | 1 |
+2       | 2  |
 3       | * |
 
 			`,
@@ -2391,8 +2391,8 @@ Channel | 3     |
 
 =SCORE  | Voice                     |
 # 4/4 @120 \major^d#'
-1       | ^1 |
-2       | ^2  |
+1       | 1 |
+2       | 2  |
 3       | * |
 
 			`,
@@ -2466,7 +2466,7 @@ Ch     |1  |
 =SCORE |p  |
 #
 1      |c"+- |
-2      |^1----+++  |
+2      |1----+++  |
 3      |d+++-  |
 
 			`,
@@ -2837,8 +2837,8 @@ TRACK   | Vocals |
 
 =SCORE | Vocals |
  #
-  1    | c^2'--     |
-  2    | c^-2'++     |
+  1    | 1^1--     |
+  2    | 1^-1++     |
 
 			`,
 			2,
@@ -2847,8 +2847,8 @@ TRACK   | Vocals |
 			`
 [0] channel.NoteOn channel 0 key 62 dyn --
 [960] channel.NoteOff channel 0 key 62
-[0] channel.NoteOn channel 0 key 58 dyn ++
-[2880] channel.NoteOff channel 0 key 58
+[0] channel.NoteOn channel 0 key 59 dyn ++
+[2880] channel.NoteOff channel 0 key 59
 `,
 		},
 		{
@@ -2860,8 +2860,8 @@ TRACK   | Vocals |
 
 =SCORE | Vocals |
  #
-  1    | ^1^2--     |
-  2    | ^1^-1++     |
+  1    | 1^2--     |
+  2    | 1^-1++     |
 
 			`,
 			2,

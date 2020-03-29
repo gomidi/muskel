@@ -1,24 +1,26 @@
 # größere Überarbeitung
 
-- einzelne Zahlen sind die Position in der Scala (also ohne vorangehendes Dach ^), dafür müssen wir vorher die kurzschreibweise abschaffen oder ändern
-- das Dach kann an eine Zahl drangehängt werden, gefolgt von einer weiteren Zahl, die die Verschiebung
-  um die Anzahl an Stufen ausdrückt (wichtig: wir zählen die Stufen jetzt von der 0 ausgehend: 0: 1.Stufe, 1: 2. Stufe etc.)
+- bei scale notes sind " und ' als oktavierungszeichen aktiv. d.h. wenn die scalenote > 0 wird aufwärts oktaviert und wenn sie < 0, wird abwärts oktaviert
 
-    0^2
+- einzelne Zahlen sind die Position in der Scala (also ohne vorangehendes Dach ^)
+- das Dach kann an eine Zahl drangehängt werden, gefolgt von einer weiteren Zahl, die die Verschiebung
+  um die Anzahl an Stufen ausdrückt (wichtig: wir zählen die Stufen von der 1 ausgehend: 1: 1.Stufe, 1: 2. Stufe etc.)
+
+    1^2
 
   wäre die Stufe 1, verschoben um zwei Stufen aufwärts, also Stufe 3
 
-    2^-2
+    3^-2
 
   wäre Stufe 3, verschoben um zwei Stufen abwärts, also Stufe 1
 
     -2^4
 
-  wäre 2, also Stufe 3
+  wäre Stufe 3
 
-    5^0
+    6^0
 
-  wäre 5, also Stufe 6
+  wäre Stufe 6
 
 - damit kann man auch in Patterns das "einhängen" auf bestimmten Stufen ermöglichen, z.B.
 

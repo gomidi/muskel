@@ -43,6 +43,11 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 		return nil, nil
 	case 1:
 		switch data[0] {
+		case '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			nt := &Note{}
+			err = nt.parseScale(data)
+			it = nt
+			return
 		case '%':
 			return repeatLastEvent{}, nil
 		case ':':
@@ -176,9 +181,10 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 		//	return parseNote(data[1:])
 		//case 'Z':
 		//	return parseNote(data[1:])
-		case '^':
+		//case '^':
+		case '-', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 			nt := &Note{}
-			err = nt.parseScale(data[1:])
+			err = nt.parseScale(data)
 			it = nt
 			return
 		case '\\': // scale
@@ -268,11 +274,13 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			}
 
 			switch data[0:2] {
-			case "_^":
-				nt := &Note{}
-				err = nt.parseScale("_" + data[2:])
-				it = nt
-				return
+			/*
+				case "_^":
+					nt := &Note{}
+					err = nt.parseScale("_" + data[2:])
+					it = nt
+					return
+			*/
 			//case "_°": // hack for keyboads that don't allow to properly insert ^
 			/*
 				case "_\\":
@@ -311,6 +319,13 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 				pt := &MIDIPolyAftertouch{}
 				err = pt.Parse(data[2:], posIn32th)
 				it = pt
+				return
+			}
+
+			if regExEndScaleNote.MatchString(data) {
+				nt := &Note{}
+				err = nt.parseScale(data)
+				it = nt
 				return
 			}
 

@@ -278,23 +278,6 @@ func velocityToDynamic(vel int8) (dyn string) {
 	}
 }
 
-type templateFragment struct {
-	position string
-	item     string
-}
-
-func (f *templateFragment) parse(s string) {
-	//fmt.Printf("templateFragment.parse(%q)\n", s)
-	if regPos.MatchString(s) {
-		all := regPos.FindAllString(s, 1)
-		//fmt.Printf("matching: %v\n", all)
-		f.position = all[0]
-
-		s = regPos.ReplaceAllString(s, "")
-	}
-	f.item = s
-}
-
 // syntax for params:  #1 #2 etc.
 var regPos = regexp.MustCompile("^([1-9]?[0-9]?)([&;" + regexp.QuoteMeta(",") + regexp.QuoteMeta(",") + "]*)")
 
@@ -309,17 +292,6 @@ func splitItems(def string) (items []string) {
 			items = append(items, it)
 		}
 	}
-	return
-}
-
-func replaceItemWith(replacement string) (position string, item string) {
-	var frepl templateFragment
-	frepl.parse(replacement)
-
-	position = frepl.position
-
-	item = frepl.item
-
 	return
 }
 
@@ -490,64 +462,6 @@ func PositionTo32th(lastBeatNo uint, pos string) (completed string, num32th uint
 	return
 
 }
-
-// lastPos must either be "", then pos must be complete
-// (i.e. must start with a number) or lastPos must be complete
-// then pos may be derived from it
-/*
-func PositionTo32th(lastPos, pos string) (completed string, num32th uint, err error) {
-
-	number, rest := getQNNumberFromPos(pos)
-	completed = pos
-
-	if number == -1 {
-		if lastPos == "" {
-			panic("lastPos must be given, if pos is incomplete")
-		}
-
-		lastNum, lastRest := getQNNumberFromPos(lastPos)
-
-		if lastNum < 1 {
-			panic("lastPos must be given, if pos is incomplete")
-		}
-
-		number = lastNum
-		rest = lastRest + rest
-		completed = fmt.Sprintf("%v%s", number, rest)
-
-		//		fmt.Printf("lastPos: %q pos: %q completed: %q\n", lastPos, pos, completed)
-
-	}
-
-	num32th = uint((number - 1) * 8)
-
-	if rest == "" {
-		return
-	}
-
-	switch rest {
-	case ";":
-		num32th += 1
-	case ".":
-		num32th += 2
-	case ".;":
-		num32th += 3
-	case "&":
-		num32th += 4
-	case "&;":
-		num32th += 5
-	case "&.":
-		num32th += 6
-	case "&.;":
-		num32th += 7
-	default:
-		err = fmt.Errorf("invalid rest: %q in position %q", rest, pos)
-	}
-
-	return
-
-}
-*/
 
 func slice(start, end int, s [][]bool) [][]bool {
 	if end < 0 {

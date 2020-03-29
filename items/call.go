@@ -276,6 +276,8 @@ var regExTemplate1 = regexp.MustCompile("^(" + regexp.QuoteMeta("=") + "[" + reg
 var regExToken0 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 var regExToken1 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 
+var regExEndScaleNote = regexp.MustCompile("^_(-)?[0-9]+")
+
 func (pc *Call) Parse(data string, positionIn32th uint) (err error) {
 	return pc.ParseTemplate(data, positionIn32th)
 }

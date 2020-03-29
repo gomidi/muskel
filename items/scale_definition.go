@@ -38,10 +38,10 @@ func (m *ScaleDefinition) findStep(basenote uint8, note int) (step int8) {
 			oct := (i - int(basenote)) / m.span
 
 			if diff > 0 {
-				return int8(diff + 1 + oct)
+				return int8(diff + oct)
 			} else {
 				oct += 1
-				return int8((m.span*oct)+diff-m.zeroIdx) + 1
+				return int8((m.span * oct) + diff - m.zeroIdx)
 			}
 		}
 	}
@@ -92,7 +92,7 @@ func (s *ScaleDefinition) Name() string {
 func (s *ScaleDefinition) NoteToStep(basenote, note uint8) (step int8) {
 	switch {
 	case note == basenote:
-		return 1
+		return 0
 	default:
 		return s.findStep(basenote, int(note))
 	}
@@ -105,17 +105,19 @@ func keyToNote(key uint8) (nt Note) {
 
 func (s *ScaleDefinition) StepToNote(basenote uint8, step int8) (note uint8) {
 	var x int
+	/*
 	if step >= 0 {
 		step += 1
 	}
+	*/
 
 	//fmt.Printf("StepToNote(basenote: %s, step %v)\n", keyToNote(basenote), step)
 
 	switch {
-	case step == 1:
+	case step == 0:
 		return basenote
-	case step > 1:
-		x = int(step) - 1 + s.zeroIdx
+	case step > 0:
+		x = int(step)  + s.zeroIdx
 	case step < 0:
 		x = s.zeroIdx + int(step)
 	default:

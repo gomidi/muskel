@@ -455,8 +455,8 @@ TRACK | left |
 
 =SCORE | left |
 # \ionian^d#
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 `,
 			`
 =SCORE                    | left |
@@ -472,14 +472,14 @@ TRACK | left |
 
 =SCORE | left |
 #
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 #  \ionian^d#
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 #  \ionian^f#
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 `,
 			`
 =SCORE                   | left |
@@ -501,15 +501,15 @@ TRACK | left |
 
 =SCORE | left |
 #
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 #  \ionian^d#
-1      | ^1   |
+1      | 1   |
 2      | \ionian^g |
-2      | ^2   |
+2      | 2   |
 #  \ionian^f#
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 `,
 			`
 =SCORE                   | left |
@@ -531,19 +531,19 @@ TRACK | left |
 
 =patt | a |
 #
-1      | ^1   |
+1      | 1   |
 2      | \ionian^g |
-2      | ^2   |
+2      | 2   |
 
 =SCORE | left |
 #
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 #  \ionian^d#
 1      | =patt  |
 #  \ionian^f#
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 `,
 			`
 =SCORE                   | left |
@@ -572,19 +572,19 @@ SCALE | myscale |
 
 =patt | a |
 #
-1      | ^1   |
+1      | 1   |
 2      | \myscale^a" |
-2      | ^2   |
+2      | 2   |
 
 =SCORE | left |
 #
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 #  \myscale^d#
 1      | =patt  |
 #  \myscale^d"
-1      | ^1   |
-2      | ^2   |
+1      | 1   |
+2      | 2   |
 `,
 			`
 =SCORE                   | left |
@@ -606,26 +606,26 @@ TRACK | left | right |
 
 =patt | |
 #
-1    |^1 |
-2    |^2 |
+1    |1 |
+2    |2 |
 #
-1    |^1 |
-2    |^2 |
+1    |1 |
+2    |2 |
 #
-1    |^1 |
-2    |^2 |
+1    |1 |
+2    |2 |
 
 
 =SCORE | left | right |
 # \minor^b'
-1      | ^2   | =patt |
-2      | ^1 | |
+1      | 2   | =patt |
+2      | 1 | |
 #
 1      |=patt |  | 
 *2
 #
-1      | ^2   | ^1  |
-2      | ^1   | ^1  |
+1      | 2   | 1  |
+2      | 1   | 1  |
 `,
 			`
 =SCORE                   | left | right |
@@ -653,11 +653,11 @@ TRACK | left | right |
 
 =patt | |
 #
-1    |^1 |
-2    |^2 |
+1    |1 |
+2    |2 |
 #
-1    |^3 |
-2    |^3 |
+1    |3 |
+2    |3 |
 
 
 =SCORE | right   |
@@ -704,11 +704,11 @@ TRACK | x | y |
 
 =patt | 2    | 1   | 0  |
 #
- 1    |      | =.2 | ^1 |
- 4&   | ^4   |     |    |
+ 1    |      | =.2 | 1 |
+ 4&   | 4   |     |    |
 #
- 1    | ^3   |     | ^2 |
- 2    | ^2   |     |    |
+ 1    | 3   |     | 2 |
+ 2    | 2   |     |    |
 
 =SCORE | x          | y          |
 #  \major^c"
@@ -743,10 +743,10 @@ TRACK | x | y |
 =patt | 2    | 
 #
  1    |      |
- 4&   | ^4   |     
+ 4&   | 4   |     
 #
- 1    | ^3   |   
- 2    | ^2   |     
+ 1    | 3   |   
+ 2    | 2   |     
 
 =SCORE | x            | y           |
 #  \major^c"
@@ -1352,9 +1352,9 @@ TRACK | x |
 
 =SCORE | x  | 
 # \minor^e
- 1     | ^1 |
- 2     | ^2 |
- 3     | ^3 | 
+ 1     | 1 |
+ 2     | 2 |
+ 3     | 3 | 
   
 `,
 			`
@@ -1690,8 +1690,8 @@ TRACK    | Vocals | Drums |
 			`
 =melody | Verse1 |
  #
-  1     | a^2      |
-  2     | a^-2     |
+  1     | 6^2      |
+  2     | 6^-2     |
 
 TRACK   | Vocals |
  Channel| 1      |
@@ -1703,8 +1703,8 @@ TRACK   | Vocals |
 			`
 =SCORE                   | Vocals |
  # 4/4 @120.00 \major^c'
-    1                    | a^2    |
-    2                    | a^-2   |
+    1                    | c"     |
+    2                    | f'     |
 `,
 		},
 		{ // 51
@@ -1812,10 +1812,10 @@ TRACK | Voc | Piano |
 
 =SCORE   | Voc | Piano |
 # \minor^c
-1        | ^1  | ^2    |
+1        | 1  | 2    |
 $$include("testdata/includes/score3", "=something")
 #
-1        | ^1   |  ^2    |    
+1        | 1   |  2    |    
 
 `,
 			`
@@ -1834,10 +1834,10 @@ TRACK | Voc | Piano |
 
 =SCORE   | Voc | Piano |
 # \minor^c
-1        | ^1  | ^2    |
+1        | 1  | 2    |
 $$include("testdata/includes/score3", "=something2")
 #
-1        | ^1   |  ^2    |    
+1        | 1   |  2    |    
 
 `,
 			`
@@ -2169,11 +2169,11 @@ TRACK | flute |
 
 =SCORE | flute | 
 # \major^g'
- 1     | ^1    |
- 1& \major^c' | ^1 |
- 2     | ^2     | 
+ 1     | 1    |
+ 1& \major^c' | 1 |
+ 2     | 2     | 
 #
- 3     | ^2     | 
+ 3     | 2     | 
 
 
 `,
@@ -2194,11 +2194,11 @@ TRACK | flute |
 
 =SCORE | flute | 
 # @110
- 1     | ^1    |
- 1& @115 | ^1 |
- 2     | ^2     | 
+ 1     | 1    |
+ 1& @115 | 1 |
+ 2     | 2     | 
 #
- 3     | ^2     | 
+ 3     | 2     | 
 
 
 `,
@@ -2219,11 +2219,11 @@ TRACK | flute |
 
 =SCORE | flute | 
 # @110
- 1     | ^1    |
+ 1     | 1    |
  1& @115 |  |
- 2     | ^2     | 
+ 2     | 2     | 
 #
- 3     | ^2     | 
+ 3     | 2     | 
 
 
 `,
@@ -2243,11 +2243,11 @@ TRACK | flute |
 
 =SCORE | flute | 
 # \major^g'
- 1     | ^1    |
+ 1     | 1    |
  1& \major^c' |  |
- 2     | ^2     | 
+ 2     | 2     | 
 #
- 3     | ^2     | 
+ 3     | 2     | 
 
 
 `,
@@ -2398,7 +2398,7 @@ TRACK | flute |
 2     | #2  |
 
 .chords |
- T      | (^1 ^3 ^5)
+ T      | (1 3 5)
 
 =SCORE | flute | 
 #
@@ -2424,7 +2424,7 @@ TRACK | flute |
 2     | #2  |
 
 .chords |
- T      | (^1 ^3 ^5)
+ T      | (1 3 5)
 
 =SCORE | flute | 
  1     | =arp(.chords.T...) |

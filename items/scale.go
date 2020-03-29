@@ -94,7 +94,7 @@ func (m mode) Name() string {
 }
 
 func (m mode) NoteToStep(basenote, note uint8) (step int8) {
-	// fmt.Printf("NoteToStep(%v,%v) in mode %q\n", basenote, note, m.name)
+	//fmt.Printf("NoteToStep(%v,%v) in mode %q\n", basenote, note, m.name)
 	var diff int8
 	if basenote > note {
 		diff = int8(basenote-note) * (-1)
@@ -102,22 +102,18 @@ func (m mode) NoteToStep(basenote, note uint8) (step int8) {
 		diff = int8(note) - int8(basenote)
 	}
 
-	diffPlusOne := diff + 1
+	//diffPlusOne := diff + 1
 	octaves := diff / 12
-	octavesPlusOne := diffPlusOne / 12
-	diffPlusOne = diffPlusOne % 12
+	//octavesPlusOne := diffPlusOne / 12
+	//diffPlusOne = diffPlusOne % 12
 	diff = diff % 12
+
+	//fmt.Printf("diff: %v\n", diff)
 
 	if diff >= 0 {
 		for i, v := range m.steps {
 			if int8(v) == diff {
 				return int8(i) + octaves*7
-			}
-		}
-
-		for i, v := range m.steps {
-			if int8(v) == diffPlusOne {
-				return int8(i) + octavesPlusOne*7
 			}
 		}
 
@@ -137,12 +133,12 @@ func (m mode) NoteToStep(basenote, note uint8) (step int8) {
 	}
 
 	for i, v := range m.steps {
-		if int8(v) == (diffPlusOne+12)%12 {
+		if int8(v) == (diff+12)%12 {
 			// fmt.Printf("B [%v] step: %v\n", i, v)
-			if diffPlusOne == 0 {
-				return int8(i) + octavesPlusOne*7
+			if diff == 0 {
+				return int8(i) + octaves*7
 			}
-			return int8(i) - 7 + octavesPlusOne*7
+			return int8(i) - 7 + octaves*7
 		}
 	}
 	panic("must not happen 2")

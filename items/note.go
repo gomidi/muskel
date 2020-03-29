@@ -8,18 +8,17 @@ import (
 	"strings"
 )
 
-// TODO translate augmentation symbols like ^ and ° to pitchbend messages
-
 type Note struct {
 	Letter    string
 	Octave    int
 	Augmenter string
 	//Velocity       int8
+	//Transposition  int8
 	Dynamic        string
-	Transposition  int8
 	GlissandoStart bool
 	GlissandoExp   bool
 	Dotted         string
+	IsScaleNote    bool
 	ScaleNote      int8
 	PosShift       int // 0 = no, 1 = laidback, -1 = ahead of time
 	NoteOn         bool
@@ -68,7 +67,7 @@ func (note Note) ToMIDI() (midinote_ uint8) {
 		//case "°":
 	}
 
-	midinote += int(note.Transposition)
+	//midinote += int(note.Transposition)
 
 	if midinote > 127 {
 		midinote = 127
@@ -85,7 +84,7 @@ func (note Note) ToMIDI() (midinote_ uint8) {
 func (n Note) String() string {
 	var bf strings.Builder
 
-	if n.ScaleNote == 0 {
+	if !n.IsScaleNote {
 		letter := n.Letter
 		if n.Octave < 0 {
 			letter = strings.ToUpper(letter)
@@ -93,9 +92,6 @@ func (n Note) String() string {
 
 		bf.WriteString(letter)
 		bf.WriteString(n.Augmenter)
-		if n.Transposition != 0 {
-			bf.WriteString(fmt.Sprintf("^%v", n.Transposition))
-		}
 
 		switch n.Octave {
 		case -5, 5:
@@ -129,9 +125,35 @@ func (n Note) String() string {
 		}
 
 	} else {
-		bf.WriteString(fmt.Sprintf("^%v", n.ScaleNote))
-		if n.Transposition != 0 {
-			bf.WriteString(fmt.Sprintf("^%v", n.Transposition))
+		if n.ScaleNote >= 0 {
+			bf.WriteString(fmt.Sprintf("%v", n.ScaleNote+1))
+		} else {
+			bf.WriteString(fmt.Sprintf("%v", n.ScaleNote))
+		}
+
+		switch n.Octave {
+		case -4, 4:
+			bf.WriteString("\"\"")
+		case -3, 3:
+			bf.WriteString("\"'")
+		case -2, 2:
+			bf.WriteString("\"")
+		case -1, 1:
+			bf.WriteString("'")
+		case 0:
+			// do nothing
+		case -5, 5:
+			bf.WriteString("\"\"'")
+		case -6, 6:
+			bf.WriteString("\"\"\"")
+		case -7, 7:
+			bf.WriteString("\"\"\"'")
+		case -8, 8:
+			bf.WriteString("\"\"\"\"")
+		case -9, 9:
+			bf.WriteString("\"\"\"\"'")
+		default:
+			panic(fmt.Sprintf("invalid octave: %v", n.Octave))
 		}
 	}
 
@@ -253,17 +275,6 @@ func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 		}
 	}
 
-	if idx := strings.Index(data, "^"); idx >= 0 {
-		if len(data) < 2 {
-			err = fmt.Errorf("invalid note: %#v II", original)
-		}
-		nt.Transposition, data, err = parseTransposition(data[1:])
-		if err != nil {
-			err = fmt.Errorf("invalid note: %#v: %s III", original, err)
-			return
-		}
-	}
-
 	//fmt.Printf("note data: %q\n", data)
 
 	var dynamic string
@@ -327,12 +338,17 @@ func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 	return
 }
 
-var regScaleNote = regexp.MustCompile("^(-){0,1}([0-9]+)(.*)$")
+var regScaleNote = regexp.MustCompile("(-){0,1}([1-9][0-9]*)(.*)$")
 
 func (nt *Note) parseScale(data string) (err error) {
 	original := data
 
 	nt.NoteOn, nt.NoteOff, data = stripNoteOnOff(data)
+
+	if !regScaleNote.MatchString(data) {
+		err = fmt.Errorf("invalid scale note: %#v: %s", data, err)
+		return
+	}
 
 	var transp int8
 
@@ -356,31 +372,21 @@ func (nt *Note) parseScale(data string) (err error) {
 	i, err = strconv.Atoi(mt[1] + mt[2])
 
 	if err != nil {
-		err = fmt.Errorf("invalid scale note: %#v III", data)
+		err = fmt.Errorf("invalid scale note: %#v", data)
 		return
 	}
 
 	nt.ScaleNote = int8(i)
+
+	if nt.ScaleNote > 0 {
+		nt.ScaleNote -= 1
+	}
+
+	nt.IsScaleNote = true
 	switch {
 	case transp == 0:
-	case nt.ScaleNote > 0 && transp > 0:
-		nt.ScaleNote += transp
-	case nt.ScaleNote < 0 && transp < 0:
-		nt.ScaleNote += transp
-	case nt.ScaleNote == 0:
-		err = fmt.Errorf("invalid scale note: %#v III", data)
-		return
-	case nt.ScaleNote+transp == 0:
-		if transp > 0 {
-			nt.ScaleNote = 1
-		} else {
-			nt.ScaleNote = -1
-		}
-	case nt.ScaleNote < 0 && transp > 0:
+	default:
 		nt.ScaleNote = nt.ScaleNote + transp
-		if nt.ScaleNote >= 0 {
-			nt.ScaleNote += 1
-		}
 	}
 
 	var dynamic string
@@ -401,46 +407,29 @@ func (nt *Note) parseScale(data string) (err error) {
 			nt.Augmenter += "#"
 		case 'b':
 			nt.Augmenter += "b"
-		//case '^':
-		//nt.Augmenter += "^"
-		//case '°':
-		//nt.Augmenter += "°"
 		case '>':
 			nt.PosShift += 1
 		case '<':
 			nt.PosShift -= 1
-		/*
-			case '#':
-				nt.augmenter = "#"
-			case '^':
-				nt.augmenter = "^"
-			case '°':
-				nt.augmenter = "°"
-			case '"':
-				if nt.octave > 0 {
-					nt.octave += 2
-				}
+		case '"':
+			if nt.ScaleNote >= 0 {
+				nt.Octave += 2
+			} else {
+				nt.Octave -= 2
+			}
+		case '\'':
+			if nt.ScaleNote >= 0 {
+				nt.Octave += 1
+			} else {
+				nt.Octave -= 1
+			}
 
-				if nt.octave < 0 {
-					nt.octave -= 2
-				}
-			case '\'':
-				if nt.octave > 0 {
-					nt.octave += 1
-				}
-
-				if nt.octave < 0 {
-					nt.octave -= 1
-				}
-		*/
 		default:
 			err = fmt.Errorf("invalid scale note: %#v IV", data)
 			return
 		}
 	}
 
-	//nt.Velocity = DynamicToVelocity(dynamic)
 	nt.Dynamic = dynamic
-
 	return
 }

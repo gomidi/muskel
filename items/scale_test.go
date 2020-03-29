@@ -62,14 +62,14 @@ func TestNoteToStep(t *testing.T) {
 		{
 			Ionian,
 			60,
-			73,
+			74,
 			8,
 		},
 		{
 			Ionian,
 			60,
-			74,
-			8,
+			76,
+			9,
 		},
 		{
 			Ionian,
@@ -110,12 +110,6 @@ func TestNoteToStep(t *testing.T) {
 		{
 			Ionian,
 			60,
-			49,
-			-6,
-		},
-		{
-			Ionian,
-			60,
 			48,
 			-7,
 		},
@@ -134,7 +128,7 @@ func TestNoteToStep(t *testing.T) {
 		{
 			Dorian,
 			50,
-			49,
+			50,
 			0,
 		},
 	}
