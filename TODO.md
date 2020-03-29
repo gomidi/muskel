@@ -2,13 +2,6 @@
 
 ## nächstes 
 
-- allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  
-  (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
-
-- Die Taktwiederholungszeichen kann man auch innerhalb der Parameter verwenden: 
- - ... wiederholt den letzten Parameter, bis alle Parameter ausgefüllt sind.
- - .n. wiederholt die letzten n Parameter, bis alle Parameter ausgefüllt sind
-
 - wir brauchen bei den tracks einen ambitus: from: to: type: (ignore,fit,mirror)
   ignore entfernt noten, die nicht reinpassen, fit verwendet die nächste passende note der skala, mirror spiegelt die note
   octaven nach unten/oben (solange, bis es passt)
@@ -25,8 +18,6 @@
   or with command pipe, e.g. %%/$reverse(=)
 - überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
 - überschreiben nur mit transposition erlauben z.B. /^1 erhöht die "darunterliegende Note" um einen schritt
-
-
 - frei stehende Plus- und Minuszeichen erlauben "aufgepropfte" Dynamik/Dynamikverläufe, z.B.
 
     =pt  | piano |
@@ -45,6 +36,15 @@
       1    |             | ++        |
     
 Die Plus- und Minuszeichen werden einfach auf die darunterliegende Dynamik "aufaddiert".
+
+
+- allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  
+  (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
+
+- Die Taktwiederholungszeichen kann man auch innerhalb der Parameter verwenden: 
+ - ... wiederholt den letzten Parameter, bis alle Parameter ausgefüllt sind.
+ - .n. wiederholt die letzten n Parameter, bis alle Parameter ausgefüllt sind
+
 
 - Aufruf des Templates mit geschweiften Klammern: Parameter werden nicht anhand ihrer Nummer ersetzt, sondern nach der Reihenfolge, in der sie im Template erscheinen (d.h. es müssen alle angegeben werden unabhängig von der Nummer). So kann man dann das gleiche Template mal mit vordefinierten Wiederholungen verwenden und mal diese Überschreiben. Ausserdem kann man auch Platzhalter ohne Nummer verwenden; diese werden dann fortlaufend nummeriert, man kann auch beides kombinieren.
 
