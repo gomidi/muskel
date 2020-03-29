@@ -9,11 +9,9 @@ import (
 )
 
 type Note struct {
-	Letter    string
-	Octave    int
-	Augmenter string
-	//Velocity       int8
-	//Transposition  int8
+	Letter         string
+	Octave         int
+	Augmenter      string
 	Dynamic        string
 	GlissandoStart bool
 	GlissandoExp   bool
