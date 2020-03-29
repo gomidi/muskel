@@ -219,6 +219,12 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			origDiff := diff
 			endOfStream := origDiff
 
+			var all []*items.Event
+
+			if len(repevts) == 0 {
+				continue
+			}
+
 			//res, currentPos = s.repeatBars(repevts, diff, stopPos)
 			res, currentPos = s.repeatBars(repevts, diff)
 			if len(res) == 0 {
@@ -229,8 +235,6 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			//DEBUG = true
 			printEvents("bar repeater I, after repeatBars", res)
 			//DEBUG = false
-
-			var all []*items.Event
 
 			all = append(all, res...)
 

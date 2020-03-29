@@ -962,6 +962,7 @@ func (s *Sketch) parsePosition(firstColumn string) (err error) {
 
 // parseEventsLine parses a non-bar line / event line
 func (s *Sketch) parseEventsLine(tabs []string) error {
+	//fmt.Printf("parseEventsLine %v\n", tabs)
 	if s.barChangeRequired {
 		if len(s.Bars) == 0 {
 			b := NewBar()

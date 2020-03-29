@@ -1,9 +1,7 @@
 package sketch
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"math/rand"
 	"sort"
 	"strconv"
@@ -14,114 +12,34 @@ import (
 	"gitlab.com/gomidi/muskel/patterncommands"
 )
 
-func parseEventsLineItem(posItem string) (pos, value string, err error) {
-	//fmt.Printf("parse eventslineItem: %v\n", posItem)
-	var positionBf strings.Builder
-	var bf strings.Builder
-	rd := bufio.NewReader(strings.NewReader(strings.TrimSpace(posItem)))
-	positionFound := false
-	var rn rune
-
-	for err == nil {
-		rn, _, err = rd.ReadRune()
-
-		if err != nil {
-			break
-		}
-
-		switch {
-		case strings.IndexRune("1234567890&;:,", rn) >= 0:
-			if !positionFound {
-				positionBf.WriteRune(rn)
-			} else {
-				bf.WriteRune(rn)
-			}
-		default:
-			positionFound = true
-			bf.WriteRune(rn)
-		}
-
-	}
-
-	if err != nil && err != io.EOF {
-		return
-	}
-
-	pos = positionBf.String()
-	value = bf.String()
-	err = nil
-	return
-}
-
-func sketchFromEventsLine(name string, patternDef string, sc Score) (*Sketch, error) {
-	posItems := strings.Split(patternDef, "|")
+func SketchFromSketchDef(name string, sketchDef [][2]string, sc Score) (*Sketch, error) {
 	var sk = NewSketch(name, sc)
 	sk.AddColumn("pattern")
-	err := sk.ParseLine([]string{"#"})
-	//	fmt.Printf("ParseLine: %q\n", patternDef)
-	if err != nil {
-		return nil, err
-	}
-	var barNo uint
 
-	for _, posItem := range posItems {
-		pos, val, err := parseEventsLineItem(posItem)
+	for i, df := range sketchDef {
+		pos, val := df[0], df[1]
 
+		err := sk.ParseLine([]string{pos, val, ""})
 		if err != nil {
-			return nil, err
-		}
-
-		var num32 uint
-		_, num32, err = items.PositionTo32th(0, pos)
-
-		if err != nil {
-			return nil, err
-		}
-
-		b := num32 / 32
-		rest := num32 % 32
-
-		for b > barNo {
-			//fmt.Printf("ParseLine: #\n")
-			err = sk.ParseLine([]string{"#"})
-			if err != nil {
-				return nil, err
-			}
-			barNo++
-		}
-
-		//fmt.Printf("ParseLine: %s | %s\n", items.Pos32thToString(rest), val)
-
-		err = sk.ParseLine([]string{items.Pos32thToString(rest), val, ""})
-		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can't parse line %v: %s", i, err.Error())
 		}
 	}
 
 	return sk, nil
 }
 
-func eventsFromPatternDef(name, patternDef string, sc Score, params []string) (evts []*items.Event, err error) {
-	replaced := replaceParams(patternDef, params)
-	//fmt.Printf("eventsFromPatternDef replaced: %q\n", replaced)
-	sk, err := sketchFromEventsLine(name, replaced, sc)
+func EventsFromSketchDef(name string, sketchDef [][2]string, sc Score, params []string) (evts []*items.Event, err error) {
+	sk, err := SketchFromSketchDef(name, sketchDef, sc)
 
 	if err != nil {
 		return nil, err
 	}
 
-	_evts, err := sk.Unroll(nil, "pattern")
+	_evts, err := sk.Unroll(nil, "pattern", params...)
 
 	if err != nil {
 		return nil, err
 	}
-
-	//var p items.Call
-	//var ps items.Parser
-	//p.ItemParser = &ps
-	// p.Params = params
-
-	//p.ParseEventsLine(replaceParams(patternDef, params), posshift, posIn32th)
 
 	for _, pev := range _evts {
 		ev := &items.Event{}
@@ -131,7 +49,7 @@ func eventsFromPatternDef(name, patternDef string, sc Score, params []string) (e
 	}
 
 	if DEBUG {
-		printEvents(" after eventsFromPatternDef "+patternDef, evts)
+		printEvents(" after EventsFromSketchDef "+name, evts)
 	}
 
 	return
@@ -579,8 +497,8 @@ func (p *patterncmdHelper) GetPipeEvents() ([]*items.Event, error) {
 	return p.pipeEvents, nil
 }
 
-func (p *patterncmdHelper) GetPatternDefEvents(patternDef string) ([]*items.Event, error) {
-	return eventsFromPatternDef(p.cmdName, patternDef, p.column.sketch.Score, p.params)
+func (p *patterncmdHelper) GetSketchDefEvents(sketchDef [][2]string) ([]*items.Event, error) {
+	return EventsFromSketchDef(p.cmdName, sketchDef, p.column.sketch.Score, p.params)
 
 }
 

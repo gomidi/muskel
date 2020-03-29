@@ -1,5 +1,7 @@
 module gitlab.com/gomidi/muskel/cmd/muskel
 
+go 1.14
+
 require (
 	github.com/gen2brain/beeep v0.0.0-20180718162406-4e430518395f
 	github.com/godbus/dbus v4.1.0+incompatible // indirect

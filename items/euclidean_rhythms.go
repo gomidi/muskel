@@ -11,7 +11,6 @@ type EuclideanRhythm struct {
 	Notes        int
 	Positions    int
 	Duration32th int
-	PatternDef   string
 	Sketch       [][2]string
 	LastPos      uint
 }
@@ -86,28 +85,29 @@ func (e *EuclideanRhythm) Parse(startPos32th uint, params ...string) error {
 		}
 	}
 
-	var bf strings.Builder
-
 	line := euclideanRhythm(e.Notes, e.Positions)
+	e.Sketch = append(e.Sketch, [2]string{"#", ""})
+	var currentBar uint
 
 	for i, set := range line {
-		pos := Pos32thToString(e.StartPos32th + uint(i*e.Duration32th))
-		e.LastPos = e.StartPos32th + uint(i*e.Duration32th)
+		ap := e.StartPos32th + uint(i*e.Duration32th) - (currentBar * 32)
+
+		if ap >= 32 {
+			currentBar++
+			e.Sketch = append(e.Sketch, [2]string{"#", ""})
+			ap -= 32
+		}
+		pos := Pos32thToString(ap)
+		e.LastPos = ap
 		var val string
 		if set {
 			val = "#1"
-			//fmt.Fprintf(&bf, "%s#1 ", Pos32thToString(uint(e.StartPos32th+i*e.Duration32th)))
 		} else {
 			val = "#2"
 		}
-		e.Sketch = append(e.Sketch, [2]string{pos, val})
-		if i > 0 {
-			pos = "|" + pos
-		}
-		bf.WriteString(pos + val)
-	}
 
-	e.PatternDef = strings.TrimSpace(bf.String())
+		e.Sketch = append(e.Sketch, [2]string{pos, val})
+	}
 
 	return nil
 }

@@ -12,5 +12,5 @@ func Euclid(params []string, helper Helper) (res []*items.Event, err error) {
 		return nil, err
 	}
 
-	return helper.GetPatternDefEvents(eu.PatternDef)
+	return helper.GetSketchDefEvents(eu.Sketch)
 }
