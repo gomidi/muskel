@@ -19,7 +19,12 @@ type Track struct {
 	PitchbendRange uint8
 	// velocity-scale property to refine velocity conversion (min, max, randomize-factor, step-width)
 	VelocityScale [5]uint8 // 0: min 1: max 2: randomize-factor 3: step-width, 4: center
-	EndPos        uint
+	/*
+		ambitus from: to:
+	*/
+	Ambitus            [2]string // notes
+	AmbitusCutOverFlow bool
+	EndPos             uint
 }
 
 func New(name string) *Track {
@@ -44,6 +49,46 @@ func (t *Track) SetImport(importFrom string) error {
 }
 
 var DefaultVeloctiyScale = [5]uint8{1, 127, 4, 15, 63}
+
+func (t *Track) SetAmbitus(ambString string) error {
+	if strings.TrimSpace(ambString) == "" {
+		return nil
+	}
+	props := strings.Split(ambString, " ")
+
+	for _, prop := range props {
+		prop = strings.TrimSpace(prop)
+
+		if prop == "" {
+			continue
+		}
+		pr := strings.Split(prop, ":")
+
+		if len(pr) != 2 {
+			return fmt.Errorf("error in Ambitus property of track %q: %q", t.Name, ambString)
+		}
+
+		key := strings.TrimSpace(pr[0])
+
+		switch strings.ToLower(key) {
+		case "from":
+			t.Ambitus[0] = strings.TrimSpace(pr[1])
+		case "to":
+			t.Ambitus[1] = strings.TrimSpace(pr[1])
+		case "cut":
+			val, errConv := strconv.ParseBool(strings.TrimSpace(pr[1]))
+
+			if errConv != nil {
+				return fmt.Errorf("error in Ambitus property of track %q: %q: %s is not a bool", t.Name, ambString, strings.TrimSpace(pr[1]))
+			}
+			t.AmbitusCutOverFlow = val
+		default:
+			return fmt.Errorf("error in Ambitus property of track %q: unknown property %q", t.Name, key)
+		}
+	}
+
+	return nil
+}
 
 func (t *Track) SetVelScale(velScale string) error {
 	// "min: %v max: %v random: %v step: %v"

@@ -45,6 +45,8 @@ func (t *Tracks) Finish() (err error) {
 					err = tr.SetPitchbendrange(val)
 				case "velscale", "velocityscale":
 					err = tr.SetVelScale(val)
+				case "ambitus":
+					err = tr.SetAmbitus(val)
 				case "file", "filegroup":
 					err = tr.SetFileGroup(val)
 				case "import":

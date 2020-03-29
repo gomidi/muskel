@@ -2997,6 +2997,42 @@ Ch |1  |
     3                     | *       |
 `,
 		},
+		{ // 97
+			`
+TRACK |p|
+Ch |1  |
+Ambitus |from:C' to:c' cut:false|
+
+=SCORE |p|
+#
+1  | D" |
+2  | d' |
+			`,
+			`
+=SCORE                   | p  |
+ # 4/4 @120.00 \major^c'
+    1                    | D' |
+    2                    | d  |
+`,
+		},
+		{ // 98
+			`
+TRACK |p|
+Ch |1  |
+Ambitus |from:C' to:c' cut:true|
+
+=SCORE |p|
+#
+1  | D" |
+1& | c  |
+2  | d' |
+			`,
+			`
+=SCORE                   | p |
+ # 4/4 @120.00 \major^c'
+    1&                   | c |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

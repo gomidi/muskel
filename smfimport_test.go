@@ -50,6 +50,7 @@ TRACK           | bass--8                                   | git--7            
  Delay          |                                           |                                           |
  PitchbendRange |                                           |                                           |
  VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Ambitus        |                                           |                                           |
  Import         |                                           |                                           |
 
 =SCORE     | bass--8 | git--7 |
@@ -92,6 +93,7 @@ TRACK           | bass--8                                   | git--7            
  Delay          |                                           |                                           |                                           |
  PitchbendRange |                                           |                                           |                                           |
  VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Ambitus        |                                           |                                           |                                           |
  Import         |                                           |                                           |                                           |
 
 =SCORE     | bass--8 | git--7 | git2--6 |
@@ -133,6 +135,7 @@ TRACK           | bass--8                                   | git--7            
  Delay          |                                           |                                           |
  PitchbendRange |                                           |                                           |
  VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Ambitus        |                                           |                                           |
  Import         |                                           |                                           |
 
 =SCORE         | bass--8 | git--7 |
@@ -174,6 +177,7 @@ TRACK           | bass--8                                   | git--7            
  Delay          |                                           |                                           |
  PitchbendRange |                                           |                                           |
  VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
+ Ambitus        |                                           |                                           |
  Import         |                                           |                                           |
 
 =SCORE         | bass--8 | git--7 |

@@ -2,10 +2,6 @@
 
 ## nächstes 
 
-- wir brauchen bei den tracks einen ambitus: from: to: type: (ignore,fit,mirror)
-  ignore entfernt noten, die nicht reinpassen, fit verwendet die nächste passende note der skala, mirror spiegelt die note
-  octaven nach unten/oben (solange, bis es passt)
-
 - mehrfache chromatische transposition erlauben, z.B. 
   1^1# transponiert um einen schritt und eine MIDInote aufwärts 
   1^1bb transponiert um einen schritt und zwei MIDInoten abwärts 
@@ -107,6 +103,11 @@ Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang 
 - Ducking?
 
 # erledigt
+
+
+- wir brauchen bei den tracks einen ambitus: from: to: type: (ignore,fit,mirror)
+  ignore entfernt noten, die nicht reinpassen, fit verwendet die nächste passende note der skala, mirror spiegelt die note
+  octaven nach unten/oben (solange, bis es passt)
 
 - bei scale notes sind " und ' als oktavierungszeichen aktiv. d.h. wenn die scalenote > 0 wird aufwärts oktaviert und wenn sie < 0, wird abwärts oktaviert
 

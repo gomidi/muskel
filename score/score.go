@@ -319,6 +319,53 @@ func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []strin
 	return sco.GetSketch(sketch_table)
 }
 
+func (sc *Score) applyAmbitus(unrolled []*items.Event, ambitus [2]string, ambitusCutOverFlow bool) (res []*items.Event) {
+	var from, to uint8
+	if ambitus[0] != "" {
+		nt, err := items.ParseNote(ambitus[0])
+		if err != nil {
+			panic(fmt.Sprintf("invalid ambitus from value: %q not a note", ambitus[0]))
+		}
+		from = nt.ToMIDI()
+	}
+
+	if ambitus[1] != "" {
+		nt, err := items.ParseNote(ambitus[1])
+		if err != nil {
+			panic(fmt.Sprintf("invalid ambitus to value: %q not a note", ambitus[1]))
+		}
+		to = nt.ToMIDI()
+	}
+
+	for _, ev := range unrolled {
+		switch v := ev.Item.(type) {
+		case *items.Note:
+			md := v.ToMIDI()
+			if from > 0 && md < from {
+				if ambitusCutOverFlow {
+					continue
+				}
+				md = md + 12
+			}
+			if to > 0 && md > to {
+				if ambitusCutOverFlow {
+					continue
+				}
+				md = md - 12
+			}
+			var nt items.Note
+			nt.Letter, nt.Augmenter, nt.Octave = items.KeyToNote(md)
+			nev := ev.Dup()
+			nev.Item = &nt
+			res = append(res, nev)
+		default:
+			res = append(res, ev)
+		}
+	}
+
+	return
+}
+
 func (sc *Score) Unroll() error {
 	if sc.IsUnrolled {
 		return nil
@@ -426,7 +473,13 @@ func (sc *Score) Unroll() error {
 	sc.IsUnrolled = true
 
 	for c, evts := range sc.Unrolled {
-		sc.Unrolled[c] = sc.replaceScalenotes(c, evts)
+		unrolled := sc.replaceScalenotes(c, evts)
+		tr, _ := sc.GetTrack(c)
+		if tr.Ambitus[0] != "" || tr.Ambitus[1] != "" {
+			sc.Unrolled[c] = sc.applyAmbitus(unrolled, tr.Ambitus, tr.AmbitusCutOverFlow)
+		} else {
+			sc.Unrolled[c] = unrolled
+		}
 	}
 
 	lastBar := sc.Bars[len(sc.Bars)-1]
@@ -564,6 +617,19 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		//0: min 1: max 2: randomize-factor 3: step-width, 4: center
 		v = fmt.Sprintf("min: %v max: %v random: %v step: %v center: %v", val[0], val[1], val[2], val[3], val[4])
 		data = append(data, v)
+	}
+	trks.AddLine(data)
+
+	data = []string{"Ambitus"}
+	for _, tr := range tracks {
+		val := sc.Tracks[tr].Ambitus
+		var v string
+		if val[0] != "" || val[1] != "" {
+			v = fmt.Sprintf("from: %v to: %v cut: %v", val[0], val[1], sc.Tracks[tr].AmbitusCutOverFlow)
+			data = append(data, v)
+		} else {
+			data = append(data, "")
+		}
 	}
 	trks.AddLine(data)
 
