@@ -19,6 +19,7 @@ type smf struct {
 	fileGroup string
 	score     *score.Score
 	writer    *writer
+	midiTrack MidiTrack
 }
 
 func newSMF(s *score.Score, filegroup string, wr *writer) *smf {
@@ -173,13 +174,19 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 
 		if b.TempoChange > 0 {
 			if inGliss {
-				distance := int64(math.Round(float64(b.Position-glissStartPos) / float64(s.writer.ticks/4)))
+				pos := uint(s.writer.ticks)/8*b.Position - glissStartPos
+
+				//distance := int64(math.Round(float64(b.Position-glissStartPos) / float64(s.midiTrack.GlideResolution(s.writer.ticks))))
+				distance := int64(math.Round(float64(pos) / float64(s.midiTrack.GlideResolution(s.writer.ticks))))
 				diff := b.TempoChange - glissStartBPM
+				//fmt.Printf("tempo glissando: \n\tpos: %v distance: %v, diff: %v ticks: %v\n", pos, distance, diff, float64(s.midiTrack.GlideResolution(s.writer.ticks)))
 
 				glissFn(distance, diff, func(step uint, bpm float64) {
 					evts = append(evts,
 						&event{
-							position: glissStartPos + s.posToTicks(step*2),
+							//uint(t.midiTrack.noteGlide.startPosition + uint64(t.smf.writer.ticks/16)*uint64(step)
+							//position: glissStartPos + s.posToTicks(step*2),
+							position: uint(glissStartPos + uint(s.writer.ticks/16)*uint(step)),
 							message:  meta.FractionalBPM(bpm + glissStartBPM),
 						})
 				})

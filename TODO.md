@@ -2,8 +2,6 @@
 
 ## nächstes 
 
-- Tempoverläufe scheinen nicht zu funktionieren
-
 - allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  
   (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
 

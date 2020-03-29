@@ -656,6 +656,9 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		if (bar.TempoChange > 0 && bar.TempoChange != lastTempoChange) || bar.No == 0 {
 			if bar.TempoChange > 0 {
 				s += fmt.Sprintf(" @%0.2f", bar.TempoChange)
+				if bar.Tilde != "" {
+					s += bar.Tilde
+				}
 				lastTempoChange = bar.TempoChange
 			} else {
 				var tempoChange float64 = 120

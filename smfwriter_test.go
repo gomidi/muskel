@@ -3770,6 +3770,170 @@ Ch     | 1   |
 [3840] channel.NoteOff channel 0 key 33
 `,
 		},
+		{ // 124
+			`
+TRACK  | voc |
+Ch     | 1   |
+
+=SCORE | voc  |
+# @110~
+# @140
+`,
+			1,
+			true,
+			false,
+			`
+[0] meta.TrackSequenceName: "BPM"
+[0] meta.Tempo BPM: 110.00
+[60] meta.Tempo BPM: 110.47
+[60] meta.Tempo BPM: 110.94
+[60] meta.Tempo BPM: 111.41
+[60] meta.Tempo BPM: 111.87
+[60] meta.Tempo BPM: 112.34
+[60] meta.Tempo BPM: 112.81
+[60] meta.Tempo BPM: 113.28
+[60] meta.Tempo BPM: 113.75
+[60] meta.Tempo BPM: 114.22
+[60] meta.Tempo BPM: 114.69
+[60] meta.Tempo BPM: 115.16
+[60] meta.Tempo BPM: 115.62
+[60] meta.Tempo BPM: 116.09
+[60] meta.Tempo BPM: 116.56
+[60] meta.Tempo BPM: 117.03
+[60] meta.Tempo BPM: 117.50
+[60] meta.Tempo BPM: 117.97
+[60] meta.Tempo BPM: 118.44
+[60] meta.Tempo BPM: 118.91
+[60] meta.Tempo BPM: 119.37
+[60] meta.Tempo BPM: 119.84
+[60] meta.Tempo BPM: 120.31
+[60] meta.Tempo BPM: 120.78
+[60] meta.Tempo BPM: 121.25
+[60] meta.Tempo BPM: 121.72
+[60] meta.Tempo BPM: 122.19
+[60] meta.Tempo BPM: 122.66
+[60] meta.Tempo BPM: 123.12
+[60] meta.Tempo BPM: 123.59
+[60] meta.Tempo BPM: 124.06
+[60] meta.Tempo BPM: 124.53
+[60] meta.Tempo BPM: 125.00
+[60] meta.Tempo BPM: 125.47
+[60] meta.Tempo BPM: 125.94
+[60] meta.Tempo BPM: 126.41
+[60] meta.Tempo BPM: 126.88
+[60] meta.Tempo BPM: 127.34
+[60] meta.Tempo BPM: 127.81
+[60] meta.Tempo BPM: 128.28
+[60] meta.Tempo BPM: 128.75
+[60] meta.Tempo BPM: 129.22
+[60] meta.Tempo BPM: 129.69
+[60] meta.Tempo BPM: 130.16
+[60] meta.Tempo BPM: 130.63
+[60] meta.Tempo BPM: 131.09
+[60] meta.Tempo BPM: 131.56
+[60] meta.Tempo BPM: 132.03
+[60] meta.Tempo BPM: 132.50
+[60] meta.Tempo BPM: 132.97
+[60] meta.Tempo BPM: 133.44
+[60] meta.Tempo BPM: 133.91
+[60] meta.Tempo BPM: 134.37
+[60] meta.Tempo BPM: 134.84
+[60] meta.Tempo BPM: 135.31
+[60] meta.Tempo BPM: 135.78
+[60] meta.Tempo BPM: 136.25
+[60] meta.Tempo BPM: 136.72
+[60] meta.Tempo BPM: 137.19
+[60] meta.Tempo BPM: 137.66
+[60] meta.Tempo BPM: 138.13
+[60] meta.Tempo BPM: 138.59
+[60] meta.Tempo BPM: 139.06
+[60] meta.Tempo BPM: 139.53
+[60] meta.Tempo BPM: 140.00
+[0] meta.Tempo BPM: 140.00
+`,
+		},
+		{ // 125
+			`
+TRACK  | voc |
+Ch     | 1   |
+
+=SCORE | voc  |
+# @110~~
+# @140
+`,
+			1,
+			true,
+			false,
+			`
+[0] meta.TrackSequenceName: "BPM"
+[0] meta.Tempo BPM: 110.00
+[60] meta.Tempo BPM: 110.01
+[60] meta.Tempo BPM: 110.03
+[60] meta.Tempo BPM: 110.07
+[60] meta.Tempo BPM: 110.12
+[60] meta.Tempo BPM: 110.18
+[60] meta.Tempo BPM: 110.26
+[60] meta.Tempo BPM: 110.36
+[60] meta.Tempo BPM: 110.47
+[60] meta.Tempo BPM: 110.59
+[60] meta.Tempo BPM: 110.73
+[60] meta.Tempo BPM: 110.89
+[60] meta.Tempo BPM: 111.05
+[60] meta.Tempo BPM: 111.24
+[60] meta.Tempo BPM: 111.44
+[60] meta.Tempo BPM: 111.65
+[60] meta.Tempo BPM: 111.87
+[60] meta.Tempo BPM: 112.12
+[60] meta.Tempo BPM: 112.37
+[60] meta.Tempo BPM: 112.64
+[60] meta.Tempo BPM: 112.93
+[60] meta.Tempo BPM: 113.23
+[60] meta.Tempo BPM: 113.54
+[60] meta.Tempo BPM: 113.87
+[60] meta.Tempo BPM: 114.22
+[60] meta.Tempo BPM: 114.58
+[60] meta.Tempo BPM: 114.95
+[60] meta.Tempo BPM: 115.34
+[60] meta.Tempo BPM: 115.74
+[60] meta.Tempo BPM: 116.16
+[60] meta.Tempo BPM: 116.59
+[60] meta.Tempo BPM: 117.04
+[60] meta.Tempo BPM: 117.50
+[60] meta.Tempo BPM: 117.98
+[60] meta.Tempo BPM: 118.47
+[60] meta.Tempo BPM: 118.97
+[60] meta.Tempo BPM: 119.49
+[60] meta.Tempo BPM: 120.03
+[60] meta.Tempo BPM: 120.58
+[60] meta.Tempo BPM: 121.14
+[60] meta.Tempo BPM: 121.72
+[60] meta.Tempo BPM: 122.31
+[60] meta.Tempo BPM: 122.92
+[60] meta.Tempo BPM: 123.54
+[60] meta.Tempo BPM: 124.18
+[60] meta.Tempo BPM: 124.83
+[60] meta.Tempo BPM: 125.50
+[60] meta.Tempo BPM: 126.18
+[60] meta.Tempo BPM: 126.88
+[60] meta.Tempo BPM: 127.59
+[60] meta.Tempo BPM: 128.31
+[60] meta.Tempo BPM: 129.05
+[60] meta.Tempo BPM: 129.80
+[60] meta.Tempo BPM: 130.57
+[60] meta.Tempo BPM: 131.36
+[60] meta.Tempo BPM: 132.16
+[60] meta.Tempo BPM: 132.97
+[60] meta.Tempo BPM: 133.80
+[60] meta.Tempo BPM: 134.64
+[60] meta.Tempo BPM: 135.50
+[60] meta.Tempo BPM: 136.37
+[60] meta.Tempo BPM: 137.25
+[60] meta.Tempo BPM: 138.15
+[60] meta.Tempo BPM: 139.07
+[60] meta.Tempo BPM: 140.00
+[0] meta.Tempo BPM: 140.00
+`,
+		},
 		/*
 
 

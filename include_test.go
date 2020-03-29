@@ -2974,6 +2974,29 @@ Ch |1  |
     3                   | *       |
 `,
 		},
+		{ // 96
+			`
+TRACK |p|
+Ch |1  |
+
+=SCORE |p|
+# @100~
+1  | 1 |
+2  | 2 |
+# @140
+2  | (2 3)     |
+3  | *         |
+			`,
+			`
+=SCORE                    | p       |
+ # 4/4 @100.00~ \major^c'
+    1                     | c'      |
+    2                     | d'      |
+ # @140.00
+    2                     | (d' e') |
+    3                     | *       |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
