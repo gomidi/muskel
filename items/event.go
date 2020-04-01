@@ -125,13 +125,129 @@ func (e *Event) AbsPosTicks(ticks4th uint32, trackDelay int) uint {
 	return uint(res)
 }
 
-type SortEvents []*Event
+type EventSequencer interface {
+	Get() EventSequence
+}
 
-func (s SortEvents) Len() int {
+/*
+- slicing mit []
+- dynamik change mit + und -
+- überschreiben mit /
+- diatonische transposition mit ^
+- chromatische transposition mit # und b
+- octavierungen mit " und '
+- startsynchronisierung mit !
+- zufallswahrscheinlichkeit mit xx%
+- zufällige auswahlmit %()
+- microtimingverschiebung mit > und <
+*/
+
+type EventSequence []*Event
+
+type EventSequenceMiddleWare []func(in EventSequence) EventSequence
+
+// first function must retrieve the eventsequence (receives nil)
+func (mw EventSequenceMiddleWare) Get() (es EventSequence) {
+	if len(mw) == 0 {
+		return nil
+	}
+
+	for _, fn := range mw {
+		es = fn(es)
+	}
+
+	return
+}
+
+type EventSequenceGetter struct {
+	mw       EventSequenceMiddleWare
+	original string
+}
+
+func (e *EventSequenceGetter) Get() *EventSequenceItem {
+	es := e.mw.Get()
+	return &EventSequenceItem{
+		seq:      es,
+		original: e.original,
+	}
+}
+
+func (e *EventSequenceGetter) String() string {
+	return e.original
+}
+
+func (e *EventSequenceGetter) Parse(data string, posIn32th uint) error {
+	panic("TODO: implement")
+}
+
+func (e EventSequenceGetter) Dup() Item {
+	return &e
+}
+
+type EventSequenceItem struct {
+	seq      EventSequence
+	original string
+}
+
+func (e *EventSequenceItem) String() string {
+	return e.original
+}
+
+func (e EventSequenceItem) Dup() Item {
+	return &e
+}
+
+func (e *EventSequenceItem) Parse(data string, posIn32th uint) error {
+	panic("TODO: implement")
+}
+
+// these two appear inside the eventsstream
+var _ Item = &EventSequenceGetter{}
+var _ Item = &EventSequenceItem{}
+
+type Params []interface{}
+
+func (s EventSequence) Call(params Params) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) Slice(from, to int) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) Override(over EventSequence) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) DiatonicTranspose(steps int8) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) Transpose(halftones int8) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) TransposeOctave(octave int8) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) StartSync(position int64) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) MircoTimingShift(shift int8) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) ChangeDynamic(diff int8) EventSequence {
+	panic("TODO implement")
+}
+
+func (s EventSequence) Len() int {
 	return len(s)
 }
 
-func (s SortEvents) Swap(a, b int) {
+func (s EventSequence) Swap(a, b int) {
 	s[a], s[b] = s[b], s[a]
 }
 
@@ -140,7 +256,7 @@ var typeSortEventPriority = map[string]int{
 	"*items.Scale": 20,
 }
 
-func (s SortEvents) Less(a, b int) bool {
+func (s EventSequence) Less(a, b int) bool {
 	if s[a].Position == s[b].Position {
 		typeA := fmt.Sprintf("%T", s[a].Item)
 		typeB := fmt.Sprintf("%T", s[b].Item)

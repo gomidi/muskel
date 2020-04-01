@@ -9,7 +9,7 @@ import (
 // $merge(=patt1,=patt2,...)
 // merges the given patterns
 func Merge(params []string, helper Helper) (res []*items.Event, err error) {
-	var sorted items.SortEvents
+	var sorted items.EventSequence
 	var evts []*items.Event
 
 	for _, param := range params {

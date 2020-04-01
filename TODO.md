@@ -2,12 +2,111 @@
 
 ## nächstes 
 
+- diatonische verläufe mittels =, z.B.
+    
+    =SCORE | piano |
+    #
+      1    | 2=&   |
+    #
+      1    | 10    |
+    
+  ist das gleiche, wie
+
+    =SCORE | piano |
+    #
+      1    | 2     |
+      1&   | 3     |
+      2    | 4     |
+      2&   | 5     |
+      3    | 6     |
+      3&   | 7     |
+      4    | 8     |
+      4&   | 9     |
+    #
+      1    | 10    |
+
+  voraussetzung dazu ist, dass das Lautstärkeresetzeichen von = auf +- geändert wird. (nach einer note gleicht sich das sowieso aus,
+  aber bei applizierung auf patterns etc. ist es wichtig)
+
 - mehrfache chromatische transposition erlauben, z.B. 
   1^1# transponiert um einen schritt und eine MIDInote aufwärts 
   1^1bb transponiert um einen schritt und zwei MIDInoten abwärts 
   1^2#3 transponiert um einen schritt und drei MIDInoten aufwärts
   1#3 transponiert um drei MIDInoten aufwärts
   1b3 transponiert um drei MIDInoten abwärts
+
+- grundsätzliche überarbeitung:
+  Obergruppe 
+    EventSequence: zeitliche Abfolge von Items einer Spur
+        - haben eine Callbackfunktion, die die events holt; sie können von patterns/tabellenspalten, 
+          wiederholungen mit .n., Wiederholungen mit % oder partwiederholungen stammen
+        - auf sie können folgende funktionen angewendet werden:
+          - sequencecommands
+          - slicing mit []
+          - dynamik change mit + und -
+          - überschreiben mit /
+          - diatonische transposition mit ^
+          - chromatische transposition mit # und b
+          - octavierungen mit " und '
+          - startsynchronisierung mit !
+          - zufallswahrscheinlichkeit mit xx%
+          - zufällige auswahlmit %()
+          - microtimingverschiebung mit > und <
+        - sie haben eine adresse von der die events geholt werden, z.b.
+          =a.b
+          =.b
+          =.
+          %
+          %2
+          ...
+          .2.
+          [part]
+          [=table.col.part]
+          [=.col.part]
+          [=.part]
+        - sie haben einen kontext, über den Adressierung und Skalenauflösung funktioniert (Position, Tabelle, Spalte, Track)
+        - sie können mit () und {} parametrisiert werden, z.B.
+          %(c',d')
+          .3.{:,d,e}
+    ItemGroup: items, die zu einer Gruppe gehören, ohne zeitliche Anordnung
+        - haben eine Callbackfunktion, die die items holt; sie können von shortcuts, Multiitems oder Skalen kommen
+        - sie können durch nachstellen von ... in parameter aufgelöst werden
+        - sie haben eine inhärente wiederholung
+        - auf sie können folgende funktionen angewendet werden:
+          - sequencecommands
+          - slicing mit []
+          - dynamik change mit + und -
+          - diatonische transposition mit ^
+          - chromatische transposition mit # und b
+          - octavierungen mit " und '
+          - zufallswahrscheinlichkeit mit xx%
+          - zufällige auswahlmit %()
+          - microtimingverschiebung mit > und <
+        - sie haben eine adresse, von der die items geholt werden, z.B.
+          .a.b
+          .b
+          %
+          %2
+          \minor^c
+          \(c e g)
+          (c e g)
+        - sie haben einen kontext, über den Adressierung und Skalenauflösung funktioniert (Position, Tabelle, Spalte, Track)
+        - sie können mit () und {} parametrisiert werden, z.B.
+          .a.b(c',d')
+          \minor^c{c,d,e}
+    Parameter: werte, die einem command, einer itemgroup oder einer EventSequence zur parametrisierung übergeben werden
+        - spezielle Sonderzeichen, wie : % und .n. die nur im kontext des Aufrufs gelten
+        - jeder parameter ist entweder ein spezielles Sonderzeichen, oder ein einfacher String, oder ein Item, oder eine ItemGroup oder 
+          eine EventSequence. in einem command kann getestet werden, ob ein parameter ein einfacher String, oder ein Item, oder eine ItemGroup oder 
+          eine EventSequence ist (spezielle Sonderzeichen werden während des aufrufs ersetzt)        
+        - können einfach in eine Itemgroup verwandelt werden, z.B.
+        =x  | 1  | 2               |
+        #
+         1  | #1 | =.1((#1 #2 #3)) |
+    commands: 
+        - empfangen parameter und geben eine itemgroup oder eine EventSequence oder nichts zurück.
+        - haben eine andere syntax: wenn sie eine EventSequence zurückgeben, beginnen sie mit $= wenn sie eine itemgroup zurückgeben, beginnen 
+          sie mit $_, wenn sie eine tabelle zurückgeben mit $$ (z.B. $$include) wenn sie nichts zurückgeben mit $ (z.B. $embed).
 
 - allow repeat last event sign to alter volume and scale mounting %++ etc
 - add repeat last pattern %% also with modifiers, e.g. %%++< or %%^2-->
