@@ -2,12 +2,11 @@ package items
 
 import (
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 )
 
-type Call struct {
+type Token struct {
 	Name                               string
 	Params                             []string
 	Slice                              [2]int
@@ -21,16 +20,22 @@ type Call struct {
 	syncFirstThroughTemplateDefinition bool
 	PosShift                           int // 0 = no, 1 = laidback, -1 = ahead of time
 	Repeat                             uint
-	Lyrics                             *Call
-	Exploded                           bool // e.g. when token is (a b c) then =patt(token...) becomes =patt(a,b,c)
+	//Lyrics                             *Call
+	Exploded bool // e.g. when token is (a b c) then =patt(token...) becomes =patt(a,b,c)
 }
 
+/*
 func (t *Call) IsLyrics() bool {
 	return strings.Split(t.Name, ".")[0][0] == '@'
 }
+*/
 
-func (c *Call) Dup() Item {
-	return &Call{
+func (pc *Token) Parse(data string, positionIn32th uint) (err error) {
+	return pc.parseTemplate(data, positionIn32th)
+}
+
+func (c *Token) Dup() Item {
+	return &Token{
 		Name:                               c.Name,
 		Params:                             c.Params,
 		Slice:                              c.Slice,
@@ -44,20 +49,12 @@ func (c *Call) Dup() Item {
 		syncFirstThroughTemplateDefinition: c.syncFirstThroughTemplateDefinition,
 		PosShift:                           c.PosShift,
 		Repeat:                             c.Repeat,
-		Lyrics:                             c.Lyrics,
-		Exploded:                           c.Exploded,
+		//Lyrics:                             c.Lyrics,
+		Exploded: c.Exploded,
 	}
 }
 
-func (c *Call) IsPattern() bool {
-	return c.Name[0] == '='
-}
-
-func (c *Call) IsToken() bool {
-	return c.Name[0] != '@' && c.Name[0] != '='
-}
-
-func (p *Call) String() string {
+func (p *Token) String() string {
 	var bf strings.Builder
 
 	if p.SyncFirst {
@@ -89,7 +86,7 @@ func (p *Call) String() string {
 	return bf.String()
 }
 
-func (p *Call) parseItem(data string, posIn32th uint) (item Item, err error) {
+func (p *Token) parseItem(data string, posIn32th uint) (item Item, err error) {
 	if len(data) == 0 {
 		return nil, nil
 	}
@@ -98,26 +95,9 @@ func (p *Call) parseItem(data string, posIn32th uint) (item Item, err error) {
 	return parser.ParseItem(data, posIn32th)
 }
 
-func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
+func (p *Token) parseTemplate(call string, positionIn32th uint) error {
 	slice := ""
 	params := ""
-	lyrics := ""
-
-	if idx := strings.Index(call, "@"); idx > 0 {
-		lyrics = call[idx:]
-		call = call[:idx]
-	}
-
-	_ = lyrics
-
-	if lyrics != "" {
-		var lp Call
-		err := lp.ParseTemplate(lyrics, 0)
-		if err != nil {
-			return fmt.Errorf("can't parse lyrics call %q", lyrics)
-		}
-		p.Lyrics = &lp
-	}
 
 	if idx := strings.Index(call, "["); idx > 0 {
 		slice = strings.TrimSpace(strings.Trim(call[idx:], "[]"))
@@ -130,23 +110,10 @@ func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
 		call = call[:idx]
 	}
 
-	if call[0:2] == "=!" {
-		p.SyncFirst = true
-		call = "=" + call[2:]
-	}
-
-	mt := regTemplateCallNameDyn.FindStringSubmatch(call)
+	mt := regPatternCallNameDyn.FindStringSubmatch(call)
 	p.Name = mt[1]
-	if p.Name[0] != '=' && p.Name[0] != '.' && p.Name[0] != '@' {
-		return fmt.Errorf("invalid template name: %q", p.Name)
-	}
-
-	if mt[2] != "" && mt[2][0] == '%' {
-		repeat, repErr := strconv.Atoi(mt[2][1:])
-		if repErr != nil {
-			return fmt.Errorf("invalid number of repetitions: %s", mt[2][1:])
-		}
-		p.Repeat = uint(repeat)
+	if p.Name[0] != '.' {
+		return fmt.Errorf("invalid token name: %q", p.Name)
 	}
 
 	if mt[3] != "" {
@@ -159,7 +126,7 @@ func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
 
 		si, err := strconv.Atoi(dt)
 		if err != nil {
-			return fmt.Errorf("error in scale moving of template %q: %q is not a number", p.Name, dt)
+			return fmt.Errorf("error in scale moving of token %q: %q is not a number", p.Name, dt)
 		}
 
 		p.ScaleMove = int8(si)
@@ -187,7 +154,7 @@ func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
 	if slice != "" {
 		sl := strings.Split(slice, ":")
 		if len(sl) != 2 {
-			return fmt.Errorf("ERROR in call of template %q: invalid slice %q", p.Name, "["+slice+"]")
+			return fmt.Errorf("ERROR in call of token %q: invalid slice %q", p.Name, "["+slice+"]")
 		}
 
 		from := strings.TrimSpace(sl[0])
@@ -198,7 +165,7 @@ func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
 		} else {
 			fromI, err := strconv.Atoi(from)
 			if err != nil {
-				return fmt.Errorf("ERROR in call of template %q: invalid slice %q", p.Name, "["+slice+"]")
+				return fmt.Errorf("ERROR in call of token %q: invalid slice %q", p.Name, "["+slice+"]")
 			}
 			p.Slice[0] = fromI
 		}
@@ -206,7 +173,7 @@ func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
 		if to != "" {
 			toI, err := strconv.Atoi(to)
 			if err != nil || toI == 0 {
-				return fmt.Errorf("ERROR in call of template %q: invalid slice %q", p.Name, "["+slice+"]")
+				return fmt.Errorf("ERROR in call of token %q: invalid slice %q", p.Name, "["+slice+"]")
 			}
 			p.Slice[1] = toI
 		}
@@ -215,31 +182,7 @@ func (p *Call) ParseTemplate(call string, positionIn32th uint) error {
 	return nil
 }
 
-func reduceDynamic(dyn string) string {
-
-	var counter int
-	for _, sym := range dyn {
-		switch sym {
-		case '-':
-			counter--
-		case '+':
-			counter++
-		}
-	}
-
-	//fmt.Printf("reduceDynamic: %q: %v\n", dyn, counter)
-
-	switch {
-	case counter > 0:
-		return strings.Repeat("+", counter)
-	case counter < 0:
-		return strings.Repeat("-", counter*(-1))
-	default:
-		return ""
-	}
-}
-
-func (p *Call) AddDynamic(orig string) (nu string) {
+func (p *Token) AddDynamic(orig string) (nu string) {
 	//fmt.Printf("addDynamic %q to %q\n", p.DynamicAdd, orig)
 	if orig == "=" {
 		return orig
@@ -254,30 +197,4 @@ func (p *Call) AddDynamic(orig string) (nu string) {
 	}
 
 	return reduceDynamic(orig + p.DynamicAdd)
-}
-
-var TemplateReg = regexp.MustCompile(regexp.QuoteMeta("#") + "([0-9]+)")
-
-var regTempStr = "^([=+" + regexp.QuoteMeta(".") + "@a-zA-Z][._~a-zA-Z0-9]+)(" +
-	regexp.QuoteMeta("%") +
-	"?[0-9]*)(" +
-	regexp.QuoteMeta("^") +
-	"{1,2}[-0-9]+){0,1}([" +
-	regexp.QuoteMeta("-+=") +
-	"]*)([<>]{0,1})"
-	//+
-	//"?(" + regexp.QuoteMeta("@") + "[a-zA-Z0-9])$"
-
-var regTemplateCallNameDyn = regexp.MustCompile(regTempStr)
-
-var regExTemplate0 = regexp.MustCompile("^(=[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
-var regExTemplate1 = regexp.MustCompile("^(" + regexp.QuoteMeta("=") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
-
-var regExToken0 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
-var regExToken1 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
-
-var regExEndScaleNote = regexp.MustCompile("^_(-)?[0-9]+")
-
-func (pc *Call) Parse(data string, positionIn32th uint) (err error) {
-	return pc.ParseTemplate(data, positionIn32th)
 }

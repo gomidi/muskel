@@ -24,7 +24,7 @@ func TestPatternRegexp(t *testing.T) {
 
 	for i, test := range tests {
 		// TemplateReg
-		res := regTemplateCallNameDyn.MatchString(test.input)
+		res := regPatternCallNameDyn.MatchString(test.input)
 
 		if res != test.shouldMatch {
 			var doesNot string
@@ -40,7 +40,7 @@ func TestPatternRegexp(t *testing.T) {
 
 		}
 
-		mt := regTemplateCallNameDyn.FindStringSubmatch(test.input)
+		mt := regPatternCallNameDyn.FindStringSubmatch(test.input)
 
 		if !reflect.DeepEqual(mt, test.matches) {
 			t.Errorf("[%v] %q matches %#v // expected %#v", i, test.input, mt, test.matches)

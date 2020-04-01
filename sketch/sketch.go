@@ -705,8 +705,10 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 				} else {
 					res = append(res, param)
 				}
-			case *items.Call:
-				if v.IsToken() && v.Exploded {
+			case *items.Pattern:
+				res = append(res, param)
+			case *items.Token:
+				if v.Exploded {
 					tok, errTok := s.Score.GetToken(v.Name)
 					if errTok == nil {
 						itt, errItt := p.ParseItem(tok, 0)

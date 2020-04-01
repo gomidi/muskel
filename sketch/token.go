@@ -7,12 +7,13 @@ import (
 	"gitlab.com/gomidi/muskel/items"
 )
 
-type pattern struct {
+type token struct {
 	column *column
-	call   *items.Pattern
+	call   *items.Token
 }
 
-func (pc *pattern) unrollPattern(start uint, until uint) (evt []*items.Event, absoluteEnd uint, err error) {
+//func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, diff uint, absoluteEnd uint, err error) {
+func (pc *token) unrollPattern(start uint, until uint) (evt []*items.Event, absoluteEnd uint, err error) {
 	p := pc.column
 	tc := pc.call
 	var evts []*items.Event
@@ -86,12 +87,7 @@ func (pc *pattern) unrollPattern(start uint, until uint) (evt []*items.Event, ab
 	return
 }
 
-type dynamicAdder interface {
-	AddDynamic(orig string) (nu string)
-}
-
-func (c *pattern) modifyItem(it items.Item) (items.Item, error) {
-	//cc := c.call.(dynamicAdder)
+func (c *token) modifyItem(it items.Item) (items.Item, error) {
 	cc := c.call
 	if DEBUG {
 		fmt.Printf("modify item %T %v\n", it, it)
@@ -154,7 +150,28 @@ func (c *pattern) modifyItem(it items.Item) (items.Item, error) {
 	}
 }
 
-func (pc *pattern) modifyEvents(start uint, until uint, evts []*items.Event) (evt []*items.Event, end uint, err error) {
+/*
+func (c *token) applyLyrics(evts []*items.Event) ([]*items.Event, error) {
+	cc := c.call.(*items.LyricsTable)
+
+	idx := strings.Index(cc.Name, ".")
+	if idx == -1 {
+		return nil, fmt.Errorf("invalid lyrics call name %q (missing dot)", cc.Name)
+	}
+
+	if idx >= len(cc.Name)-1 {
+		return nil, fmt.Errorf("invalid lyrics call name %q", cc.Name)
+	}
+
+	l, err := c.column.sketch.Score.Lyric(cc.Name, cc.Slice[0], cc.Slice[1])
+	if err != nil {
+		return nil, err
+	}
+	return applyLyrics(evts, l), nil
+}
+*/
+
+func (pc *token) modifyEvents(start uint, until uint, evts []*items.Event) (evt []*items.Event, end uint, err error) {
 	projectedBarEnd := pc.column.sketch.projectedBarEnd
 
 	if until < projectedBarEnd {
@@ -185,17 +202,7 @@ func (pc *pattern) modifyEvents(start uint, until uint, evts []*items.Event) (ev
 	return
 }
 
-func printEvents(message string, evts []*items.Event) {
-	if DEBUG {
-		fmt.Printf("##> Events %s\n", message)
-		for _, ev := range evts {
-			fmt.Printf("[%v] %v ", ev.Position, ev.String())
-		}
-		fmt.Printf("\n##< Events %s\n", message)
-	}
-}
-
-func (pc *pattern) _getEventStream(start uint, endPos uint, isOverride bool) (*eventStream, error) {
+func (pc *token) _getEventStream(start uint, endPos uint, isOverride bool) (*eventStream, error) {
 	evts, diff, absoluteEnd, err := pc.unroll(start, endPos)
 	if err != nil {
 		return nil, err
@@ -215,43 +222,59 @@ func (pc *pattern) _getEventStream(start uint, endPos uint, isOverride bool) (*e
 
 	var es *eventStream
 
-	es = newEventStream(start, end, true, evts...)
+	if isOverride {
+		es = newEventStream(start, 1, true, evts...)
+	} else {
+		es = newEventStream(start, 1, false, evts...)
+	}
 
 	es.isOverride = isOverride
 	return es, nil
 }
 
-func (c *pattern) unroll(start uint, until uint) (evt []*items.Event, diff uint, end uint, err error) {
-	cc := c.call
+func (c *token) unroll(start uint, until uint) (evt []*items.Event, diff uint, end uint, err error) {
+	//cc := c.call
 
-	var sk *Sketch
-	var colname string
-	sk, colname, err = findPattern(c.column.sketch, c.column.name, cc.Name)
+	//switch cc.Name[0] {
+	// TODO allow parameters?
+	var sc string
+	sc, err = c.getToken()
 	if err != nil {
 		return
 	}
-	tr, _ := c.column.sketch.Score.GetTrack(colname)
-	var patt = sk.newCol(tr, colname)
-	var pcc = patt.newPattern(cc)
-	//evt, diff, end, err = pcc.unrollPattern(start, until)
-	evt, end, err = pcc.unrollPattern(start, until)
-	return
-	//default:
 
+	var pEvents []*items.Event
+	var loop uint
+
+	pEvents, loop, err = c.column.sketch.parseEvents([]string{sc}, c.column.sketch.projectedBarEnd)
+	if err != nil {
+		return
+	}
+	_ = loop
+	for _, pEvent := range pEvents {
+		pEvent.Position = start
+		pEvent.Item, err = c.modifyItem(pEvent.Item)
+		if err != nil {
+			return
+		}
+		evt = append(evt, pEvent)
+	}
+	end = c.column.sketch.projectedBarEnd
+	return
 }
 
-func (pc *pattern) getToken(v *items.Token) (val string, err error) {
+func (pc *token) getToken() (val string, err error) {
 	var table, colname string
-	idx := strings.Index(v.Name[1:], ".")
+	idx := strings.Index(pc.call.Name[1:], ".")
 
 	switch {
 	case idx < 0:
-		table = v.Name
+		table = pc.call.Name
 	case idx == 0 || idx == 1:
-		err = fmt.Errorf("invalid token %q", v.Name)
+		err = fmt.Errorf("invalid token %q", pc.call.Name)
 		return
 	default:
-		table, colname = v.Name[:idx+1], v.Name[idx+2:]
+		table, colname = pc.call.Name[:idx+1], pc.call.Name[idx+2:]
 	}
 
 	var token = table
@@ -267,28 +290,16 @@ func (pc *pattern) getToken(v *items.Token) (val string, err error) {
 	}
 
 	val, err = pc.column.sketch.Score.GetToken(token)
-	val = replaceParams(val, v.Params)
+	val = replaceParams(val, pc.call.Params)
 	return
 }
 
-func (c *pattern) getEventStream(start uint, end uint) (*eventStream, error) {
-	cc := c.call
-	if cc.Lyrics != nil {
-		es, err := c._getEventStream(start, end, false)
-		if err != nil {
-			return nil, err
-		}
-		var lc = c.column.newLyrics(cc.Lyrics)
-		es.events, err = lc.applyLyrics(es.events)
-		if err != nil {
-			return nil, err
-		}
-		return es, nil
-	}
+func (c *token) getEventStream(start uint, end uint) (*eventStream, error) {
+	//cc := c.call
 	return c._getEventStream(start, end, false)
 }
 
-func (pc *pattern) getOverrideEventStream(start uint, endPos uint) (*eventStream, error) {
+func (pc *token) getOverrideEventStream(start uint, endPos uint) (*eventStream, error) {
 	es, err := pc._getEventStream(start, endPos, true)
 	es.end = es.start + es.end
 	return es, err

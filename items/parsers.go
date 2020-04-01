@@ -21,16 +21,6 @@ func (p *Parser) SetDefinitionGetter(getter func(string) TemplateDefinition) {
 }
 
 func (p *Parser) ParseItem(data string, posIn32th uint) (Item, error) {
-	/*
-		if data == "=sk.col2" {
-			panic("same col")
-		}
-		if data == "" {
-			//panic("empty data")
-			return nil, nil
-		}
-		fmt.Printf("Parser#ParseItem(%q,%v)\n", data, posIn32th)
-	*/
 	return parseItem(p, data, posIn32th)
 }
 
@@ -75,6 +65,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 		// fmt.Printf("data[0]: %#v\n", string(data[0]))
 		switch data[0] {
 		case '[':
+			// EventSequence
 			var pt PartRepeat
 			err = pt.Parse(data[1:], posIn32th)
 			if err != nil {
@@ -99,17 +90,6 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			return
 		case '"':
 			var ly Lyric
-			//l := &ly
-			/*
-				switch data[len(data)-1] {
-				case '>':
-					ly.PosShift = 1
-					data = data[:len(data)-1]
-				case '<':
-					ly.PosShift = -1
-					data = data[:len(data)-1]
-				}
-			*/
 			err = ly.Parse(data, posIn32th)
 			it = &ly
 			return
@@ -155,6 +135,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			}
 			return
 		case '(':
+			// ItemGroup
 			var m = &MultiItem{}
 
 			if idx := strings.Index(data, "..."); idx > 0 {
@@ -188,6 +169,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			it = nt
 			return
 		case '\\': // scale
+			// ItemGroup
 			var sc Scale
 			//fmt.Printf("parsing Scale: %q\n", data)
 			if idx := strings.Index(data, "..."); idx > 0 {
@@ -241,6 +223,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 		*/
 		case '.':
 			if len(data) == 3 && data[2] == '.' {
+				// EventSequence
 				var rp = &BarRepeater{}
 				err = rp.Parse(data[1:], posIn32th)
 				it = rp
@@ -248,8 +231,10 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			}
 
 			if regExToken0.MatchString(data) || regExToken1.MatchString(data) {
+				// ItemGroup
+
 				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
-				pc := &Call{}
+				pc := &Token{}
 				//pc.Parser = p
 				if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
 					//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
@@ -275,21 +260,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			}
 
 			switch data[0:2] {
-			/*
-				case "_^":
-					nt := &Note{}
-					err = nt.parseScale("_" + data[2:])
-					it = nt
-					return
-			*/
 			//case "_°": // hack for keyboads that don't allow to properly insert ^
-			/*
-				case "_\\":
-					nt := &Note{}
-					err = nt.parseScale("_" + data[2:])
-					it = nt
-					return
-			*/
 			case "MN":
 				mn := &MIDINote{}
 				err = mn.Parse(data[2:], posIn32th)
@@ -331,8 +302,10 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			}
 
 			if regExTemplate0.MatchString(data) || regExTemplate1.MatchString(data) {
+				// EventSequence
+
 				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
-				pc := &Call{}
+				pc := &Pattern{}
 				//pc.Parser = p
 				if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
 					//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)

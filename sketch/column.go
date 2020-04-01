@@ -14,16 +14,30 @@ type column struct {
 	track  *track.Track
 }
 
-func (p *column) newCall(pc *items.Call) *call {
-	return &call{
+func (p *column) newPattern(pc *items.Pattern) *pattern {
+	return &pattern{
+		column: p,
+		call:   pc,
+	}
+}
+
+func (p *column) newToken(pc *items.Token) *token {
+	return &token{
+		column: p,
+		call:   pc,
+	}
+}
+
+func (p *column) newLyrics(pc *items.LyricsTable) *lyrics {
+	return &lyrics{
 		column: p,
 		call:   pc,
 	}
 }
 
 func (p *column) pipedEventStream(start uint, endPos uint, evts []*items.Event) (*eventStream, error) {
-	var cl items.Call
-	pc := p.newCall(&cl)
+	var cl items.Pattern
+	pc := p.newPattern(&cl)
 	printEvents("pipedEventStream before modifyEvents", evts)
 	evts, absoluteEnd, err := pc.modifyEvents(start, endPos, evts)
 	printEvents("pipedEventStream after modifyEvents", evts)
@@ -45,17 +59,15 @@ func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err e
 
 	for _, it := range in.Events {
 		switch v := it.Item.(type) {
-		case *items.Call:
-			if v.IsToken() {
-				pc := c.newCall(v)
-				posEv, err := pc.getEventStream(0, 1)
-				if err != nil {
-					return nil, err
-				}
-				out.Events = append(out.Events, posEv.events[0])
-			} else {
-				return nil, fmt.Errorf("could not use pattern (%q) within ntuple %v", v.Name, in)
+		case *items.Token:
+			pc := c.newToken(v)
+			posEv, err := pc.getEventStream(0, 1)
+			if err != nil {
+				return nil, err
 			}
+			out.Events = append(out.Events, posEv.events[0])
+		case *items.Pattern:
+			return nil, fmt.Errorf("could not use pattern (%q) within ntuple %v", v.Name, in)
 		case *items.NTuple:
 			nit, err := c.replaceNtupleTokens(v)
 			if err != nil {
@@ -351,8 +363,16 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			var newItsm = make([]*items.Event, len(v.Events))
 			for itidx, itm := range v.Events {
 				switch vv := itm.Item.(type) {
-				case *items.Call:
-					pc := p.newCall(vv)
+				case *items.Pattern:
+					pc := p.newPattern(vv)
+					posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+					if err != nil {
+						return nil, endPos, err
+					}
+					// fmt.Printf("got item: %v\n", posEv.events[0].Item)
+					newItsm[itidx] = posEv.events[0]
+				case *items.Token:
+					pc := p.newToken(vv)
 					posEv, err = pc.getEventStream(forward+ev.Position, endPos)
 					if err != nil {
 						return nil, endPos, err
@@ -369,10 +389,19 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			nev.Item = v.Dup()
 			posEv = newEventStream(nev.Position, uint(until), false, nev)
 
-		case *items.Call:
+		case *items.Pattern:
 			// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
 			// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
-			pc := p.newCall(v)
+			pc := p.newPattern(v)
+			posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+			if err != nil {
+				return nil, endPos, err
+			}
+
+		case *items.Token:
+			// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
+			// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
+			pc := p.newToken(v)
 			posEv, err = pc.getEventStream(forward+ev.Position, endPos)
 			if err != nil {
 				return nil, endPos, err
@@ -380,13 +409,16 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 		case *items.Override:
 			switch vv := v.Item.(type) {
-			case *items.Call:
-				pc := p.newCall(v.Item.(*items.Call))
-				if vv.IsPattern() {
-					posEv, err = pc.getOverrideEventStream(forward+ev.Position, endPos)
-				} else {
-					posEv, err = pc.getOverrideEventStream(forward+ev.Position, forward+ev.Position+1)
+			case *items.Pattern:
+				pc := p.newPattern(vv)
+				posEv, err = pc.getOverrideEventStream(forward+ev.Position, endPos)
+
+				if err != nil {
+					return nil, endPos, err
 				}
+			case *items.Token:
+				pc := p.newToken(v.Item.(*items.Token))
+				posEv, err = pc.getOverrideEventStream(forward+ev.Position, forward+ev.Position+1)
 				if err != nil {
 					return nil, endPos, err
 				}

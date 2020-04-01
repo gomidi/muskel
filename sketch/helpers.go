@@ -503,7 +503,7 @@ func (p *patterncmdHelper) GetSketchDefEvents(sketchDef [][2]string) ([]*items.E
 }
 
 func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string, params ...string) ([]*items.Event, error) {
-	pc := &items.Call{}
+	pc := &items.Pattern{}
 	//pc.Parser = p
 	if idx := strings.Index(callDef, "..."); idx > 0 && idx+3 == len(callDef) {
 		//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
@@ -518,7 +518,7 @@ func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string, params ...
 
 	pc.Params = params
 
-	pcc := p.column.newCall(pc)
+	pcc := p.column.newPattern(pc)
 	if endPos == 0 {
 		endPos = p.column.sketch.projectedBarEnd
 		//fmt.Printf("endPos: %v\n", endPos)
