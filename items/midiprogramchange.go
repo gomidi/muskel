@@ -21,6 +21,7 @@ func (m MIDIProgramChange) String() string {
 }
 
 func (at *MIDIProgramChange) Parse(data string, posIn32th uint) (err error) {
+	data = data[2:]
 	dt := strings.Trim(data, "()")
 	var val int
 	val, err = strconv.Atoi(dt)

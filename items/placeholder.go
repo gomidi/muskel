@@ -10,6 +10,8 @@ type Placeholder int
 //var _ Item = &Placeholder{}
 
 func (l *Placeholder) Parse(data string, posIn32th uint) (err error) {
+	data = data[1:]
+
 	i, err := strconv.Atoi(data)
 
 	if err != nil {

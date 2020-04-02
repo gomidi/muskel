@@ -28,6 +28,7 @@ func (b BarRepeater) String() string {
 }
 
 func (b *BarRepeater) Parse(data string, posIn32th uint) (err error) {
+	data = data[1:]
 	if data == ".." {
 		b.OnlyOnce = false
 		b.LastN = 1

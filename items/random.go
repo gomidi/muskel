@@ -13,7 +13,7 @@ type RandomProbability struct {
 	Item             Item
 	Chosen           bool
 	ItemOriginalData string
-	Parser           *Parser
+	//Parser           *Parser
 }
 
 func (r RandomProbability) Dup() Item {
@@ -25,6 +25,7 @@ func (r RandomProbability) String() string {
 }
 
 func (rp *RandomProbability) Parse(data string, posIn32th uint) (err error) {
+	data = data[1:]
 	idx := strings.Index(data, "%")
 	if idx < 0 {
 		return fmt.Errorf("invalid random value: ?%s", data)
@@ -45,7 +46,8 @@ func (rp *RandomProbability) Parse(data string, posIn32th uint) (err error) {
 		return fmt.Errorf("invalid random value: ?%s, syntax must be ?n%% where n is a number between 0 and 100, but number is %v", data, rp.Prob)
 	}
 
-	rp.Item, err = parseItem(rp.Parser, data[idx+1:], posIn32th)
+	//rp.Item, err = parseItem(rp.Parser, data[idx+1:], posIn32th)
+	rp.Item, err = Parse(data[idx+1:], posIn32th)
 
 	if err != nil {
 		return fmt.Errorf("invalid random value item: ?%s", data)
@@ -58,7 +60,7 @@ type RandomChooser struct {
 	Alternatives             []Item
 	AlternativesOriginalData []string
 	Chosen                   int
-	Parser                   *Parser
+	//Parser                   *Parser
 }
 
 var _ Item = &RandomChooser{}
@@ -68,13 +70,15 @@ func (r RandomChooser) Dup() Item {
 }
 
 func (r *RandomChooser) Parse(data string, posIn32th uint) (err error) {
+	data = data[1:]
 	alternatives := strings.Trim(data, "()")
 	alt := strings.Split(alternatives, ",")
 	for _, a := range alt {
 		a = strings.TrimSpace(a)
 		var item Item
 		if a != "" {
-			item, err = parseItem(r.Parser, a, posIn32th)
+			//item, err = parseItem(r.Parser, a, posIn32th)
+			item, err = Parse(a, posIn32th)
 
 			if err != nil {
 				return fmt.Errorf("invalid random value item: %s: %v", a, err)

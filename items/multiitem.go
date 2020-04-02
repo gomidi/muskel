@@ -7,7 +7,6 @@ import (
 
 type MultiItem struct {
 	Events []*Event
-	Parser *Parser
 	itemGroupModifier
 }
 

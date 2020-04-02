@@ -4,25 +4,24 @@ import (
 	"strings"
 )
 
-type CommandCall struct {
+type Command struct {
 	Name     string
 	Params   []string
 	original string
-	//Position uint
 }
 
-func (c CommandCall) Dup() Item {
+func (c Command) Dup() Item {
 	return &c
 }
 
-func (c CommandCall) String() string {
+func (c Command) String() string {
 	return c.original
 }
 
-func (p *CommandCall) Parse(call string, posIn32th uint) error {
-	call = strings.TrimSpace(call)
+func (p *Command) Parse(call string, posIn32th uint) error {
+	//call = call[1:]
+	call = strings.TrimSpace(strings.TrimSpace(call)[1:])
 	p.original = call
-	//p.Position = posIn32th
 	params := ""
 
 	if idx := strings.Index(call, "("); idx > 0 {

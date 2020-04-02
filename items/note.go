@@ -233,6 +233,16 @@ func parseTransposition(data string) (trans int8, rest string, err error) {
 }
 
 func (nt *Note) Parse(data string, posIn32th uint) (err error) {
+
+	switch data[0] {
+	case '-', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return nt.parseScale(data)
+	}
+
+	if regExEndScaleNote.MatchString(data) {
+		return nt.parseScale(data)
+	}
+
 	original := data
 
 	nt.NoteOn, nt.NoteOff, data = stripNoteOnOff(data)

@@ -36,6 +36,7 @@ func (m MIDIPolyAftertouch) String() string {
 }
 
 func (pt *MIDIPolyAftertouch) Parse(data string, posIn32th uint) (err error) {
+	data = data[2:]
 	if idx := strings.Index(data, "~"); idx > -1 {
 		pt.Tilde = data[idx:]
 		data = data[:idx]

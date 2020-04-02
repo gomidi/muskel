@@ -18,6 +18,7 @@ func (g GlideStart) String() string {
 }
 
 func (g *GlideStart) Parse(data string, posIn32th uint) error {
+	data = data[1:]
 	if data == "" {
 		*g = GlideLinear
 		return nil

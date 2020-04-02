@@ -103,7 +103,7 @@ func TestSimpleLyricsParse(t *testing.T) {
 		var p LyricsTable
 		//p.Parser = &pp
 
-		err := p.ParseTemplate(test.data, 0)
+		err := p.Parse(test.data, 0)
 
 		if err != nil {
 			t.Errorf("[%v] PatternCall.SimpleParse(%q,0) returns error: %s", i, test.data, err.Error())

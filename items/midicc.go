@@ -36,6 +36,7 @@ func (m MIDICC) String() string {
 }
 
 func (cc *MIDICC) Parse(data string, posIn32th uint) (err error) {
+	data = data[2:]
 	var ccval int = -1
 
 	if len(data) > 2 {

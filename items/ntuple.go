@@ -4,13 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
-	//	"gitlab.com/gomidi/midi/mid"
 )
 
 type NTuple struct {
-	//Items       []Item
 	Events      []*Event
-	Parser      *Parser
 	LengthTicks uint
 }
 
@@ -65,7 +62,7 @@ func (ntp *NTuple) split(data string) (res []string) {
 
 // ntuple has the form {c,e,d}>
 func (ntp *NTuple) Parse(data string, posIn32th uint) (err error) {
-
+	data = data[1:]
 	orig := data
 
 	idx := strings.LastIndex(data, "}")

@@ -122,9 +122,9 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 			for _, cmd := range v.Cmds {
 				//fmt.Printf("command: %q\n", cmd.Name)
-				if fn, hasCmd := patterncommands.Commands[cmd.Name[1:]]; hasCmd {
+				if fn, hasCmd := patterncommands.Commands[cmd.Name]; hasCmd {
 					//fmt.Printf("found command: %q\n", cmd.Name)
-					helper.cmdName = cmd.Name[1:]
+					helper.cmdName = cmd.Name
 					_evts, err := fn(cmd.Params, helper)
 
 					if err != nil {
@@ -144,7 +144,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				return nil, endPos, err
 			}
 
-		case *items.CommandCall:
+		case *items.Command:
 			if fn, hasCmd := patterncommands.Commands[v.Name]; hasCmd {
 				helper := &patterncmdHelper{
 					cmdName: v.Name,

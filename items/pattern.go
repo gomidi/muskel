@@ -82,14 +82,20 @@ func (p *Pattern) parseItem(data string, posIn32th uint) (item Item, err error) 
 		return nil, nil
 	}
 
-	var parser Parser
-	return parser.ParseItem(data, posIn32th)
+	//var parser Parser
+	//return parser.ParseItem(data, posIn32th)
+	return Parse(data, posIn32th)
 }
 
 func (p *Pattern) ParseTemplate(call string, positionIn32th uint) error {
 	slice := ""
 	params := ""
 	lyrics := ""
+
+	if idx := strings.Index(call, "..."); idx > 0 && idx+3 == len(call) {
+		p.Exploded = true
+		call = call[:idx] //+ data[idx+3:]
+	}
 
 	if idx := strings.Index(call, "@"); idx > 0 {
 		lyrics = call[idx:]
@@ -100,7 +106,7 @@ func (p *Pattern) ParseTemplate(call string, positionIn32th uint) error {
 
 	if lyrics != "" {
 		var lp LyricsTable
-		err := lp.ParseTemplate(lyrics, 0)
+		err := lp.Parse(lyrics, 0)
 		if err != nil {
 			return fmt.Errorf("can't parse lyrics call %q", lyrics)
 		}
@@ -259,11 +265,11 @@ var regPattStr = "^([=+" + regexp.QuoteMeta(".") + "@a-zA-Z][._~a-zA-Z0-9]+)(" +
 var regPatternCallNameDyn = regexp.MustCompile(regPattStr)
 
 var regTokenStr = "^([+" + regexp.QuoteMeta(".") + "a-zA-Z][._~a-zA-Z0-9]+)(.*)"
-	//+
-	//"?(" + regexp.QuoteMeta("@") + "[a-zA-Z0-9])$"
+
+//+
+//"?(" + regexp.QuoteMeta("@") + "[a-zA-Z0-9])$"
 
 var regTokenCallNameDyn = regexp.MustCompile(regTokenStr)
-
 
 var regExTemplate0 = regexp.MustCompile("^(=[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 var regExTemplate1 = regexp.MustCompile("^(" + regexp.QuoteMeta("=") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")

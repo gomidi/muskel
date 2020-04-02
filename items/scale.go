@@ -38,6 +38,9 @@ func (s *Scale) All() []uint8 {
 var regExScaleNum = regexp.MustCompile("^([a-zA-Z" + regexp.QuoteMeta("\"") + regexp.QuoteMeta("'") + "#]+)(.*)")
 
 func (s *Scale) Parse(data string, pos uint) error {
+
+	data = data[1:]
+
 	s.itemGroupModifier.Reset()
 	if idx := strings.Index(data, "..."); idx > 0 {
 		s.Exploded = true

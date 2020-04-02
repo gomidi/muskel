@@ -319,7 +319,7 @@ func (p *Sketch) parseBarLine(data string) error {
 
 	if data[0] == '$' {
 		p.barChangeRequired = true
-		return p.parseCommandLF(data[1:])
+		return p.parseCommandLF(data)
 	}
 
 	// its a jump
@@ -396,7 +396,7 @@ func (p *Sketch) parseBarLine(data string) error {
 	b.Comment = comment
 
 	if idx := strings.Index(data, "\\"); idx >= 0 {
-		err := p.parseScale(data[idx+1:], b)
+		err := p.parseScale(data[idx:], b)
 		if err != nil {
 			return err
 		}
@@ -679,13 +679,14 @@ func (p *Sketch) handleTimeSigChange(b *Bar, data string) error {
 
 func (s *Sketch) explodeParam(params []string) (res []string) {
 
-	var p items.Parser
+	//var p items.Parser
 
 	for _, param := range params {
-		it, err := p.ParseItem(param, 0)
+		it, err := items.Parse(param, 0)
 
 		if err == nil {
 			switch v := it.(type) {
+
 			case *items.Scale:
 				if v.Exploded {
 					//sc := v.Dup().(*items.Scale)
@@ -706,13 +707,15 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 				} else {
 					res = append(res, param)
 				}
+
 			case *items.Pattern:
 				res = append(res, param)
 			case *items.Token:
 				if v.Exploded {
 					tok, errTok := s.Score.GetToken(v.Name)
 					if errTok == nil {
-						itt, errItt := p.ParseItem(tok, 0)
+						//itt, errItt := p.ParseItem(tok, 0)
+						itt, errItt := items.Parse(tok, 0)
 						if errItt == nil {
 							switch vv := itt.(type) {
 							case *items.MultiItem:
@@ -859,7 +862,7 @@ func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts 
 func (p *Sketch) parseCommandLF(data string) error {
 	//fmt.Printf("parse command: %q\n", data)
 	p.barChangeRequired = true
-	var c items.CommandCall
+	var c items.Command
 	err := c.Parse(data, 0)
 	if err != nil {
 		return err
@@ -871,11 +874,14 @@ func (p *Sketch) parseCommandLF(data string) error {
 			return err
 		}
 	case "$include":
-		var parser items.Parser
-		it, err := parser.ParseItem("$"+data, 0)
+		//var parser items.Parser
+		//it, err := parser.ParseItem("$"+data, 0)
+		it, err := items.Parse(data, 0)
 		if err != nil {
 			return fmt.Errorf("can't parse include: $%q", data)
 		}
+
+		//fmt.Printf("should be include, is %#v\n", it)
 		if inc, isInc := it.(items.Include); isInc {
 			sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
 			if err != nil {
@@ -921,7 +927,7 @@ func (s *Sketch) parsePosition(firstColumn string) (err error) {
 		case _p == "":
 			// ignore
 		case _p[0] == '\\':
-			scale = _p[1:]
+			scale = _p
 		case _p[0] == '@':
 			tempoChange, err = strconv.ParseFloat(_p[1:], 64)
 			if err != nil {

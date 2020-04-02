@@ -3,333 +3,156 @@ package items
 import (
 	"fmt"
 	"strings"
-	//"gitlab.com/gomidi/muskel/template"
 )
 
-type TemplateDefinition interface {
-	TimeSignature() [2]uint8
-	Definition() string
-	Call(params ...string) (result string, err error)
+func runeItem(r rune) Item {
+	switch r {
+	case '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		//err = nt.parseScale(data)
+		return &Note{}
+	case '%':
+		return repeatLastEvent{}
+	case ':':
+		return Hold
+	case '*':
+		return Rest
+	case '~':
+		gliss := GlideStart(false)
+		return &gliss
+	case '_':
+		return End
+	default:
+		return &Note{}
+	}
 }
 
-type Parser struct {
-	GetDefinition func(name string) TemplateDefinition
+func getItem(data string) (it Item) {
+	switch data[0] {
+	case '[':
+		// EventSequence
+		return &PartRepeat{}
+	case '#':
+		var p Placeholder
+		return &p
+	case '~':
+		gliss := GlideStart(false)
+		return &gliss
+	case '"':
+		return &Lyric{}
+	case '{':
+		return &NTuple{}
+	case '$':
+		piidx := strings.Index(data, "/")
+		if data[1] != '$' && piidx > 0 {
+			return &PipedPatternCommands{}
+		}
+		//fmt.Printf("got command %q\n", data)
+		return &Command{}
+	case '(':
+		// ItemGroup
+		return &MultiItem{}
+	case '-', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		return &Note{}
+	case '\\': // scale
+		// ItemGroup
+		return &Scale{}
+	case '?':
+		if data[1] == '(' {
+			return &RandomChooser{}
+		}
+		return &RandomProbability{}
+	case '/':
+		return &Override{}
+	case '.':
+		if len(data) == 3 && data[2] == '.' {
+			// EventSequence
+			return &BarRepeater{}
+		}
+
+		if regExToken0.MatchString(data) || regExToken1.MatchString(data) {
+			// ItemGroup
+			return &Token{}
+		}
+
+		return nil
+
+	default:
+
+		if len(data) > 3 && data[0:3] == "_MN" {
+			return &MIDINote{}
+		}
+
+		switch data[0:2] {
+		//case "_°": // hack for keyboads that don't allow to properly insert ^
+		case "MN":
+			return &MIDINote{}
+		case "CC":
+			return &MIDICC{}
+		case "PB":
+			return &MIDIPitchbend{}
+		case "PC":
+			return &MIDIProgramChange{}
+		case "AT":
+			return &MIDIAftertouch{}
+		case "PT":
+			return &MIDIPolyAftertouch{}
+		}
+
+		if regExEndScaleNote.MatchString(data) {
+			//err = nt.parseScale(data)
+			return &Note{}
+		}
+
+		if regExTemplate0.MatchString(data) || regExTemplate1.MatchString(data) {
+			// EventSequence
+			return &Pattern{}
+		}
+
+		return &Note{}
+	}
 }
 
-func (p *Parser) SetDefinitionGetter(getter func(string) TemplateDefinition) {
-	p.GetDefinition = getter
-}
-
-func (p *Parser) ParseItem(data string, posIn32th uint) (Item, error) {
-	return parseItem(p, data, posIn32th)
-}
-
-func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
+func Parse(data string, posIn32th uint) (it Item, err error) {
 	data = strings.TrimSpace(data)
 
-	// fmt.Printf("parseItem called with %q\n", data)
 	switch len(data) {
 	case 0:
 		return nil, nil
 	case 1:
-		switch data[0] {
-		case '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			nt := &Note{}
-			err = nt.parseScale(data)
-			it = nt
-			return
-		case '%':
-			return repeatLastEvent{}, nil
-		case ':':
-			return Hold, nil
-		case '*':
-			return Rest, nil
-		case '~':
-			gliss := GlideStart(false)
-			gl := &gliss
-			err = gl.Parse("", posIn32th)
-			it = gl
-			return
-		case '_':
-			return End, nil
-		default:
-			var nt = &Note{}
-			err = nt.Parse(data, posIn32th)
-			if err != nil {
-				err = fmt.Errorf("unknown item: %#v", data)
-			}
-			it = nt
-			return
-		}
+		it = runeItem(rune(data[0]))
 	default:
-		// fmt.Printf("data[0]: %#v\n", string(data[0]))
-		switch data[0] {
-		case '[':
-			// EventSequence
-			var pt PartRepeat
-			err = pt.Parse(data[1:], posIn32th)
-			if err != nil {
-				err = fmt.Errorf("invalid part repeat: %#v: %v", data, err)
-			}
-			it = &pt
-			return
-		case '#':
-			var p Placeholder
-			var ph = &p
-			err = ph.Parse(data[1:], posIn32th)
-			if err != nil {
-				err = fmt.Errorf("invalid placeholder: %#v", data)
-			}
-			it = ph
-			return
-		case '~':
-			gliss := GlideStart(false)
-			gl := &gliss
-			err = gl.Parse(data[1:], posIn32th)
-			it = gl
-			return
-		case '"':
-			var ly Lyric
-			err = ly.Parse(data, posIn32th)
-			it = &ly
-			return
-		case '{':
-			var ntp = &NTuple{}
-			ntp.Parser = p
-			err = ntp.Parse(data[1:], posIn32th)
-			it = ntp
-			return
-		case '$':
-			piidx := strings.Index(data, "/")
-			//fmt.Printf("piidx: %v, data[1]: %q\n", piidx, data)
-			if data[1] != '$' && piidx > 0 {
-				var piped PipedPatternCommands
-				err = piped.Parse(data, posIn32th)
-				if err != nil {
-					return
-				}
-				it = &piped
-				return
-			} else {
-				var cmd = &CommandCall{}
-				err = cmd.Parse(data[1:], posIn32th)
-				if err != nil {
-					return
-				}
-				switch cmd.Name {
-				case "$include":
-					sketch := "=SCORE"
-					if len(cmd.Params) > 1 {
-						sketch = strings.Trim(cmd.Params[1], `"'`)
-					}
-					var inc Include
-					inc.File = strings.Trim(cmd.Params[0], `"'`)
-					inc.Sketch = sketch
-					if len(cmd.Params) > 2 {
-						inc.Params = cmd.Params[2:]
-					}
-					it = inc
-				default:
-					it = cmd
-				}
-			}
-			return
-		case '(':
-			// ItemGroup
-			var m = &MultiItem{}
-
-			/*
-						if idx := strings.Index(data, "..."); idx > 0 {
-							m.Exploded = true
-							data = data[:idx]
-						}
-
-						endIdx := strings.LastIndex(data, ")")
-				/*
-						/*
-							if endIdx < 4 {
-								return nil, fmt.Errorf("invalid MultiItem: %q must start and end with kleene star *", data)
-							}
-			*/
-			/*
-				if endIdx != len(data)-1 {
-					return nil, fmt.Errorf("invalid MultiItem: %q must end with )", "("+data)
-				}
-				m.Parser = p
-			*/
-			//err = m.Parse(data[1:endIdx], posIn32th)
-			err = m.Parse(data, posIn32th)
-			it = m
-			return
-			//return nil, fmt.Errorf("deprecated syntax: use  : instead to create a hold")
-		//case 'S':
-		//	return parseNote(data[1:])
-		//case 'Z':
-		//	return parseNote(data[1:])
-		//case '^':
-		case '-', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			nt := &Note{}
-			err = nt.parseScale(data)
-			it = nt
-			return
-		case '\\': // scale
-			// ItemGroup
-			var sc Scale
-			//fmt.Printf("parsing Scale: %q\n", data)
-
-			//fmt.Printf("parsing scale: %q\n", data[1:])
-			err = sc.Parse(data[1:], posIn32th)
-			it = &sc
-			return
-			/*
-				case 'Â':
-			*/
-			/*
-				nt := &Note{}
-				err = nt.parseScale(data[1:])
-				it = nt
-				return
-			*/
-		case '?':
-			if data[1] == '(' {
-				rd := &RandomChooser{}
-				rd.Parser = p
-				err = rd.Parse(data[1:], posIn32th)
-				it = rd
-				return
-			}
-
-			rd := &RandomProbability{}
-			rd.Parser = p
-			err = rd.Parse(data[1:], posIn32th)
-			it = rd
-			return
-		//case 'O':
-		//	return p.parseOSC(data[1:])
-		case '/':
-			var o Override
-			o.Item, err = parseItem(p, data[1:], posIn32th)
-			if err != nil {
-				return
-			}
-			it = &o
-			return
-		/*
-			case '!':
-				pc := NewTemplateCall(p)
-				pc.Parser = p
-				err = pc.Parse(data, posIn32th)
-				it = pc
-				return
-		*/
-		case '.':
-			if len(data) == 3 && data[2] == '.' {
-				// EventSequence
-				var rp = &BarRepeater{}
-				err = rp.Parse(data[1:], posIn32th)
-				it = rp
-				return
-			}
-
-			if regExToken0.MatchString(data) || regExToken1.MatchString(data) {
-				// ItemGroup
-
-				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
-				pc := &Token{}
-				//pc.Parser = p
-				/*
-					if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
-						//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
-						pc.Exploded = true
-						data = data[:idx] //+ data[idx+3:]
-					}
-				*/
-				//fmt.Printf("data cleaned: %q\n", data)
-				err = pc.Parse(data, posIn32th)
-				it = pc
-				return
-			}
-			return
-
-		default:
-
-			// fmt.Printf("%v %v\n", data[0], int(data[0]))
-
-			if len(data) > 3 && data[0:3] == "_MN" {
-				mn := &MIDINote{}
-				err = mn.Parse("_"+data[3:], posIn32th)
-				it = mn
-				return
-			}
-
-			switch data[0:2] {
-			//case "_°": // hack for keyboads that don't allow to properly insert ^
-			case "MN":
-				mn := &MIDINote{}
-				err = mn.Parse(data[2:], posIn32th)
-				it = mn
-				return
-			case "CC":
-				cc := &MIDICC{}
-				err = cc.Parse(data[2:], posIn32th)
-				it = cc
-				return
-				//return parseMIDICC(data[2:])
-			case "PB":
-				pb := &MIDIPitchbend{}
-				err = pb.Parse(data[2:], posIn32th)
-				it = pb
-				return
-			case "PC":
-				pc := &MIDIProgramChange{}
-				err = pc.Parse(data[2:], posIn32th)
-				it = pc
-				return
-			case "AT":
-				at := &MIDIAftertouch{}
-				err = at.Parse(data[2:], posIn32th)
-				it = at
-				return
-			case "PT":
-				pt := &MIDIPolyAftertouch{}
-				err = pt.Parse(data[2:], posIn32th)
-				it = pt
-				return
-			}
-
-			if regExEndScaleNote.MatchString(data) {
-				nt := &Note{}
-				err = nt.parseScale(data)
-				it = nt
-				return
-			}
-
-			if regExTemplate0.MatchString(data) || regExTemplate1.MatchString(data) {
-				// EventSequence
-
-				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
-				pc := &Pattern{}
-				//pc.Parser = p
-				if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
-					//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
-					pc.Exploded = true
-					data = data[:idx] //+ data[idx+3:]
-				}
-				//fmt.Printf("data cleaned: %q\n", data)
-				err = pc.Parse(data, posIn32th)
-				it = pc
-				return
-			}
-
-			nt := &Note{}
-			err := nt.Parse(data, posIn32th)
-			if err != nil {
-				return nil, fmt.Errorf("unknown item: %#v: %s", data, err)
-			}
-			return nt, nil
-		}
+		it = getItem(data)
 	}
 
-	return nil, nil
+	if it == nil {
+		return nil, fmt.Errorf("unknown item %T: %q", it, data)
+	}
 
+	err = it.Parse(data, posIn32th)
+	if err != nil {
+		return nil, fmt.Errorf("invalid item %T: %q", it, data)
+	}
+
+	/*
+		if cmd, is := it.(*Command); is {
+			fmt.Printf("cmd: %#v\n", cmd)
+		}
+	*/
+
+	if cmd, is := it.(*Command); is && cmd.Name == "$include" {
+		inc := Include{
+			File:   strings.Trim(cmd.Params[0], `"'`),
+			Sketch: "=SCORE",
+		}
+		if len(cmd.Params) > 1 {
+			inc.Sketch = strings.Trim(cmd.Params[1], `"'`)
+		}
+
+		if len(cmd.Params) > 2 {
+			inc.Params = cmd.Params[2:]
+		}
+		return inc, nil
+	}
+
+	return it, nil
 }

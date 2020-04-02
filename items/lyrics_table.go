@@ -10,17 +10,7 @@ type LyricsTable struct {
 	Name   string
 	Params []string
 	Slice  [2]int
-	//SyncFirst                          bool
-	//firstPos                           uint
-	//DynamicAdd                         string
-	//ScaleMove                          int8 // 0: force to scale (take next note in scale if not exact matching, no movement for in scale notes), n >0 || n < 0: move by n steps along the scale
-	//ScaleMoveMode                      int8 // 0: no scale movement, 1: move only scale notes, 2: move only scale notes or non scale notes depending on the first item
-	//FirstNoteIsScaleNote               int  // 0: not set, 1: true, 2: false
-	//FirstNoteAbsKey                    uint8
-	//syncFirstThroughTemplateDefinition bool
-	//PosShift                           int // 0 = no, 1 = laidback, -1 = ahead of time
-	Repeat   uint
-	Exploded bool // e.g. when token is (a b c) then =patt(token...) becomes =patt(a,b,c)
+	Repeat uint
 }
 
 func (c *LyricsTable) Dup() Item {
@@ -28,28 +18,12 @@ func (c *LyricsTable) Dup() Item {
 		Name:   c.Name,
 		Params: c.Params,
 		Slice:  c.Slice,
-		//SyncFirst:                          c.SyncFirst,
-		//firstPos:                           c.firstPos,
-		//DynamicAdd:                         c.DynamicAdd,
-		//ScaleMove:                          c.ScaleMove,
-		//ScaleMoveMode:                      c.ScaleMoveMode,
-		//FirstNoteIsScaleNote:               c.FirstNoteIsScaleNote,
-		//FirstNoteAbsKey:                    c.FirstNoteAbsKey,
-		//syncFirstThroughTemplateDefinition: c.syncFirstThroughTemplateDefinition,
-		//PosShift:                           c.PosShift,
-		Repeat:   c.Repeat,
-		Exploded: c.Exploded,
+		Repeat: c.Repeat,
 	}
 }
 
 func (p *LyricsTable) String() string {
 	var bf strings.Builder
-
-	/*
-		if p.SyncFirst {
-			bf.WriteString("!")
-		}
-	*/
 
 	bf.WriteString(p.Name)
 
@@ -73,21 +47,14 @@ func (p *LyricsTable) String() string {
 		bf.WriteString("]")
 	}
 
+	if p.Repeat > 0 {
+		fmt.Fprintf(&bf, "%%%v", p.Repeat)
+	}
+
 	return bf.String()
 }
 
-/*
-func (p *LyricsTable) parseItem(data string, posIn32th uint) (item Item, err error) {
-	if len(data) == 0 {
-		return nil, nil
-	}
-
-	var parser Parser
-	return parser.ParseItem(data, posIn32th)
-}
-*/
-
-func (p *LyricsTable) ParseTemplate(call string, positionIn32th uint) error {
+func (p *LyricsTable) Parse(call string, positionIn32th uint) error {
 	slice := ""
 	params := ""
 
@@ -152,8 +119,4 @@ func (p *LyricsTable) ParseTemplate(call string, positionIn32th uint) error {
 
 	}
 	return nil
-}
-
-func (pc *LyricsTable) Parse(data string, positionIn32th uint) (err error) {
-	return pc.ParseTemplate(data, positionIn32th)
 }

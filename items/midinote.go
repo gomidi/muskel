@@ -54,6 +54,11 @@ func (mn MIDINote) Dup() Item {
 var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("=") + "]*)(:{0,3})([<>]{0,1})$")
 
 func (nt *MIDINote) Parse(data string, posIn32th uint) (err error) {
+	if len(data) > 3 && data[0:3] == "_MN" {
+		data = "_" + data[3:]
+	} else {
+		data = data[2:]
+	}
 
 	nt.NoteOn, nt.NoteOff, data = stripNoteOnOff(data)
 

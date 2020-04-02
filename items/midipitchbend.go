@@ -35,6 +35,7 @@ func (m MIDIPitchbend) String() string {
 }
 
 func (pb *MIDIPitchbend) Parse(data string, posIn32th uint) (err error) {
+	data = data[2:]
 
 	if idx := strings.Index(data, "~"); idx > -1 {
 		pb.Tilde = data[idx:]

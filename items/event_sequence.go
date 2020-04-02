@@ -13,17 +13,43 @@ func (e EventSequencerFunc) Get() EventSequence {
 }
 
 /*
+von item_group
 - slicing mit []
 - dynamik change mit + und -
-- überschreiben mit /
 - diatonische transposition mit ^
 - chromatische transposition mit # und b
 - octavierungen mit " und '
-- startsynchronisierung mit !
+- microtimingverschiebung mit > und <
 - zufallswahrscheinlichkeit mit xx%
 - zufällige auswahlmit %()
-- microtimingverschiebung mit > und <
 */
+
+/*
+- überschreiben mit /
+- startsynchronisierung mit !
+
+- slicing mit []
+- dynamik change mit + und -
+- diatonische transposition mit ^
+- chromatische transposition mit # und b
+- octavierungen mit " und '
+- microtimingverschiebung mit > und <
+- zufallswahrscheinlichkeit mit xx%
+- zufällige auswahlmit %()
+*/
+
+/*
+items.Pattern     -> EventSequence
+items.PartRepeat  -> EventSequence
+items.BarRepeater -> EventSequence
+*/
+
+type eventSequenceModifier struct {
+	SyncFirst bool
+	Repeat    uint
+	firstPos  uint
+	itemGroupModifier
+}
 
 type EventSequence []*Event
 

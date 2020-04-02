@@ -72,12 +72,12 @@ func (e *Event) parsePosShift(data string) string {
 }
 
 func (e *Event) Parse(data string) error {
-	var parser Parser
+	//var parser Parser
 
 	//fmt.Printf("parsing: %q\n", data)
 	data = e.parsePosShift(data)
 
-	it, err := parser.ParseItem(data, 0)
+	it, err := Parse(data, 0)
 
 	if err != nil {
 		return err

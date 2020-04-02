@@ -31,8 +31,8 @@ func (pr *PartRepeat) String() string {
 	return bd.String()
 }
 
-// ntuple has the form {c,e,d}>
 func (pr *PartRepeat) Parse(data string, posIn32th uint) (err error) {
+	data = data[1:]
 
 	orig := data
 
