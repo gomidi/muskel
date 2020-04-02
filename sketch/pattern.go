@@ -2,19 +2,18 @@ package sketch
 
 import (
 	"fmt"
-	"strings"
 
 	"gitlab.com/gomidi/muskel/items"
 )
 
 type pattern struct {
-	column *column
-	call   *items.Pattern
+	column  *column
+	pattern *items.Pattern
 }
 
 func (pc *pattern) unrollPattern(start uint, until uint) (evt []*items.Event, absoluteEnd uint, err error) {
 	p := pc.column
-	tc := pc.call
+	tc := pc.pattern
 	var evts []*items.Event
 	evts, absoluteEnd, err = p.call(until, tc.SyncFirst, tc.Params...)
 	if err != nil {
@@ -27,7 +26,6 @@ func (pc *pattern) unrollPattern(start uint, until uint) (evt []*items.Event, ab
 
 	printEvents(fmt.Sprintf("after call.call(until: %v, syncfirst: %v, params: %v)\n", until, tc.SyncFirst, tc.Params), evts)
 
-	//_evt, diff, absoluteEnd = pc.modifyEvents(start, until, evts)
 	var _evt []*items.Event
 	_evt, absoluteEnd, err = pc.modifyEvents(start, absoluteEnd, evts)
 	if err != nil {
@@ -92,7 +90,7 @@ type dynamicAdder interface {
 
 func (c *pattern) modifyItem(it items.Item) (items.Item, error) {
 	//cc := c.call.(dynamicAdder)
-	cc := c.call
+	cc := c.pattern
 	if DEBUG {
 		fmt.Printf("modify item %T %v\n", it, it)
 	}
@@ -175,9 +173,9 @@ func (pc *pattern) modifyEvents(start uint, until uint, evts []*items.Event) (ev
 		evt = append(evt, nuEv)
 	}
 
-	evt, end = sliceEvents(pc.call.Slice, evt, projectedBarEnd)
+	evt, end = sliceEvents(pc.pattern.Slice, evt, projectedBarEnd)
 
-	if pc.call.Slice[0] > 0 {
+	if pc.pattern.Slice[0] > 0 {
 		evt = moveBySyncFirst(evt)
 		evt = forwardEvents(evt, start)
 	}
@@ -203,8 +201,6 @@ func (pc *pattern) _getEventStream(start uint, endPos uint, isOverride bool) (*e
 	_ = diff
 	end := uint(endPos)
 
-	//fmt.Printf("absoluteEnd: %v end: %v\n", absoluteEnd, end)
-
 	if absoluteEnd < end && isOverride {
 		end = absoluteEnd
 	}
@@ -222,7 +218,7 @@ func (pc *pattern) _getEventStream(start uint, endPos uint, isOverride bool) (*e
 }
 
 func (c *pattern) unroll(start uint, until uint) (evt []*items.Event, diff uint, end uint, err error) {
-	cc := c.call
+	cc := c.pattern
 
 	var sk *Sketch
 	var colname string
@@ -240,39 +236,8 @@ func (c *pattern) unroll(start uint, until uint) (evt []*items.Event, diff uint,
 
 }
 
-func (pc *pattern) getToken(v *items.Token) (val string, err error) {
-	var table, colname string
-	idx := strings.Index(v.Name[1:], ".")
-
-	switch {
-	case idx < 0:
-		table = v.Name
-	case idx == 0 || idx == 1:
-		err = fmt.Errorf("invalid token %q", v.Name)
-		return
-	default:
-		table, colname = v.Name[:idx+1], v.Name[idx+2:]
-	}
-
-	var token = table
-	if colname != "" {
-		if colname[len(colname)-1] == '.' {
-			if pc.column.track == nil {
-				colname += pc.column.name
-			} else {
-				colname += pc.column.track.Name
-			}
-		}
-		token += "." + colname
-	}
-
-	val, err = pc.column.sketch.Score.GetToken(token)
-	val = replaceParams(val, v.Params)
-	return
-}
-
 func (c *pattern) getEventStream(start uint, end uint) (*eventStream, error) {
-	cc := c.call
+	cc := c.pattern
 	if cc.Lyrics != nil {
 		es, err := c._getEventStream(start, end, false)
 		if err != nil {

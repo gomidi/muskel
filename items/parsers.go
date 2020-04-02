@@ -138,23 +138,27 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			// ItemGroup
 			var m = &MultiItem{}
 
-			if idx := strings.Index(data, "..."); idx > 0 {
-				m.Exploded = true
-				data = data[:idx]
-			}
-
-			endIdx := strings.LastIndex(data, ")")
 			/*
-				if endIdx < 4 {
-					return nil, fmt.Errorf("invalid MultiItem: %q must start and end with kleene star *", data)
-				}
-			*/
+						if idx := strings.Index(data, "..."); idx > 0 {
+							m.Exploded = true
+							data = data[:idx]
+						}
 
-			if endIdx != len(data)-1 {
-				return nil, fmt.Errorf("invalid MultiItem: %q must end with )", "("+data)
-			}
-			m.Parser = p
-			err = m.Parse(data[1:endIdx], posIn32th)
+						endIdx := strings.LastIndex(data, ")")
+				/*
+						/*
+							if endIdx < 4 {
+								return nil, fmt.Errorf("invalid MultiItem: %q must start and end with kleene star *", data)
+							}
+			*/
+			/*
+				if endIdx != len(data)-1 {
+					return nil, fmt.Errorf("invalid MultiItem: %q must end with )", "("+data)
+				}
+				m.Parser = p
+			*/
+			//err = m.Parse(data[1:endIdx], posIn32th)
+			err = m.Parse(data, posIn32th)
 			it = m
 			return
 			//return nil, fmt.Errorf("deprecated syntax: use  : instead to create a hold")
@@ -172,10 +176,7 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 			// ItemGroup
 			var sc Scale
 			//fmt.Printf("parsing Scale: %q\n", data)
-			if idx := strings.Index(data, "..."); idx > 0 {
-				sc.Exploded = true
-				data = data[:idx]
-			}
+
 			//fmt.Printf("parsing scale: %q\n", data[1:])
 			err = sc.Parse(data[1:], posIn32th)
 			it = &sc
@@ -236,11 +237,13 @@ func parseItem(p *Parser, data string, posIn32th uint) (it Item, err error) {
 				//fmt.Printf("regExTemplate.MatchString(%q)\n", data)
 				pc := &Token{}
 				//pc.Parser = p
-				if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
-					//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
-					pc.Exploded = true
-					data = data[:idx] //+ data[idx+3:]
-				}
+				/*
+					if idx := strings.Index(data, "..."); idx > 0 && idx+3 == len(data) {
+						//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
+						pc.Exploded = true
+						data = data[:idx] //+ data[idx+3:]
+					}
+				*/
 				//fmt.Printf("data cleaned: %q\n", data)
 				err = pc.Parse(data, posIn32th)
 				it = pc

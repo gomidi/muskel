@@ -16,22 +16,22 @@ type column struct {
 
 func (p *column) newPattern(pc *items.Pattern) *pattern {
 	return &pattern{
-		column: p,
-		call:   pc,
+		column:  p,
+		pattern: pc,
 	}
 }
 
 func (p *column) newToken(pc *items.Token) *token {
 	return &token{
 		column: p,
-		call:   pc,
+		token:  pc,
 	}
 }
 
 func (p *column) newLyrics(pc *items.LyricsTable) *lyrics {
 	return &lyrics{
 		column: p,
-		call:   pc,
+		lyrics: pc,
 	}
 }
 
@@ -237,7 +237,6 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				continue
 			}
 
-			//res, currentPos = s.repeatBars(repevts, diff, stopPos)
 			res, currentPos = s.repeatBars(repevts, diff)
 			if len(res) == 0 {
 				//fmt.Printf("no repeatBars\n")
@@ -250,56 +249,21 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 			all = append(all, res...)
 
-			//mixed = append(mixed, newEventStream(s.Bars[bidx].Position, currentPos, true, res...))
-			//out = append(out, res...)
-
 			var repetitions uint = 1
 
 			if !v.OnlyOnce {
 			barRepeatLoop:
 				for {
-					/*
-						barIdx := s.getBarIdxOf(res[len(res)-1].Position)
-						if barIdx+1 >= len(s.Bars)-1 {
-							break
-						}
-
-						currentPos = s.Bars[barIdx+1].Position
-
-
-					*/
 					if currentPos >= stopPos {
 						break barRepeatLoop
 					}
 					repetitions++
 					endOfStream += origDiff
-					//diff = currentPos - s.Bars[startBar].Position
-					//oldStart := currentPos
-					//res, currentPos = s.repeatBars(repevts, diff, stopPos)
 					res, currentPos = s.repeatBars(repevts, diff*repetitions)
-
-					//printEvents("bar repeater II, after repeatBars", res)
 					all = append(all, res...)
-					/*
-						res, err = p._unroll(res, s.projectedBarEnd, nil)
-						if err != nil {
-							return nil, err
-						}
-					*/
-					//printEvents("bar repeater II, after unroll", res)
-					//mixed = append(mixed, newEventStream(oldStart, currentPos, true, res...))
-					//out = append(out, res...)
 				}
 			}
 
-			//sorted := items.SortEvents(all)
-			//sort.Sort(sorted)
-
-			//DEBUG = true
-			//printEvents("bar repeater II, sorted", sorted)
-			//DEBUG = false
-			//fmt.Printf("bar repeat: create stream events from %v to %v\n", s.Bars[bidx].Position, currentPos)
-			//mixed = append(mixed, newEventStream(s.Bars[bidx].Position, currentPos, true, sorted...))
 			mixed = append(mixed, newEventStream(s.Bars[bidx].Position, currentPos, true, all...))
 			posEv = nil
 

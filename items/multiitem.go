@@ -1,31 +1,49 @@
 package items
 
 import (
+	"fmt"
 	"strings"
 )
 
-
 type MultiItem struct {
-	Events   []*Event
-	Parser   *Parser
-	Exploded bool // exploded means: =patt((c d b)...) will become  =patt(c,d,b)
+	Events []*Event
+	Parser *Parser
+	itemGroupModifier
 }
 
 func (m *MultiItem) Parse(data string, posIn32th uint) (err error) {
-	d := strings.Split(data, " ")
+	idx := strings.Index(data, "(")
+	endIdx := strings.LastIndex(data, ")")
+
+	if idx < 0 || endIdx < 0 || endIdx <= idx {
+		return fmt.Errorf("invalid multiItem: %q", data)
+	}
+
+	m.itemGroupModifier.Reset()
+
+	innerData := data[idx+1 : endIdx]
+
+	if len(data) > endIdx {
+		rest := m.itemGroupModifier.parseExploded(data[endIdx+1:])
+		err = m.itemGroupModifier.parse(rest)
+		if err != nil {
+			return fmt.Errorf("error in multiitem %q, item group modifier: %s", data, err)
+		}
+	}
+
+	//fmt.Printf("slice: %v\n", m.Slice)
+
+	d := strings.Split(innerData, " ")
 	for _, dd := range d {
 		var ev Event
 
-		err := ev.Parse(strings.TrimSpace(dd))
-
-		//it, err := parseItem(m.Parser, strings.TrimSpace(dd), posIn32th)
+		err = ev.Parse(strings.TrimSpace(dd))
 
 		if err != nil {
-			return err
+			return fmt.Errorf("error in multiitem %q, item %q: %s", data, dd, err)
 		}
 
 		m.Events = append(m.Events, &ev)
-		//m.Items = append(m.Items, it)
 	}
 
 	return nil
@@ -51,7 +69,7 @@ func (m MultiItem) String() string {
 
 	bd.WriteString(")")
 
-	return bd.String()
+	return bd.String() + m.itemGroupModifier.string()
 }
 
 func (m MultiItem) IsHold() bool {
@@ -85,25 +103,6 @@ func (s sortMultiItem) Len() int {
 func (s sortMultiItem) Swap(a, b int) {
 	s[a], s[b] = s[b], s[a]
 }
-
-/*
-func getPosShift(i Item) int {
-	switch v := i.(type) {
-	case *Note:
-		return v.PosShift
-	case *MIDINote:
-		return v.PosShift
-	case *NTuple:
-		return v.PosShift
-	case *Call:
-		return v.PosShift
-	case *Lyric:
-		return v.PosShift
-	default:
-		return 0
-	}
-}
-*/
 
 func (s sortMultiItem) Less(a, b int) bool {
 	if s[a].Position == s[b].Position {

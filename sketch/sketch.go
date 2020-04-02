@@ -84,6 +84,7 @@ func NewSketch(name string, sc Score) *Sketch {
 
 	if sk.isScore() {
 		scale := &items.Scale{}
+		scale.Reset()
 		scale.BaseNote = 60
 		scale.Mode = items.Major
 		sk.currentScale = scale

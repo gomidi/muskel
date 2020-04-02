@@ -317,6 +317,7 @@ func _applyLyric(ev *items.Event, lyric string) (applied *items.Event, wasApplie
 		wasApplied = true
 	case *items.Note:
 		var me = &items.MultiItem{}
+		me.Reset()
 		//l.PosShift = v.PosShift
 		_ev := ev.Dup()
 		_ev.PosShift = 0
@@ -329,6 +330,7 @@ func _applyLyric(ev *items.Event, lyric string) (applied *items.Event, wasApplie
 		wasApplied = true
 	case *items.MIDINote:
 		var me = &items.MultiItem{}
+		me.Reset()
 		_ev := ev.Dup()
 		_ev.PosShift = 0
 		_ev.Item = &l
@@ -342,6 +344,7 @@ func _applyLyric(ev *items.Event, lyric string) (applied *items.Event, wasApplie
 			return
 		}
 		var me = &items.MultiItem{}
+		me.Reset()
 		var _ev = ev.Dup()
 		_ev.Item = &l
 		_ev.PosShift = 0
@@ -357,6 +360,7 @@ func _applyLyric(ev *items.Event, lyric string) (applied *items.Event, wasApplie
 		}
 
 		var me = &items.MultiItem{}
+		me.Reset()
 		_ev := ev.Dup()
 		_ev.Item = &l
 		_ev.PosShift = 0

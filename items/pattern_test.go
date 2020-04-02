@@ -66,7 +66,7 @@ func TestSimpleTokenParse(t *testing.T) {
 		var p Token
 		//p.Parser = &pp
 
-		err := p.parseTemplate(test.data, 0)
+		err := p.Parse(test.data, 0)
 
 		if err != nil {
 			t.Errorf("[%v] PatternCall.SimpleParse(%q,0) returns error: %s", i, test.data, err.Error())

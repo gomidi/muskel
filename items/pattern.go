@@ -258,6 +258,13 @@ var regPattStr = "^([=+" + regexp.QuoteMeta(".") + "@a-zA-Z][._~a-zA-Z0-9]+)(" +
 
 var regPatternCallNameDyn = regexp.MustCompile(regPattStr)
 
+var regTokenStr = "^([+" + regexp.QuoteMeta(".") + "a-zA-Z][._~a-zA-Z0-9]+)(.*)"
+	//+
+	//"?(" + regexp.QuoteMeta("@") + "[a-zA-Z0-9])$"
+
+var regTokenCallNameDyn = regexp.MustCompile(regTokenStr)
+
+
 var regExTemplate0 = regexp.MustCompile("^(=[" + regexp.QuoteMeta("!") + "]?[a-zA-Z][" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 var regExTemplate1 = regexp.MustCompile("^(" + regexp.QuoteMeta("=") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 

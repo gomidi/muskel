@@ -9,86 +9,11 @@ import (
 
 type token struct {
 	column *column
-	call   *items.Token
-}
-
-//func (pc *call) unrollPattern(start uint, until uint) (evt []*Event, diff uint, absoluteEnd uint, err error) {
-func (pc *token) unrollPattern(start uint, until uint) (evt []*items.Event, absoluteEnd uint, err error) {
-	p := pc.column
-	tc := pc.call
-	var evts []*items.Event
-	evts, absoluteEnd, err = p.call(until, tc.SyncFirst, tc.Params...)
-	if err != nil {
-		return
-	}
-
-	for _, ev := range evts {
-		ev.PosShift += tc.PosShift
-	}
-
-	printEvents(fmt.Sprintf("after call.call(until: %v, syncfirst: %v, params: %v)\n", until, tc.SyncFirst, tc.Params), evts)
-
-	//_evt, diff, absoluteEnd = pc.modifyEvents(start, until, evts)
-	var _evt []*items.Event
-	_evt, absoluteEnd, err = pc.modifyEvents(start, absoluteEnd, evts)
-	if err != nil {
-		return
-	}
-
-	//fmt.Printf("until: %v absoluteEnd: %v\n", until, absoluteEnd)
-	// TODO check, if until and absoluteEnd is correct
-
-	// TODO check if length is correct
-	length := absoluteEnd //- start
-
-	if DEBUG {
-		fmt.Printf("absoluteEnd: %v start: %v until: %v length: %v\n", absoluteEnd, start, until, length)
-	}
-
-	printEvents("before repeat", _evt)
-
-	repeat := int(tc.Repeat)
-	if repeat == 0 {
-		repeat = 1
-	}
-
-	var __evts []*items.Event
-
-	for i := 0; i < repeat; i++ {
-		if DEBUG {
-			fmt.Printf("forwarding by %v\n", length*uint(i))
-		}
-		__evts = append(__evts, forwardEvents(_evt, length*uint(i))...)
-		absoluteEnd += length * uint(i)
-	}
-
-	printEvents("after repeat", __evts)
-
-	if DEBUG {
-		fmt.Printf("absoluteEnd: %v start: %v until: %v length: %v\n", absoluteEnd, start, until, length)
-	}
-
-	for _, ev := range __evts {
-		if ev.Position < until {
-			evt = append(evt, ev)
-		}
-	}
-
-	if absoluteEnd > until {
-		absoluteEnd = until
-	}
-
-	printEvents("after unrollPattern", evt)
-
-	if DEBUG {
-		fmt.Printf("absoluteEnd: %v start: %v until: %v length: %v\n", absoluteEnd, start, until, length)
-	}
-
-	return
+	token   *items.Token
 }
 
 func (c *token) modifyItem(it items.Item) (items.Item, error) {
-	cc := c.call
+	cc := c.token
 	if DEBUG {
 		fmt.Printf("modify item %T %v\n", it, it)
 	}
@@ -150,27 +75,6 @@ func (c *token) modifyItem(it items.Item) (items.Item, error) {
 	}
 }
 
-/*
-func (c *token) applyLyrics(evts []*items.Event) ([]*items.Event, error) {
-	cc := c.call.(*items.LyricsTable)
-
-	idx := strings.Index(cc.Name, ".")
-	if idx == -1 {
-		return nil, fmt.Errorf("invalid lyrics call name %q (missing dot)", cc.Name)
-	}
-
-	if idx >= len(cc.Name)-1 {
-		return nil, fmt.Errorf("invalid lyrics call name %q", cc.Name)
-	}
-
-	l, err := c.column.sketch.Score.Lyric(cc.Name, cc.Slice[0], cc.Slice[1])
-	if err != nil {
-		return nil, err
-	}
-	return applyLyrics(evts, l), nil
-}
-*/
-
 func (pc *token) modifyEvents(start uint, until uint, evts []*items.Event) (evt []*items.Event, end uint, err error) {
 	projectedBarEnd := pc.column.sketch.projectedBarEnd
 
@@ -192,9 +96,9 @@ func (pc *token) modifyEvents(start uint, until uint, evts []*items.Event) (evt 
 		evt = append(evt, nuEv)
 	}
 
-	evt, end = sliceEvents(pc.call.Slice, evt, projectedBarEnd)
+	evt, end = sliceEvents(pc.token.Slice, evt, projectedBarEnd)
 
-	if pc.call.Slice[0] > 0 {
+	if pc.token.Slice[0] > 0 {
 		evt = moveBySyncFirst(evt)
 		evt = forwardEvents(evt, start)
 	}
@@ -233,9 +137,6 @@ func (pc *token) _getEventStream(start uint, endPos uint, isOverride bool) (*eve
 }
 
 func (c *token) unroll(start uint, until uint) (evt []*items.Event, diff uint, end uint, err error) {
-	//cc := c.call
-
-	//switch cc.Name[0] {
 	// TODO allow parameters?
 	var sc string
 	sc, err = c.getToken()
@@ -265,16 +166,16 @@ func (c *token) unroll(start uint, until uint) (evt []*items.Event, diff uint, e
 
 func (pc *token) getToken() (val string, err error) {
 	var table, colname string
-	idx := strings.Index(pc.call.Name[1:], ".")
+	idx := strings.Index(pc.token.Name[1:], ".")
 
 	switch {
 	case idx < 0:
-		table = pc.call.Name
+		table = pc.token.Name
 	case idx == 0 || idx == 1:
-		err = fmt.Errorf("invalid token %q", pc.call.Name)
+		err = fmt.Errorf("invalid token %q", pc.token.Name)
 		return
 	default:
-		table, colname = pc.call.Name[:idx+1], pc.call.Name[idx+2:]
+		table, colname = pc.token.Name[:idx+1], pc.token.Name[idx+2:]
 	}
 
 	var token = table
@@ -290,7 +191,7 @@ func (pc *token) getToken() (val string, err error) {
 	}
 
 	val, err = pc.column.sketch.Score.GetToken(token)
-	val = replaceParams(val, pc.call.Params)
+	val = replaceParams(val, pc.token.Params)
 	return
 }
 

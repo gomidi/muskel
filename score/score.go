@@ -705,6 +705,7 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 	lastTimeSig := [2]uint8{4, 4}
 	var lastTempoChange float64 = 0
 	var lastScale = &items.Scale{BaseNote: 60, Mode: items.Major}
+	lastScale.Reset()
 
 	//fmt.Printf("sorted: %#v\n", sorted)
 
@@ -914,6 +915,7 @@ func (s *Score) replaceScalenotes(colname string, evts []*items.Event) []*items.
 	scale := s.Bars[0].Scale
 	if scale == nil {
 		scale = &items.Scale{}
+		scale.Reset()
 		scale.BaseNote = 60
 		scale.Mode = items.Major
 	}
@@ -986,10 +988,6 @@ func (sc *Score) AddFilter(t *filter.Filter) {
 }
 
 func (sc *Score) AddScale(t items.Mode) {
-	//fmt.Printf("AddScale: %s\n", t.Name())
-	if t.Name() == "minor" {
-		panic("minor added")
-	}
 	sc.Scales[t.Name()] = t
 }
 
