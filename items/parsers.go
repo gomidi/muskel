@@ -7,9 +7,6 @@ import (
 
 func runeItem(r rune) Item {
 	switch r {
-	case '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		//err = nt.parseScale(data)
-		return &Note{}
 	case '%':
 		return repeatLastEvent{}
 	case ':':
@@ -17,8 +14,7 @@ func runeItem(r rune) Item {
 	case '*':
 		return Rest
 	case '~':
-		gliss := GlideStart(false)
-		return &gliss
+		return &GlideLinear
 	case '_':
 		return End
 	default:
@@ -26,7 +22,26 @@ func runeItem(r rune) Item {
 	}
 }
 
-func getItem(data string) (it Item) {
+func getMIDIItem(data string) Item {
+	switch data[0:2] {
+	case "MN":
+		return &MIDINote{}
+	case "CC":
+		return &MIDICC{}
+	case "PB":
+		return &MIDIPitchbend{}
+	case "PC":
+		return &MIDIProgramChange{}
+	case "AT":
+		return &MIDIAftertouch{}
+	case "PT":
+		return &MIDIPolyAftertouch{}
+	default:
+		return nil
+	}
+}
+
+func getItem(data string) Item {
 	switch data[0] {
 	case '[':
 		// EventSequence
@@ -35,8 +50,7 @@ func getItem(data string) (it Item) {
 		var p Placeholder
 		return &p
 	case '~':
-		gliss := GlideStart(false)
-		return &gliss
+		return &GlideLinear
 	case '"':
 		return &Lyric{}
 	case '{':
@@ -46,14 +60,11 @@ func getItem(data string) (it Item) {
 		if data[1] != '$' && piidx > 0 {
 			return &PipedPatternCommands{}
 		}
-		//fmt.Printf("got command %q\n", data)
 		return &Command{}
 	case '(':
 		// ItemGroup
 		return &MultiItem{}
-	case '-', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-		return &Note{}
-	case '\\': // scale
+	case '\\':
 		// ItemGroup
 		return &Scale{}
 	case '?':
@@ -64,54 +75,38 @@ func getItem(data string) (it Item) {
 	case '/':
 		return &Override{}
 	case '.':
-		if len(data) == 3 && data[2] == '.' {
+		switch {
+		case len(data) == 3 && data[2] == '.':
 			// EventSequence
 			return &BarRepeater{}
-		}
-
-		if regExToken0.MatchString(data) || regExToken1.MatchString(data) {
+		case regExToken0.MatchString(data) || regExToken1.MatchString(data):
 			// ItemGroup
 			return &Token{}
+		default:
+			return nil
 		}
+	}
 
-		return nil
+	switch data[0:2] {
+	//case "_°": // hack for keyboads that don't allow to properly insert ^
+	case "MN", "CC", "PB", "PC", "AT", "PT":
+		return getMIDIItem(data)
+	}
 
+	switch {
+	case len(data) > 3 && data[0:3] == "_MN":
+		return &MIDINote{}
+	case regExEndScaleNote.MatchString(data):
+		return &Note{}
+	case regExTemplate0.MatchString(data) || regExTemplate1.MatchString(data):
+		// EventSequence
+		return &Pattern{}
 	default:
-
-		if len(data) > 3 && data[0:3] == "_MN" {
-			return &MIDINote{}
-		}
-
-		switch data[0:2] {
-		//case "_°": // hack for keyboads that don't allow to properly insert ^
-		case "MN":
-			return &MIDINote{}
-		case "CC":
-			return &MIDICC{}
-		case "PB":
-			return &MIDIPitchbend{}
-		case "PC":
-			return &MIDIProgramChange{}
-		case "AT":
-			return &MIDIAftertouch{}
-		case "PT":
-			return &MIDIPolyAftertouch{}
-		}
-
-		if regExEndScaleNote.MatchString(data) {
-			//err = nt.parseScale(data)
-			return &Note{}
-		}
-
-		if regExTemplate0.MatchString(data) || regExTemplate1.MatchString(data) {
-			// EventSequence
-			return &Pattern{}
-		}
-
 		return &Note{}
 	}
 }
 
+// Parse is the major entry point for parsing an Item
 func Parse(data string, posIn32th uint) (it Item, err error) {
 	data = strings.TrimSpace(data)
 
@@ -133,25 +128,8 @@ func Parse(data string, posIn32th uint) (it Item, err error) {
 		return nil, fmt.Errorf("invalid item %T: %q", it, data)
 	}
 
-	/*
-		if cmd, is := it.(*Command); is {
-			fmt.Printf("cmd: %#v\n", cmd)
-		}
-	*/
-
-	if cmd, is := it.(*Command); is && cmd.Name == "$include" {
-		inc := Include{
-			File:   strings.Trim(cmd.Params[0], `"'`),
-			Sketch: "=SCORE",
-		}
-		if len(cmd.Params) > 1 {
-			inc.Sketch = strings.Trim(cmd.Params[1], `"'`)
-		}
-
-		if len(cmd.Params) > 2 {
-			inc.Params = cmd.Params[2:]
-		}
-		return inc, nil
+	if cmd, is := it.(*Command); is && cmd.IsInclude() {
+		return cmd.GetInclude(), nil
 	}
 
 	return it, nil

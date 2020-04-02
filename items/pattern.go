@@ -87,7 +87,7 @@ func (p *Pattern) parseItem(data string, posIn32th uint) (item Item, err error) 
 	return Parse(data, posIn32th)
 }
 
-func (p *Pattern) ParseTemplate(call string, positionIn32th uint) error {
+func (p *Pattern) Parse(call string, positionIn32th uint) (err error) {
 	slice := ""
 	params := ""
 	lyrics := ""
@@ -278,7 +278,3 @@ var regExToken0 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp
 var regExToken1 = regexp.MustCompile("^(" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta("!") + "]?" + regexp.QuoteMeta(".") + "[" + regexp.QuoteMeta(".") + "_0-9a-zA-Z]*).*")
 
 var regExEndScaleNote = regexp.MustCompile("^_(-)?[0-9]+")
-
-func (pc *Pattern) Parse(data string, positionIn32th uint) (err error) {
-	return pc.ParseTemplate(data, positionIn32th)
-}
