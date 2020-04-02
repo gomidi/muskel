@@ -53,6 +53,10 @@ func (mn MIDINote) Dup() Item {
 
 var regexMIDINote = regexp.MustCompile("^([0-9]{1,3})([-+" + regexp.QuoteMeta("=") + "]*)(:{0,3})([<>]{0,1})$")
 
+func (nt *MIDINote) SetDynamic(dyn string) {
+	nt.Dynamic = AddDynamic(nt.Dynamic, dyn)
+}
+
 func (nt *MIDINote) Parse(data string, posIn32th uint) (err error) {
 	if len(data) > 3 && data[0:3] == "_MN" {
 		data = "_" + data[3:]

@@ -60,6 +60,15 @@ func (ntp *NTuple) split(data string) (res []string) {
 
 }
 
+func (ntp *NTuple) SetDynamic(dyn string) {
+	for _, ev := range ntp.Events {
+		_ = ev
+		panic("TODO")
+	}
+	// TODO resolv and then set it
+	//nt.Dynamic = AddDynamic(nt.Dynamic, dyn)
+}
+
 // ntuple has the form {c,e,d}>
 func (ntp *NTuple) Parse(data string, posIn32th uint) (err error) {
 	data = data[1:]

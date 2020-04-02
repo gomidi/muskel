@@ -35,7 +35,7 @@ func (p *column) newLyrics(pc *items.LyricsTable) *lyrics {
 	}
 }
 
-func (p *column) pipedEventStream(start uint, endPos uint, evts []*items.Event) (*eventStream, error) {
+func (p *column) pipedEventStream(start uint, endPos uint, evts []*items.Event) (*items.EventStream, error) {
 	var cl items.Pattern
 	pc := p.newPattern(&cl)
 	printEvents("pipedEventStream before modifyEvents", evts)
@@ -50,7 +50,7 @@ func (p *column) pipedEventStream(start uint, endPos uint, evts []*items.Event) 
 		_end = absoluteEnd
 	}
 
-	return newEventStream(start, absoluteEnd, true, evts...), nil
+	return items.NewEventStream(start, absoluteEnd, true, evts...), nil
 }
 
 func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err error) {
@@ -65,7 +65,7 @@ func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err e
 			if err != nil {
 				return nil, err
 			}
-			out.Events = append(out.Events, posEv.events[0])
+			out.Events = append(out.Events, posEv.Events[0])
 		case *items.Pattern:
 			return nil, fmt.Errorf("could not use pattern (%q) within ntuple %v", v.Name, in)
 		case *items.NTuple:
@@ -92,7 +92,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 	var forward uint
 
-	var mixed []*eventStream
+	var mixed []*items.EventStream
 
 	for i, ev := range evts {
 		//fmt.Printf("################## %v event: %v ##################\n", i, ev)
@@ -107,7 +107,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		}
 
 		// fmt.Printf("[%v] ev.Item %T\n", i, ev.Item)
-		var posEv *eventStream
+		var posEv *items.EventStream
 
 		switch v := ev.Item.(type) {
 		//case *items.BarRepeater:
@@ -189,7 +189,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			nev.Position = ev.Position + forward
 			nev.PosShift = 0
 			nev.Item = newItm
-			posEv = newEventStream(nev.Position, uint(until), false, nev)
+			posEv = items.NewEventStream(nev.Position, uint(until), false, nev)
 		case *items.BarRepeater:
 			//fmt.Printf("bar repeater: %v endPos: %v in col %q of sketch %q\n", v, endPos, p.name, p.sketch.Name)
 			stopPos := endPos
@@ -264,7 +264,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				}
 			}
 
-			mixed = append(mixed, newEventStream(s.Bars[bidx].Position, currentPos, true, all...))
+			mixed = append(mixed, items.NewEventStream(s.Bars[bidx].Position, currentPos, true, all...))
 			posEv = nil
 
 		case *items.PartRepeat:
@@ -288,7 +288,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 					endPos = ev.Position - 1
 				}
 			*/
-			partEvents := getEventsInPosRange(startPos, _endPos, evts)
+			partEvents := items.GetEventsInPosRange(startPos, _endPos, evts)
 
 			partEvents, _endPos, err = p._unroll(partEvents, _endPos, nil)
 			if err != nil {
@@ -311,7 +311,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 				totalStart := startPos + ev.Position + (uint(r) * diff)
 
-				mixed = append(mixed, newEventStream(totalStart, totalStart+diff, true, nevts...))
+				mixed = append(mixed, items.NewEventStream(totalStart, totalStart+diff, true, nevts...))
 			}
 
 			posEv = nil
@@ -334,7 +334,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 						return nil, endPos, err
 					}
 					// fmt.Printf("got item: %v\n", posEv.events[0].Item)
-					newItsm[itidx] = posEv.events[0]
+					newItsm[itidx] = posEv.Events[0]
 				case *items.Token:
 					pc := p.newToken(vv)
 					posEv, err = pc.getEventStream(forward+ev.Position, endPos)
@@ -342,7 +342,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 						return nil, endPos, err
 					}
 					// fmt.Printf("got item: %v\n", posEv.events[0].Item)
-					newItsm[itidx] = posEv.events[0]
+					newItsm[itidx] = posEv.Events[0]
 				default:
 					newItsm[itidx] = itm
 				}
@@ -351,7 +351,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			var nev = ev.Dup()
 			nev.Position = ev.Position + forward
 			nev.Item = v.Dup()
-			posEv = newEventStream(nev.Position, uint(until), false, nev)
+			posEv = items.NewEventStream(nev.Position, uint(until), false, nev)
 
 		case *items.Pattern:
 			// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
@@ -392,8 +392,8 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				nev := ev.Dup()
 				nev.Item = vv
 				nev.Position = ev.Position + forward
-				posEv = newEventStream(nev.Position, nev.Position+1, true, nev)
-				posEv.isOverride = true
+				posEv = items.NewEventStream(nev.Position, nev.Position+1, true, nev)
+				posEv.IsOverride = true
 				//fmt.Printf("override of %q: from: %v to: %v\n", v.Item.(*items.Call).Name, forward+ev.Position, endPos)
 			}
 
@@ -404,7 +404,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			}
 			var nev = ev.Dup()
 			nev.Position = ev.Position + forward
-			posEv = newEventStream(nev.Position, uint(until), false, nev)
+			posEv = items.NewEventStream(nev.Position, uint(until), false, nev)
 		}
 		if posEv != nil {
 			mixed = append(mixed, posEv)
@@ -415,13 +415,13 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		fmt.Printf(">> mixed\n")
 
 		for _, ev := range mixed {
-			fmt.Printf("at %v: %v\n", ev.start, ev)
+			fmt.Printf("at %v: %v\n", ev.Start, ev)
 		}
 		fmt.Printf("<< mixed\n")
 	}
 
 	//fmt.Printf("mixed premerged: %v\n", mixed)
-	unrolled = mergeEventStreams(mixed, s.projectedBarEnd)
+	unrolled = items.MergeEventStreams(mixed, s.projectedBarEnd)
 	//fmt.Printf("eevts: %v\n", eevts)
 
 	if DEBUG {
@@ -550,7 +550,7 @@ func (c *column) call(originalEndPos uint, syncFirst bool, params ...string) (ev
 	//}
 
 	if syncFirst {
-		events = moveBySyncFirst(events)
+		events = items.MoveBySyncFirst(events)
 	}
 
 	printEvents("after unroll of events", events)
@@ -619,12 +619,12 @@ func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
 			endPos = s.projectedBarEnd
 		}
 
-		ets := getEventsInPosRange(bar.Position, endPos, evts)
+		ets := items.GetEventsInPosRange(bar.Position, endPos, evts)
 		res = append(res, ets...)
 
 	}
 
-	ets := getEventsInPosRange(lastBarEnd, s.projectedBarEnd, evts)
+	ets := items.GetEventsInPosRange(lastBarEnd, s.projectedBarEnd, evts)
 	res = append(res, ets...)
 
 	return res
@@ -635,7 +635,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 
 	var skipPos uint
 
-	var mixed []*eventStream
+	var mixed []*items.EventStream
 
 	for _, evt := range evts {
 		if evt.Position > s.projectedBarEnd {
@@ -659,7 +659,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 					endPos = s.projectedBarEnd
 				}
 
-				partEvents := getEventsInPosRange(startPos, endPos, evts)
+				partEvents := items.GetEventsInPosRange(startPos, endPos, evts)
 
 				// TODO:
 				//
@@ -676,12 +676,12 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 					nevts = append(nevts, nue)
 				}
 
-				mixed = append(mixed, newEventStream(startPos, endPos, true, nevts...))
+				mixed = append(mixed, items.NewEventStream(startPos, endPos, true, nevts...))
 
 				//printEvents("nevts", nevts)
 
 				// overrides
-				otherEvents := getEventsInPosRange(endPos, endPos+diff, evts)
+				otherEvents := items.GetEventsInPosRange(endPos, endPos+diff, evts)
 
 				for _, otherE := range otherEvents {
 					switch otherE.Item.(type) {
@@ -689,11 +689,11 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 						// ignore
 					case *items.Override:
 						fmt.Printf("got override: %v\n", otherE)
-						oes := newEventStream(otherE.Position, otherE.Position+1, false, otherE)
-						oes.isOverride = true
+						oes := items.NewEventStream(otherE.Position, otherE.Position+1, false, otherE)
+						oes.IsOverride = true
 						mixed = append(mixed, oes)
 					default:
-						nes := newEventStream(otherE.Position, otherE.Position+1, false, otherE)
+						nes := items.NewEventStream(otherE.Position, otherE.Position+1, false, otherE)
 						mixed = append(mixed, nes)
 					}
 				}
@@ -704,7 +704,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 
 			} else {
 				if evt.Position >= skipPos {
-					nes := newEventStream(evt.Position, evt.Position+1, false, evt)
+					nes := items.NewEventStream(evt.Position, evt.Position+1, false, evt)
 					mixed = append(mixed, nes)
 				}
 				//res = append(res, evt)
@@ -712,7 +712,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 		}
 	}
 
-	unrolled := mergeEventStreams(mixed, s.projectedBarEnd)
+	unrolled := items.MergeEventStreams(mixed, s.projectedBarEnd)
 
 	return unrolled, nil
 }
@@ -752,7 +752,7 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 				}
 			*/
 
-			partEvents := getEventsInPosRange(startPos, endPos, evts)
+			partEvents := items.GetEventsInPosRange(startPos, endPos, evts)
 
 			var nevts []*items.Event
 
@@ -787,14 +787,14 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 			if endPos > stopPos {
 				endPos = stopPos
 			}
-			ets := getEventsInPosRange(bar.Position, endPos, evts)
+			ets := items.GetEventsInPosRange(bar.Position, endPos, evts)
 			printEvents("ets", ets)
 			res = append(res, ets...)
 		}
 
 	}
 
-	ets := getEventsInPosRange(lastBarEnd, stopPos, evts)
+	ets := items.GetEventsInPosRange(lastBarEnd, stopPos, evts)
 	printEvents("rest", ets)
 	res = append(res, ets...)
 

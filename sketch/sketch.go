@@ -131,7 +131,7 @@ func (s *Sketch) getEventsInBars(startbar, endBar int, evts []*items.Event) []*i
 		return nil
 	}
 
-	return getEventsInPosRange(uint(startPos), uint(endPos), evts)
+	return items.GetEventsInPosRange(uint(startPos), uint(endPos), evts)
 }
 
 // gets the bar idx of an event at the given position
@@ -188,7 +188,7 @@ func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event
 
 		//fmt.Printf("it: %#v\n", it)
 
-		il := isLoop(ev.Item)
+		il := items.IsLoop(ev.Item)
 
 		if il >= 0 {
 			loop = uint(il)
@@ -758,7 +758,7 @@ func (s *Sketch) injectParams(col []string, params []string) (res []string) {
 
 	// replace placeholders with params inside the col strings
 	for _, c := range col {
-		res = append(res, replaceParams(c, params))
+		res = append(res, items.ReplaceParams(c, params))
 	}
 
 	return
@@ -854,7 +854,7 @@ func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts 
 		return
 	}
 
-	evts = forwardEvents(evts, start)
+	evts = items.ForwardEvents(evts, start)
 	printEvents("after including in col "+column, evts)
 	return
 }

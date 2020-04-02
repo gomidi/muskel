@@ -34,19 +34,9 @@ func (t *Token) String() string {
 	return t.Name + t.itemGroupModifier.string()
 }
 
-func (p *Token) AddDynamic(orig string) (nu string) {
-	//fmt.Printf("addDynamic %q to %q\n", p.DynamicAdd, orig)
-	if orig == "=" {
-		return orig
-	}
-
-	if p.DynamicAdd == "" {
-		return orig
-	}
-
-	if p.DynamicAdd == "=" {
-		return p.DynamicAdd
-	}
-
-	return reduceDynamic(orig + p.DynamicAdd)
+/*
+func (t *Token) SetDynamic(dyn string) {
+	// TODO resolv and then set it
+	//nt.Dynamic = AddDynamic(nt.Dynamic, dyn)
 }
+*/

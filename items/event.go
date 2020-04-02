@@ -128,3 +128,34 @@ func (e *Event) AbsPosTicks(ticks4th uint32, trackDelay int) uint {
 
 	return uint(res)
 }
+
+func ForwardEvents(ins []*Event, diff uint) (outs []*Event) {
+	if diff == 0 {
+		return ins
+	}
+	for _, ev := range ins {
+		nev := ev.Dup()
+		nev.Position += diff
+		outs = append(outs, nev)
+	}
+	return
+}
+
+func MoveBySyncFirst(ins []*Event) (out []*Event) {
+	var posDiff uint
+	for i, ev := range ins {
+		if ev == nil {
+			continue
+		}
+
+		if i == 0 {
+			posDiff = ev.Position
+		}
+
+		nev := ev.Dup()
+		nev.Position = ev.Position - posDiff
+
+		out = append(out, nev)
+	}
+	return
+}

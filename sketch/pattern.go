@@ -55,7 +55,7 @@ func (pc *pattern) unrollPattern(start uint, until uint) (evt []*items.Event, ab
 		if DEBUG {
 			fmt.Printf("forwarding by %v\n", length*uint(i))
 		}
-		__evts = append(__evts, forwardEvents(_evt, length*uint(i))...)
+		__evts = append(__evts, items.ForwardEvents(_evt, length*uint(i))...)
 		absoluteEnd += length * uint(i)
 	}
 
@@ -122,7 +122,7 @@ func (c *pattern) modifyItem(it items.Item) (items.Item, error) {
 			if err != nil {
 				return nil, err
 			}
-			it := posEv.events[0].Item
+			it := posEv.Events[0].Item
 			return it, nil
 		} else {
 			return it.Dup(), nil
@@ -173,27 +173,17 @@ func (pc *pattern) modifyEvents(start uint, until uint, evts []*items.Event) (ev
 		evt = append(evt, nuEv)
 	}
 
-	evt, end = sliceEvents(pc.pattern.Slice, evt, projectedBarEnd)
+	evt, end = items.SliceEvents(pc.pattern.Slice, evt, projectedBarEnd)
 
 	if pc.pattern.Slice[0] > 0 {
-		evt = moveBySyncFirst(evt)
-		evt = forwardEvents(evt, start)
+		evt = items.MoveBySyncFirst(evt)
+		evt = items.ForwardEvents(evt, start)
 	}
 
 	return
 }
 
-func printEvents(message string, evts []*items.Event) {
-	if DEBUG {
-		fmt.Printf("##> Events %s\n", message)
-		for _, ev := range evts {
-			fmt.Printf("[%v] %v ", ev.Position, ev.String())
-		}
-		fmt.Printf("\n##< Events %s\n", message)
-	}
-}
-
-func (pc *pattern) _getEventStream(start uint, endPos uint, isOverride bool) (*eventStream, error) {
+func (pc *pattern) _getEventStream(start uint, endPos uint, isOverride bool) (*items.EventStream, error) {
 	evts, diff, absoluteEnd, err := pc.unroll(start, endPos)
 	if err != nil {
 		return nil, err
@@ -209,11 +199,11 @@ func (pc *pattern) _getEventStream(start uint, endPos uint, isOverride bool) (*e
 
 	printEvents("after unrolling colum "+pc.column.name+" of sketch "+pc.column.sketch.Name, evts)
 
-	var es *eventStream
+	var es *items.EventStream
 
-	es = newEventStream(start, end, true, evts...)
+	es = items.NewEventStream(start, end, true, evts...)
 
-	es.isOverride = isOverride
+	es.IsOverride = isOverride
 	return es, nil
 }
 
@@ -229,14 +219,11 @@ func (c *pattern) unroll(start uint, until uint) (evt []*items.Event, diff uint,
 	tr, _ := c.column.sketch.Score.GetTrack(colname)
 	var patt = sk.newCol(tr, colname)
 	var pcc = patt.newPattern(cc)
-	//evt, diff, end, err = pcc.unrollPattern(start, until)
 	evt, end, err = pcc.unrollPattern(start, until)
 	return
-	//default:
-
 }
 
-func (c *pattern) getEventStream(start uint, end uint) (*eventStream, error) {
+func (c *pattern) getEventStream(start uint, end uint) (*items.EventStream, error) {
 	cc := c.pattern
 	if cc.Lyrics != nil {
 		es, err := c._getEventStream(start, end, false)
@@ -244,7 +231,7 @@ func (c *pattern) getEventStream(start uint, end uint) (*eventStream, error) {
 			return nil, err
 		}
 		var lc = c.column.newLyrics(cc.Lyrics)
-		es.events, err = lc.applyLyrics(es.events)
+		es.Events, err = lc.applyLyrics(es.Events)
 		if err != nil {
 			return nil, err
 		}
@@ -253,8 +240,8 @@ func (c *pattern) getEventStream(start uint, end uint) (*eventStream, error) {
 	return c._getEventStream(start, end, false)
 }
 
-func (pc *pattern) getOverrideEventStream(start uint, endPos uint) (*eventStream, error) {
+func (pc *pattern) getOverrideEventStream(start uint, endPos uint) (*items.EventStream, error) {
 	es, err := pc._getEventStream(start, endPos, true)
-	es.end = es.start + es.end
+	es.End = es.Start + es.End
 	return es, err
 }

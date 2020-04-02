@@ -9,7 +9,7 @@ import (
 
 type token struct {
 	column *column
-	token   *items.Token
+	token  *items.Token
 }
 
 func (c *token) modifyItem(it items.Item) (items.Item, error) {
@@ -21,7 +21,7 @@ func (c *token) modifyItem(it items.Item) (items.Item, error) {
 	case *items.Note:
 		it := v.Dup().(*items.Note)
 		if c != nil {
-			it.Dynamic = cc.AddDynamic(v.Dynamic)
+			it.Dynamic = items.AddDynamic(v.Dynamic, cc.DynamicAdd)
 			if it.PosShift == 0 && cc.PosShift != 0 {
 				it.PosShift = cc.PosShift
 			}
@@ -30,7 +30,7 @@ func (c *token) modifyItem(it items.Item) (items.Item, error) {
 	case *items.MIDINote:
 		it := v.Dup().(*items.MIDINote)
 		if c != nil {
-			it.Dynamic = cc.AddDynamic(v.Dynamic)
+			it.Dynamic = items.AddDynamic(v.Dynamic, cc.DynamicAdd)
 			if it.PosShift == 0 && cc.PosShift != 0 {
 				it.PosShift = cc.PosShift
 			}
@@ -45,7 +45,7 @@ func (c *token) modifyItem(it items.Item) (items.Item, error) {
 			if err != nil {
 				return nil, err
 			}
-			it := posEv.events[0].Item
+			it := posEv.Events[0].Item
 			return it, nil
 		} else {
 			return it.Dup(), nil
@@ -96,17 +96,17 @@ func (pc *token) modifyEvents(start uint, until uint, evts []*items.Event) (evt 
 		evt = append(evt, nuEv)
 	}
 
-	evt, end = sliceEvents(pc.token.Slice, evt, projectedBarEnd)
+	evt, end = items.SliceEvents(pc.token.Slice, evt, projectedBarEnd)
 
 	if pc.token.Slice[0] > 0 {
-		evt = moveBySyncFirst(evt)
-		evt = forwardEvents(evt, start)
+		evt = items.MoveBySyncFirst(evt)
+		evt = items.ForwardEvents(evt, start)
 	}
 
 	return
 }
 
-func (pc *token) _getEventStream(start uint, endPos uint, isOverride bool) (*eventStream, error) {
+func (pc *token) _getEventStream(start uint, endPos uint, isOverride bool) (*items.EventStream, error) {
 	evts, diff, absoluteEnd, err := pc.unroll(start, endPos)
 	if err != nil {
 		return nil, err
@@ -124,15 +124,15 @@ func (pc *token) _getEventStream(start uint, endPos uint, isOverride bool) (*eve
 
 	printEvents("after unrolling colum "+pc.column.name+" of sketch "+pc.column.sketch.Name, evts)
 
-	var es *eventStream
+	var es *items.EventStream
 
 	if isOverride {
-		es = newEventStream(start, 1, true, evts...)
+		es = items.NewEventStream(start, 1, true, evts...)
 	} else {
-		es = newEventStream(start, 1, false, evts...)
+		es = items.NewEventStream(start, 1, false, evts...)
 	}
 
-	es.isOverride = isOverride
+	es.IsOverride = isOverride
 	return es, nil
 }
 
@@ -191,17 +191,17 @@ func (pc *token) getToken() (val string, err error) {
 	}
 
 	val, err = pc.column.sketch.Score.GetToken(token)
-	val = replaceParams(val, pc.token.Params)
+	val = items.ReplaceParams(val, pc.token.Params)
 	return
 }
 
-func (c *token) getEventStream(start uint, end uint) (*eventStream, error) {
+func (c *token) getEventStream(start uint, end uint) (*items.EventStream, error) {
 	//cc := c.call
 	return c._getEventStream(start, end, false)
 }
 
-func (pc *token) getOverrideEventStream(start uint, endPos uint) (*eventStream, error) {
+func (pc *token) getOverrideEventStream(start uint, endPos uint) (*items.EventStream, error) {
 	es, err := pc._getEventStream(start, endPos, true)
-	es.end = es.start + es.end
+	es.End = es.Start + es.End
 	return es, err
 }

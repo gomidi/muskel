@@ -10,6 +10,15 @@ type MultiItem struct {
 	itemGroupModifier
 }
 
+func (m *MultiItem) SetDynamic(dyn string) {
+	for _, ev := range m.Events {
+		_ = ev
+		panic("TODO")
+	}
+	// TODO resolv and then set it
+	//nt.Dynamic = AddDynamic(nt.Dynamic, dyn)
+}
+
 func (m *MultiItem) Parse(data string, posIn32th uint) (err error) {
 	idx := strings.Index(data, "(")
 	endIdx := strings.LastIndex(data, ")")

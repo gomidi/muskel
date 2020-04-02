@@ -39,7 +39,7 @@
   Obergruppe 
     EventSequence: zeitliche Abfolge von Items einer Spur
         - haben eine Callbackfunktion, die die events holt; sie können von patterns/tabellenspalten, 
-          wiederholungen mit .n., Wiederholungen mit % oder partwiederholungen stammen
+          wiederholungen mit .n., Wiederholungen mit % oder partwiederholungen stammen oder von includes
         - auf sie können folgende funktionen angewendet werden:
           - sequencecommands
           - slicing mit []

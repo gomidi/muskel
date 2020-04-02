@@ -209,30 +209,6 @@ func (p *Pattern) Parse(call string, positionIn32th uint) (err error) {
 	return nil
 }
 
-func reduceDynamic(dyn string) string {
-
-	var counter int
-	for _, sym := range dyn {
-		switch sym {
-		case '-':
-			counter--
-		case '+':
-			counter++
-		}
-	}
-
-	//fmt.Printf("reduceDynamic: %q: %v\n", dyn, counter)
-
-	switch {
-	case counter > 0:
-		return strings.Repeat("+", counter)
-	case counter < 0:
-		return strings.Repeat("-", counter*(-1))
-	default:
-		return ""
-	}
-}
-
 func (p *Pattern) AddDynamic(orig string) (nu string) {
 	//fmt.Printf("addDynamic %q to %q\n", p.DynamicAdd, orig)
 	if orig == "=" {

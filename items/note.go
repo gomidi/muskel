@@ -232,6 +232,10 @@ func parseTransposition(data string) (trans int8, rest string, err error) {
 	return int8(tr), restbf.String(), nil
 }
 
+func (nt *Note) SetDynamic(dyn string) {
+	nt.Dynamic = AddDynamic(nt.Dynamic, dyn)
+}
+
 func (nt *Note) Parse(data string, posIn32th uint) (err error) {
 
 	switch data[0] {

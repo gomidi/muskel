@@ -608,7 +608,7 @@ func TestReplaceParams(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		result := replaceParams(test.input, params)
+		result := items.ReplaceParams(test.input, params)
 
 		if result != test.expected {
 			t.Errorf("[%v] replaceParams(%q, %v) = %q // expected %q ", i, test.input, params, result, test.expected)

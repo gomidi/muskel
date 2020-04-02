@@ -9,7 +9,7 @@ import (
 
 type lyrics struct {
 	column *column
-	lyrics   *items.LyricsTable
+	lyrics *items.LyricsTable
 }
 
 func (c *lyrics) applyLyrics(evts []*items.Event) ([]*items.Event, error) {
@@ -28,5 +28,5 @@ func (c *lyrics) applyLyrics(evts []*items.Event) ([]*items.Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	return applyLyrics(evts, l), nil
+	return items.ApplyLyrics(evts, l), nil
 }

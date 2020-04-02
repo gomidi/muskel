@@ -13,21 +13,10 @@ func (e EventSequencerFunc) Get() EventSequence {
 }
 
 /*
-von item_group
-- slicing mit []
-- dynamik change mit + und -
-- diatonische transposition mit ^
-- chromatische transposition mit # und b
-- octavierungen mit " und '
-- microtimingverschiebung mit > und <
-- zufallswahrscheinlichkeit mit xx%
-- zufällige auswahlmit %()
-*/
-
-/*
 - überschreiben mit /
 - startsynchronisierung mit !
 
+von item_group
 - slicing mit []
 - dynamik change mit + und -
 - diatonische transposition mit ^
@@ -42,6 +31,8 @@ von item_group
 items.Pattern     -> EventSequence
 items.PartRepeat  -> EventSequence
 items.BarRepeater -> EventSequence
+items.Includes    -> EventSequence
+items.NTuple      -> EventSequence
 */
 
 type eventSequenceModifier struct {
@@ -116,12 +107,39 @@ var _ Item = &EventSequenceItem{}
 
 type Params []interface{}
 
-func (s EventSequence) Call(params Params) EventSequence {
+func (s EventSequence) Call(mod *eventSequenceModifier) EventSequence {
 	panic("TODO implement")
 }
 
-func (s EventSequence) Slice(from, to int) EventSequence {
-	panic("TODO implement")
+func (s EventSequence) Slice(mod *eventSequenceModifier) (evs EventSequence) {
+	if mod.SingleSlice >= 0 {
+		if len(s) <= mod.SingleSlice {
+			return nil
+		}
+		return EventSequence{s[mod.SingleSlice]}
+	}
+
+	first, last := mod.Slice[0], mod.Slice[1]
+	if first < 0 {
+		return s
+	}
+
+	var collecting bool
+
+	for i, ev := range s {
+		if last > 0 && i >= last {
+			break
+		}
+
+		if i == first {
+			collecting = true
+		}
+
+		if collecting {
+			evs = append(evs, ev.Dup())
+		}
+	}
+	return
 }
 
 func (s EventSequence) Override(over EventSequence) EventSequence {
@@ -148,8 +166,79 @@ func (s EventSequence) MircoTimingShift(shift int8) EventSequence {
 	panic("TODO implement")
 }
 
-func (s EventSequence) ChangeDynamic(diff int8) EventSequence {
-	panic("TODO implement")
+type dynamicSetter interface {
+	SetDynamic(string)
+}
+
+func (s EventSequence) ChangeDynamic(mod *eventSequenceModifier) (evs EventSequence) {
+	for _, ev := range s {
+		if _, is := ev.Item.(dynamicSetter); is {
+			nu := ev.Dup()
+			d := nu.Item.(dynamicSetter)
+			d.SetDynamic(mod.DynamicAdd)
+			evs = append(evs, nu)
+		}
+	}
+	return
+
+	/*
+		switch v := it.(type) {
+		case *items.Note:
+			it := v.Dup().(*items.Note)
+			if c != nil {
+				it.Dynamic = cc.AddDynamic(v.Dynamic)
+				if it.PosShift == 0 && cc.PosShift != 0 {
+					it.PosShift = cc.PosShift
+				}
+			}
+			return it, nil
+		case *items.MIDINote:
+			it := v.Dup().(*items.MIDINote)
+			if c != nil {
+				it.Dynamic = cc.AddDynamic(v.Dynamic)
+				if it.PosShift == 0 && cc.PosShift != 0 {
+					it.PosShift = cc.PosShift
+				}
+			}
+			return it, nil
+
+		case *items.Token:
+			if c != nil {
+				pc := c.column.newToken(v)
+				//posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+				posEv, err := pc.getEventStream(0, 1)
+				if err != nil {
+					return nil, err
+				}
+				it := posEv.events[0].Item
+				return it, nil
+			} else {
+				return it.Dup(), nil
+			}
+
+		case *items.LyricsTable:
+			return it.Dup(), nil
+
+		case *items.Pattern:
+			return it.Dup(), nil
+
+		case *items.NTuple:
+			if c != nil {
+				it := v.Dup().(*items.NTuple)
+				it, err := c.column.replaceNtupleTokens(v)
+
+				if err != nil {
+					return nil, err
+				}
+
+				return it, nil
+			} else {
+				return v.Dup(), nil
+			}
+		default:
+			return it.Dup(), nil
+		}
+	*/
 }
 
 func (s EventSequence) Len() int {

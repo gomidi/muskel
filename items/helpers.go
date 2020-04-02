@@ -12,6 +12,240 @@ import (
 	"gitlab.com/gomidi/midi/smf"
 )
 
+func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
+	applied = ev.Dup()
+	var l Lyric
+	l.Text = lyric
+
+	switch v := applied.Item.(type) {
+	case *MultiItem:
+		if !MultiHasNote(v) {
+			return
+		}
+		var _ev = ev.Dup()
+		_ev.PosShift = 0
+		_ev.Item = &l
+		v.Events = append(v.Events, _ev)
+		applied.Item = v
+		wasApplied = true
+	case *Note:
+		var me = &MultiItem{}
+		me.Reset()
+		//l.PosShift = v.PosShift
+		_ev := ev.Dup()
+		_ev.PosShift = 0
+		_ev.Item = &l
+
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		me.Events = append(me.Events, _ev2, _ev)
+		applied.Item = me
+		wasApplied = true
+	case *MIDINote:
+		var me = &MultiItem{}
+		me.Reset()
+		_ev := ev.Dup()
+		_ev.PosShift = 0
+		_ev.Item = &l
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		me.Events = append(me.Events, _ev2, _ev)
+		applied.Item = me
+		wasApplied = true
+	case *NTuple:
+		if !NtupleHasNote(v) {
+			return
+		}
+		var me = &MultiItem{}
+		me.Reset()
+		var _ev = ev.Dup()
+		_ev.Item = &l
+		_ev.PosShift = 0
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		//l.PosShift = v.PosShift
+		me.Events = append(me.Events, _ev2, _ev)
+		applied.Item = me
+		wasApplied = true
+	default:
+		if ev.Item != Hold {
+			return
+		}
+
+		var me = &MultiItem{}
+		me.Reset()
+		_ev := ev.Dup()
+		_ev.Item = &l
+		_ev.PosShift = 0
+		_ev2 := ev.Dup()
+		_ev2.PosShift = 0
+		me.Events = append(me.Events, _ev2, _ev)
+		applied.Item = me
+		wasApplied = true
+	}
+	return
+}
+
+// applyLyrics applies the lyrics to the items of the pattern
+func ApplyLyrics(events []*Event, lyrics []string) (applied []*Event) {
+	if len(lyrics) == 0 {
+		return events
+	}
+	var i int
+	for _, ev := range events {
+		if i >= len(lyrics) {
+			i = i % len(lyrics)
+		}
+		nev, wasApplied := _applyLyric(ev, lyrics[i])
+		if wasApplied {
+			i++
+		}
+		applied = append(applied, nev)
+	}
+	return
+}
+
+func MultiHasNote(me *MultiItem) bool {
+	for _, it := range me.Events {
+		switch it.Item.(type) {
+		case *Note, *MIDINote:
+			return true
+		default:
+		}
+	}
+	return false
+}
+
+func NtupleHasNote(me *NTuple) bool {
+	for _, it := range me.Events {
+		switch it.Item.(type) {
+		case *Note, *MIDINote:
+			return true
+		default:
+		}
+	}
+	return false
+}
+
+func IsLoop(it Item) int {
+	if it == nil {
+		return -1
+	}
+
+	switch v := it.(type) {
+	case *Override:
+		return IsLoop(v.Item)
+	case *BarRepeater:
+		if v.OnlyOnce {
+			return 0
+		}
+		return v.LastN
+	default:
+		return 0
+	}
+}
+
+func FindEventThatIsNotRest(start int, evts []*Event) (found int) {
+	if start >= len(evts) {
+		return -1
+	}
+
+	if evts[start].Item != Rest {
+		return start
+	}
+
+	return FindEventThatIsNotRest(start+1, evts)
+}
+
+//func replaceParams(s string, params []interface{}) string {
+func ReplaceParams(s string, params []string) string {
+	/*
+		if DEBUG {
+			fmt.Printf("should replace params %#v in %q\n", params, s)
+		}
+	*/
+	if len(params) == 0 {
+		return s
+	}
+	paramslen := len(params)
+	return TemplateReg.ReplaceAllStringFunc(s, func(in string) (out string) {
+		i, err := strconv.Atoi(in[1:])
+		if err != nil {
+			// should be unreachable, if regexp is correct
+			panic(in)
+		}
+		return params[(i-1)%paramslen]
+	})
+}
+
+// sliceEvents slices the events according to the template call slice definition
+func SliceEvents(slice [2]int, all []*Event, projectedBarEnd uint) (evs []*Event, absoluteEnd uint) {
+	first, last := slice[0], slice[1]
+	absoluteEnd = projectedBarEnd
+	if first < 0 {
+		return all, projectedBarEnd
+	}
+
+	var collecting bool
+
+	for i, ev := range all {
+		if last > 0 && i >= last {
+			absoluteEnd = ev.Position
+			break
+		}
+
+		if i == first {
+			collecting = true
+		}
+
+		if collecting {
+			evs = append(evs, ev.Dup())
+		}
+	}
+	return
+}
+
+func reduceDynamic(dyn string) string {
+
+	var counter int
+	for _, sym := range dyn {
+		switch sym {
+		case '-':
+			counter--
+		case '+':
+			counter++
+		}
+	}
+
+	//fmt.Printf("reduceDynamic: %q: %v\n", dyn, counter)
+
+	switch {
+	case counter > 0:
+		return strings.Repeat("+", counter)
+	case counter < 0:
+		return strings.Repeat("-", counter*(-1))
+	default:
+		return ""
+	}
+}
+
+func AddDynamic(orig, dynAdd string) (nu string) {
+	//fmt.Printf("addDynamic %q to %q\n", p.DynamicAdd, orig)
+	if orig == "=" {
+		return orig
+	}
+
+	if dynAdd == "" {
+		return orig
+	}
+
+	if dynAdd == "=" {
+		return dynAdd
+	}
+
+	return reduceDynamic(orig + dynAdd)
+}
+
 func calcAdd(distance int64, diff float64) float64 {
 	return diff / float64(distance)
 }
