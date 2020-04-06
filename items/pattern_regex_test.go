@@ -11,15 +11,15 @@ func TestPatternRegexp(t *testing.T) {
 		shouldMatch bool
 		matches     []string
 	}{
-		{"hi", true, []string{"hi", "hi", "", "", "", ""}},
-		{"=hi", true, []string{"=hi", "=hi", "", "", "", ""}},
-		{"=.hi", true, []string{"=.hi", "=.hi", "", "", "", ""}},
-		{"@hi", true, []string{"@hi", "@hi", "", "", "", ""}},
-		{"=hi()", true, []string{"=hi", "=hi", "", "", "", ""}},
-		{"=hi.ho()", true, []string{"=hi.ho", "=hi.ho", "", "", "", ""}},
-		{"=hi(hui)", true, []string{"=hi", "=hi", "", "", "", ""}},
-		{"=hi(hui)[0:3]", true, []string{"=hi", "=hi", "", "", "", ""}},
-		{"=hi(hui)[0:3]@ho", true, []string{"=hi", "=hi", "", "", "", ""}},
+		{"hi", true, []string{"hi", "hi", "", "", ""}},
+		{"=hi", true, []string{"=hi", "=hi", "", "", ""}},
+		{"=.hi", true, []string{"=.hi", "=.hi", "", "", ""}},
+		{"@hi", true, []string{"@hi", "@hi", "", "", ""}},
+		{"=hi()", true, []string{"=hi", "=hi", "", "", ""}},
+		{"=hi.ho()", true, []string{"=hi.ho", "=hi.ho", "", "", ""}},
+		{"=hi(hui)", true, []string{"=hi", "=hi", "", "", ""}},
+		{"=hi(hui)[0:3]", true, []string{"=hi", "=hi", "", "", ""}},
+		{"=hi(hui)[0:3]@ho", true, []string{"=hi", "=hi", "", "", ""}},
 	}
 
 	for i, test := range tests {

@@ -113,6 +113,15 @@ func (p *Pattern) Parse(call string, positionIn32th uint) (err error) {
 		p.Lyrics = &lp
 	}
 
+	if idx := strings.Index(call, "%"); idx > 0 {
+		repeat, repErr := strconv.Atoi(call[idx+1:])
+		if repErr != nil {
+			return fmt.Errorf("invalid number of repetitions: %s", call[idx+1:])
+		}
+		p.Repeat = uint(repeat)
+		call = call[:idx]
+	}
+
 	if idx := strings.Index(call, "["); idx > 0 {
 		slice = strings.TrimSpace(strings.Trim(call[idx:], "[]"))
 		call = call[:idx]
@@ -135,16 +144,8 @@ func (p *Pattern) Parse(call string, positionIn32th uint) (err error) {
 		return fmt.Errorf("invalid template name: %q", p.Name)
 	}
 
-	if mt[2] != "" && mt[2][0] == '%' {
-		repeat, repErr := strconv.Atoi(mt[2][1:])
-		if repErr != nil {
-			return fmt.Errorf("invalid number of repetitions: %s", mt[2][1:])
-		}
-		p.Repeat = uint(repeat)
-	}
-
-	if mt[3] != "" {
-		dt := mt[3][1:]
+	if mt[2] != "" {
+		dt := mt[2][1:]
 		p.ScaleMoveMode = 1 // move only scale notes
 		if dt[0] == '^' {
 			p.ScaleMoveMode = 2 // move depending on first note
@@ -159,9 +160,9 @@ func (p *Pattern) Parse(call string, positionIn32th uint) (err error) {
 		p.ScaleMove = int8(si)
 	}
 
-	p.DynamicAdd = mt[4]
+	p.DynamicAdd = mt[3]
 
-	switch mt[5] {
+	switch mt[4] {
 	case "<":
 		p.PosShift = -1
 	case ">":
@@ -229,8 +230,6 @@ func (p *Pattern) AddDynamic(orig string) (nu string) {
 var TemplateReg = regexp.MustCompile(regexp.QuoteMeta("#") + "([0-9]+)")
 
 var regPattStr = "^([=+" + regexp.QuoteMeta(".") + "@a-zA-Z][._~a-zA-Z0-9]+)(" +
-	regexp.QuoteMeta("%") +
-	"?[0-9]*)(" +
 	regexp.QuoteMeta("^") +
 	"{1,2}[-0-9]+){0,1}([" +
 	regexp.QuoteMeta("-+=") +
