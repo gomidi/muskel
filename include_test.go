@@ -3033,6 +3033,41 @@ Ambitus |from:C' to:c' cut:true|
     1&                   | c |
 `,
 		},
+		{ // 99
+			`
+TRACK | p |
+Ch    | 1 |
+
+=t  | 1  |
+#
+ 1  | #1 |
+ 1& | #2 |
+ 2  | #3 |
+ 3  | _  |
+
+=SCORE | p            |
+#
+    1  | =t%3(a,c,c)  |
+#
+    1  |              |
+    3  | *            |
+			`,
+			`
+=SCORE                   | p |
+ # 4/4 @120.00 \major^c'
+    1                    | a |
+    1&                   | c |
+    2                    | c |
+    3                    | a |
+    3&                   | c |
+    4                    | c |
+ #
+    1                    | a |
+    1&                   | c |
+    2                    | c |
+    3                    | * |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -3085,7 +3120,7 @@ Ambitus |from:C' to:c' cut:true|
 					continue
 				}
 
-			if i != 93 {
+			if i != 99 {
 				continue
 			}
 		*/
