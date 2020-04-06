@@ -2,6 +2,9 @@
 
 ## nächstes 
 
+- _ beendet ein Pattern und zwar auch mitten im Takt, sodass wiederholungen auf dem _ einsetzen, d.h. man kann auch Pattern machen,
+  die kürzer sind, als ein Takt!
+
 - diatonische verläufe mittels =, z.B.
     
     =SCORE | piano |

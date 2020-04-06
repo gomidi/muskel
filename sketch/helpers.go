@@ -2,9 +2,7 @@ package sketch
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
-	"time"
 
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/patterncommands"
@@ -81,8 +79,6 @@ func printBars(text string, bars ...*Bar) {
 	fmt.Printf("<<<<<<< bars %s\n", text)
 }
 
-
-
 func forwardBars(bars []*Bar, diff uint) {
 	if diff == 0 {
 		return
@@ -90,55 +86,6 @@ func forwardBars(bars []*Bar, diff uint) {
 	for _, b := range bars {
 		b.Position += diff
 	}
-}
-
-// findNextNotEmptyPos finds the next non empty position in evts and adds forward to it
-func findNextPos(i int, forward int, evts []*items.Event) int {
-	// TODO test, if it works
-	for j := i + 1; j < len(evts); j++ {
-		if evts[j].Item != nil {
-			return int(evts[j].Position) + forward
-		}
-	}
-
-	return -1
-}
-
-func rollTheDiceForAnItem(it items.Item) items.Item {
-	if it == nil {
-		return nil
-	}
-	switch v := it.(type) {
-	case *items.RandomChooser:
-		rand.Seed(time.Now().UnixNano())
-		return v.Alternatives[rand.Intn(len(v.Alternatives))].Dup()
-	case *items.RandomProbability:
-		if v.Prob == 0 {
-			return nil
-		}
-		if v.Prob >= 100 {
-			return v.Item.Dup()
-		}
-		rand.Seed(time.Now().UnixNano())
-		if int(v.Prob) >= rand.Intn(100) {
-			return v.Item.Dup()
-		}
-		return nil
-	default:
-		return it.Dup()
-	}
-}
-
-func rollTheDice(events []*items.Event) []*items.Event {
-	// resolv remaining randomness
-	var evs = make([]*items.Event, len(events))
-	for i, ev := range events {
-		var nuEv = ev.Dup()
-		nuEv.Item = rollTheDiceForAnItem(ev.Item)
-		evs[i] = nuEv
-	}
-
-	return evs
 }
 
 func printEvents(message string, evts []*items.Event) {

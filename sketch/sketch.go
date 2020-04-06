@@ -194,7 +194,7 @@ func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event
 			loop = uint(il)
 		}
 
-		ev.Item = rollTheDiceForAnItem(ev.Item)
+		ev.Item = items.RollTheDiceForAnItem(ev.Item)
 
 		//res = append(res, rollTheDiceForAnItem(it))
 		res = append(res, &ev)
@@ -254,7 +254,7 @@ func (s *Sketch) Unroll(_tr *track.Track, colName string, params ...string) ([]*
 
 	printEvents("Sketch.Unroll: after column "+colName+" call of sketch "+s.Name+" in file "+s.File, events)
 
-	events = rollTheDice(events)
+	events = items.RollTheDice(events)
 	//printEvents("after rollTheDice "+colName, events)
 
 	//printEvents("after replaceScalenotes "+colName, events)

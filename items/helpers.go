@@ -4,13 +4,64 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"math/rand"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"gitlab.com/gomidi/midi/smf"
 )
+
+// findNextNotEmptyPos finds the next non empty position in evts and adds forward to it
+func FindNextPos(i int, forward int, evts []*Event) int {
+	// TODO test, if it works
+	for j := i + 1; j < len(evts); j++ {
+		if evts[j].Item != nil {
+			return int(evts[j].Position) + forward
+		}
+	}
+
+	return -1
+}
+
+func RollTheDiceForAnItem(it Item) Item {
+	if it == nil {
+		return nil
+	}
+	switch v := it.(type) {
+	case *RandomChooser:
+		rand.Seed(time.Now().UnixNano())
+		return v.Alternatives[rand.Intn(len(v.Alternatives))].Dup()
+	case *RandomProbability:
+		if v.Prob == 0 {
+			return nil
+		}
+		if v.Prob >= 100 {
+			return v.Item.Dup()
+		}
+		rand.Seed(time.Now().UnixNano())
+		if int(v.Prob) >= rand.Intn(100) {
+			return v.Item.Dup()
+		}
+		return nil
+	default:
+		return it.Dup()
+	}
+}
+
+func RollTheDice(events []*Event) []*Event {
+	// resolv remaining randomness
+	var evs = make([]*Event, len(events))
+	for i, ev := range events {
+		var nuEv = ev.Dup()
+		nuEv.Item = RollTheDiceForAnItem(ev.Item)
+		evs[i] = nuEv
+	}
+
+	return evs
+}
 
 func _applyLyric(ev *Event, lyric string) (applied *Event, wasApplied bool) {
 	applied = ev.Dup()

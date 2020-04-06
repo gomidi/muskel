@@ -173,7 +173,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 		case *items.NTuple:
 			// TODO look inside each item and replace random things and templatecalls if there
-			var until = findNextPos(i, int(forward), evts)
+			var until = items.FindNextPos(i, int(forward), evts)
 			if until < 0 {
 				until = int(endPos)
 			}
@@ -318,7 +318,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 		case *items.MultiItem:
 			// TODO look inside each item and replace random things and templatecalls if there
-			var until = findNextPos(i, int(forward), evts)
+			var until = items.FindNextPos(i, int(forward), evts)
 			if until < 0 {
 				until = int(endPos)
 			}
@@ -398,7 +398,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			}
 
 		default:
-			var until = findNextPos(i, int(forward), evts)
+			var until = items.FindNextPos(i, int(forward), evts)
 			if until < 0 {
 				until = int(endPos)
 			}
