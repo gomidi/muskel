@@ -2,9 +2,6 @@
 
 ## nächstes 
 
-- _ beendet ein Pattern und zwar auch mitten im Takt, sodass wiederholungen auf dem _ einsetzen, d.h. man kann auch Pattern machen,
-  die kürzer sind, als ein Takt!
-
 - diatonische verläufe mittels =, z.B.
     
     =SCORE | piano |
@@ -206,6 +203,8 @@ Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang 
 
 # erledigt
 
+- _ beendet ein Pattern und zwar auch mitten im Takt, sodass wiederholungen auf dem _ einsetzen, d.h. man kann auch Pattern machen,
+  die kürzer sind, als ein Takt!
 
 - wir brauchen bei den tracks einen ambitus: from: to: type: (ignore,fit,mirror)
   ignore entfernt noten, die nicht reinpassen, fit verwendet die nächste passende note der skala, mirror spiegelt die note
