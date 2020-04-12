@@ -59,7 +59,7 @@ type Score struct {
 
 	printBarComments bool
 
-	Bars     []*sketch.Bar
+	Bars     []*items.Bar
 	Parts    map[string][2]uint
 	Tracks   map[string]*track.Track
 	Tunings  map[string]*tuning.Tuning
@@ -1005,7 +1005,7 @@ func (sc *Score) AddSketch(name string) interface {
 		name = name[:idx]
 		sc.exclSketch[excl] = name
 	}
-	sk := sketch.NewSketch(name, sc)
+	sk := sketch.New(name, sc)
 	sk.File = sc.mainFile
 	sc.Sketches[name] = sk
 	return sk

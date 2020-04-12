@@ -11,7 +11,6 @@ import (
 	"gitlab.com/gomidi/midi/midimessage/meta"
 	"gitlab.com/gomidi/midi/rpn"
 	"gitlab.com/gomidi/muskel/items"
-	"gitlab.com/gomidi/muskel/sketch"
 	"gitlab.com/gomidi/muskel/track"
 )
 
@@ -56,7 +55,7 @@ func (iw *Track) trackIntroEvents(tr *track.Track) (evts events) {
 	return
 }
 
-func (tw *Track) barOfEvent(ev *items.Event) (bar *sketch.Bar) {
+func (tw *Track) barOfEvent(ev *items.Event) (bar *items.Bar) {
 	if len(tw.smf.score.Bars) == 0 {
 		panic("no bars")
 	}

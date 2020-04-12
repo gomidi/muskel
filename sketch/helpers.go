@@ -8,8 +8,10 @@ import (
 	"gitlab.com/gomidi/muskel/patterncommands"
 )
 
+var eventDebug bool
+
 func SketchFromSketchDef(name string, sketchDef [][2]string, sc Score) (*Sketch, error) {
-	var sk = NewSketch(name, sc)
+	var sk = New(name, sc)
 	sk.AddColumn("pattern")
 
 	for i, df := range sketchDef {
@@ -51,7 +53,7 @@ func EventsFromSketchDef(name string, sketchDef [][2]string, sc Score, params []
 	return
 }
 
-func getBarsInPosRange(from, to uint, bars []*Bar) (res []*Bar) {
+func getBarsInPosRange(from, to uint, bars []*items.Bar) (res []*items.Bar) {
 	for _, b := range bars {
 		//fmt.Printf("event %v at %v: %v\n", i, ev.Position, ev)
 		if b.Position >= to {
@@ -66,7 +68,7 @@ func getBarsInPosRange(from, to uint, bars []*Bar) (res []*Bar) {
 	return
 }
 
-func printBars(text string, bars ...*Bar) {
+func printBars(text string, bars ...*items.Bar) {
 	if !DEBUG {
 		return
 	}
@@ -79,7 +81,7 @@ func printBars(text string, bars ...*Bar) {
 	fmt.Printf("<<<<<<< bars %s\n", text)
 }
 
-func forwardBars(bars []*Bar, diff uint) {
+func forwardBars(bars []*items.Bar, diff uint) {
 	if diff == 0 {
 		return
 	}

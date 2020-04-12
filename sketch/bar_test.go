@@ -23,7 +23,7 @@ rules:
 
 func TestBars(t *testing.T) {
 
-	inc := NewSketch("testinclude", nil)
+	inc := New("testinclude", nil)
 	inc.AddColumn("col1")
 	inc.AddColumn("col2")
 	inc.ParseLine([]string{"# 2/4"})
@@ -175,7 +175,7 @@ $$include("testinclude")
 
 	for i, test := range tests {
 
-		sk := NewSketch("testscore", &testScore{include: inc})
+		sk := New("testscore", &testScore{include: inc})
 		sk.AddColumn("col1")
 		sk.AddColumn("col2")
 		lines := strings.Split(strings.TrimSpace(test.lines), "\n")
@@ -235,7 +235,7 @@ func internalTempoChangesToString(tc map[uint]float64) string {
 	return strings.Join(lines, ",")
 }
 
-func barToString(b *Bar) string {
+func barToString(b *items.Bar) string {
 	/*
 		&Bar{No: 0, Position: 0, TimeSig: [2]uint8{3, 4}, TimeSigChange: [2]uint8{3, 4}, Comment: "tester#1", Part: "A", TempoChange: 120},
 						&Bar{No: 1, Position: 24, TimeSig: [2]uint8{4, 4}, TimeSigChange: [2]uint8{4, 4}, Part: "B", TempoChange: 120},

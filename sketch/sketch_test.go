@@ -492,9 +492,9 @@ func (t *testScore) Properties() map[string]interface{} {
 
 func TestCall(t *testing.T) {
 	//t.Skip()
-	var s = NewSketch("sk", nil)
+	var s = New("sk", nil)
 	s.colOrder = []string{"col1", "col2"}
-	b := NewBar()
+	b := items.NewBar()
 	b.TimeSig = [2]uint8{4, 4}
 	s.newBar(b)
 	sc := &testScore{}

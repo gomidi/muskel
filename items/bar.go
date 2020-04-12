@@ -1,9 +1,7 @@
-package sketch
+package items
 
 import (
 	"fmt"
-
-	"gitlab.com/gomidi/muskel/items"
 )
 
 type Bar struct {
@@ -15,13 +13,13 @@ type Bar struct {
 	// real time sig (inherited or changed)
 	TimeSig           [2]uint8
 	JumpTo            string
-	Scale             *items.Scale
+	Scale             *Scale
 	Tilde             string
-	Include           *items.Include
+	Include           *Include
 	Comment           string
 	Part              string
 	InnerTempoChanges map[uint]float64
-	InnerScales       map[uint]*items.Scale
+	InnerScales       map[uint]*Scale
 }
 
 func (b *Bar) Dup() (nuB *Bar) {
@@ -46,8 +44,8 @@ func (b *Bar) String() string {
 	s := fmt.Sprintf("#%s [%v] %v/%v (<-%v/%v) @%v", b.Part, b.Position, b.TimeSig[0], b.TimeSig[1], b.TimeSigChange[0], b.TimeSigChange[1], b.TempoChange)
 
 	if b.Scale != nil {
-		var nt items.Note
-		nt.Letter, nt.Augmenter, nt.Octave = items.KeyToNote(b.Scale.BaseNote)
+		var nt Note
+		nt.Letter, nt.Augmenter, nt.Octave = KeyToNote(b.Scale.BaseNote)
 		s += b.Scale.String()
 	}
 
@@ -59,7 +57,7 @@ func NewBar() *Bar {
 	return &Bar{
 		TimeSig:           [2]uint8{4, 4},
 		InnerTempoChanges: map[uint]float64{},
-		InnerScales:       map[uint]*items.Scale{},
+		InnerScales:       map[uint]*Scale{},
 	}
 }
 
@@ -72,7 +70,5 @@ func (b *Bar) Length32th() uint {
 	if b.Include != nil {
 		return b.Include.Length32ths
 	}
-	return items.Length32ths(b.TimeSig[0], b.TimeSig[1])
+	return Length32ths(b.TimeSig[0], b.TimeSig[1])
 }
-
-var eventDebug bool

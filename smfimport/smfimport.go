@@ -13,7 +13,6 @@ import (
 	"gitlab.com/gomidi/midi/smf/smfreader"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/gomidi/muskel/sketch"
 	"gitlab.com/gomidi/muskel/track"
 )
 
@@ -76,12 +75,12 @@ func (c *Importer) readSMF() error {
 
 }
 
-func (c *Importer) addBar(b *sketch.Bar) {
+func (c *Importer) addBar(b *items.Bar) {
 	//fmt.Printf("adding bar #%v %s\n", b.No, b)
 	c.score.Bars = append(c.score.Bars, b)
 }
 
-func (c *Importer) addMissingBars(until uint64, lastBar *sketch.Bar) (no int) {
+func (c *Importer) addMissingBars(until uint64, lastBar *items.Bar) (no int) {
 	//lastTick
 	//lastPos := c.ticksTo32ths(c.lastTick)
 	no = lastBar.No
@@ -94,7 +93,7 @@ func (c *Importer) addMissingBars(until uint64, lastBar *sketch.Bar) (no int) {
 
 		for n := uint(1); n < num; n++ {
 			no++
-			b := sketch.NewBar()
+			b := items.NewBar()
 			b.No = no
 			b.TempoChange = lastBar.TempoChange
 			b.TimeSig = lastBar.TimeSig
@@ -109,7 +108,7 @@ func (c *Importer) addMissingBars(until uint64, lastBar *sketch.Bar) (no int) {
 func (c *Importer) setBars() {
 	var no = 1
 
-	var lastBar = sketch.NewBar()
+	var lastBar = items.NewBar()
 	lastBar.No = no
 	lastBar.Position = 0
 	lastBar.TimeSig = [2]uint8{4, 4}
@@ -163,7 +162,7 @@ func (c *Importer) setBars() {
 
 		no++
 		tts := ts.msg.(meta.TimeSig)
-		b := sketch.NewBar()
+		b := items.NewBar()
 		b.No = no
 		b.Position = pos
 		b.TimeSig = [2]uint8{tts.Numerator, tts.Denominator}
@@ -322,7 +321,7 @@ func (c *Importer) setMarkers() {
 	}
 }
 
-func (c *Importer) getBarOf(pos uint) *sketch.Bar {
+func (c *Importer) getBarOf(pos uint) *items.Bar {
 	bidx := c.score.GetBarIdxOf(pos)
 	if bidx >= 0 {
 		return c.score.Bars[bidx]

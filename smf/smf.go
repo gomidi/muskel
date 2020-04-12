@@ -12,7 +12,6 @@ import (
 	smfpkg "gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/gomidi/muskel/sketch"
 )
 
 type smf struct {
@@ -98,7 +97,7 @@ func (s *smf) newTrack() *Track {
 	}
 }
 
-func (s *smf) isStartOfPart(b *sketch.Bar) string {
+func (s *smf) isStartOfPart(b *items.Bar) string {
 	for k, v := range s.score.Parts {
 		if v[0] == b.Position {
 			return k

@@ -46,7 +46,7 @@ type include struct {
 
 type Sketch struct {
 	Name              string
-	Bars              []*Bar
+	Bars              []*items.Bar
 	Positions         [][2]uint // bar+position
 	Columns           map[string][]string
 	Parts             map[string][2]uint // absolute positions
@@ -68,7 +68,7 @@ type Sketch struct {
 	currentBeat         uint
 }
 
-func NewSketch(name string, sc Score) *Sketch {
+func New(name string, sc Score) *Sketch {
 	sk := &Sketch{
 		Score:   sc,
 		Name:    name,
@@ -187,7 +187,7 @@ func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event
 	return
 }
 
-func (s *Sketch) findBarAtPosition(pos uint) (b *Bar) {
+func (s *Sketch) findBarAtPosition(pos uint) (b *items.Bar) {
 	for _, bb := range s.Bars {
 		if bb.Position > pos {
 			return
@@ -297,7 +297,7 @@ func (p *Sketch) parseBarLine(data string) error {
 			return err
 		}
 		for n := 0; n < num; n++ {
-			b := NewBar() //score.NewBar()
+			b := items.NewBar() //score.NewBar()
 			b.TimeSig = p.currentTimeSignatur
 			b.TempoChange = p.currentTempo
 			b.Scale = p.currentScale
@@ -337,7 +337,7 @@ func (p *Sketch) parseBarLine(data string) error {
 
 	data = strings.TrimSpace(data[1:])
 
-	var b = NewBar()
+	var b = items.NewBar()
 	b.Part = part
 	p.jumpInLineBefore = false
 	b.TimeSig = p.currentTimeSignatur
@@ -381,8 +381,8 @@ func (p *Sketch) parseBarLine(data string) error {
 	return nil
 }
 
-func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
-	var res []*Bar
+func (s *Sketch) unrollPartBars(bars []*items.Bar) ([]*items.Bar, error) {
+	var res []*items.Bar
 	var lastBarEnd uint
 	var i int
 
@@ -399,7 +399,7 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 			endPos := part[1]
 			partBars := getBarsInPosRange(startPos, endPos, bars)
 
-			var nbars []*Bar
+			var nbars []*items.Bar
 
 			for kk, b := range partBars {
 				nub := b.Dup()
@@ -421,7 +421,7 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 			}
 
 			brs := getBarsInPosRange(bar.Position, endPos, bars)
-			var nbars []*Bar
+			var nbars []*items.Bar
 
 			for _, b := range brs {
 				nub := b.Dup()
@@ -440,7 +440,7 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 	return res, nil
 }
 
-func (s *Sketch) unrollIncludedBars() (unrolled []*Bar, err error) {
+func (s *Sketch) unrollIncludedBars() (unrolled []*items.Bar, err error) {
 	var no int
 
 	for _, bar := range s.Bars {
@@ -486,7 +486,7 @@ func (s *Sketch) unrollIncludedBars() (unrolled []*Bar, err error) {
 	return
 }
 
-func (s *Sketch) UnrolledBars() (unrolled []*Bar, err error) {
+func (s *Sketch) UnrolledBars() (unrolled []*items.Bar, err error) {
 	unrolled, err = s.unrollIncludedBars()
 	if err != nil {
 		return nil, err
@@ -498,7 +498,7 @@ func (s *Sketch) UnrolledBars() (unrolled []*Bar, err error) {
 	return
 }
 
-func (p *Sketch) newBar(b *Bar) {
+func (p *Sketch) newBar(b *items.Bar) {
 	p.currentBarNo++
 	b.No = p.currentBarNo
 	b.Position = p.projectedBarEnd
@@ -510,7 +510,7 @@ func (p *Sketch) newBar(b *Bar) {
 
 // handleEmptyLine handles an empty line
 func (p *Sketch) handleEmptyBarChange(comment, part string) {
-	b := NewBar()
+	b := items.NewBar()
 	b.Comment = comment
 	b.TimeSig = p.currentTimeSignatur
 	b.TempoChange = p.currentTempo
@@ -539,7 +539,7 @@ func (t *Sketch) isTemplate() bool {
 // handleJump handles a jump
 func (p *Sketch) handleJump(data string) error {
 	p.finishPart(p.projectedBarEnd)
-	b := NewBar()
+	b := items.NewBar()
 	part := strings.TrimSpace(strings.Trim(data, "[]"))
 
 	if p.inPart != "" {
@@ -559,7 +559,7 @@ func (p *Sketch) handleJump(data string) error {
 }
 
 // handleTempoChange handles a tempo change
-func (p *Sketch) handleTempoChange(b *Bar, data string) error {
+func (p *Sketch) handleTempoChange(b *items.Bar, data string) error {
 	if idx := strings.Index(data, "~"); idx > 0 {
 		b.Tilde = data[idx:]
 		data = data[:idx]
@@ -575,7 +575,7 @@ func (p *Sketch) handleTempoChange(b *Bar, data string) error {
 }
 
 // handleTimeSigChange handles a time signature change
-func (p *Sketch) handleTimeSigChange(b *Bar, data string) error {
+func (p *Sketch) handleTimeSigChange(b *items.Bar, data string) error {
 	timeSig := strings.Split(data, "/")
 	if len(timeSig) != 2 {
 		return fmt.Errorf("error in time signature %#v. must be in format n/m where n and m are numbers > 0", data)
@@ -609,27 +609,18 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 
 		if err == nil {
 			switch v := it.(type) {
-
 			case *items.Scale:
 				if v.Exploded {
-					if v.Mode == nil {
-						v.Mode = s.Score.GetMode(v.Name)
-					}
 					if v.Mode != nil {
 						for _, key := range v.All() {
 							var note items.Note
 							note.Letter, note.Augmenter, note.Octave = items.KeyToNote(key)
 							res = append(res, note.String())
 						}
-					} else {
-						res = append(res, param)
+						continue
 					}
-				} else {
-					res = append(res, param)
+					v.Mode = s.Score.GetMode(v.Name)
 				}
-
-			case *items.Pattern:
-				res = append(res, param)
 			case *items.Token:
 				if v.Exploded {
 					tok, errTok := s.Score.GetToken(v.Name)
@@ -641,34 +632,22 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 								for _, iiit := range vv.Events {
 									res = append(res, iiit.String())
 								}
-							default:
-								res = append(res, param)
+								continue
 							}
-						} else {
-							res = append(res, param)
 						}
-					} else {
-						res = append(res, param)
 					}
-				} else {
-					res = append(res, param)
 				}
 			case *items.MultiItem:
 				if v.Exploded {
 					for _, iit := range v.Events {
 						res = append(res, iit.String())
 					}
-				} else {
-					res = append(res, param)
+					continue
 				}
-			default:
-				res = append(res, param)
 			}
-		} else {
-			res = append(res, param)
 		}
+		res = append(res, param)
 	}
-
 	return
 }
 
@@ -683,7 +662,7 @@ func (s *Sketch) injectParams(col []string, params []string) (res []string) {
 	return
 }
 
-func (p *Sketch) parseScale(data string, b *Bar) error {
+func (p *Sketch) parseScale(data string, b *items.Bar) error {
 	var sc items.Scale
 
 	err := sc.Parse(data, 0)
@@ -803,7 +782,7 @@ func (p *Sketch) parseCommandLF(data string) error {
 
 			inc.Length32ths = sk.projectedBarEnd
 			end := p.projectedBarEnd
-			b := NewBar() //score.NewBar()
+			b := items.NewBar() //score.NewBar()
 			b.Include = &inc
 			p.newBar(b)
 			p.projectedBarEnd = end + uint(inc.Length32ths)
@@ -886,7 +865,7 @@ func (s *Sketch) parsePosition(firstColumn string) (err error) {
 func (s *Sketch) parseEventsLine(tabs []string) error {
 	if s.barChangeRequired {
 		if len(s.Bars) == 0 {
-			b := NewBar()
+			b := items.NewBar()
 			b.TempoChange = 120
 			s.currentTempo = b.TempoChange
 			s.currentTimeSignatur = b.TimeSig
