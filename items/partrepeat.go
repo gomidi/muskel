@@ -22,6 +22,10 @@ func (pr *PartRepeat) Dup() Item {
 	}
 }
 
+func (pr *PartRepeat) NewUnrollGetter(evts []*Event) UnrollGetter {
+	return &PartRepeatES{Item: pr, Evts: evts}
+}
+
 func (pr *PartRepeat) String() string {
 	var bd strings.Builder
 	bd.WriteString("[" + pr.Part + "]")

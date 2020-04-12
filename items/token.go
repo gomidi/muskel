@@ -9,21 +9,33 @@ type Token struct {
 	itemGroupModifier
 }
 
-func (t *Token) newSketchToken(column columner) *sketchToken {
+func (t *Token) newSketchToken(column Columner) *sketchToken {
 	return &sketchToken{
 		column: column,
 		token:  t,
 	}
 }
 
-func (t *Token) GetEventStream(column columner, start, until uint) (*EventStream, error) {
+func (t *Token) GetEventStream(column Columner, start, until uint) (*EventStream, error) {
 	pc := t.newSketchToken(column)
 	return pc.getEventStream(start, until)
 }
 
-func (t *Token) GetOverrideEventStream(column columner, start, until uint) (*EventStream, error) {
+func (t *Token) GetOverrideEventStream(column Columner, start, until uint) (*EventStream, error) {
 	pc := t.newSketchToken(column)
 	return pc.getOverrideEventStream(start, until)
+}
+
+var _ UnrollGetter = &Token{}
+
+func (c *Token) GetES(p Columner, ev *Event, start, endPos uint) (mixed []*EventStream, err error) {
+	// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
+	// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
+	posEv, err := c.GetEventStream(p, start, endPos)
+	if err != nil {
+		return nil, err
+	}
+	return []*EventStream{posEv}, nil
 }
 
 func (t *Token) Parse(data string, positionIn32th uint) (err error) {

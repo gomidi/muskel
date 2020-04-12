@@ -60,6 +60,23 @@ func (ntp *NTuple) split(data string) (res []string) {
 
 }
 
+var _ UnrollGetter = &NTuple{}
+
+func (p *NTuple) GetES(c Columner, ev *Event, start, endPos uint) ([]*EventStream, error) {
+	// TODO look inside each item and replace random things and templatecalls if there
+	newItm, err := ReplaceNtupleTokens(c, p)
+	if err != nil {
+		return nil, err
+	}
+
+	var nev = ev.Dup()
+	nev.Position = start
+	nev.PosShift = 0
+	nev.Item = newItm
+	posEv := NewEventStream(nev.Position, endPos, false, nev)
+	return []*EventStream{posEv}, nil
+}
+
 func (ntp *NTuple) SetDynamic(dyn string) {
 	for _, ev := range ntp.Events {
 		_ = ev

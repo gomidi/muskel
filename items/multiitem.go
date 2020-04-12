@@ -19,6 +19,38 @@ func (m *MultiItem) SetDynamic(dyn string) {
 	//nt.Dynamic = AddDynamic(nt.Dynamic, dyn)
 }
 
+var _ UnrollGetter = &MultiItem{}
+
+func (p *MultiItem) GetES(c Columner, ev *Event, start, endPos uint) (x []*EventStream, err error) {
+	// TODO look inside each item and replace random things and templatecalls if there
+	var posEv *EventStream
+	var newItsm = make([]*Event, len(p.Events))
+	for itidx, itm := range p.Events {
+		switch vv := itm.Item.(type) {
+		case *Pattern:
+			posEv, err = vv.GetEventStream(c, start, endPos)
+			if err != nil {
+				return nil, err
+			}
+			newItsm[itidx] = posEv.Events[0]
+		case *Token:
+			posEv, err = vv.GetEventStream(c, start, endPos)
+			if err != nil {
+				return nil, err
+			}
+			newItsm[itidx] = posEv.Events[0]
+		default:
+			newItsm[itidx] = itm
+		}
+	}
+	p.Events = newItsm
+	var nev = ev.Dup()
+	nev.Position = start
+	nev.Item = p.Dup()
+	posEv = NewEventStream(nev.Position, endPos, false, nev)
+	return []*EventStream{posEv}, nil
+}
+
 func (m *MultiItem) Parse(data string, posIn32th uint) (err error) {
 	idx := strings.Index(data, "(")
 	endIdx := strings.LastIndex(data, ")")

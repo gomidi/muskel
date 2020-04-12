@@ -45,23 +45,35 @@ func (c *Pattern) Dup() Item {
 	}
 }
 
-func (p *Pattern) newSketchPattern(column columner) *sketchPattern {
+func (p *Pattern) newSketchPattern(column Columner) *sketchPattern {
 	return &sketchPattern{
 		column:  column,
 		pattern: p,
 	}
 }
 
-func (p *Pattern) GetEventStream(column columner, start, end uint) (*EventStream, error) {
+func (p *Pattern) GetEventStream(column Columner, start, end uint) (*EventStream, error) {
 	return p.newSketchPattern(column).getEventStream(start, end)
 }
 
-func (p *Pattern) GetOverrideEventStream(column columner, start, end uint) (*EventStream, error) {
+func (p *Pattern) GetOverrideEventStream(column Columner, start, end uint) (*EventStream, error) {
 	return p.newSketchPattern(column).getOverrideEventStream(start, end)
 }
 
-func (p *Pattern) Unroll(column columner, start, until uint) (evt []*Event, end uint, err error) {
+func (p *Pattern) Unroll(column Columner, start, until uint) (evt []*Event, end uint, err error) {
 	return p.newSketchPattern(column).unrollPattern(start, until)
+}
+
+var _ UnrollGetter = &Pattern{}
+
+func (c *Pattern) GetES(p Columner, ev *Event, start, endPos uint) (mixed []*EventStream, err error) {
+	// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
+	// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
+	posEv, err := c.GetEventStream(p, start, endPos)
+	if err != nil {
+		return nil, err
+	}
+	return []*EventStream{posEv}, nil
 }
 
 func (p *Pattern) String() string {

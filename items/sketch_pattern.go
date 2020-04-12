@@ -3,21 +3,11 @@ package items
 import "fmt"
 
 type sketchPattern struct {
-	column  columner
+	column  Columner
 	pattern *Pattern
 }
 
-type columner interface {
-	Call(until uint, syncFirst bool, params ...string) (evts []*Event, absoluteEnd uint, err error)
-	EndPosition() uint
-	UnrollPattern(start uint, until uint, cc *Pattern) (evt []*Event, diff uint, end uint, err error)
-	ModifyToken(tk *Token) (Item, error)
-	ApplyLyricsTable(lt *LyricsTable, evts []*Event) ([]*Event, error)
-	ParseEvents(data []string) (evts []*Event, absEnd uint, err error)
-	GetToken(origName string, params []string) (val string, err error)
-}
-
-func ReplaceNtupleTokens(c columner, in *NTuple) (out *NTuple, err error) {
+func ReplaceNtupleTokens(c Columner, in *NTuple) (out *NTuple, err error) {
 	out = in.Dup().(*NTuple)
 	out.Events = nil
 

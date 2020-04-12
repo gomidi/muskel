@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-func PipedEventStream(p columner, start uint, endPos uint, evts []*Event) (*EventStream, error) {
+func PipedEventStream(p Columner, start uint, endPos uint, evts []*Event) (*EventStream, error) {
 	var cl Pattern
 	//pc := p.newPattern(&cl)
 	pc := cl.newSketchPattern(p)

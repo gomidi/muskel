@@ -15,6 +15,10 @@ func (b BarRepeater) Dup() Item {
 	return &b
 }
 
+func (b *BarRepeater) NewUnrollGetter(evts []*Event, nextEv *Event) UnrollGetter {
+	return &BarRepeaterES{Item: b, Evts: evts, NextEv: nextEv}
+}
+
 func (b BarRepeater) String() string {
 	if b.OnlyOnce && b.LastN < 2 {
 		return "./."

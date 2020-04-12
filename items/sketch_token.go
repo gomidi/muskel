@@ -1,7 +1,7 @@
 package items
 
 type sketchToken struct {
-	column columner
+	column Columner
 	token  *Token
 }
 
