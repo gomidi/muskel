@@ -5,6 +5,30 @@ import (
 	"sort"
 )
 
+func PipedEventStream(p Columner, start uint, endPos uint, evts []*Event) (*EventStream, error) {
+	var cl Pattern
+	//pc := p.newPattern(&cl)
+	pc := NewSketchPattern(p, &cl)
+	/*
+		printEvents("pipedEventStream before modifyEvents", evts)
+		if DEBUG {
+			fmt.Printf("pipedEventStream: start: %v endPos: %v\n", start, endPos)
+		}
+	*/
+	evts, absoluteEnd, err := pc.ModifyEvents(start, endPos, evts)
+	//printEvents("pipedEventStream after modifyEvents", evts)
+	if err != nil {
+		return nil, err
+	}
+	_end := uint(endPos)
+
+	if absoluteEnd < _end {
+		_end = absoluteEnd
+	}
+
+	return NewEventStream(start, absoluteEnd, true, evts...), nil
+}
+
 // eventStream simulates a column of events
 type EventStream struct {
 	Start      uint     // start position of the sketch column

@@ -1,7 +1,54 @@
 # TODOs
 
+
+patterns und wiederholungen
+
+es gibt folgende patternsituationen:
+
+A startposition erster Takt
+B startposition erstes Event
+X endPosition letzter Takt
+Y endPosition durch end-Event
+
+damit gibt es folgende Kombinationsmöglichkeiten:
+AX: startposition erster Takt und endPosition ende letzten Taktes; länge ist die summe der länge der Takte
+AY: startposition erster Takt und endPosition durch end-Event; länge ist position endEvent - startposition erster Takt
+BX: startposition erstes Event (sync) endPosition letzter Takt; länge ist endPosition letzter Takt- startposition erstes Event
+BY: startposition erstes Event (sync) endPosition durch end-Event; länge ist position endEvent - startposition erstes Event
+
+dann gibt es folgende Wiederholungsarten:
+
+1. Taktwiederholungen .n.
+2. partwiederholungen []
+3. Wiederholungen letztes event %
+4. Patternwiederholung =patt%n
+
+1. und 2. wiederholen immer die ganzen zurückliegenden takte
+3. wiederholt letztes event an angegebener position
+4.
+  a) sync: wiederholt, indem das erste event an das ende der vorigen wiederholung anschließt
+  b) kein sync: wiederholt, indem der abstand zwischen dem taktanfang und dem ersten event gleich dem abstand zwischen dem ende der vorigen wiederholung und dem ersten event der aktuellen wiederholung ist
+
+außerdem muss man bei den patterns unterscheiden zwischen verschiedenen zuständen/phasen
+
+phase 1: der PatternCall ist als solcher identifiziert und geparst, wir kennen name/pfad, parameter, sync, slice und wiederholungen
+phase 2: die events der spalte, die zu dem pfad gehört, sind bekannt und typisiert, die länge der Spalte ist bekannt
+pahse 3: die events der spalte sind parametrisiert und anhand der aufrufposition platziert und ggf. wiederholt
+
+
+
+
 ## nächstes 
 
+- fix mehrtaktiges pattern, dass mitten im takt endet
+
+- funktionen, die sich auf die spalte auswirken, z.B. 
+   - relatives tempo zum haupttempo
+   - geändertes midiprogram
+   - geändertes delay
+
+  syntax: $.() z.B. 
+    $.delay(3/16)
 
 - diatonische verläufe mittels =, z.B.
     

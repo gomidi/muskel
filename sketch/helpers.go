@@ -139,12 +139,13 @@ func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string, params ...
 
 	pc.Params = params
 
-	pcc := p.column.newPattern(pc)
+	//pcc := p.column.newPattern(pc)
 	if endPos == 0 {
 		endPos = p.column.sketch.projectedBarEnd
 		//fmt.Printf("endPos: %v\n", endPos)
 	}
-	evts, _, _, err := pcc.unroll(0, endPos)
+
+	evts, _, _, err := p.column.UnrollPattern(0, endPos, pc)
 	return evts, err
 }
 

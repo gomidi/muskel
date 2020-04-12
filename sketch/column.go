@@ -2,6 +2,7 @@ package sketch
 
 import (
 	"fmt"
+	"strings"
 
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/patterncommands"
@@ -14,74 +15,81 @@ type column struct {
 	track  *track.Track
 }
 
-func (p *column) newPattern(pc *items.Pattern) *pattern {
-	return &pattern{
-		column:  p,
-		pattern: pc,
-	}
+func (c *column) Lyric(name string, from, to int) ([]string, error) {
+	return c.sketch.Score.Lyric(name, from, to)
 }
 
-func (p *column) newToken(pc *items.Token) *token {
-	return &token{
-		column: p,
-		token:  pc,
-	}
+func (c *column) findPattern(pattern string) (sk *Sketch, colname string, err error) {
+	return findPattern(c.sketch, c.name, pattern)
 }
 
-func (p *column) newLyrics(pc *items.LyricsTable) *lyrics {
-	return &lyrics{
-		column: p,
-		lyrics: pc,
-	}
+func (c *column) EndPosition() uint {
+	return c.sketch.projectedBarEnd
 }
 
-func (p *column) pipedEventStream(start uint, endPos uint, evts []*items.Event) (*items.EventStream, error) {
-	var cl items.Pattern
-	pc := p.newPattern(&cl)
-	printEvents("pipedEventStream before modifyEvents", evts)
-	evts, absoluteEnd, err := pc.modifyEvents(start, endPos, evts)
-	printEvents("pipedEventStream after modifyEvents", evts)
+func (cl *column) ModifyToken(tk *items.Token) (items.Item, error) {
+	pc := items.NewSketchToken(cl, tk)
+	posEv, err := pc.GetEventStream(0, 1)
 	if err != nil {
 		return nil, err
 	}
-	_end := uint(endPos)
-
-	if absoluteEnd < _end {
-		_end = absoluteEnd
-	}
-
-	return items.NewEventStream(start, absoluteEnd, true, evts...), nil
+	it := posEv.Events[0].Item
+	return it, nil
 }
 
-func (c *column) replaceNtupleTokens(in *items.NTuple) (out *items.NTuple, err error) {
-	out = in.Dup().(*items.NTuple)
-	out.Events = nil
+func (cl *column) ApplyLyricsTable(lt *items.LyricsTable, evts []*items.Event) ([]*items.Event, error) {
+	var lc = items.NewSketchLyrics(cl, lt)
+	return lc.ApplyLyrics(evts)
+}
 
-	for _, it := range in.Events {
-		switch v := it.Item.(type) {
-		case *items.Token:
-			pc := c.newToken(v)
-			posEv, err := pc.getEventStream(0, 1)
-			if err != nil {
-				return nil, err
-			}
-			out.Events = append(out.Events, posEv.Events[0])
-		case *items.Pattern:
-			return nil, fmt.Errorf("could not use pattern (%q) within ntuple %v", v.Name, in)
-		case *items.NTuple:
-			nit, err := c.replaceNtupleTokens(v)
-			if err != nil {
-				return nil, fmt.Errorf("could not replace tokens in ntuple %q within ntuple %v: %s", v, in, err)
-			}
-			var ev items.Event
-			ev.Item = nit
-			out.Events = append(out.Events, &ev)
-		default:
-			out.Events = append(out.Events, it.Dup())
-		}
+func (c *column) ParseEvents(data []string) (evts []*items.Event, absEnd uint, err error) {
+	return c.sketch.parseEvents(data, c.sketch.projectedBarEnd)
+}
+
+func (c *column) GetToken(origName string, params []string) (val string, err error) {
+	var table, colname string
+	idx := strings.Index(origName[1:], ".")
+
+	switch {
+	case idx < 0:
+		table = origName
+	case idx == 0 || idx == 1:
+		err = fmt.Errorf("invalid token %q", origName)
+		return
+	default:
+		table, colname = origName[:idx+1], origName[idx+2:]
 	}
 
-	return out, nil
+	var token = table
+	if colname != "" {
+		if colname[len(colname)-1] == '.' {
+			if c.track == nil {
+				colname += c.name
+			} else {
+				colname += c.track.Name
+			}
+		}
+		token += "." + colname
+	}
+
+	val, err = c.sketch.Score.GetToken(token)
+	val = items.ReplaceParams(val, params)
+	return
+
+}
+
+func (c *column) UnrollPattern(start uint, until uint, cc *items.Pattern) (evt []*items.Event, diff uint, end uint, err error) {
+	var sk *Sketch
+	var colname string
+	sk, colname, err = c.findPattern(cc.Name)
+	if err != nil {
+		return
+	}
+	tr, _ := c.sketch.Score.GetTrack(colname)
+	var patt = sk.newCol(tr, colname)
+	var pcc = items.NewSketchPattern(patt, cc)
+	evt, end, err = pcc.UnrollPattern(start, until)
+	return
 }
 
 func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []string) (unrolled []*items.Event, endPos uint, err error) {
@@ -95,25 +103,19 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 	var mixed []*items.EventStream
 
 	for i, ev := range evts {
-		//fmt.Printf("################## %v event: %v ##################\n", i, ev)
 		if ev.Item == nil {
 			continue
 		}
 
 		if ev.Item == items.End {
-			//fmt.Printf("###### END ITEM in col %q of sketch %q ##########\n", p.name, p.sketch.Name)
 			endPos = ev.Position
 			break
 		}
 
-		// fmt.Printf("[%v] ev.Item %T\n", i, ev.Item)
 		var posEv *items.EventStream
 
 		switch v := ev.Item.(type) {
-		//case *items.BarRepeater:
-		//	fmt.Printf("bar repeater: %v mixed: %v\n", v, mixed)
 		case *items.PipedPatternCommands:
-			//fmt.Printf("got: *items.PipedPatternCommands\n")
 			helper := &patterncmdHelper{
 				column: p,
 				params: params,
@@ -121,9 +123,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			}
 
 			for _, cmd := range v.Cmds {
-				//fmt.Printf("command: %q\n", cmd.Name)
 				if fn, hasCmd := patterncommands.Commands[cmd.Name]; hasCmd {
-					//fmt.Printf("found command: %q\n", cmd.Name)
 					helper.cmdName = cmd.Name
 					_evts, err := fn(cmd.Params, helper)
 
@@ -131,15 +131,13 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 						return nil, endPos, err
 					}
 
-					printEvents(cmd.Name, _evts)
-
 					helper.pipeEvents = _evts
 				} else {
 					return nil, endPos, fmt.Errorf("unknown command %q", cmd.Name)
 				}
 			}
 
-			posEv, err = p.pipedEventStream(forward+ev.Position, endPos, helper.pipeEvents)
+			posEv, err = items.PipedEventStream(p, forward+ev.Position, endPos, helper.pipeEvents)
 			if err != nil {
 				return nil, endPos, err
 			}
@@ -158,12 +156,10 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 					return nil, endPos, err
 				}
 
-				printEvents(v.Name, _evts)
-
 				if len(_evts) == 0 {
 					continue
 				}
-				posEv, err = p.pipedEventStream(forward+ev.Position, endPos, _evts)
+				posEv, err = items.PipedEventStream(p, forward+ev.Position, endPos, _evts)
 				if err != nil {
 					return nil, endPos, err
 				}
@@ -178,20 +174,17 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				until = int(endPos)
 			}
 
-			// fmt.Printf("inside ntuple: %v\n", v)
-			newItm, err := p.replaceNtupleTokens(v)
+			newItm, err := items.ReplaceNtupleTokens(p, v)
 			if err != nil {
 				return nil, endPos, err
 			}
 
-			//v.Items = newItsm
 			var nev = ev.Dup()
 			nev.Position = ev.Position + forward
 			nev.PosShift = 0
 			nev.Item = newItm
 			posEv = items.NewEventStream(nev.Position, uint(until), false, nev)
 		case *items.BarRepeater:
-			//fmt.Printf("bar repeater: %v endPos: %v in col %q of sketch %q\n", v, endPos, p.name, p.sketch.Name)
 			stopPos := endPos
 			if i < len(evts)-1 {
 				stBarIdx := s.getBarIdxOf(evts[i+1].Position)
@@ -199,13 +192,11 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				if stBarPos < stopPos {
 					stopPos = stBarPos
 				}
-				//fmt.Printf("stopPos: %v next bars position: %v in col %q of sketch %q\n", stopPos, stBarPos, p.name, p.sketch.Name)
 			}
 			bidx := s.getBarIdxOf(ev.Position)
 			startBar := bidx - v.LastN
 			repevts := s.getEventsInBars(startBar, bidx-1, evts)
 			if len(repevts) == 0 {
-				//fmt.Printf("no repevts\n")
 				continue
 			}
 
@@ -215,19 +206,12 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			var ignoreEndPos uint
 			repevts, ignoreEndPos, err = p._unroll(repevts, stopPos, nil)
 			_ = ignoreEndPos
-			//fmt.Printf("setting endPos to %v from BarRepeater in col %q of sketch %q via stopPos %v\n", endPos, p.name, p.sketch.Name, stopPos)
 			if err != nil {
-				//fmt.Printf("error while unrolling: %v\n", err)
 				return nil, endPos, err
 			}
 
-			//DEBUG = true
-			printEvents("bar repeater I, after unroll", repevts)
-			//DEBUG = false
-
 			var res []*items.Event
 
-			//fmt.Printf("stopPos: %v\n", stopPos)
 			origDiff := diff
 			endOfStream := origDiff
 
@@ -239,13 +223,8 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 			res, currentPos = s.repeatBars(repevts, diff)
 			if len(res) == 0 {
-				//fmt.Printf("no repeatBars\n")
 				continue
 			}
-
-			//DEBUG = true
-			printEvents("bar repeater I, after repeatBars", res)
-			//DEBUG = false
 
 			all = append(all, res...)
 
@@ -274,28 +253,19 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				return nil, endPos, fmt.Errorf("can't repeat part %q at %v: part is not defined", partname, ev.Position)
 			}
 
-			//fmt.Printf("part %q: %v\n", bar.JumpTo, part)
 			startPos := part[0]
 			_endPos := part[1]
 			diff := (_endPos - startPos) //- uint(bar.Length32th())
-			//_ = diff
 			if _endPos > s.projectedBarEnd {
 				_endPos = s.projectedBarEnd
 			}
 
-			/*
-				if endPos >= ev.Position {
-					endPos = ev.Position - 1
-				}
-			*/
 			partEvents := items.GetEventsInPosRange(startPos, _endPos, evts)
 
 			partEvents, _endPos, err = p._unroll(partEvents, _endPos, nil)
 			if err != nil {
 				return nil, endPos, err
 			}
-
-			printEvents(fmt.Sprintf("partEvents from %v to %v", startPos, _endPos), partEvents)
 
 			for r := 0; r < int(v.Repeat); r++ {
 				var nevts []*items.Event
@@ -323,25 +293,22 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				until = int(endPos)
 			}
 
-			// fmt.Printf("inside multiitem: %v\n", v)
 			var newItsm = make([]*items.Event, len(v.Events))
 			for itidx, itm := range v.Events {
 				switch vv := itm.Item.(type) {
 				case *items.Pattern:
-					pc := p.newPattern(vv)
-					posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+					pc := items.NewSketchPattern(p, vv)
+					posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
 					if err != nil {
 						return nil, endPos, err
 					}
-					// fmt.Printf("got item: %v\n", posEv.events[0].Item)
 					newItsm[itidx] = posEv.Events[0]
 				case *items.Token:
-					pc := p.newToken(vv)
-					posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+					pc := items.NewSketchToken(p, vv)
+					posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
 					if err != nil {
 						return nil, endPos, err
 					}
-					// fmt.Printf("got item: %v\n", posEv.events[0].Item)
 					newItsm[itidx] = posEv.Events[0]
 				default:
 					newItsm[itidx] = itm
@@ -356,8 +323,8 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		case *items.Pattern:
 			// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
 			// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
-			pc := p.newPattern(v)
-			posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+			pc := items.NewSketchPattern(p, v)
+			posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
 			if err != nil {
 				return nil, endPos, err
 			}
@@ -365,8 +332,8 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		case *items.Token:
 			// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
 			// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
-			pc := p.newToken(v)
-			posEv, err = pc.getEventStream(forward+ev.Position, endPos)
+			pc := items.NewSketchToken(p, v)
+			posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
 			if err != nil {
 				return nil, endPos, err
 			}
@@ -374,15 +341,15 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		case *items.Override:
 			switch vv := v.Item.(type) {
 			case *items.Pattern:
-				pc := p.newPattern(vv)
-				posEv, err = pc.getOverrideEventStream(forward+ev.Position, endPos)
+				pc := items.NewSketchPattern(p, vv)
+				posEv, err = pc.GetOverrideEventStream(forward+ev.Position, endPos)
 
 				if err != nil {
 					return nil, endPos, err
 				}
 			case *items.Token:
-				pc := p.newToken(v.Item.(*items.Token))
-				posEv, err = pc.getOverrideEventStream(forward+ev.Position, forward+ev.Position+1)
+				pc := items.NewSketchToken(p, v.Item.(*items.Token))
+				posEv, err = pc.GetOverrideEventStream(forward+ev.Position, forward+ev.Position+1)
 				if err != nil {
 					return nil, endPos, err
 				}
@@ -394,7 +361,6 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 				nev.Position = ev.Position + forward
 				posEv = items.NewEventStream(nev.Position, nev.Position+1, true, nev)
 				posEv.IsOverride = true
-				//fmt.Printf("override of %q: from: %v to: %v\n", v.Item.(*items.Call).Name, forward+ev.Position, endPos)
 			}
 
 		default:
@@ -420,9 +386,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		fmt.Printf("<< mixed\n")
 	}
 
-	//fmt.Printf("mixed premerged: %v\n", mixed)
 	unrolled = items.MergeEventStreams(mixed, s.projectedBarEnd)
-	//fmt.Printf("eevts: %v\n", eevts)
 
 	if DEBUG {
 		fmt.Printf(">> after merge\n")
@@ -452,10 +416,8 @@ func (p *column) unroll(inputEvents []*items.Event, originalEndPos uint, params 
 		}
 
 		pos := s.Positions[i]
-		//var ev Event
 		inEv.Position = s.getAbsPos(pos[0], pos[1])
 
-		//		fmt.Printf("item: %T %v\n", it, it)
 		evts = append(evts, inEv)
 	}
 
@@ -463,37 +425,13 @@ func (p *column) unroll(inputEvents []*items.Event, originalEndPos uint, params 
 		return
 	}
 
-	/*
-		unrolled, err = p._unroll(evts, endPos, params)
-
-		if err != nil {
-			return
-		}
-	*/
-
 	return p._unroll(evts, originalEndPos, params)
-
-	//fmt.Printf("rolledEvts: %v\n", rolledEvts)
-	//fmt.Printf(">> rolledEvts\n")
-
-	/*
-		for _, ev := range rolledEvts {
-			fmt.Printf("at %v: %v\n", ev.Position, ev)
-		}
-	*/
-	//fmt.Printf("<< rolledEvts\n")
-
-	// fmt.Printf("«««««««««««««« UNROLL %v endPos: %v\n", p.sketch.Name+"."+p.name, endPos)
-
-	return
-
-	// return
 }
 
 // Call parameterizes the sketch in the given column, parses and unrolls it and returns the resulting events
 // as absolut positioned items. If the column does not exist, nil is returned
 // endPos is the absolute end position of the piece. If 0, the last bar of the SketchTable is used
-func (c *column) call(originalEndPos uint, syncFirst bool, params ...string) (events []*items.Event, endPos uint, err error) {
+func (c *column) Call(originalEndPos uint, syncFirst bool, params ...string) (events []*items.Event, endPos uint, err error) {
 	s := c.sketch
 	endPos = originalEndPos
 	if c.name == "" {
@@ -504,95 +442,49 @@ func (c *column) call(originalEndPos uint, syncFirst bool, params ...string) (ev
 		}
 	}
 
-	//if DEBUG {
-	//fmt.Printf("at start of call in col %q of sketch %q originalEndPos: %v\n", c.name, c.sketch.Name, originalEndPos)
-	//}
-
 	col, has := s.Columns[c.name]
 	if !has {
-		//fmt.Printf("has no column: %q\n", col)
-		return nil, endPos, fmt.Errorf("has no column: %q\n", col)
+		err = fmt.Errorf("has no column: %q\n", col)
+		return
 	}
-
-	//fmt.Printf("raw data of col %q: %#v\n", colName, col)
 
 	if endPos == 0 {
 		endPos = s.projectedBarEnd
 	}
-	//fmt.Printf("call %q endPos: %v\n", colName, endPos)
-
-	//fmt.Printf("endPos: %v\n", endPos)
 
 	data := c.sketch.injectParams(col, params)
 
 	var loop uint
 
-	//fmt.Printf("data: %v\n", data)
 	events, loop, err = s.parseEvents(data, endPos)
 
 	if err != nil {
-		return nil, endPos, err
+		return
 	}
 
-	//fmt.Printf("items: %v loop: %v\n", items, loop)
 	_ = loop
-	//if DEBUG {
-	//fmt.Printf("before unroll in col %q of sketch %q endPos: %v\n", c.name, c.sketch.Name, endPos)
-	//}
 
 	events, endPos, err = c.unroll(events, endPos, params) // replaces template calls and imports
 	if err != nil {
-		return nil, endPos, err
+		return
 	}
-
-	//if DEBUG {
-	//fmt.Printf("after unroll in col %q of sketch %q endPos: %v\n", c.name, c.sketch.Name, endPos)
-	//}
 
 	if syncFirst {
 		events = items.MoveBySyncFirst(events)
 	}
 
-	printEvents("after unroll of events", events)
-
-	//fmt.Println("returning from unrolled")
-	//events = c.unrollBarRepetitions(events, endPos)
-	//printEvents("after unrollBarRepetitions of events", events)
-
 	events = c.unrollIncludedBars(events)
-
-	printEvents("after unrollIncludedBars of events", events)
-	//fmt.Printf("unrolled: %v\n", events)
-	//if DEBUG {
-	//fmt.Printf("unrollPartRepetitionsOfBars in col %q of sketch %q\n", c.name, c.sketch.Name)
-	//}
 	events, err = c.unrollPartRepetitionsOfBars(events, endPos)
-	if err != nil {
-		return nil, endPos, err
-	}
-
-	/*
-		events, err = c.unrollPartRepetitions(events)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
-	//fmt.Printf(unrolledPartRepetitions: %v\n", events)
-	//printBars("after unrollPartRepetitions of events", c.sketch.Bars...)
-	printEvents("after call of col "+c.name+" in sketch "+c.sketch.Name+" in file "+c.sketch.File, events)
-	return events, endPos, nil
+	return
 }
 
 func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
-
 	s := p.sketch
 
 	var res []*items.Event
 	var lastBarEnd uint
 
 	for _, bar := range s.Bars {
-		//fmt.Printf("sketch: %q bar %v no: %v pos: %v jumpto %q\n", s.Name, i, bar.No, bar.Position, bar.JumpTo)
 
 		if bar.Include != nil {
 			lastBarEnd = bar.Include.Length32ths
@@ -600,17 +492,8 @@ func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
 			if err != nil {
 				continue
 			}
-			printEvents("added included events", ets)
-
-			if DEBUG {
-				fmt.Printf("end is: %v\n", lastBarEnd)
-			}
 			res = append(res, ets...)
 			continue
-		}
-
-		if DEBUG {
-			fmt.Printf("bar has start position: %v\n", bar.Position)
 		}
 
 		endPos := bar.Position + uint(bar.Length32th())
@@ -621,12 +504,10 @@ func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
 
 		ets := items.GetEventsInPosRange(bar.Position, endPos, evts)
 		res = append(res, ets...)
-
 	}
 
 	ets := items.GetEventsInPosRange(lastBarEnd, s.projectedBarEnd, evts)
 	res = append(res, ets...)
-
 	return res
 }
 
@@ -650,11 +531,9 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 					return nil, fmt.Errorf("can't repeat part %q at %v: part is not defined", partname, evt.Position)
 				}
 
-				//fmt.Printf("part %q: %v\n", bar.JumpTo, part)
 				startPos := part[0]
 				endPos := part[1]
 				diff := (endPos - startPos) //- uint(bar.Length32th())
-				//_ = diff
 				if endPos > s.projectedBarEnd {
 					endPos = s.projectedBarEnd
 				}
@@ -678,8 +557,6 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 
 				mixed = append(mixed, items.NewEventStream(startPos, endPos, true, nevts...))
 
-				//printEvents("nevts", nevts)
-
 				// overrides
 				otherEvents := items.GetEventsInPosRange(endPos, endPos+diff, evts)
 
@@ -699,15 +576,11 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 				}
 
 				skipPos = endPos + diff
-
-				//res = append(res, nevts...)
-
 			} else {
 				if evt.Position >= skipPos {
 					nes := items.NewEventStream(evt.Position, evt.Position+1, false, evt)
 					mixed = append(mixed, nes)
 				}
-				//res = append(res, evt)
 			}
 		}
 	}
@@ -726,31 +599,18 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 
 	for i, bar := range s.Bars {
 		_ = i
-		if DEBUG {
-			fmt.Printf("sketch: %q bar %v no: %v pos: %v jumpto %q include: %#v length: %v\n", s.Name, i, bar.No, bar.Position, bar.JumpTo, bar.Include, bar.Length32th())
-		}
 
 		lastBarEnd = bar.Position + uint(bar.Length32th())
-		if DEBUG {
-			fmt.Printf("setting lastBarEnd to: %v\n", lastBarEnd)
-		}
 
 		if bar.JumpTo != "" {
 			part, has := s.Parts[bar.JumpTo]
 			if !has {
 				return nil, fmt.Errorf("can't jump to part %q from bar %v: part is not defined", bar.JumpTo, bar.No+1)
 			}
-			//fmt.Printf("part %q: %v\n", bar.JumpTo, part)
 			startPos := part[0]
 			endPos := part[1]
 			diff := (endPos - startPos) - uint(bar.Length32th())
 			_ = diff
-
-			/*
-				if i < len(s.Bars)-1 {
-					forwardBars(s.Bars[i+1:], diff)
-				}
-			*/
 
 			partEvents := items.GetEventsInPosRange(startPos, endPos, evts)
 
@@ -763,24 +623,14 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 				nevts = append(nevts, nue)
 			}
 
-			printEvents(fmt.Sprintf("bar %v jumped to %q nevts", bar.No, bar.JumpTo), nevts)
 			_lastBarEnd := 2*endPos - startPos
 			if lastBarEnd < _lastBarEnd {
 				lastBarEnd = _lastBarEnd
-				if DEBUG {
-					fmt.Printf("setting lastBarEnd to 2*endPos  - startPos: %v\n", lastBarEnd)
-				}
 			}
-			/*
-				for _, nv := range nevts {
-					fmt.Printf("partEvent at %v: %v\n", nv.Position, nv)
-				}
-			*/
 			res = append(res, nevts...)
 
 		} else {
 			endPos := bar.Position + uint(bar.Length32th())
-			//fmt.Printf("endPos: %v s.projectedBarEnd: %v stopPos: %v\n", endPos, s.projectedBarEnd, stopPos)
 			if endPos > s.projectedBarEnd {
 				endPos = s.projectedBarEnd
 			}
@@ -788,14 +638,12 @@ func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) 
 				endPos = stopPos
 			}
 			ets := items.GetEventsInPosRange(bar.Position, endPos, evts)
-			printEvents("ets", ets)
 			res = append(res, ets...)
 		}
 
 	}
 
 	ets := items.GetEventsInPosRange(lastBarEnd, stopPos, evts)
-	printEvents("rest", ets)
 	res = append(res, ets...)
 
 	// TODO check if it is correct

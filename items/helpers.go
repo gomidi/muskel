@@ -609,8 +609,11 @@ func Pos32thToString(pos uint) string {
 }
 
 // length returns the bar length in 32th
-func Length32ths(num, denom uint8) int {
-	return int(num*32) / int(denom)
+func Length32ths(num, denom uint8) uint {
+	if denom == 0 || num == 0 {
+		return 0
+	}
+	return uint(num) * 32 / uint(denom)
 }
 
 func GetQNNumberFromPos(pos string) (qnnumber uint, rest string) {

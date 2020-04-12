@@ -120,7 +120,7 @@ func (s *Sketch) getRangeInBars(startbar, endBar int) (startPos, endPos int) {
 	if endBar >= len(s.Bars) {
 		endPos = int(s.Bars[len(s.Bars)-1].Position)
 	} else {
-		endPos = int(s.Bars[endBar].Position) + s.Bars[endBar].Length32th()
+		endPos = int(s.Bars[endBar].Position + s.Bars[endBar].Length32th())
 	}
 	return
 }
@@ -151,27 +151,14 @@ func (s *Sketch) getBarIdxOf(pos uint) (baridx int) {
 
 // loop = 0: column is not looped; loop > 0: column is looped n times
 func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event, loop uint, err error) {
-	//var parser items.Parser
-	//endPos = origEndPos
-
 	var lastNoRestItem items.Item
 
 	for _, dat := range data {
-		//fmt.Printf("parseItem(%q)\n", dat)
 		var ev items.Event
 		err = ev.Parse(dat)
-		//it, err := parser.ParseItem(dat, 0)
 		if err != nil {
 			return nil, 0, err
 		}
-
-		/*
-			if ev.Item == items.End {
-				endPos = ev.Position
-				fmt.Printf("endPos: %v\n", endPos)
-				return
-			}
-		*/
 
 		if ev.Item == items.RepeatLastEvent {
 			ev.Item = lastNoRestItem
@@ -186,8 +173,6 @@ func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event
 			panic("includes not allowed inside columns")
 		}
 
-		//fmt.Printf("it: %#v\n", it)
-
 		il := items.IsLoop(ev.Item)
 
 		if il >= 0 {
@@ -195,8 +180,6 @@ func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event
 		}
 
 		ev.Item = items.RollTheDiceForAnItem(ev.Item)
-
-		//res = append(res, rollTheDiceForAnItem(it))
 		res = append(res, &ev)
 	}
 	// parse items and resolve randomness at this level
@@ -222,15 +205,8 @@ func (s *Sketch) getAbsPos(bar, pos32ths uint) uint {
 			pos = b.Position
 			break
 		}
-		//pos += uint(b.Length32th())
 	}
 
-	/*
-		if DEBUG {
-			fmt.Printf("getAbsPos(bar: %v, pos32ths: %v) = %v\n", bar, pos32ths, pos+pos32ths)
-		}
-	*/
-	//fmt.Printf("getAbsPos(bar: %v, pos32ths: %v) called: %v\n", bar, pos32ths, pos+pos32ths)
 	return pos + pos32ths
 }
 
@@ -244,7 +220,7 @@ func (s *Sketch) newCol(tr *track.Track, colName string) *column {
 
 func (s *Sketch) Unroll(_tr *track.Track, colName string, params ...string) ([]*items.Event, error) {
 	col := s.newCol(_tr, colName)
-	events, _, err := col.call(0, false, params...)
+	events, _, err := col.Call(0, false, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -252,20 +228,12 @@ func (s *Sketch) Unroll(_tr *track.Track, colName string, params ...string) ([]*
 		return nil, nil
 	}
 
-	printEvents("Sketch.Unroll: after column "+colName+" call of sketch "+s.Name+" in file "+s.File, events)
-
 	events = items.RollTheDice(events)
-	//printEvents("after rollTheDice "+colName, events)
-
-	//printEvents("after replaceScalenotes "+colName, events)
 	events = s.Score.FilterTrack(colName, events)
-	//printEvents("after FilterTrack "+colName, events)
 	return events, nil
 }
 
-//func (s *Sketch) repeatBars(repevts []*items.Event, diff uint, stopPos uint) (out []*items.Event, nextBarPos uint) {
 func (s *Sketch) repeatBars(repevts []*items.Event, diff uint) (out []*items.Event, nextBarPos uint) {
-	//fmt.Printf("repeatBars, diff: %v stopPos: %v\n", diff, stopPos)
 	lastPos := repevts[len(repevts)-1].Position
 	bidx := s.getBarIdxOf(lastPos)
 	nextBarPos = s.Bars[bidx].Position + uint(s.Bars[bidx].Length32th()) + diff
@@ -273,12 +241,6 @@ func (s *Sketch) repeatBars(repevts []*items.Event, diff uint) (out []*items.Eve
 	for _, rev := range repevts {
 		nev := rev.Dup()
 		nev.Position += diff
-		/*
-			if nev.Position >= stopPos {
-				//	fmt.Printf("nev.Position: %v >= stopPos: %v returning\n", nev.Position, stopPos)
-				break
-			}
-		*/
 		out = append(out, nev)
 	}
 
@@ -291,12 +253,10 @@ func (t *Sketch) isScore() bool {
 
 // parseBarLine parses a bar line (i.e. either simple bar change, or jump, or time signature change or tempo change and combinations of the last two
 func (p *Sketch) parseBarLine(data string) error {
-	//fmt.Printf("parse bar line: %q\n", data)
 	if data == "" {
 		return fmt.Errorf("empty lines are allowed within a table")
 	}
 
-	//fmt.Printf("parseBarLine(%q)\n", data)
 	var comment string
 	var part string
 
@@ -307,8 +267,6 @@ func (p *Sketch) parseBarLine(data string) error {
 		}
 		data = strings.TrimSpace(data[:idx])
 	}
-
-	//fmt.Printf("without comment: %q\n", data)
 
 	if data == "#" {
 		p.handleEmptyBarChange(comment, part)
@@ -328,7 +286,6 @@ func (p *Sketch) parseBarLine(data string) error {
 		if p.currentBarNo == -1 {
 			return fmt.Errorf("can't start with a jump: we need bars and parts first")
 		}
-		//p.finishPart(p.projectedBarEnd)
 		return p.handleJump(data)
 
 	}
@@ -347,15 +304,9 @@ func (p *Sketch) parseBarLine(data string) error {
 			if n == 0 {
 				b.Comment = comment
 			}
-			//b.IsEmpty = true
 			p.newBar(b)
 		}
 		p.jumpInLineBefore = false
-
-		//p.newBar(score.NewBar())
-		//b := NewBar()
-		//b.TimeSig = p.currentTimeSignatur
-		//p.newBar(b)
 		return nil
 	}
 
@@ -386,7 +337,6 @@ func (p *Sketch) parseBarLine(data string) error {
 
 	data = strings.TrimSpace(data[1:])
 
-	//var b = score.NewBar()
 	var b = NewBar()
 	b.Part = part
 	p.jumpInLineBefore = false
@@ -403,7 +353,6 @@ func (p *Sketch) parseBarLine(data string) error {
 		data = strings.TrimSpace(data[:idx])
 		if data == "" {
 			// add bar
-			//			fmt.Println("new bar added based on tempo change")
 			p.newBar(b)
 			p.handlePart(part)
 			return nil
@@ -418,7 +367,6 @@ func (p *Sketch) parseBarLine(data string) error {
 		data = strings.TrimSpace(data[:idx])
 		if data == "" {
 			// add bar
-			//			fmt.Println("new bar added based on tempo change")
 			p.newBar(b)
 			p.handlePart(part)
 			return nil
@@ -434,22 +382,12 @@ func (p *Sketch) parseBarLine(data string) error {
 }
 
 func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
-	/*
-		if DEBUG {
-			//fmt.Printf("unrollPartBars called for bars \n")
-			printBars("unrollPartBars start", bars...)
-		}
-	*/
 	var res []*Bar
 	var lastBarEnd uint
 	var i int
 
 	for _, bar := range bars {
-		//for _, bar := range s.Bars {
-		//fmt.Printf("sketch: %q bar %v no: %v pos: %v jumpto %q\n", s.Name, i, bar.No, bar.Position, bar.JumpTo)
-
 		lastBarEnd = bar.Position + uint(bar.Length32th())
-		// fmt.Printf("lastBarEnd: %v of #%v @ %v\n", lastBarEnd, bar.No, bar.Position)
 
 		if bar.JumpTo != "" {
 
@@ -457,13 +395,9 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 			if !has {
 				return nil, fmt.Errorf("can't jump to part %q from bar %v: part is not defined", bar.JumpTo, bar.No+1)
 			}
-			// fmt.Printf("bars part %q: %v @ %v\n", bar.JumpTo, part, bar.Position)
 			startPos := part[0]
 			endPos := part[1]
-			//diff := (endPos - startPos) - uint(bar.Length32th())
-
 			partBars := getBarsInPosRange(startPos, endPos, bars)
-			//printBars("partsBars Part "+bar.JumpTo, partBars...)
 
 			var nbars []*Bar
 
@@ -478,8 +412,6 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 				i++
 			}
 
-			//printBars("nbars Part "+bar.JumpTo, nbars...)
-
 			res = append(res, nbars...)
 
 		} else {
@@ -488,7 +420,6 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 				endPos = s.projectedBarEnd
 			}
 
-			//fmt.Printf("getting bars from %v to %v\n", bar.Position, endPos)
 			brs := getBarsInPosRange(bar.Position, endPos, bars)
 			var nbars []*Bar
 
@@ -498,7 +429,6 @@ func (s *Sketch) unrollPartBars(bars []*Bar) ([]*Bar, error) {
 				nbars = append(nbars, nub)
 				i++
 			}
-			//printBars("brs ", nbars...)
 			res = append(res, nbars...)
 		}
 
@@ -561,12 +491,10 @@ func (s *Sketch) UnrolledBars() (unrolled []*Bar, err error) {
 	if err != nil {
 		return nil, err
 	}
-	//printBars("after unrolling included", unrolled...)
 	unrolled, err = s.unrollPartBars(unrolled)
 	if err != nil {
 		return nil, err
 	}
-	//printBars("after unrolling PartBars", unrolled...)
 	return
 }
 
@@ -574,12 +502,10 @@ func (p *Sketch) newBar(b *Bar) {
 	p.currentBarNo++
 	b.No = p.currentBarNo
 	b.Position = p.projectedBarEnd
-	//fmt.Printf("parser: adding bar %v at %v time-sig: %v\n", p.currentBarNo, b.Position, b.TimeSig)
 	p.Bars = append(p.Bars, b)
 	p.currentPosIn32ths = p.projectedBarEnd
 	p.projectedBarEnd += uint(b.Length32th())
 	p.currentBeat = 0
-	//fmt.Printf("projectedBarEnd: %v\n", p.projectedBarEnd)
 }
 
 // handleEmptyLine handles an empty line
@@ -650,7 +576,6 @@ func (p *Sketch) handleTempoChange(b *Bar, data string) error {
 
 // handleTimeSigChange handles a time signature change
 func (p *Sketch) handleTimeSigChange(b *Bar, data string) error {
-	//fmt.Printf("time signature: %q at bar %v\n", data, b.No)
 	timeSig := strings.Split(data, "/")
 	if len(timeSig) != 2 {
 		return fmt.Errorf("error in time signature %#v. must be in format n/m where n and m are numbers > 0", data)
@@ -679,8 +604,6 @@ func (p *Sketch) handleTimeSigChange(b *Bar, data string) error {
 
 func (s *Sketch) explodeParam(params []string) (res []string) {
 
-	//var p items.Parser
-
 	for _, param := range params {
 		it, err := items.Parse(param, 0)
 
@@ -689,12 +612,9 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 
 			case *items.Scale:
 				if v.Exploded {
-					//sc := v.Dup().(*items.Scale)
 					if v.Mode == nil {
 						v.Mode = s.Score.GetMode(v.Name)
 					}
-					//fmt.Printf("scale name: %q mode: %v\n", v.Name, v.Mode)
-					//sc.Mode = s.Score.GetMode(sc.Name)
 					if v.Mode != nil {
 						for _, key := range v.All() {
 							var note items.Note
@@ -714,7 +634,6 @@ func (s *Sketch) explodeParam(params []string) (res []string) {
 				if v.Exploded {
 					tok, errTok := s.Score.GetToken(v.Name)
 					if errTok == nil {
-						//itt, errItt := p.ParseItem(tok, 0)
 						itt, errItt := items.Parse(tok, 0)
 						if errItt == nil {
 							switch vv := itt.(type) {
@@ -790,7 +709,6 @@ func (p *Sketch) getColumnData(tabs []string) (colData []string, lastColumn stri
 	if len(tabs)-1 >= to {
 		lastColumn = strings.TrimSpace(tabs[len(tabs)-1])
 	}
-	// fmt.Printf("to: %v\n", to)
 	colData = make([]string, len(tabs[1:to]))
 	copy(colData, tabs[1:to])
 
@@ -818,7 +736,6 @@ func (p *Sketch) handlePart(data string) error {
 
 	p.Parts[data] = [2]uint{p.Bars[p.currentBarNo].Position, 0}
 	p.inPart = data
-	//	fmt.Printf("sketch %q adding part %q at %v\n", p.Name, data, p.currentBarNo)
 	return nil
 }
 
@@ -845,7 +762,7 @@ func (s *Sketch) _includeCol(column string, inc items.Include) (evts []*items.Ev
 		return nil, 0, nil
 	}
 	var patt = sk.newCol(tr, column)
-	return patt.call(0, false, inc.Params...)
+	return patt.Call(0, false, inc.Params...)
 }
 
 func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts []*items.Event, err error) {
@@ -860,7 +777,6 @@ func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts 
 }
 
 func (p *Sketch) parseCommandLF(data string) error {
-	//fmt.Printf("parse command: %q\n", data)
 	p.barChangeRequired = true
 	var c items.Command
 	err := c.Parse(data, 0)
@@ -874,14 +790,11 @@ func (p *Sketch) parseCommandLF(data string) error {
 			return err
 		}
 	case "$include":
-		//var parser items.Parser
-		//it, err := parser.ParseItem("$"+data, 0)
 		it, err := items.Parse(data, 0)
 		if err != nil {
 			return fmt.Errorf("can't parse include: $%q", data)
 		}
 
-		//fmt.Printf("should be include, is %#v\n", it)
 		if inc, isInc := it.(items.Include); isInc {
 			sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
 			if err != nil {
@@ -971,7 +884,6 @@ func (s *Sketch) parsePosition(firstColumn string) (err error) {
 
 // parseEventsLine parses a non-bar line / event line
 func (s *Sketch) parseEventsLine(tabs []string) error {
-	//fmt.Printf("parseEventsLine %v\n", tabs)
 	if s.barChangeRequired {
 		if len(s.Bars) == 0 {
 			b := NewBar()
@@ -996,8 +908,6 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 	if err != nil {
 		return err
 	}
-
-	//fmt.Printf("s.colOrder: %v colsData: %v\n", s.colOrder, colsData)
 
 	for i, data := range colsData {
 		data = strings.TrimSpace(data)
@@ -1040,6 +950,5 @@ func (p *Sketch) ParseLine(tabs []string) error {
 		return p.parseBarLine(first)
 	}
 
-	//fmt.Printf("ParseLine %v\n", tabs)
 	return p.parseEventsLine(tabs)
 }

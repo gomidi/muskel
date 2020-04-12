@@ -4,6 +4,109 @@ import (
 	"strings"
 )
 
+// CalledEvents is a column of events, the events have the position relative to the start
+type CalledEvents struct {
+	Events   []*Event
+	PosStart uint
+	PosEnd   uint
+	Repeat   uint
+}
+
+func (c *CalledEvents) Length32ths() uint {
+	return c.PosEnd - c.PosStart
+}
+
+func (c *CalledEvents) SetStart(syncFirst bool) {
+	if syncFirst {
+		c.setStartToFirstEvent()
+		return
+	}
+	c.PosStart = 0
+	return
+}
+
+func (c *CalledEvents) setStartToFirstEvent() {
+	for _, ev := range c.Events {
+		if ev == nil {
+			continue
+		}
+
+		if ev.Item == nil {
+			continue
+		}
+
+		if ev.Item == End {
+			return
+		}
+
+		if ev.Item == Rest {
+			continue
+		}
+
+		/*
+			switch v := ev.Item.(type) {
+			case BarChange:
+				c.PosStart += v.Length32ths()
+			default:
+		*/
+		c.PosStart += ev.Position
+		return
+		/*
+			}
+		*/
+	}
+}
+
+// SetEndToEndEvent sets the PosEnd to the first End item
+// and returns the position. If there is no End item, 0 is returned
+func (c *CalledEvents) SetEnd(firstBarLength uint, lastBarEnd uint) {
+	pos := firstBarLength
+	for _, ev := range c.Events {
+		if ev == nil {
+			continue
+		}
+
+		if ev.Item == nil {
+			continue
+		}
+
+		if ev.Item == End {
+			if ev.Position <= firstBarLength {
+				c.PosEnd = ev.Position
+				return
+			}
+			pos += ev.Position
+			c.PosEnd = pos
+			return
+		}
+	}
+	c.PosEnd = lastBarEnd
+	return
+}
+
+func (c *CalledEvents) GetEvents(placementPos uint) (res []*Event) {
+	diff := placementPos
+	for i := c.Repeat; i >= 0; i-- {
+		diff += i * c.Length32ths()
+		res = append(res, c.forward(c.Events, diff)...)
+	}
+	return
+}
+
+func (c *CalledEvents) forward(src []*Event, diff uint) (res []*Event) {
+	for _, ev := range src {
+		/*
+			switch v := ev.Item.(type) {
+			case BarChange:
+				diff += v.Length32ths()
+			default:
+		*/
+		res = append(res, forwardEvent(ev, diff))
+		//}
+	}
+	return
+}
+
 var eventDebug bool
 
 type Event struct {
@@ -134,10 +237,17 @@ func ForwardEvents(ins []*Event, diff uint) (outs []*Event) {
 		return ins
 	}
 	for _, ev := range ins {
-		nev := ev.Dup()
-		nev.Position += diff
-		outs = append(outs, nev)
+		outs = append(outs, forwardEvent(ev, diff))
 	}
+	return
+}
+
+func forwardEvent(in *Event, diff uint) (out *Event) {
+	if diff == 0 {
+		return in.Dup()
+	}
+	out = in.Dup()
+	out.Position += diff
 	return
 }
 

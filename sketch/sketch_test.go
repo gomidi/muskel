@@ -569,7 +569,7 @@ func TestCall(t *testing.T) {
 		var patt column
 		patt.sketch = s
 		patt.name = "col2"
-		evt, _, err := patt.call(0, false, params...)
+		evt, _, err := patt.Call(0, false, params...)
 
 		if err != nil {
 			t.Errorf("[%v](%q, %q).Call(\"col2\",0,%s) returns error: %s ", i, test.col1, test.col2, test.params, err.Error())

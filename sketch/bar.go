@@ -68,9 +68,9 @@ func (b Bar) Mount(pos uint) *Bar {
 	return &b
 }
 
-func (b *Bar) Length32th() int {
+func (b *Bar) Length32th() uint {
 	if b.Include != nil {
-		return int(b.Include.Length32ths)
+		return b.Include.Length32ths
 	}
 	return items.Length32ths(b.TimeSig[0], b.TimeSig[1])
 }
