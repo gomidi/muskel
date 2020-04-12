@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"gitlab.com/gomidi/midi/smf/smfwriter"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/gomidi/muskel/sketch"
 )
 
 type errors []error
@@ -34,7 +34,7 @@ func writeSMFToFile(s *score.Score, midifile, filegroup string, options ...smfwr
 		return err
 	}
 
-	if sketch.DEBUG {
+	if items.DEBUG {
 		fmt.Printf("writing to %q\n", midifile)
 	}
 

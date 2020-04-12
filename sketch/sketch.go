@@ -397,7 +397,7 @@ func (s *Sketch) unrollPartBars(bars []*items.Bar) ([]*items.Bar, error) {
 			}
 			startPos := part[0]
 			endPos := part[1]
-			partBars := getBarsInPosRange(startPos, endPos, bars)
+			partBars := items.GetBarsInPosRange(startPos, endPos, bars)
 
 			var nbars []*items.Bar
 
@@ -420,7 +420,7 @@ func (s *Sketch) unrollPartBars(bars []*items.Bar) ([]*items.Bar, error) {
 				endPos = s.projectedBarEnd
 			}
 
-			brs := getBarsInPosRange(bar.Position, endPos, bars)
+			brs := items.GetBarsInPosRange(bar.Position, endPos, bars)
 			var nbars []*items.Bar
 
 			for _, b := range brs {
@@ -434,7 +434,7 @@ func (s *Sketch) unrollPartBars(bars []*items.Bar) ([]*items.Bar, error) {
 
 	}
 
-	nbars := getBarsInPosRange(lastBarEnd, s.projectedBarEnd, bars)
+	nbars := items.GetBarsInPosRange(lastBarEnd, s.projectedBarEnd, bars)
 	res = append(res, nbars...)
 
 	return res, nil
@@ -521,7 +521,7 @@ func (p *Sketch) handleEmptyBarChange(comment, part string) {
 
 func (p *Sketch) finishPart(end uint) {
 	if p.inPart != "" {
-		if DEBUG {
+		if items.DEBUG {
 			fmt.Printf("finishPart %q at %v\n", p.inPart, end)
 		}
 		if old := p.Parts[p.inPart]; old[1] == 0 {
@@ -751,7 +751,7 @@ func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts 
 	}
 
 	evts = items.ForwardEvents(evts, start)
-	printEvents("after including in col "+column, evts)
+	items.PrintEvents("after including in col "+column, evts)
 	return
 }
 

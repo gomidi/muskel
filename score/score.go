@@ -29,7 +29,7 @@ func Column(colname string) Option {
 func Debug() Option {
 	return func(s *Score) {
 		//s.mainCol = colname
-		sketch.DEBUG = true
+		items.DEBUG = true
 	}
 }
 

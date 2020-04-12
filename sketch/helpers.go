@@ -46,58 +46,11 @@ func EventsFromSketchDef(name string, sketchDef [][2]string, sc Score, params []
 		evts = append(evts, ev)
 	}
 
-	if DEBUG {
-		printEvents(" after EventsFromSketchDef "+name, evts)
+	if items.DEBUG {
+		items.PrintEvents(" after EventsFromSketchDef "+name, evts)
 	}
 
 	return
-}
-
-func getBarsInPosRange(from, to uint, bars []*items.Bar) (res []*items.Bar) {
-	for _, b := range bars {
-		//fmt.Printf("event %v at %v: %v\n", i, ev.Position, ev)
-		if b.Position >= to {
-			break
-		}
-		if b.Position >= from {
-			res = append(res, b)
-		}
-	}
-	//fmt.Printf("getEventsInPosRange from: %v to: %v => %v\n", from, to, res)
-
-	return
-}
-
-func printBars(text string, bars ...*items.Bar) {
-	if !DEBUG {
-		return
-	}
-	fmt.Printf(">>>>>>> bars %s\n", text)
-
-	for _, b := range bars {
-		fmt.Printf("%s\n", b.String())
-	}
-
-	fmt.Printf("<<<<<<< bars %s\n", text)
-}
-
-func forwardBars(bars []*items.Bar, diff uint) {
-	if diff == 0 {
-		return
-	}
-	for _, b := range bars {
-		b.Position += diff
-	}
-}
-
-func printEvents(message string, evts []*items.Event) {
-	if DEBUG {
-		fmt.Printf("##> Events %s\n", message)
-		for _, ev := range evts {
-			fmt.Printf("[%v] %v ", ev.Position, ev.String())
-		}
-		fmt.Printf("\n##< Events %s\n", message)
-	}
 }
 
 func findPattern(fromSketch *Sketch, fromCol string, patternName string) (sk *Sketch, column string, err error) {
@@ -127,13 +80,10 @@ func (p *patterncmdHelper) GetSketchDefEvents(sketchDef [][2]string) ([]*items.E
 
 func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string, params ...string) ([]*items.Event, error) {
 	pc := &items.Pattern{}
-	//pc.Parser = p
 	if idx := strings.Index(callDef, "..."); idx > 0 && idx+3 == len(callDef) {
-		//fmt.Printf("len(data) = %v; idx = %v\n", len(data), idx)
 		pc.Exploded = true
 		callDef = callDef[:idx] //+ data[idx+3:]
 	}
-	//fmt.Printf("data cleaned: %q\n", data)
 	err := pc.Parse(callDef, 0)
 	if err != nil {
 		return nil, err
@@ -141,10 +91,8 @@ func (p *patterncmdHelper) GetCallEvents(endPos uint, callDef string, params ...
 
 	pc.Params = params
 
-	//pcc := p.column.newPattern(pc)
 	if endPos == 0 {
 		endPos = p.column.sketch.projectedBarEnd
-		//fmt.Printf("endPos: %v\n", endPos)
 	}
 
 	evts, _, _, err := p.column.UnrollPattern(0, endPos, pc)

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"gitlab.com/gomidi/muskel"
-	"gitlab.com/gomidi/muskel/sketch"
+	"gitlab.com/gomidi/muskel/items"
 )
 
 func TestInclude(t *testing.T) {
@@ -3068,6 +3068,89 @@ Ch    | 1 |
     3                    | * |
 `,
 		},
+		{ // 100
+			`
+TRACK    | piano |
+ Channel | 1     |
+
+=motiv   |    |
+ #
+    1    | #1 |
+    1&   | #2 |
+    2    | #3 |
+    2&   | _  |
+
+=SCORE       | piano              |
+ # \minor^c'
+    4        | =!motiv(1,-1,-1)%3 |
+ *2
+ #
+    1        | 5                  |
+
+
+			`,
+			`
+=SCORE                   | piano |
+ # 4/4 @120.00 \minor^c'
+    4                    | c'    |
+    4&                   | a#    |
+ #
+    1                    | a#    |
+    2                    | c'    |
+    2&                   | a#    |
+    3                    | a#    |
+ #
+    1                    | c'    |
+    1&                   | a#    |
+    2                    | a#    |
+ #
+    1                    | g'    |
+`,
+		},
+		{ // 101
+			`
+TRACK    | piano |
+ Channel | 1     |
+
+=motiv   |    |
+ #
+    1    |    |
+    1&   |    |
+    2    |    |
+    3    |    |
+    4    | #1 |
+    4&   | #2 |
+ #
+    1    | #3 |
+    2    | _  |
+
+=SCORE       | piano              |
+ # \minor^c'
+    4        | =!motiv(1,-1,-1)%3 |
+ *2
+ #
+    1        | 5                  |
+
+
+			`,
+			`
+=SCORE                              | piano |
+ # 4/4 @120.00 \minor^c'           //  #1
+    4                               | c'    |
+    4&                              | a#    |
+ #           //  #2
+    1                               | a#    |
+    2                               | c'    |
+    2&                              | a#    |
+    3                               | a#    |
+ #           //  #3
+    1                               | c'    |
+    1&                              | a#    |
+    2                               | a#    |
+ #           //  #4
+    1                               | g'    |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -3103,12 +3186,14 @@ Ch    | 1 |
 		*/
 	}
 
-	//sketch.DEBUG = true
+	items.DEBUG = false
 
 	skip := map[int]bool{
 		//36: true,
 		//91: true,
 		//92: true,
+		100: true,
+		101: true,
 	}
 
 	for i, test := range tests {
@@ -3120,7 +3205,7 @@ Ch    | 1 |
 					continue
 				}
 
-			if i != 99 {
+			if i != 100 {
 				continue
 			}
 		*/
@@ -3181,7 +3266,7 @@ Ch    | 1 |
 		}
 	}
 
-	sketch.DEBUG = false
+	items.DEBUG = false
 }
 
 func TestInclude2(t *testing.T) {

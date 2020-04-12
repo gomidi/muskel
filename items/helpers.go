@@ -14,6 +14,31 @@ import (
 	"gitlab.com/gomidi/midi/smf"
 )
 
+var DEBUG bool = false
+
+func PrintBars(text string, bars ...*Bar) {
+	if !DEBUG {
+		return
+	}
+	fmt.Printf(">>>>>>> bars %s\n", text)
+
+	for _, b := range bars {
+		fmt.Printf("%s\n", b.String())
+	}
+
+	fmt.Printf("<<<<<<< bars %s\n", text)
+}
+
+func PrintEvents(message string, evts []*Event) {
+	if DEBUG {
+		fmt.Printf("##> Events %s\n", message)
+		for _, ev := range evts {
+			fmt.Printf("[%v] %v ", ev.Position, ev.String())
+		}
+		fmt.Printf("\n##< Events %s\n", message)
+	}
+}
+
 // findNextNotEmptyPos finds the next non empty position in evts and adds forward to it
 func FindNextPos(i int, forward int, evts []*Event) int {
 	// TODO test, if it works
@@ -165,6 +190,30 @@ func MultiHasNote(me *MultiItem) bool {
 		}
 	}
 	return false
+}
+
+func ForwardBars(bars []*Bar, diff uint) {
+	if diff == 0 {
+		return
+	}
+	for _, b := range bars {
+		b.Position += diff
+	}
+}
+
+func GetBarsInPosRange(from, to uint, bars []*Bar) (res []*Bar) {
+	for _, b := range bars {
+		//fmt.Printf("event %v at %v: %v\n", i, ev.Position, ev)
+		if b.Position >= to {
+			break
+		}
+		if b.Position >= from {
+			res = append(res, b)
+		}
+	}
+	//fmt.Printf("getEventsInPosRange from: %v to: %v => %v\n", from, to, res)
+
+	return
 }
 
 func NtupleHasNote(me *NTuple) bool {

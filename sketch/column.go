@@ -368,7 +368,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		}
 	}
 
-	if DEBUG {
+	if items.DEBUG {
 		fmt.Printf(">> mixed\n")
 
 		for _, ev := range mixed {
@@ -379,7 +379,7 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 
 	unrolled = items.MergeEventStreams(mixed, s.projectedBarEnd)
 
-	if DEBUG {
+	if items.DEBUG {
 		fmt.Printf(">> after merge\n")
 
 		for _, ev := range unrolled {

@@ -10,8 +10,8 @@ import (
 	"gitlab.com/gomidi/midi/midimessage/meta"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/file"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/gomidi/muskel/sketch"
 	"gitlab.com/gomidi/muskel/smf"
 )
 
@@ -4113,7 +4113,7 @@ Ch     | 1   |
 
 	}
 
-	sketch.DEBUG = false
+	items.DEBUG = false
 }
 
 type logger struct {

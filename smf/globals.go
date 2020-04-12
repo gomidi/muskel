@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"gitlab.com/gomidi/midi/smf/smfwriter"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/gomidi/muskel/sketch"
 )
 
 const DEBUG_TEST = false
@@ -17,7 +17,7 @@ const DEBUG_TEST = false
 func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwriter.Option) error {
 	numTracks := uint16(2) // first track is for time signatures, second track is for tempo changes
 
-	if sketch.DEBUG {
+	if items.DEBUG {
 		fmt.Printf("WriteSMFTo filegroup %v\n", filegroup)
 	}
 
@@ -47,11 +47,11 @@ func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwr
 
 // WriteFile writes the score to the given SMF file
 func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (err error) {
-	if sketch.DEBUG {
+	if items.DEBUG {
 		fmt.Printf("WriteFile(%q) called\n", midifile)
 	}
 	defer func() {
-		if !sketch.DEBUG {
+		if !items.DEBUG {
 			if r := recover(); r != nil {
 				err = fmt.Errorf("%v", r)
 			}
@@ -69,7 +69,7 @@ func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (er
 		fileGroups[track.FileGroup] = fmt.Sprintf(midifile, track.FileGroup)
 	}
 
-	if sketch.DEBUG {
+	if items.DEBUG {
 		fmt.Printf("filegroups: %#v\n", fileGroups)
 	}
 
