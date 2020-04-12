@@ -317,8 +317,6 @@ func reduceDynamic(dyn string) string {
 		}
 	}
 
-	//fmt.Printf("reduceDynamic: %q: %v\n", dyn, counter)
-
 	switch {
 	case counter > 0:
 		return strings.Repeat("+", counter)

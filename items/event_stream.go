@@ -7,16 +7,8 @@ import (
 
 func PipedEventStream(p Columner, start uint, endPos uint, evts []*Event) (*EventStream, error) {
 	var cl Pattern
-	//pc := p.newPattern(&cl)
 	pc := cl.newSketchPattern(p)
-	/*
-		printEvents("pipedEventStream before modifyEvents", evts)
-		if DEBUG {
-			fmt.Printf("pipedEventStream: start: %v endPos: %v\n", start, endPos)
-		}
-	*/
 	evts, absoluteEnd, err := pc.modifyEvents(start, endPos, evts)
-	//printEvents("pipedEventStream after modifyEvents", evts)
 	if err != nil {
 		return nil, err
 	}
@@ -131,19 +123,7 @@ func MergeEventStreams(mixed []*EventStream, endPos uint) (evts []*Event) {
 }
 
 func GetEventsInPosRange(from, to uint, evts []*Event) (res []*Event) {
-	/*
-		if DEBUG {
-			fmt.Printf("getEventsInPosRange(from: %v, to: %v)\n", from, to)
-		}
-	*/
-	/*
-		if to < from {
-			fmt.Printf("getEventsInPosRange(from: %v, to: %v)\n", from, to)
-			panic("invalid pos range")
-		}
-	*/
 	for _, ev := range evts {
-		//fmt.Printf("event %v at %v: %v\n", i, ev.Position, ev)
 		if ev.Position >= to {
 			break
 		}
@@ -151,17 +131,10 @@ func GetEventsInPosRange(from, to uint, evts []*Event) (res []*Event) {
 			res = append(res, ev)
 		}
 	}
-	//fmt.Printf("getEventsInPosRange from: %v to: %v => %v\n", from, to, res)
-
 	return
 }
 
 func NewEventStream(start, end uint, isTemplate bool, events ...*Event) *EventStream {
-	/*
-		if DEBUG {
-			fmt.Printf("newEventStream(start: %v, end: %v, isTemplate: %v, events: %v)\n", start, end, isTemplate, events)
-		}
-	*/
 	return &EventStream{
 		Start:      start,
 		End:        end,
@@ -186,17 +159,9 @@ func (p *EventStream) String() string {
 }
 
 func (p EventStream) inRange(from, to uint) bool {
-	res := p.Start <= to && p.End > from
-	//fmt.Printf("%v:%v inRange from: %v to: %v: %v\n", p.start, p.end, from, to, res)
-	return res
+	return p.Start <= to && p.End > from
 }
 
 func (l *EventStream) getEvents(from, to uint) (result []*Event) {
-	for _, ev := range l.Events {
-		if ev.Position >= uint(from) && ev.Position < uint(to) {
-			result = append(result, ev)
-		}
-	}
-
-	return
+	return GetEventsInPosRange(from, to, l.Events)
 }

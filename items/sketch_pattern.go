@@ -121,71 +121,42 @@ type dynamicAdder interface {
 	AddDynamic(orig string) (nu string)
 }
 
-func (c *sketchPattern) modifyItem(it Item) (Item, error) {
-	//cc := c.call.(dynamicAdder)
-	cc := c.pattern
-	/*
-		if DEBUG {
-			fmt.Printf("modify item %T %v\n", it, it)
-		}
-	*/
-	switch v := it.(type) {
+func (p *sketchPattern) modifyItem(it Item) (out Item, err error) {
+	patt := p.pattern
+	out = it
+
+	switch v := out.(type) {
 	case *Note:
-		it := v.Dup().(*Note)
-		if c != nil {
-			it.Dynamic = cc.AddDynamic(v.Dynamic)
-			if it.PosShift == 0 && cc.PosShift != 0 {
-				it.PosShift = cc.PosShift
+		if p != nil {
+			v.Dynamic = patt.AddDynamic(v.Dynamic)
+			if v.PosShift == 0 && patt.PosShift != 0 {
+				v.PosShift = patt.PosShift
 			}
 		}
-		return it, nil
 	case *MIDINote:
-		it := v.Dup().(*MIDINote)
-		if c != nil {
-			it.Dynamic = cc.AddDynamic(v.Dynamic)
-			if it.PosShift == 0 && cc.PosShift != 0 {
-				it.PosShift = cc.PosShift
+		if p != nil {
+			v.Dynamic = patt.AddDynamic(v.Dynamic)
+			if v.PosShift == 0 && patt.PosShift != 0 {
+				v.PosShift = patt.PosShift
 			}
 		}
-		return it, nil
-
 	case *Token:
-		if c != nil {
-			return c.column.ModifyToken(v)
-		} else {
-			return it.Dup(), nil
+		if p != nil {
+			return p.column.ModifyToken(v)
 		}
-
-	case *LyricsTable:
-		return it.Dup(), nil
-
-	case *Pattern:
-		return it.Dup(), nil
-
 	case *NTuple:
-		if c != nil {
-			it := v.Dup().(*NTuple)
-			it, err := ReplaceNtupleTokens(c.column, v)
+		if p != nil {
+			out, err = ReplaceNtupleTokens(p.column, v)
 
 			if err != nil {
 				return nil, err
 			}
-
-			return it, nil
-		} else {
-			return v.Dup(), nil
 		}
-	default:
-		return it.Dup(), nil
 	}
+	return
 }
 
 func (pc *sketchPattern) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint, err error) {
-	/*
-		if DEBUG {
-			fmt.Printf("modifyEvents(start: %v until: %v)\n", start, until)
-		}
-	*/
 	projectedBarEnd := pc.column.EndPosition()
 
 	if until < projectedBarEnd {
@@ -199,7 +170,7 @@ func (pc *sketchPattern) modifyEvents(start uint, until uint, evts []*Event) (ev
 		}
 		nuEv := ev.Dup()
 		nuEv.Position = pos
-		nuEv.Item, err = pc.modifyItem(ev.Item)
+		nuEv.Item, err = pc.modifyItem(ev.Item.Dup())
 		if err != nil {
 			return
 		}
@@ -228,14 +199,7 @@ func (pc *sketchPattern) _getEventStream(start uint, endPos uint, isOverride boo
 		end = absoluteEnd
 	}
 
-	_ = absoluteEnd
-
-	//printEvents("after unrolling colum "+pc.column.name+" of sketch "+pc.column.sketch.Name, evts)
-
-	var es *EventStream
-
-	es = NewEventStream(start, end, true, evts...)
-
+	es := NewEventStream(start, end, true, evts...)
 	es.IsOverride = isOverride
 	return es, nil
 }

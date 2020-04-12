@@ -1,8 +1,6 @@
 package items
 
-import (
-	"strings"
-)
+import "strings"
 
 // CalledEvents is a column of events, the events have the position relative to the start
 type CalledEvents struct {

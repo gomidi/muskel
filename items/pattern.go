@@ -46,10 +46,7 @@ func (c *Pattern) Dup() Item {
 }
 
 func (p *Pattern) newSketchPattern(column Columner) *sketchPattern {
-	return &sketchPattern{
-		column:  column,
-		pattern: p,
-	}
+	return &sketchPattern{column: column, pattern: p}
 }
 
 func (p *Pattern) GetEventStream(column Columner, start, end uint) (*EventStream, error) {
