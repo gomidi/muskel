@@ -2,21 +2,13 @@ package items
 
 import "fmt"
 
-type SketchPattern struct {
-	column  Columner
+type sketchPattern struct {
+	column  columner
 	pattern *Pattern
 }
 
-func NewSketchPattern(column Columner, pattern *Pattern) *SketchPattern {
-	return &SketchPattern{
-		column:  column,
-		pattern: pattern,
-	}
-}
-
-type Columner interface {
+type columner interface {
 	Call(until uint, syncFirst bool, params ...string) (evts []*Event, absoluteEnd uint, err error)
-	//ReplaceNtupleTokens(*NTuple) (*NTuple, error)
 	EndPosition() uint
 	UnrollPattern(start uint, until uint, cc *Pattern) (evt []*Event, diff uint, end uint, err error)
 	ModifyToken(tk *Token) (Item, error)
@@ -25,15 +17,15 @@ type Columner interface {
 	GetToken(origName string, params []string) (val string, err error)
 }
 
-func ReplaceNtupleTokens(c Columner, in *NTuple) (out *NTuple, err error) {
+func ReplaceNtupleTokens(c columner, in *NTuple) (out *NTuple, err error) {
 	out = in.Dup().(*NTuple)
 	out.Events = nil
 
 	for _, it := range in.Events {
 		switch v := it.Item.(type) {
 		case *Token:
-			pc := NewSketchToken(c, v)
-			posEv, err := pc.GetEventStream(0, 1)
+			pc := v.newSketchToken(c)
+			posEv, err := pc.getEventStream(0, 1)
 			if err != nil {
 				return nil, err
 			}
@@ -56,7 +48,7 @@ func ReplaceNtupleTokens(c Columner, in *NTuple) (out *NTuple, err error) {
 	return out, nil
 }
 
-func (pc *SketchPattern) UnrollPattern(start uint, until uint) (evt []*Event, absoluteEnd uint, err error) {
+func (pc *sketchPattern) unrollPattern(start uint, until uint) (evt []*Event, absoluteEnd uint, err error) {
 	tc := pc.pattern
 	var evts []*Event
 	evts, absoluteEnd, err = pc.column.Call(until, tc.SyncFirst, tc.Params...)
@@ -71,7 +63,7 @@ func (pc *SketchPattern) UnrollPattern(start uint, until uint) (evt []*Event, ab
 	//printEvents(fmt.Sprintf("after call.call(until: %v, syncfirst: %v, params: %v)", until, tc.SyncFirst, tc.Params), evts)
 
 	var _evt []*Event
-	_evt, absoluteEnd, err = pc.ModifyEvents(start, start+absoluteEnd, evts)
+	_evt, absoluteEnd, err = pc.modifyEvents(start, start+absoluteEnd, evts)
 	if err != nil {
 		return
 	}
@@ -139,7 +131,7 @@ type dynamicAdder interface {
 	AddDynamic(orig string) (nu string)
 }
 
-func (c *SketchPattern) modifyItem(it Item) (Item, error) {
+func (c *sketchPattern) modifyItem(it Item) (Item, error) {
 	//cc := c.call.(dynamicAdder)
 	cc := c.pattern
 	/*
@@ -198,7 +190,7 @@ func (c *SketchPattern) modifyItem(it Item) (Item, error) {
 	}
 }
 
-func (pc *SketchPattern) ModifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint, err error) {
+func (pc *sketchPattern) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint, err error) {
 	/*
 		if DEBUG {
 			fmt.Printf("modifyEvents(start: %v until: %v)\n", start, until)
@@ -234,7 +226,7 @@ func (pc *SketchPattern) ModifyEvents(start uint, until uint, evts []*Event) (ev
 	return
 }
 
-func (pc *SketchPattern) _getEventStream(start uint, endPos uint, isOverride bool) (*EventStream, error) {
+func (pc *sketchPattern) _getEventStream(start uint, endPos uint, isOverride bool) (*EventStream, error) {
 	evts, diff, absoluteEnd, err := pc.column.UnrollPattern(start, endPos, pc.pattern)
 	if err != nil {
 		return nil, err
@@ -258,7 +250,7 @@ func (pc *SketchPattern) _getEventStream(start uint, endPos uint, isOverride boo
 	return es, nil
 }
 
-func (c *SketchPattern) GetEventStream(start uint, end uint) (*EventStream, error) {
+func (c *sketchPattern) getEventStream(start uint, end uint) (*EventStream, error) {
 	cc := c.pattern
 	if cc.Lyrics != nil {
 		es, err := c._getEventStream(start, end, false)
@@ -274,7 +266,7 @@ func (c *SketchPattern) GetEventStream(start uint, end uint) (*EventStream, erro
 	return c._getEventStream(start, end, false)
 }
 
-func (pc *SketchPattern) GetOverrideEventStream(start uint, endPos uint) (*EventStream, error) {
+func (pc *sketchPattern) getOverrideEventStream(start uint, endPos uint) (*EventStream, error) {
 	es, err := pc._getEventStream(start, endPos, true)
 	es.End = es.Start + es.End
 	return es, err

@@ -13,6 +13,18 @@ type LyricsTable struct {
 	Repeat uint
 }
 
+func (c *LyricsTable) newSketchLyrics(column lyricser) *sketchLyrics {
+	return &sketchLyrics{
+		column: column,
+		lyrics: c,
+	}
+}
+
+func (c *LyricsTable) ApplyLyrics(column lyricser, evts []*Event) ([]*Event, error) {
+	var lc = c.newSketchLyrics(column)
+	return lc.applyLyrics(evts)
+}
+
 func (c *LyricsTable) Dup() Item {
 	return &LyricsTable{
 		Name:   c.Name,

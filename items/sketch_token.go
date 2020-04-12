@@ -1,18 +1,11 @@
 package items
 
-type SketchToken struct {
-	column Columner
+type sketchToken struct {
+	column columner
 	token  *Token
 }
 
-func NewSketchToken(column Columner, token *Token) *SketchToken {
-	return &SketchToken{
-		column: column,
-		token:  token,
-	}
-}
-
-func (c *SketchToken) modifyItem(it Item) (Item, error) {
+func (c *sketchToken) modifyItem(it Item) (Item, error) {
 	cc := c.token
 	switch v := it.(type) {
 	case *Note:
@@ -65,7 +58,7 @@ func (c *SketchToken) modifyItem(it Item) (Item, error) {
 	}
 }
 
-func (pc *SketchToken) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint, err error) {
+func (pc *sketchToken) modifyEvents(start uint, until uint, evts []*Event) (evt []*Event, end uint, err error) {
 	projectedBarEnd := pc.column.EndPosition()
 
 	if until < projectedBarEnd {
@@ -96,7 +89,7 @@ func (pc *SketchToken) modifyEvents(start uint, until uint, evts []*Event) (evt 
 	return
 }
 
-func (pc *SketchToken) _getEventStream(start uint, endPos uint, isOverride bool) (*EventStream, error) {
+func (pc *sketchToken) _getEventStream(start uint, endPos uint, isOverride bool) (*EventStream, error) {
 	evts, diff, absoluteEnd, err := pc.unroll(start, endPos)
 	if err != nil {
 		return nil, err
@@ -126,7 +119,7 @@ func (pc *SketchToken) _getEventStream(start uint, endPos uint, isOverride bool)
 	return es, nil
 }
 
-func (c *SketchToken) unroll(start uint, until uint) (evt []*Event, diff uint, end uint, err error) {
+func (c *sketchToken) unroll(start uint, until uint) (evt []*Event, diff uint, end uint, err error) {
 	// TODO allow parameters?
 	var sc string
 	sc, err = c.getToken()
@@ -152,16 +145,16 @@ func (c *SketchToken) unroll(start uint, until uint) (evt []*Event, diff uint, e
 	return
 }
 
-func (pc *SketchToken) getToken() (val string, err error) {
+func (pc *sketchToken) getToken() (val string, err error) {
 	return pc.column.GetToken(pc.token.Name, pc.token.Params)
 }
 
-func (c *SketchToken) GetEventStream(start uint, end uint) (*EventStream, error) {
+func (c *sketchToken) getEventStream(start uint, end uint) (*EventStream, error) {
 	//cc := c.call
 	return c._getEventStream(start, end, false)
 }
 
-func (pc *SketchToken) GetOverrideEventStream(start uint, endPos uint) (*EventStream, error) {
+func (pc *sketchToken) getOverrideEventStream(start uint, endPos uint) (*EventStream, error) {
 	es, err := pc._getEventStream(start, endPos, true)
 	es.End = es.Start + es.End
 	return es, err

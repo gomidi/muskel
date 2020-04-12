@@ -5,17 +5,17 @@ import (
 	"sort"
 )
 
-func PipedEventStream(p Columner, start uint, endPos uint, evts []*Event) (*EventStream, error) {
+func PipedEventStream(p columner, start uint, endPos uint, evts []*Event) (*EventStream, error) {
 	var cl Pattern
 	//pc := p.newPattern(&cl)
-	pc := NewSketchPattern(p, &cl)
+	pc := cl.newSketchPattern(p)
 	/*
 		printEvents("pipedEventStream before modifyEvents", evts)
 		if DEBUG {
 			fmt.Printf("pipedEventStream: start: %v endPos: %v\n", start, endPos)
 		}
 	*/
-	evts, absoluteEnd, err := pc.ModifyEvents(start, endPos, evts)
+	evts, absoluteEnd, err := pc.modifyEvents(start, endPos, evts)
 	//printEvents("pipedEventStream after modifyEvents", evts)
 	if err != nil {
 		return nil, err

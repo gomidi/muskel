@@ -45,6 +45,25 @@ func (c *Pattern) Dup() Item {
 	}
 }
 
+func (p *Pattern) newSketchPattern(column columner) *sketchPattern {
+	return &sketchPattern{
+		column:  column,
+		pattern: p,
+	}
+}
+
+func (p *Pattern) GetEventStream(column columner, start, end uint) (*EventStream, error) {
+	return p.newSketchPattern(column).getEventStream(start, end)
+}
+
+func (p *Pattern) GetOverrideEventStream(column columner, start, end uint) (*EventStream, error) {
+	return p.newSketchPattern(column).getOverrideEventStream(start, end)
+}
+
+func (p *Pattern) Unroll(column columner, start, until uint) (evt []*Event, end uint, err error) {
+	return p.newSketchPattern(column).unrollPattern(start, until)
+}
+
 func (p *Pattern) String() string {
 	var bf strings.Builder
 

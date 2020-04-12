@@ -5,23 +5,16 @@ import (
 	"strings"
 )
 
-type SketchLyrics struct {
-	column Lyricser
+type sketchLyrics struct {
+	column lyricser
 	lyrics *LyricsTable
 }
 
-func NewSketchLyrics(column Lyricser, lyrics *LyricsTable) *SketchLyrics {
-	return &SketchLyrics{
-		column: column,
-		lyrics: lyrics,
-	}
-}
-
-type Lyricser interface {
+type lyricser interface {
 	Lyric(name string, from, to int) ([]string, error)
 }
 
-func (c *SketchLyrics) ApplyLyrics(evts []*Event) ([]*Event, error) {
+func (c *sketchLyrics) applyLyrics(evts []*Event) ([]*Event, error) {
 	cc := c.lyrics
 
 	idx := strings.Index(cc.Name, ".")

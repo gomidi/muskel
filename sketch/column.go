@@ -28,8 +28,9 @@ func (c *column) EndPosition() uint {
 }
 
 func (cl *column) ModifyToken(tk *items.Token) (items.Item, error) {
-	pc := items.NewSketchToken(cl, tk)
-	posEv, err := pc.GetEventStream(0, 1)
+	//pc := tk.NewSketchToken(cl)
+	//posEv, err := pc.GetEventStream(0, 1)
+	posEv, err := tk.GetEventStream(cl, 0, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +39,7 @@ func (cl *column) ModifyToken(tk *items.Token) (items.Item, error) {
 }
 
 func (cl *column) ApplyLyricsTable(lt *items.LyricsTable, evts []*items.Event) ([]*items.Event, error) {
-	var lc = items.NewSketchLyrics(cl, lt)
-	return lc.ApplyLyrics(evts)
+	return lt.ApplyLyrics(cl, evts)
 }
 
 func (c *column) ParseEvents(data []string) (evts []*items.Event, absEnd uint, err error) {
@@ -78,17 +78,17 @@ func (c *column) GetToken(origName string, params []string) (val string, err err
 
 }
 
-func (c *column) UnrollPattern(start uint, until uint, cc *items.Pattern) (evt []*items.Event, diff uint, end uint, err error) {
+func (c *column) UnrollPattern(start uint, until uint, patt *items.Pattern) (evt []*items.Event, diff uint, end uint, err error) {
 	var sk *Sketch
 	var colname string
-	sk, colname, err = c.findPattern(cc.Name)
+	sk, colname, err = c.findPattern(patt.Name)
 	if err != nil {
 		return
 	}
 	tr, _ := c.sketch.Score.GetTrack(colname)
-	var patt = sk.newCol(tr, colname)
-	var pcc = items.NewSketchPattern(patt, cc)
-	evt, end, err = pcc.UnrollPattern(start, until)
+	//var pcc = patt.NewSketchPattern(sk.newCol(tr, colname))
+	//evt, end, err = pcc.UnrollPattern(start, until)
+	evt, end, err = patt.Unroll(sk.newCol(tr, colname), start, until)
 	return
 }
 
@@ -297,15 +297,17 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 			for itidx, itm := range v.Events {
 				switch vv := itm.Item.(type) {
 				case *items.Pattern:
-					pc := items.NewSketchPattern(p, vv)
-					posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+					//pc := vv.NewSketchPattern(p)
+					//posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+					posEv, err = vv.GetEventStream(p, forward+ev.Position, endPos)
 					if err != nil {
 						return nil, endPos, err
 					}
 					newItsm[itidx] = posEv.Events[0]
 				case *items.Token:
-					pc := items.NewSketchToken(p, vv)
-					posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+					//pc := vv.NewSketchToken(p)
+					//posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+					posEv, err = vv.GetEventStream(p, forward+ev.Position, endPos)
 					if err != nil {
 						return nil, endPos, err
 					}
@@ -323,8 +325,9 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		case *items.Pattern:
 			// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
 			// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
-			pc := items.NewSketchPattern(p, v)
-			posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+			//pc := v.NewSketchPattern(p)
+			//posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+			posEv, err = v.GetEventStream(p, forward+ev.Position, endPos)
 			if err != nil {
 				return nil, endPos, err
 			}
@@ -332,8 +335,9 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		case *items.Token:
 			// TODO prevent endless loops from templates calling each other like col1 -> col2 -> col1 by keeping a stack of template calls
 			// and checking them for duplicates (the stack may as well be a map[string]bool; makes is easier; we need the complete names in there
-			pc := items.NewSketchToken(p, v)
-			posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+			//pc := v.NewSketchToken(p)
+			//posEv, err = pc.GetEventStream(forward+ev.Position, endPos)
+			posEv, err = v.GetEventStream(p, forward+ev.Position, endPos)
 			if err != nil {
 				return nil, endPos, err
 			}
@@ -341,15 +345,18 @@ func (p *column) _unroll(evts []*items.Event, originalEndPos uint, params []stri
 		case *items.Override:
 			switch vv := v.Item.(type) {
 			case *items.Pattern:
-				pc := items.NewSketchPattern(p, vv)
-				posEv, err = pc.GetOverrideEventStream(forward+ev.Position, endPos)
+				//pc := vv.NewSketchPattern(p)
+				//posEv, err = pc.GetOverrideEventStream(forward+ev.Position, endPos)
+				posEv, err = vv.GetOverrideEventStream(p, forward+ev.Position, endPos)
 
 				if err != nil {
 					return nil, endPos, err
 				}
 			case *items.Token:
-				pc := items.NewSketchToken(p, v.Item.(*items.Token))
-				posEv, err = pc.GetOverrideEventStream(forward+ev.Position, forward+ev.Position+1)
+				tk := v.Item.(*items.Token)
+				//pc := tk.NewSketchToken(p)
+				//posEv, err = pc.GetOverrideEventStream(forward+ev.Position, forward+ev.Position+1)
+				posEv, err = tk.GetOverrideEventStream(p, forward+ev.Position, forward+ev.Position+1)
 				if err != nil {
 					return nil, endPos, err
 				}

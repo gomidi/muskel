@@ -9,6 +9,23 @@ type Token struct {
 	itemGroupModifier
 }
 
+func (t *Token) newSketchToken(column columner) *sketchToken {
+	return &sketchToken{
+		column: column,
+		token:  t,
+	}
+}
+
+func (t *Token) GetEventStream(column columner, start, until uint) (*EventStream, error) {
+	pc := t.newSketchToken(column)
+	return pc.getEventStream(start, until)
+}
+
+func (t *Token) GetOverrideEventStream(column columner, start, until uint) (*EventStream, error) {
+	pc := t.newSketchToken(column)
+	return pc.getOverrideEventStream(start, until)
+}
+
 func (t *Token) Parse(data string, positionIn32th uint) (err error) {
 	data = t.parseExploded(data)
 	mt := regTokenCallNameDyn.FindStringSubmatch(data)
