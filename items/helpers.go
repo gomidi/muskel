@@ -39,6 +39,14 @@ func PrintEvents(message string, evts []*Event) {
 	}
 }
 
+func PrintEventStream(message string, ess ...*EventStream) {
+	if DEBUG {
+		for i, es := range ess {
+			PrintEvents(fmt.Sprintf("%s eventstream [%v] start: %v end: %v", message, i, es.Start, es.End), es.Events)
+		}
+	}
+}
+
 // findNextNotEmptyPos finds the next non empty position in evts and adds forward to it
 func FindNextPos(i int, forward int, evts []*Event) int {
 	// TODO test, if it works

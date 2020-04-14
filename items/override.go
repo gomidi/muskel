@@ -41,7 +41,7 @@ func (c *Override) GetES(p Columner, ev *Event, start, endPos uint) (mixed []*Ev
 		nev := ev.Dup()
 		nev.Item = vv
 		nev.Position = start
-		posEv = NewEventStream(nev.Position, nev.Position+1, true, nev)
+		posEv = NewEventStream(false, nev.Position, nev.Position+1, true, nev)
 		posEv.IsOverride = true
 	}
 	if err != nil {

@@ -110,9 +110,9 @@ func (pc *sketchToken) _getEventStream(start uint, endPos uint, isOverride bool)
 	var es *EventStream
 
 	if isOverride {
-		es = NewEventStream(start, 1, true, evts...)
+		es = NewEventStream(false, start, 1, true, evts...)
 	} else {
-		es = NewEventStream(start, 1, false, evts...)
+		es = NewEventStream(false, start, 1, false, evts...)
 	}
 
 	es.IsOverride = isOverride
@@ -127,13 +127,13 @@ func (c *sketchToken) unroll(start uint, until uint) (evt []*Event, diff uint, e
 		return
 	}
 
-	var pEvents []*Event
+	var pEvents *EventStream
 
-	pEvents, _, err = c.column.ParseEvents([]string{sc})
+	pEvents, err = c.column.ParseEvents(false, []string{sc})
 	if err != nil {
 		return
 	}
-	for _, pEvent := range pEvents {
+	for _, pEvent := range pEvents.Events {
 		pEvent.Position = start
 		pEvent.Item, err = c.modifyItem(pEvent.Item)
 		if err != nil {

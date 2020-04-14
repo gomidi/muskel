@@ -10,18 +10,19 @@ type UnrollGetter interface {
 
 type Columner interface {
 	Call(until uint, syncFirst bool, params ...string) (evts []*Event, absoluteEnd uint, err error)
+	//IsSyncFirst() bool
 	EndPosition() uint
 	UnrollPattern(start uint, until uint, cc *Pattern) (evt []*Event, diff uint, end uint, err error)
 	ModifyToken(tk *Token) (Item, error)
 	ApplyLyricsTable(lt *LyricsTable, evts []*Event) ([]*Event, error)
-	ParseEvents(data []string) (evts []*Event, absEnd uint, err error)
+	ParseEvents(syncfirst bool, data []string) (es *EventStream, err error)
 	GetToken(origName string, params []string) (val string, err error)
 
 	GetBarIdxOf(pos uint) int
 	GetPart(partname string) (part [2]uint, has bool)
 	GetBar(idx int) *Bar
 	GetEventsInBars(start, end int, evts []*Event) []*Event
-	UnUnroll(evts []*Event, originalEndPos uint, params []string) (unrolled []*Event, endPos uint, err error)
+	UnrollAndMerge(es *EventStream, params []string) (mix *EventStream, err error)
 	RepeatBars(repevts []*Event, diff uint) (evts []*Event, absend uint)
 }
 
@@ -50,11 +51,13 @@ func (p *BarRepeaterES) GetES(c Columner, ev *Event, start, endPos uint) (x []*E
 	}
 
 	currentPos := c.GetBar(bidx).Position
-
 	diff := currentPos - c.GetBar(startBar).Position
-	var ignoreEndPos uint
-	repevts, ignoreEndPos, err = c.UnUnroll(repevts, stopPos, nil)
-	_ = ignoreEndPos
+
+	es := &EventStream{}
+	es.SetEnd(stopPos)
+	es.Events = repevts
+	es, err = c.UnrollAndMerge(es, nil)
+	//_ = ignoreEndPos
 	if err != nil {
 		return nil, err
 	}
@@ -66,11 +69,11 @@ func (p *BarRepeaterES) GetES(c Columner, ev *Event, start, endPos uint) (x []*E
 
 	var all []*Event
 
-	if len(repevts) == 0 {
+	if len(es.Events) == 0 {
 		return nil, nil
 	}
 
-	res, currentPos = c.RepeatBars(repevts, diff)
+	res, currentPos = c.RepeatBars(es.Events, diff)
 	if len(res) == 0 {
 		return nil, nil
 	}
@@ -86,12 +89,12 @@ func (p *BarRepeaterES) GetES(c Columner, ev *Event, start, endPos uint) (x []*E
 			}
 			repetitions++
 			endOfStream += origDiff
-			res, currentPos = c.RepeatBars(repevts, diff*repetitions)
+			res, currentPos = c.RepeatBars(es.Events, diff*repetitions)
 			all = append(all, res...)
 		}
 	}
 
-	return []*EventStream{NewEventStream(c.GetBar(bidx).Position, currentPos, true, all...)}, nil
+	return []*EventStream{NewEventStream(false, c.GetBar(bidx).Position, currentPos, true, all...)}, nil
 }
 
 type PartRepeatES struct {
@@ -116,8 +119,12 @@ func (c *PartRepeatES) GetES(p Columner, ev *Event, start, endPos uint) (mixed [
 	}
 
 	partEvents := GetEventsInPosRange(startPos, _endPos, c.Evts)
+	var es = &EventStream{}
+	es.Start = startPos
+	es.SetEnd(_endPos)
+	es.Events = partEvents
 
-	partEvents, _endPos, err = p.UnUnroll(partEvents, _endPos, nil)
+	es, err = p.UnrollAndMerge(es, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +132,7 @@ func (c *PartRepeatES) GetES(p Columner, ev *Event, start, endPos uint) (mixed [
 	for r := 0; r < int(c.Item.Repeat); r++ {
 		var nevts []*Event
 
-		for _, _ev := range partEvents {
+		for _, _ev := range es.Events {
 			nue := _ev.Dup()
 			nue.Position += ev.Position + uint(r)*diff
 			if c.Item.SyncFirst {
@@ -136,7 +143,7 @@ func (c *PartRepeatES) GetES(p Columner, ev *Event, start, endPos uint) (mixed [
 
 		totalStart := startPos + ev.Position + (uint(r) * diff)
 
-		mixed = append(mixed, NewEventStream(totalStart, totalStart+diff, true, nevts...))
+		mixed = append(mixed, NewEventStream(false, totalStart, totalStart+diff, true, nevts...))
 	}
 
 	return mixed, nil
@@ -149,5 +156,5 @@ var _ UnrollGetter = DefaultES{}
 func (c DefaultES) GetES(p Columner, ev *Event, start, endPos uint) (mixed []*EventStream, err error) {
 	var nev = ev.Dup()
 	nev.Position = start
-	return []*EventStream{NewEventStream(nev.Position, endPos, false, nev)}, nil
+	return []*EventStream{NewEventStream(false, nev.Position, endPos, false, nev)}, nil
 }

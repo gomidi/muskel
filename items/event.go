@@ -3,27 +3,29 @@ package items
 import "strings"
 
 // CalledEvents is a column of events, the events have the position relative to the start
+/*
 type CalledEvents struct {
 	Events   []*Event
-	PosStart uint
-	PosEnd   uint
+	Start uint
+	End   uint
 	Repeat   uint
 }
+*/
 
-func (c *CalledEvents) Length32ths() uint {
-	return c.PosEnd - c.PosStart
+func (c *EventStream) Length32ths() uint {
+	return c.End - c.Start
 }
 
-func (c *CalledEvents) SetStart(syncFirst bool) {
+func (c *EventStream) SetStart(syncFirst bool, start uint) {
 	if syncFirst {
 		c.setStartToFirstEvent()
 		return
 	}
-	c.PosStart = 0
+	c.Start = start
 	return
 }
 
-func (c *CalledEvents) setStartToFirstEvent() {
+func (c *EventStream) setStartToFirstEvent() {
 	for _, ev := range c.Events {
 		if ev == nil {
 			continue
@@ -47,7 +49,7 @@ func (c *CalledEvents) setStartToFirstEvent() {
 				c.PosStart += v.Length32ths()
 			default:
 		*/
-		c.PosStart += ev.Position
+		c.Start += ev.Position
 		return
 		/*
 			}
@@ -57,32 +59,18 @@ func (c *CalledEvents) setStartToFirstEvent() {
 
 // SetEndToEndEvent sets the PosEnd to the first End item
 // and returns the position. If there is no End item, 0 is returned
-func (c *CalledEvents) SetEnd(firstBarLength uint, lastBarEnd uint) {
-	pos := firstBarLength
+func (c *EventStream) SetEnd(end uint) {
 	for _, ev := range c.Events {
-		if ev == nil {
-			continue
-		}
-
-		if ev.Item == nil {
-			continue
-		}
-
 		if ev.Item == End {
-			if ev.Position <= firstBarLength {
-				c.PosEnd = ev.Position
-				return
-			}
-			pos += ev.Position
-			c.PosEnd = pos
+			c.End = ev.Position
 			return
 		}
 	}
-	c.PosEnd = lastBarEnd
+	c.End = end
 	return
 }
 
-func (c *CalledEvents) GetEvents(placementPos uint) (res []*Event) {
+func (c *EventStream) GetEvents(placementPos uint) (res []*Event) {
 	diff := placementPos
 	for i := c.Repeat; i >= 0; i-- {
 		diff += i * c.Length32ths()
@@ -91,7 +79,23 @@ func (c *CalledEvents) GetEvents(placementPos uint) (res []*Event) {
 	return
 }
 
-func (c *CalledEvents) forward(src []*Event, diff uint) (res []*Event) {
+func (c *EventStream) Normalize() {
+	length := c.Length32ths()
+	res := c.backward(c.Events, c.Start)
+	c.Start = 0
+	c.End = length
+	c.Events = res
+	return
+}
+
+func (c *EventStream) backward(src []*Event, diff uint) (res []*Event) {
+	for _, ev := range src {
+		res = append(res, backwardEvent(ev, diff))
+	}
+	return
+}
+
+func (c *EventStream) forward(src []*Event, diff uint) (res []*Event) {
 	for _, ev := range src {
 		/*
 			switch v := ev.Item.(type) {
@@ -246,6 +250,15 @@ func forwardEvent(in *Event, diff uint) (out *Event) {
 	}
 	out = in.Dup()
 	out.Position += diff
+	return
+}
+
+func backwardEvent(in *Event, diff uint) (out *Event) {
+	if diff == 0 {
+		return in.Dup()
+	}
+	out = in.Dup()
+	out.Position -= diff
 	return
 }
 

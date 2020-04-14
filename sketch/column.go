@@ -56,8 +56,8 @@ func (cl *column) ApplyLyricsTable(lt *items.LyricsTable, evts []*items.Event) (
 	return lt.ApplyLyrics(cl, evts)
 }
 
-func (c *column) ParseEvents(data []string) (evts []*items.Event, absEnd uint, err error) {
-	return c.sketch.parseEvents(data, c.sketch.projectedBarEnd)
+func (c *column) ParseEvents(syncfirst bool, data []string) (es *items.EventStream, err error) {
+	return c.sketch.parseEvents(syncfirst, data, c.sketch.projectedBarEnd)
 }
 
 func (c *column) GetToken(origName string, params []string) (val string, err error) {
@@ -101,6 +101,7 @@ func (c *column) UnrollPattern(start uint, until uint, patt *items.Pattern) (evt
 	}
 	tr, _ := c.sketch.Score.GetTrack(colname)
 	evt, end, err = patt.Unroll(sk.newCol(tr, colname), start, until)
+	items.PrintEvents(fmt.Sprintf("column.UnrollPattern start: %v until: %v sk.Name: %q.%q", start, until, sk.Name, colname), evt)
 	return
 }
 
@@ -109,6 +110,12 @@ func (p *column) unrollItem(evts []*items.Event, ev, nextEv *items.Event, until,
 		es    items.UnrollGetter
 		start = ev.Position
 	)
+
+	/*
+		if items.DEBUG {
+			fmt.Printf("unrollItem(%s)\n", ev)
+		}
+	*/
 
 	switch it := ev.Item.(type) {
 	case *items.PipedPatternCommands:
@@ -134,6 +141,7 @@ func (p *column) unrollItem(evts []*items.Event, ev, nextEv *items.Event, until,
 	}
 
 	mixed, err = es.GetES(p, ev, start, endPos)
+	//items.PrintEvents(fmt.Sprintf("GetES(%s)", ev.Item), mixed[0].Events)
 
 	if err != nil {
 		return nil, err
@@ -146,45 +154,50 @@ func (p *column) RepeatBars(repevts []*items.Event, diff uint) (evts []*items.Ev
 	return p.sketch.repeatBars(repevts, diff)
 }
 
-func (p *column) UnUnroll(evts []*items.Event, originalEndPos uint, params []string) (unrolled []*items.Event, endPos uint, err error) {
-	endPos = originalEndPos
+func (p *column) UnrollAndMerge(es *items.EventStream, params []string) (mix *items.EventStream, err error) {
 	var mixed []*items.EventStream
 
-	for i, ev := range evts {
+	end := p.sketch.projectedBarEnd
+
+	for i, ev := range es.Events {
 		if ev.Item == nil {
 			continue
 		}
 
 		if ev.Item == items.End {
-			endPos = ev.Position
+			end = ev.Position
 			break
 		}
 
-		var until = items.FindNextPos(i, 0, evts)
+		var until = items.FindNextPos(i, 0, es.Events)
 		if until < 0 {
-			until = int(endPos)
+			until = int(es.End)
 		}
 
 		var nextEv *items.Event
 
-		if i < len(evts)-1 {
-			nextEv = evts[i+1]
+		if i < len(es.Events)-1 {
+			nextEv = es.Events[i+1]
 		}
 
-		_mixed, err := p.unrollItem(evts, ev, nextEv, uint(until), endPos, params)
+		_mixed, err := p.unrollItem(es.Events, ev, nextEv, uint(until), es.End, params)
+
+		//items.PrintEvents(fmt.Sprintf("after unrollItem %s", ev.Item), _mixed[0].Events)
 
 		if err != nil {
-			return nil, endPos, err
+			return nil, err
 		}
 
 		mixed = append(mixed, _mixed...)
 	}
-	return items.MergeEventStreams(mixed, p.sketch.projectedBarEnd), endPos, nil
+
+	items.PrintEventStream("mixed", mixed...)
+	return items.MergeEventStreams(mixed, end), nil
 }
 
-func (p *column) unroll(inputEvents []*items.Event, originalEndPos uint, params []string) (unrolled []*items.Event, endPos uint, err error) {
+func (p *column) setAbsolutePositions(es *items.EventStream, params []string) (mix *items.EventStream, err error) {
 	var evts []*items.Event
-	for i, inEv := range inputEvents {
+	for i, inEv := range es.Events {
 		if inEv.Item == nil || err != nil {
 			continue
 		}
@@ -203,7 +216,20 @@ func (p *column) unroll(inputEvents []*items.Event, originalEndPos uint, params 
 		return
 	}
 
-	return p.UnUnroll(evts, originalEndPos, params)
+	es.Events = evts
+
+	return es, err
+}
+
+func (p *column) unroll(es *items.EventStream, params []string) (mix *items.EventStream, err error) {
+	es, err = p.setAbsolutePositions(es, params)
+	if err != nil {
+		return
+	}
+
+	items.PrintEventStream("after setAbsolutePositions", es)
+
+	return p.UnrollAndMerge(es, params)
 }
 
 // Call parameterizes the sketch in the given column, parses and unrolls it and returns the resulting events
@@ -232,28 +258,43 @@ func (c *column) Call(originalEndPos uint, syncFirst bool, params ...string) (ev
 
 	data := c.sketch.injectParams(col, params)
 
-	var loop uint
+	//var loop uint
+	var es *items.EventStream
 
-	events, loop, err = s.parseEvents(data, endPos)
+	es, err = s.parseEvents(syncFirst, data, endPos)
 
 	if err != nil {
 		return
 	}
 
-	_ = loop
+	//	items.PrintEvents("after parse", es.Events)
 
-	events, endPos, err = c.unroll(events, endPos, params) // replaces template calls and imports
+	// _ = loop
+
+	es, err = c.unroll(es, params) // replaces template calls and imports
 	if err != nil {
 		return
 	}
+
+	items.PrintEventStream("after unroll", es)
 
 	if syncFirst {
-		events = items.MoveBySyncFirst(events)
+		es.SetStart(true, 0)
+		es.Normalize()
+		//items.
+		//es.Events =
+		//items.MoveBySyncFirst(es)
+		items.PrintEventStream("after syncFirst", es)
 	}
 
-	events = c.unrollIncludedBars(events)
-	events, err = c.unrollPartRepetitionsOfBars(events, endPos)
-	return
+	es.Events = c.unrollIncludedBars(es.Events)
+
+	items.PrintEventStream("after unrollIncludedBars", es)
+
+	es.Events, err = c.unrollPartRepetitionsOfBars(es.Events, endPos)
+
+	items.PrintEventStream("after unrollPartRepetitionsOfBars", es)
+	return es.Events, es.Length32ths(), err
 }
 
 func (p *column) unrollIncludedBars(evts []*items.Event) []*items.Event {
@@ -333,7 +374,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 					nevts = append(nevts, nue)
 				}
 
-				mixed = append(mixed, items.NewEventStream(startPos, endPos, true, nevts...))
+				mixed = append(mixed, items.NewEventStream(false, startPos, endPos, true, nevts...))
 
 				// overrides
 				otherEvents := items.GetEventsInPosRange(endPos, endPos+diff, evts)
@@ -344,11 +385,11 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 						// ignore
 					case *items.Override:
 						fmt.Printf("got override: %v\n", otherE)
-						oes := items.NewEventStream(otherE.Position, otherE.Position+1, false, otherE)
+						oes := items.NewEventStream(false, otherE.Position, otherE.Position+1, false, otherE)
 						oes.IsOverride = true
 						mixed = append(mixed, oes)
 					default:
-						nes := items.NewEventStream(otherE.Position, otherE.Position+1, false, otherE)
+						nes := items.NewEventStream(false, otherE.Position, otherE.Position+1, false, otherE)
 						mixed = append(mixed, nes)
 					}
 				}
@@ -356,7 +397,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 				skipPos = endPos + diff
 			} else {
 				if evt.Position >= skipPos {
-					nes := items.NewEventStream(evt.Position, evt.Position+1, false, evt)
+					nes := items.NewEventStream(false, evt.Position, evt.Position+1, false, evt)
 					mixed = append(mixed, nes)
 				}
 			}
@@ -365,7 +406,7 @@ func (p *column) unrollPartRepetitions(evts []*items.Event) (res []*items.Event,
 
 	unrolled := items.MergeEventStreams(mixed, s.projectedBarEnd)
 
-	return unrolled, nil
+	return unrolled.Events, nil
 }
 
 func (p *column) unrollPartRepetitionsOfBars(evts []*items.Event, stopPos uint) ([]*items.Event, error) {

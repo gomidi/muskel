@@ -41,10 +41,19 @@ func ReplaceNtupleTokens(c Columner, in *NTuple) (out *NTuple, err error) {
 func (pc *sketchPattern) unrollPattern(start uint, until uint) (evt []*Event, absoluteEnd uint, err error) {
 	tc := pc.pattern
 	var evts []*Event
-	evts, absoluteEnd, err = pc.column.Call(until, tc.SyncFirst, tc.Params...)
+	var length uint
+	evts, length, err = pc.column.Call(until, tc.SyncFirst, tc.Params...)
 	if err != nil {
 		return
 	}
+
+	//length := absoluteEnd - start
+
+	if DEBUG {
+		fmt.Printf("length: %v start: %v\n", length, start)
+	}
+
+	PrintEvents("sketchPattern.unrollPattern", evts)
 
 	for _, ev := range evts {
 		ev.PosShift += tc.PosShift
@@ -53,7 +62,7 @@ func (pc *sketchPattern) unrollPattern(start uint, until uint) (evt []*Event, ab
 	//printEvents(fmt.Sprintf("after call.call(until: %v, syncfirst: %v, params: %v)", until, tc.SyncFirst, tc.Params), evts)
 
 	var _evt []*Event
-	_evt, absoluteEnd, err = pc.modifyEvents(start, start+absoluteEnd, evts)
+	_evt, absoluteEnd, err = pc.modifyEvents(start, start+length, evts)
 	if err != nil {
 		return
 	}
@@ -62,7 +71,10 @@ func (pc *sketchPattern) unrollPattern(start uint, until uint) (evt []*Event, ab
 	// TODO check, if until and absoluteEnd is correct
 
 	// TODO check if length is correct
-	length := absoluteEnd //- start
+
+	if DEBUG {
+		fmt.Printf("absoluteEnd: %v\n", absoluteEnd)
+	}
 
 	/*
 		if DEBUG {
@@ -192,6 +204,7 @@ func (pc *sketchPattern) _getEventStream(start uint, endPos uint, isOverride boo
 	if err != nil {
 		return nil, err
 	}
+	PrintEvents("sketchPattern._getEventStream", evts)
 	_ = diff
 	end := uint(endPos)
 
@@ -199,7 +212,7 @@ func (pc *sketchPattern) _getEventStream(start uint, endPos uint, isOverride boo
 		end = absoluteEnd
 	}
 
-	es := NewEventStream(start, end, true, evts...)
+	es := NewEventStream(pc.pattern.SyncFirst, start, end, true, evts...)
 	es.IsOverride = isOverride
 	return es, nil
 }

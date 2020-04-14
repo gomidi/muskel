@@ -150,14 +150,16 @@ func (s *Sketch) getBarIdxOf(pos uint) (baridx int) {
 }
 
 // loop = 0: column is not looped; loop > 0: column is looped n times
-func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event, loop uint, err error) {
+func (s *Sketch) parseEvents(syncFirst bool, data []string, origEndPos uint) (es *items.EventStream, err error) {
+	es = &items.EventStream{}
+
 	var lastNoRestItem items.Item
 
 	for _, dat := range data {
 		var ev items.Event
 		err = ev.Parse(dat)
 		if err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 
 		if ev.Item == items.RepeatLastEvent {
@@ -173,15 +175,18 @@ func (s *Sketch) parseEvents(data []string, origEndPos uint) (res []*items.Event
 			panic("includes not allowed inside columns")
 		}
 
-		il := items.IsLoop(ev.Item)
+		//il := items.IsLoop(ev.Item)
 
-		if il >= 0 {
-			loop = uint(il)
-		}
-
+		/*
+			if il >= 0 {
+				loop = uint(il)
+			}
+		*/
 		ev.Item = items.RollTheDiceForAnItem(ev.Item)
-		res = append(res, &ev)
+		es.Events = append(es.Events, &ev)
 	}
+	es.SetStart(syncFirst, 0)
+	es.SetEnd(origEndPos)
 	// parse items and resolve randomness at this level
 	// TODO check, if it works
 	return

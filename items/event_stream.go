@@ -18,7 +18,7 @@ func PipedEventStream(p Columner, start uint, endPos uint, evts []*Event) (*Even
 		_end = absoluteEnd
 	}
 
-	return NewEventStream(start, absoluteEnd, true, evts...), nil
+	return NewEventStream(cl.SyncFirst, start, absoluteEnd, true, evts...), nil
 }
 
 // eventStream simulates a column of events
@@ -28,6 +28,7 @@ type EventStream struct {
 	IsOverride bool     // simulates wether the sketch column call is an override
 	IsTemplate bool
 	End        uint
+	Repeat     uint
 }
 
 func getFirstType(es *EventStream) string {
@@ -74,12 +75,13 @@ func (s sortedEventStream) Len() int {
 	return len(s)
 }
 
-func MergeEventStreams(mixed []*EventStream, endPos uint) (evts []*Event) {
+func MergeEventStreams(mixed []*EventStream, endPos uint) (es *EventStream) {
 	var (
 		lastStreamPos uint
 		keepLooping   bool = true
 		lastStream    *EventStream
 	)
+	es = &EventStream{}
 
 	lastStream = nil
 	sorted := sortedEventStream(mixed)
@@ -95,7 +97,7 @@ func MergeEventStreams(mixed []*EventStream, endPos uint) (evts []*Event) {
 						toMod = mixed[idx+1].Start
 					}
 				}
-				evts = append(evts, lastStream.getEvents(lastStreamPos, toMod)...)
+				es.Events = append(es.Events, lastStream.getEvents(lastStreamPos, toMod)...)
 			}
 		}
 
@@ -111,14 +113,16 @@ func MergeEventStreams(mixed []*EventStream, endPos uint) (evts []*Event) {
 		}
 
 		lastStreamPos = stream.End
-		evts = append(evts, stream.Events...)
+		es.Events = append(es.Events, stream.Events...)
 	}
 
 	if keepLooping && lastStream != nil {
 		if lastStream.inRange(lastStreamPos, endPos) {
-			evts = append(evts, lastStream.getEvents(lastStreamPos, endPos)...)
+			es.Events = append(es.Events, lastStream.getEvents(lastStreamPos, endPos)...)
 		}
 	}
+
+	es.SetEnd(endPos)
 	return
 }
 
@@ -134,24 +138,30 @@ func GetEventsInPosRange(from, to uint, evts []*Event) (res []*Event) {
 	return
 }
 
-func NewEventStream(start, end uint, isTemplate bool, events ...*Event) *EventStream {
-	return &EventStream{
-		Start:      start,
-		End:        end,
+func NewEventStream(syncFirst bool, start, end uint, isTemplate bool, events ...*Event) *EventStream {
+	es := &EventStream{
+		//Start:      start,
+		//End:        end,
 		IsOverride: false,
 		IsTemplate: isTemplate,
 		Events:     events,
 	}
+	es.SetStart(syncFirst, start)
+	es.SetEnd(end)
+	return es
 }
 
-func NewEventStreamOverride(start, end uint, isTemplate bool, events ...*Event) *EventStream {
-	return &EventStream{
-		Start:      start,
-		End:        end,
+func NewEventStreamOverride(syncFirst bool, start, end uint, isTemplate bool, events ...*Event) *EventStream {
+	es := &EventStream{
+		//Start:      start,
+		//End:        end,
 		IsOverride: true,
 		IsTemplate: isTemplate,
 		Events:     events,
 	}
+	es.SetStart(syncFirst, start)
+	es.SetEnd(end)
+	return es
 }
 
 func (p *EventStream) String() string {

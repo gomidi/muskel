@@ -14,7 +14,7 @@ import (
 )
 
 func TestSMFImport(t *testing.T) {
-	// t.Skip()
+	//t.Skip()
 	var tests = []struct {
 		msklIn               string
 		midiOut              string

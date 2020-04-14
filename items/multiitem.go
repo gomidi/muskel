@@ -47,7 +47,7 @@ func (p *MultiItem) GetES(c Columner, ev *Event, start, endPos uint) (x []*Event
 	var nev = ev.Dup()
 	nev.Position = start
 	nev.Item = p.Dup()
-	posEv = NewEventStream(nev.Position, endPos, false, nev)
+	posEv = NewEventStream(false, nev.Position, endPos, false, nev)
 	return []*EventStream{posEv}, nil
 }
 

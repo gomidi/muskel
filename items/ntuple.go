@@ -73,7 +73,7 @@ func (p *NTuple) GetES(c Columner, ev *Event, start, endPos uint) ([]*EventStrea
 	nev.Position = start
 	nev.PosShift = 0
 	nev.Item = newItm
-	posEv := NewEventStream(nev.Position, endPos, false, nev)
+	posEv := NewEventStream(false, nev.Position, endPos, false, nev)
 	return []*EventStream{posEv}, nil
 }
 

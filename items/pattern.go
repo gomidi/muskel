@@ -70,6 +70,8 @@ func (c *Pattern) GetES(p Columner, ev *Event, start, endPos uint) (mixed []*Eve
 	if err != nil {
 		return nil, err
 	}
+
+	//PrintEvents("inside pattern GetES", posEv.Events)
 	return []*EventStream{posEv}, nil
 }
 
