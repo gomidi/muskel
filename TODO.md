@@ -3,38 +3,7 @@
 
 ## nächstes 
 
-- diatonische verläufe mittels =, z.B.
-    
-    =SCORE | piano |
-    #
-      1    | 2=&   |
-    #
-      1    | 10    |
-    
-  ist das gleiche, wie
-
-    =SCORE | piano |
-    #
-      1    | 2     |
-      1&   | 3     |
-      2    | 4     |
-      2&   | 5     |
-      3    | 6     |
-      3&   | 7     |
-      4    | 8     |
-      4&   | 9     |
-    #
-      1    | 10    |
-
-  voraussetzung dazu ist, dass das Lautstärkeresetzeichen von = auf +- geändert wird. (nach einer note gleicht sich das sowieso aus,
-  aber bei applizierung auf patterns etc. ist es wichtig)
-
-- mehrfache chromatische transposition erlauben, z.B. 
-  1^1# transponiert um einen schritt und eine MIDInote aufwärts 
-  1^1bb transponiert um einen schritt und zwei MIDInoten abwärts 
-  1^2#3 transponiert um einen schritt und drei MIDInoten aufwärts
-  1#3 transponiert um drei MIDInoten aufwärts
-  1b3 transponiert um drei MIDInoten abwärts
+- gleichheitszeichen frei machen, reset von dynamik mit +-
 
 - grundsätzliche überarbeitung:
   Obergruppe 
@@ -109,11 +78,10 @@
         - haben eine andere syntax: wenn sie eine EventSequence zurückgeben, beginnen sie mit $= wenn sie eine itemgroup zurückgeben, beginnen 
           sie mit $_, wenn sie eine tabelle zurückgeben mit $$ (z.B. $$include) wenn sie nichts zurückgeben mit $ (z.B. $embed).
 
-- allow repeat last event sign to alter volume and scale mounting %++ etc
-- add repeat last pattern %% also with modifiers, e.g. %%++< or %%^2-->
-  or with command pipe, e.g. %%/$reverse(=)
-- überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
-- überschreiben nur mit transposition erlauben z.B. /^1 erhöht die "darunterliegende Note" um einen schritt
+- wir brauchen eine komplette überarbeitung, um die abhängigkeiten aufzulösen: jedes item muss in einer closure funktion
+  münden, die den aktuellen kontext (parameter, Zeitposition etc.) speichern und letztlich erst am Schluss aufgelöst wird
+  (beim unrolling). das wird wahrscheinlich erstmal extrem komplex, aber es wird es ermöglichen, alles mit jedem zu kombinieren
+
 - frei stehende Plus- und Minuszeichen erlauben "aufgepropfte" Dynamik/Dynamikverläufe, z.B.
 
     =pt  | piano |
@@ -127,7 +95,7 @@
     #
       2    |             | --        |
     #                   // exponentieller Dynamikverlauf
-      1    |             | =~~       |
+      1    |             | +-~~      |
     #
       1    |             | ++        |
     
@@ -137,14 +105,17 @@ Die Plus- und Minuszeichen werden einfach auf die darunterliegende Dynamik "aufa
 - allow [] for taking a part of a multiitem, e.g. (C e g c')[0] takes C, (C e g c')[1;3] takes (e c'),  
   (C e g c')[1:3] takes (e g c'). Also do it for shortcuts/tokens
 
+- Aufruf des Templates mit geschweiften Klammern: Parameter werden nicht anhand ihrer Nummer ersetzt, sondern nach der Reihenfolge, in der sie im Template erscheinen (d.h. es müssen alle angegeben werden unabhängig von der Nummer). So kann man dann das gleiche Template mal mit vordefinierten Wiederholungen verwenden und mal diese Überschreiben. Ausserdem kann man auch Platzhalter ohne Nummer verwenden; diese werden dann fortlaufend nummeriert, man kann auch beides kombinieren.
+
+- allow repeat last event sign to alter volume and scale mounting %++ etc
+- add repeat last pattern %% also with modifiers, e.g. %%++< or %%^2-->
+  or with command pipe, e.g. %%/$reverse(+-)
+- überschreiben nur mit velocity erlauben z.B. /++ erhöht die "darunterliegende Note" in der velocity um ++
+- überschreiben nur mit transposition erlauben z.B. /^1 erhöht die "darunterliegende Note" um einen schritt
+
 - Die Taktwiederholungszeichen kann man auch innerhalb der Parameter verwenden: 
  - ... wiederholt den letzten Parameter, bis alle Parameter ausgefüllt sind.
  - .n. wiederholt die letzten n Parameter, bis alle Parameter ausgefüllt sind
-
-
-- Aufruf des Templates mit geschweiften Klammern: Parameter werden nicht anhand ihrer Nummer ersetzt, sondern nach der Reihenfolge, in der sie im Template erscheinen (d.h. es müssen alle angegeben werden unabhängig von der Nummer). So kann man dann das gleiche Template mal mit vordefinierten Wiederholungen verwenden und mal diese Überschreiben. Ausserdem kann man auch Platzhalter ohne Nummer verwenden; diese werden dann fortlaufend nummeriert, man kann auch beides kombinieren.
-
-- es fehlt die Möglichkeit, innerhalb der Score Tabelle die Tracks in den Spalten zu wechseln. Ein Spaltenwechsel impliziert immer auch das Ende der vorangehenden Spalte (d.h. eine Pause am Ende). Ein Spaltenwechsel besteht aus einer Zeile, die wieder mit =SCORE beginnt. Nur jene Spalten, die nicht leer sind, werden gewechselt.
 
 - funktionen, die sich auf die spalte auswirken, z.B. 
    - relatives tempo zum haupttempo
@@ -154,26 +125,6 @@ Die Plus- und Minuszeichen werden einfach auf die darunterliegende Dynamik "aufa
   syntax: $.() z.B. 
     $.delay(3/16)
 
-
-- $$save(key,what...) erlaubt speichern von Werten in einer Token-Tabelle. Key ist .table.token.col von 
-  einer Tokentabelle, die existieren muss.
-  bei .table.token. wird die spalte der aktuellen Spalte verwendet. what kann folgendes sein:
-  - 1,2 etc. Scalenwert der aktuellen Scala in dieser Spalte in dieser Zeitposition
-  - CC(12) der aktuelle Controllerwert für den Controller 12 in dieser Spalte in dieser Zeitposition
-  - PB der aktuelle Pitchbendwert in dieser Spalte in dieser Zeitposition
-  - AT der aktuelle Aftertouchwert in dieser Spalte in dieser Zeitposition
-  - PT(12) der aktuelle Polyaftertouchwert für Taste 12 in dieser Spalte in dieser Zeitposition
-  - % die aktuelle Note (letzte geschlagene Note oder Pause)
-  gesetzt werden die platzhalter. wenn mehr platzhalter vorhanden sind, als werte, werden die überschüssigen parameter 
-  beim aufruf gesetzt, z.B. .table.token.col(c')
-  auf die gleiche Weise kann auch in Pattern tabellen gespeichert werden. Hierbei ist der key dann =pattern.col
-
-- wir brauchen eine komplette überarbeitung, um die abhängigkeiten aufzulösen: jedes item muss in einer closure funktion
-  münden, die den aktuellen kontext (parameter, Zeitposition etc.) speichern und letztlich erst am Schluss aufgelöst wird
-  (beim unrolling). das wird wahrscheinlich erstmal extrem komplex, aber es wird es ermöglichen, alles mit jedem zu kombinieren
-
-- (ggf. Spezialsyntax für slicing wegnehmen und durch $slice funktion ersetzen)
-
 ## Was fehlt mir bei muskel?
 
 1. Die Möglichkeit, den aktuellen Ton zu hören und ändern zu können 
@@ -182,10 +133,12 @@ Dann brauchen wir die Möglichkeit, aus einem Editor heraus einen Befehl aufzuru
 
 2. Die Visualisierung der Melodie
 Man könnte die Konvention haben, dass wenn ein Spaltenname auf `<` endet, die Spalte "expanded" ist, d.h. der Spaltenname beinhaltet nicht das `<`, aber die Anordnung der Töne spiegelt durch Padding den Tonhöhenverlauf wider (von links nach rechts mit minimalen Abständen).
+Oder (einfacher) mit smfimage.
 
 3. Es gibt keine Möglichkeit, auf einfachem Wege Noten in Spalten "nach unten" oder "nach oben" zu schieben.
 Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang und Ende der zu verschiebenden Noten markieren können. z.B. `^+(` für _Start verschieben nach unten_ mit Menge an Pluszeichen = Anzahl der Verschiebepositionen und analog `^-(` für _Start verschieben nach oben_ und `^)` für das _Ende der letzten Verschiebegruppe_ (kann am Ende der Spalte weggelassen werden)
 
+Letztlich können alle drei Features aber besser in einem eigens entwickelten Editor implementiert werden.
  
 ## weiteres
 
@@ -204,11 +157,66 @@ Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang 
 - make converter a separate package, reading from stdin and writing to stdout
 - make muskel binary read from stdin and write to stdout
 - tests reanimieren
+- es fehlt die Möglichkeit, innerhalb der Score Tabelle die Tracks in den Spalten zu wechseln. Ein Spaltenwechsel impliziert immer auch das Ende der vorangehenden Spalte (d.h. eine Pause am Ende). Ein Spaltenwechsel besteht aus einer Zeile, die wieder mit =SCORE beginnt. Nur jene Spalten, die nicht leer sind, werden gewechselt.
+- (ggf. Spezialsyntax für slicing wegnehmen und durch $slice funktion ersetzen)
+- $$save(key,what...) erlaubt speichern von Werten in einer Token-Tabelle. Key ist .table.token.col von 
+  einer Tokentabelle, die existieren muss.
+  bei .table.token. wird die spalte der aktuellen Spalte verwendet. what kann folgendes sein:
+  - 1,2 etc. Scalenwert der aktuellen Scala in dieser Spalte in dieser Zeitposition
+  - CC(12) der aktuelle Controllerwert für den Controller 12 in dieser Spalte in dieser Zeitposition
+  - PB der aktuelle Pitchbendwert in dieser Spalte in dieser Zeitposition
+  - AT der aktuelle Aftertouchwert in dieser Spalte in dieser Zeitposition
+  - PT(12) der aktuelle Polyaftertouchwert für Taste 12 in dieser Spalte in dieser Zeitposition
+  - % die aktuelle Note (letzte geschlagene Note oder Pause)
+  gesetzt werden die platzhalter. wenn mehr platzhalter vorhanden sind, als werte, werden die überschüssigen parameter 
+  beim aufruf gesetzt, z.B. .table.token.col(c')
+  auf die gleiche Weise kann auch in Pattern tabellen gespeichert werden. Hierbei ist der key dann =pattern.col
+- diatonische verläufe mittels =, z.B.
+    
+    =SCORE | piano |
+    #
+      1    | 2=&   |
+    #
+      1    | 10    |
+    
+  ist das gleiche, wie
+
+    =SCORE | piano |
+    #
+      1    | 2     |
+      1&   | 3     |
+      2    | 4     |
+      2&   | 5     |
+      3    | 6     |
+      3&   | 7     |
+      4    | 8     |
+      4&   | 9     |
+    #
+      1    | 10    |
+
+  voraussetzung dazu ist, dass das Lautstärkeresetzeichen von = auf +- geändert wird. (nach einer note gleicht sich das sowieso aus,
+  aber bei applizierung auf patterns etc. ist es wichtig)
+
+- mehrfache chromatische transposition erlauben, z.B. 
+  1^1# transponiert um einen schritt und eine MIDInote aufwärts 
+  1^1bb transponiert um einen schritt und zwei MIDInoten abwärts 
+  1^2#3 transponiert um einen schritt und drei MIDInoten aufwärts
+  1#3 transponiert um drei MIDInoten aufwärts
+  1b3 transponiert um drei MIDInoten abwärts
 
 ## Komplexeres
 - tuning
 - timbres
 - Ducking?
+
+
+
+
+
+
+
+
+
 
 # erledigt
 

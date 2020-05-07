@@ -6,7 +6,9 @@ import (
 	"sort"
 
 	"gitlab.com/gomidi/midi"
-	"gitlab.com/gomidi/midi/mid"
+	"gitlab.com/gomidi/midi/reader"
+
+	//"gitlab.com/gomidi/midi/writer"
 	"gitlab.com/gomidi/midi/midimessage/channel"
 	"gitlab.com/gomidi/midi/midimessage/meta"
 	"gitlab.com/gomidi/midi/smf"
@@ -18,7 +20,7 @@ import (
 
 type Importer struct {
 	score        *score.Score
-	rd           *mid.Reader
+	rd           *reader.Reader
 	src          io.Reader
 	cols         map[colsKey][]positionedMsg // key: trackno and midi channel
 	tracknames   map[int16]string
@@ -31,16 +33,17 @@ type Importer struct {
 	lastTick     uint64
 }
 
-func New(fname string, src io.Reader, opts ...mid.ReaderOption) *Importer {
-	opts = append(opts, mid.NoLogger())
-	return &Importer{
-		rd:           mid.NewReader(opts...),
+func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
+	im := &Importer{
 		src:          src,
 		score:        score.New(fname, nil),
 		cols:         map[colsKey][]positionedMsg{}, // key: trackno and midi channel
 		tracknames:   map[int16]string{},
 		trackMetaMsg: map[int16][]positionedMsg{},
 	}
+	opts = append(opts, reader.NoLogger(), reader.Each(im.registerMsg))
+	im.rd = reader.New(opts...)
+	return im
 }
 
 func (c *Importer) WriteMsklTo(wr io.Writer) error {
@@ -57,9 +60,8 @@ func (c *Importer) WriteMsklTo(wr io.Writer) error {
 }
 
 func (c *Importer) readSMF() error {
-	c.rd.Msg.Each = c.registerMsg
 	innerrd := smfreader.New(c.src)
-	err := c.rd.ReadSMFFrom(innerrd)
+	err := reader.ReadSMFFrom(c.rd, innerrd)
 	if err != nil {
 		return fmt.Errorf("could not read smf: %v", err)
 	}
@@ -263,7 +265,7 @@ func (c *Importer) setTracks() {
 
 }
 
-func (c *Importer) registerMsg(pos *mid.Position, msg midi.Message) {
+func (c *Importer) registerMsg(pos *reader.Position, msg midi.Message) {
 	if pos.AbsoluteTicks > c.lastTick {
 		c.lastTick = pos.AbsoluteTicks
 	}
