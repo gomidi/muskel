@@ -16,7 +16,7 @@ func TestInclude(t *testing.T) {
 	}{
 		{ // 0
 			`
-$$include("drumnote")
+'drumnote
 
 TRACK | Voc | Drums | Piano |
 
@@ -38,8 +38,8 @@ TRACK | Voc | Drums | Piano |
 		},
 		{ // 1
 			`
-$$include("testdata/includes/header")
-$$include("drumnote")
+'testdata/includes/header
+'drumnote
 
 =hu |a|
 #
@@ -67,8 +67,8 @@ TRACK | Voc | Drums | Piano |
 		},
 		{ // 2
 			`
-$$include("testdata/includes/header")
-$$include("drumnote")
+'testdata/includes/header
+'drumnote
 
 =rhythm |a|
 #
@@ -104,8 +104,8 @@ TRACK | Voc | Drums | Piano |
 		},
 		{ // 3
 			`
-$$include("testdata/includes/header")
-$$include("drumnote")
+'testdata/includes/header
+'drumnote
 
 =rhythm |a|
 #
@@ -1435,7 +1435,7 @@ TRACK | x |
 		},
 		{ // 42
 			`
-$$include("drumnote")
+'drumnote
 
 =rhythm |a|
 #
@@ -1471,7 +1471,7 @@ TRACK | Drums |
 		},
 		{ // 43
 			`
-$$include("drumnote")
+'drumnote
 
 =rhythm |a|
 #
@@ -1507,7 +1507,7 @@ TRACK | Drums |
 		},
 		{ // 44
 			`
-$$include("drumnote")
+'drumnote
 
 =rhythm |a|
 #
@@ -1543,7 +1543,7 @@ TRACK | Drums |
 		},
 		{ // 45
 			`
-$$include("drumnote")
+'drumnote
 
 =rhythm |a|
 #
@@ -1579,7 +1579,7 @@ TRACK | Drums |
 		},
 		{ // 46
 			`
-$$include("drumnote")
+'drumnote
 
 =rhythm |a|
 #
@@ -1715,7 +1715,7 @@ TRACK   | Vocals |
 		{ // 51
 			`
       
-$$include("testdata/includes/lyrics")
+'testdata/includes/lyrics
 
 =melody | Verse1 |
  #
@@ -1882,8 +1882,8 @@ TRACK | Voc | Piano |
 			`
 TRACK | drums |
 
-$$include("drumnote")
-$$include("testdata/includes/score3")
+'drumnote
+'testdata/includes/score3
 
 =SCORE   | drums |
 #
@@ -1901,11 +1901,11 @@ $$include("testdata/includes/score3")
 			`
 TRACK | drums |
 
-$$include("drumnote")
+'drumnote
 
 $$embed(".drums.*")
 
-$$include("testdata/includes/score3")
+'testdata/includes/score3
 
 =SCORE   | drums |
 #
@@ -2528,7 +2528,7 @@ X         | a" | b"' |
 		},
 		{ // 81
 			`
-$$include(drumnote)
+'drumnote
 			
 TRACK  | dr |
 
@@ -3196,6 +3196,45 @@ TRACK    | piano |
     1                    | g'    |
 `,
 		},
+		{ // 103
+			`
+'drumnote.drums
+
+TRACK | Voc | Drums | Piano |
+
+=SCORE | Voc | Drums | Piano |
+#
+1  | a"  | .drums.kd    | b"    |
+2& | c   | .drums.sn    | d     |
+#
+1  |     | .drums.ho    |       |
+`,
+			`
+=SCORE                   | Drums   | Piano | Voc |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: | b"    | a"  |
+    2&                   | MN40::: | d     | c   |
+ #
+    1                    | MN46::: |       |     |
+`,
+		},
+		{ // 104
+			`
+'testdata/includes/score3=template
+
+TRACK | Drums |
+
+=SCORE | Drums |
+#
+1  |  =template(MN36:::,MN40:::)    | 
+`,
+			`
+=SCORE                   | Drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+    2                    | MN40::: |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -3324,68 +3363,68 @@ func TestInclude2(t *testing.T) {
 	}{
 		{ // 0
 			`
-$$include("drumnote")
+'drumnote
 
 TRACK | Voc | Drums | Piano |
 
 =SCORE | Voc | Drums | Piano |
 #
-1      | a"  | drums.kd    | b"    |
-2&     | c   | drums.sn    | d     |
+1      | a"  | .drums.kd    | b"    |
+2&     | c   | .drums.sn    | d     |
 #
-1      |     | drums.ho    |       |
+1      |     | .drums.ho    |       |
 `,
 			`
-$$include("drumnote")
+'drumnote
 
 TRACK    | Voc | Drums | Piano |
 
-=SCORE   | Voc | Drums    | Piano |
+=SCORE   | Voc | Drums     | Piano |
  #
-    1    | a"  | drums.kd | b"    |
-    2&   | c   | drums.sn | d     |
+    1    | a"  | .drums.kd | b"    |
+    2&   | c   | .drums.sn | d     |
  #
-    1    |     | drums.ho |       |
+    1    |     | .drums.ho |       |
 
 `,
 		},
 		{ // 1
 			`
-$$include("testdata/includes/header")
-$$include("drumnote")
+'testdata/includes/header
+'drumnote
 
 =hu | a        |
 #
-1   | drums.sn |
-2   | drums.kd |
+1   | .drums.sn |
+2   | .drums.kd |
 
 TRACK | Voc | Drums | Piano |
 
 =SCORE   | Voc | Drums | Piano |
 #
- 1       | a"  | drums.kd    | b"    |
- 2&      | c   | drums.sn    | d     |
+ 1       | a"  | .drums.kd    | b"    |
+ 2&      | c   | .drums.sn    | d     |
 #
  1       |     | =hu.a       |       |
 
 `,
 			`
-$$include("testdata/includes/header")
-$$include("drumnote")
+'testdata/includes/header
+'drumnote
 
-=hu      | a        |
+=hu      | a         |
  #
-    1    | drums.sn |
-    2    | drums.kd |
+    1    | .drums.sn |
+    2    | .drums.kd |
 
 TRACK    | Voc | Drums | Piano |
 
-=SCORE   | Voc | Drums    | Piano |
+=SCORE   | Voc | Drums     | Piano |
  #
-    1    | a"  | drums.kd | b"    |
-    2&   | c   | drums.sn | d     |
+    1    | a"  | .drums.kd | b"    |
+    2&   | c   | .drums.sn | d     |
  #
-    1    |     | =hu.a    |       |
+    1    |     | =hu.a     |       |
 
 `,
 		},
@@ -3440,6 +3479,62 @@ TRACK    | Voc | Drums | Piano |
  $$include("testdata/includes/score")
  #
     1    | d   |       |       |
+`,
+		},
+		{ // 4
+			`
+'drumnote.drums
+
+TRACK | Voc | Drums | Piano |
+
+=SCORE | Voc | Drums | Piano |
+#
+1      | a"  | .drums.kd    | b"    |
+2&     | c   | .drums.sn    | d     |
+#
+1      |     | .drums.ho    |       |
+`,
+			`
+'drumnote.drums
+
+TRACK    | Voc | Drums | Piano |
+
+=SCORE   | Voc | Drums     | Piano |
+ #
+    1    | a"  | .drums.kd | b"    |
+    2&   | c   | .drums.sn | d     |
+ #
+    1    |     | .drums.ho |       |
+
+`,
+		},
+		{ // 5
+			`
+'testdata/includes/score3=template
+'drumnote.drums
+
+TRACK | Voc | Drums | Piano |
+
+=SCORE | Voc | Drums | Piano |
+#
+1      | a"  | .drums.kd    | b"    |
+2&     | c   | .drums.sn    | d     |
+#
+1      |     | .drums.ho    |       |
+`,
+			`
+'testdata/includes/score3=template
+'drumnote.drums
+
+TRACK    | Voc | Drums | Piano |
+
+=SCORE   | Voc | Drums     | Piano |
+ #
+    1    | a"  | .drums.kd | b"    |
+    2&   | c   | .drums.sn | d     |
+ #
+    1    |     | .drums.ho |       |
+
 `,
 		},
 	}

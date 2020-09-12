@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"gitlab.com/gomidi/muskel/reference"
 	"gitlab.com/gomidi/muskel/table"
 )
 
@@ -67,7 +68,8 @@ func (e EmptyLine) WriteTo(f table.Formatter) error {
 	return f.WriteLine("")
 }
 
-var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$$") + "include")
+//var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$$") + "include")
+var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("'"))
 
 type Include struct {
 	lineNo int
@@ -85,45 +87,67 @@ func (i *Include) LineNo() int {
 }
 
 func (i *Include) ParseLine(line string) error {
-	idx := strings.Index(line, "(")
-	if idx < 3 {
+	//reference.NewFileCtx(i.score.)
+	//var _ = reference.NewFileCtx
+	r, err := reference.Parse(line)
+	if err != nil {
 		return fmt.Errorf("invalid include line: %q", line)
 	}
 
-	args := strings.Split(strings.TrimSpace(strings.TrimRight(line[idx+1:], ")")), ",")
+	i.file = r.File
+	i.part = r.Table
 
-	switch len(args) {
-	case 1:
-		i.include.file = strings.Trim(strings.TrimSpace(args[0]), `"`)
-		i.score.AddInclude(i.include.file, i.include.part, nil)
-		return i.score.Include(i.include.file, i.include.part, nil)
-	case 2:
-		i.include.part = strings.Trim(strings.TrimSpace(args[0]), `"`)
-		i.include.file = strings.Trim(strings.TrimSpace(args[1]), `"`)
-		i.score.AddInclude(i.include.file, i.include.part, nil)
-		return i.score.Include(i.include.file, i.include.part, nil)
-	default:
-		//return fmt.Errorf("invalid include line: %q", line)
-		var params []string
-		i.include.part = strings.Trim(strings.TrimSpace(args[0]), `"`)
-		i.include.file = strings.Trim(strings.TrimSpace(args[1]), `"`)
-		for i := 2; i < len(args); i++ {
-			params = append(params, strings.Trim(strings.TrimSpace(args[i]), `"`))
+	i.score.AddInclude(i.include.file, i.include.part, nil)
+	return i.score.Include(i.include.file, i.include.part, nil)
+
+	/*
+		idx := strings.Index(line, "(")
+		if idx < 3 {
+			return fmt.Errorf("invalid include line: %q", line)
 		}
-		i.score.AddInclude(i.include.file, i.include.part, params)
-		return i.score.Include(i.include.file, i.include.part, params)
-	}
+
+		args := strings.Split(strings.TrimSpace(strings.TrimRight(line[idx+1:], ")")), ",")
+
+		switch len(args) {
+		case 1:
+			i.include.file = strings.Trim(strings.TrimSpace(args[0]), `"`)
+			i.score.AddInclude(i.include.file, i.include.part, nil)
+			return i.score.Include(i.include.file, i.include.part, nil)
+		case 2:
+			i.include.part = strings.Trim(strings.TrimSpace(args[0]), `"`)
+			i.include.file = strings.Trim(strings.TrimSpace(args[1]), `"`)
+			i.score.AddInclude(i.include.file, i.include.part, nil)
+			return i.score.Include(i.include.file, i.include.part, nil)
+		default:
+			//return fmt.Errorf("invalid include line: %q", line)
+			var params []string
+			i.include.part = strings.Trim(strings.TrimSpace(args[0]), `"`)
+			i.include.file = strings.Trim(strings.TrimSpace(args[1]), `"`)
+			for i := 2; i < len(args); i++ {
+				params = append(params, strings.Trim(strings.TrimSpace(args[i]), `"`))
+			}
+			i.score.AddInclude(i.include.file, i.include.part, params)
+			return i.score.Include(i.include.file, i.include.part, params)
+		}
+	*/
+
 }
 
 func (i *Include) WriteTo(f table.Formatter) error {
-	var line string
-	switch i.include.part {
-	case "":
-		line = fmt.Sprintf("$$include(%q)", i.include.file)
-	default:
-		line = fmt.Sprintf("$$include(%q,%q)", i.include.part, i.include.file)
-	}
-	return f.WriteLine(line)
+	/*
+		var line string
+		switch i.include.part {
+		case "":
+			line = fmt.Sprintf("$$include(%q)", i.include.file)
+		default:
+			line = fmt.Sprintf("$$include(%q,%q)", i.include.part, i.include.file)
+		}
+		return f.WriteLine(line)
+	*/
+	var r reference.Reference
+	r.File = i.include.file
+	r.Table = i.include.part
+	return f.WriteLine(r.String())
 }
 
 var embedRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$$") + "embed")

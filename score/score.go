@@ -152,22 +152,32 @@ func (sc *Score) Lyric(part string, fromLine, toLine int) (tokens []string, err 
 	return
 }
 
-func (sc *Score) AddInclude(filepath string, sketch string, params []string) error {
-	//fmt.Printf("AddInclude %q %q\n", filepath, part)
+func (sc *Score) AddInclude(filepath string, tableName string, params []string) error {
+	//fmt.Printf("AddInclude %q %q\n", filepath, tableName)
 	fname, err := sc.findInclude(filepath)
 	if err != nil {
 		return fmt.Errorf("can't find include %q", filepath)
 	}
 
+	var isToken bool
+
+	if len(tableName) > 0 && tableName[0] == '.' {
+		isToken = true
+	}
+
 	sco, has := sc.includedScores[fname]
 	if !has {
-		err := sc.Include(fname, sketch, params)
+		var inc string
+		if !isToken {
+			inc = tableName
+		}
+		err := sc.Include(fname, inc, params)
 		if err != nil {
 			return fmt.Errorf("can't include %q, reason: %s", filepath, err.Error())
 		}
 		sco = sc.includedScores[fname]
 	}
-	if sketch == "" {
+	if tableName == "" {
 		for k, v := range sco.tokens {
 			sc.tokens[k] = v
 		}
@@ -183,29 +193,37 @@ func (sc *Score) AddInclude(filepath string, sketch string, params []string) err
 		}
 
 		return nil
+	} else {
+		if isToken {
+			for k, v := range sco.tokens {
+				if strings.HasPrefix(k, tableName) {
+					sc.tokens[k] = v
+				}
+			}
+		}
 	}
 
-	switch sketch[0] {
+	switch tableName[0] {
 	case '=':
-		sk, err := sco.GetSketch(sketch)
+		sk, err := sco.GetSketch(tableName)
 		if err != nil {
-			return fmt.Errorf("can't find sketch %q in include %q, reason: %s", sketch, filepath, err.Error())
+			return fmt.Errorf("can't find sketch %q in include %q, reason: %s", tableName, filepath, err.Error())
 		}
-		sc.Sketches[sketch] = sk
+		sc.Sketches[tableName] = sk
 		return nil
 	case '@':
-		ly, has := sco.lyrics[sketch]
+		ly, has := sco.lyrics[tableName]
 		if !has {
-			return fmt.Errorf("can't find lyrics %q in include %q", sketch, filepath)
+			return fmt.Errorf("can't find lyrics %q in include %q", tableName, filepath)
 		}
-		sc.lyrics[sketch] = ly
+		sc.lyrics[tableName] = ly
 		return nil
 	default:
-		sh, err := sco.GetToken(sketch)
+		sh, err := sco.GetToken(tableName)
 		if err != nil {
-			return fmt.Errorf("can't find token %q in include %q", sketch, filepath)
+			return fmt.Errorf("can't find token %q in include %q", tableName, filepath)
 		}
-		sc.tokens[sketch] = sh
+		sc.tokens[tableName] = sh
 		return nil
 	}
 

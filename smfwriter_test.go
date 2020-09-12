@@ -2898,7 +2898,7 @@ TRACK   | Vocals |
 		{
 			// 104
 			`
-$$include("cc")
+'cc
 
 TRACK   | Vocals | 
  Channel| 1      |      
@@ -3463,7 +3463,7 @@ Ch      |1|
 		{
 			// 119
 			`
-$$include(drumnote)
+'drumnote
 			
 TRACK  | dr |
 Ch     | 1  |
