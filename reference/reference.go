@@ -133,37 +133,33 @@ func IsReference(str string) bool {
 	return err == nil
 }
 
-func NewFileCtx(file, dir string) Reference {
+func NewFileCtx(file string) Reference {
 	return Reference{
 		File: file,
-		Dir:  dir,
 		Type: FileCtx,
 	}
 }
 
-func NewShortCutCtx(file, dir, table string) Reference {
+func NewShortCutCtx(file, table string) Reference {
 	return Reference{
 		File:  file,
-		Dir:   dir,
 		Table: table,
 		Type:  ShortCutCtx,
 	}
 }
 
-func NewScoreColCtx(file, dir, table, col string) Reference {
+func NewScoreColCtx(file, table, col string) Reference {
 	return Reference{
 		File:  file,
-		Dir:   dir,
 		Table: table,
 		Type:  ScoreColCtx,
 		Col:   col,
 	}
 }
 
-func NewScoreCtx(file, dir, table string) Reference {
+func NewScoreCtx(file, table string) Reference {
 	return Reference{
 		File:  file,
-		Dir:   dir,
 		Table: table,
 		Type:  ScoreCtx,
 	}
@@ -501,7 +497,6 @@ func (r *Reference) parseShortCutCtx() error {
 type Reference struct {
 	Type
 	File  string
-	Dir   string
 	Table string
 	Row   string // empty for score tables
 	Col   string
@@ -732,18 +727,18 @@ func (r Reference) IsComplete() bool {
 			return false
 		}
 	case FileCtx:
-		if r.File == "" || r.Dir == "" {
+		if r.File == "" {
 			return false
 		}
 	case ScoreCtx:
-		if r.File == "" || r.Dir == "" {
+		if r.File == "" {
 			return false
 		}
 		if r.Table == "" {
 			return false
 		}
 	case ScoreColCtx:
-		if r.File == "" || r.Dir == "" {
+		if r.File == "" {
 			return false
 		}
 		if r.Table == "" {
@@ -753,7 +748,7 @@ func (r Reference) IsComplete() bool {
 			return false
 		}
 	case ShortCutCtx:
-		if r.File == "" || r.Dir == "" {
+		if r.File == "" {
 			return false
 		}
 		if r.Table == "" {

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"gitlab.com/gomidi/muskel/items"
+	"gitlab.com/gomidi/muskel/reference"
 	"gitlab.com/gomidi/muskel/track"
 )
 
@@ -280,20 +281,55 @@ func (p *Sketch) parseBarLine(data string) error {
 		return nil
 	}
 
+	if reference.IsReference(data) {
+		//fmt.Printf("is reference %q\n", data)
+		r, err := reference.Parse(data)
+		if err != nil {
+			return fmt.Errorf("can't parse reference: %q: %s", data, err.Error())
+		}
+
+		ctx := reference.NewScoreCtx(p.File, p.Name)
+
+		err = r.Complete(ctx)
+
+		if err != nil {
+			return fmt.Errorf("can't complete reference: %q: %s", data, err.Error())
+		}
+
+		p.barChangeRequired = true
+
+		switch r.Type {
+		case reference.ScorePart:
+			// its a jump
+			if p.currentBarNo == -1 {
+				return fmt.Errorf("can't start with a jump: we need bars and parts first")
+			}
+			// TODO handle jumps from included files
+			return p.handleJump(data)
+		case reference.Score:
+			return p.parseInclude(r, data)
+		default:
+			return fmt.Errorf("invalid reference type %s in score context: %q", r.Type.String(), data)
+		}
+
+	}
+
 	if data[0] == '$' {
 		p.barChangeRequired = true
 		return p.parseCommandLF(data)
 	}
 
 	// its a jump
-	if data[0] == '[' {
-		p.barChangeRequired = true
-		if p.currentBarNo == -1 {
-			return fmt.Errorf("can't start with a jump: we need bars and parts first")
-		}
-		return p.handleJump(data)
+	/*
+		if data[0] == '[' {
+			p.barChangeRequired = true
+			if p.currentBarNo == -1 {
+				return fmt.Errorf("can't start with a jump: we need bars and parts first")
+			}
+			return p.handleJump(data)
 
-	}
+		}
+	*/
 
 	if data[0] == '*' {
 		p.barChangeRequired = true
@@ -760,6 +796,28 @@ func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts 
 	return
 }
 
+// in fact is reference parsing
+func (p *Sketch) parseInclude(r *reference.Reference, data string) error {
+	p.barChangeRequired = true
+
+	var inc items.Include
+	inc.File = r.File
+	inc.Sketch = r.Table
+
+	sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
+	if err != nil {
+		return fmt.Errorf("can't find sketch table %q in include %q: %s", inc.Sketch, inc.File, err.Error())
+	}
+
+	inc.Length32ths = sk.projectedBarEnd
+	end := p.projectedBarEnd
+	b := items.NewBar() //score.NewBar()
+	b.Include = &inc
+	p.newBar(b)
+	p.projectedBarEnd = end + uint(inc.Length32ths)
+	return nil
+}
+
 func (p *Sketch) parseCommandLF(data string) error {
 	p.barChangeRequired = true
 	var c items.Command
@@ -773,27 +831,29 @@ func (p *Sketch) parseCommandLF(data string) error {
 		if err != nil {
 			return err
 		}
-	case "$include":
-		it, err := items.Parse(data, 0)
-		if err != nil {
-			return fmt.Errorf("can't parse include: $%q", data)
-		}
+		/*
+			case "$include":
+				it, err := items.Parse(data, 0)
+				if err != nil {
+					return fmt.Errorf("can't parse include: $%q", data)
+				}
 
-		if inc, isInc := it.(items.Include); isInc {
-			sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
-			if err != nil {
-				return fmt.Errorf("can't find sketch table %q in include %q: %s", inc.Sketch, inc.File, err.Error())
-			}
+				if inc, isInc := it.(items.Include); isInc {
+					sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
+					if err != nil {
+						return fmt.Errorf("can't find sketch table %q in include %q: %s", inc.Sketch, inc.File, err.Error())
+					}
 
-			inc.Length32ths = sk.projectedBarEnd
-			end := p.projectedBarEnd
-			b := items.NewBar() //score.NewBar()
-			b.Include = &inc
-			p.newBar(b)
-			p.projectedBarEnd = end + uint(inc.Length32ths)
-		} else {
-			return fmt.Errorf("not a proper include: $%q", data)
-		}
+					inc.Length32ths = sk.projectedBarEnd
+					end := p.projectedBarEnd
+					b := items.NewBar() //score.NewBar()
+					b.Include = &inc
+					p.newBar(b)
+					p.projectedBarEnd = end + uint(inc.Length32ths)
+				} else {
+					return fmt.Errorf("not a proper include: $%q", data)
+				}
+		*/
 		return nil
 	default:
 	}

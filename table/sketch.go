@@ -69,7 +69,7 @@ func formatPosition(pos string) string {
 func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 	var s strings.Builder
 
-	if len(line[0]) > 0 && (line[0][0] == '#' || line[0][0] == '$' || line[0][0] == '[' || line[0][0] == '*') {
+	if len(line[0]) > 0 && (line[0][0] == '#' || line[0][0] == '\'' || line[0][0] == '=' || line[0][0] == '[' || line[0][0] == '*') {
 		var first, last string
 		first = " " + line[0]
 		if idx := strings.Index(line[0], "##"); idx > 0 {

@@ -148,7 +148,7 @@ TRACK | Voc | Drums | Piano |
 # 3/4
 1        | a"  | d    | b"    |
 2&       | c   |      | d     |
-$$include("testdata/includes/score")
+'testdata/includes/score
 #
 1        | d   |      |       | B
 `,
@@ -169,7 +169,7 @@ $$include("testdata/includes/score")
 TRACK | Voc | Drums | Piano |
 
 =SCORE  | Voc | Drums | Piano |
-$$include("testdata/includes/score")
+'testdata/includes/score
 #
 1       | d   |       |       | B
 `,
@@ -187,8 +187,8 @@ $$include("testdata/includes/score")
 TRACK | Voc | Drums | Piano |
 
 =SCORE | Voc | Drums   | Piano |
-$$include("testdata/includes/score")
-$$include("testdata/includes/score")
+'testdata/includes/score
+'testdata/includes/score
 `,
 			`
 =SCORE                   | Drums | Piano | Voc |
@@ -208,8 +208,8 @@ TRACK | Voc | Drums | Piano |
 # 4/4
 1        | a"  | d    | b"    |
 2&       | c   |      | d     |
-$$include("testdata/includes/score")
-$$include("testdata/includes/score")
+'testdata/includes/score
+'testdata/includes/score
 #
 1        | d   |      |       | B
 
@@ -1747,7 +1747,7 @@ TRACK   | Voc    | Piano | Drums |
  # 4/4 @100
   1    | (a "Hi-") |       |       |
   2    | (c "ho")  |       |       |
-$$include("testdata/includes/score2")
+'testdata/includes/score2
 `,
 			`
 =SCORE                    | Drums | Piano | Voc       |
@@ -1766,7 +1766,7 @@ $$include("testdata/includes/score2")
 TRACK | Voc | Drums | Piano |
 
 =SCORE   | Voc | Drums   | Piano |
-$$include("testdata/includes/score2")
+'testdata/includes/score2
 #
 1        | d   |      |     B  |
 
@@ -1788,7 +1788,7 @@ $$include("testdata/includes/score2")
 TRACK | Voc | Piano |
 
 =SCORE   | Voc | Piano |
-$$include("testdata/includes/score3")
+'testdata/includes/score3
 #
 1        | d   |      |    
 
@@ -1818,7 +1818,7 @@ TRACK | Voc | Piano |
 =SCORE   | Voc | Piano |
 # \minor^c
 1        | 1  | 2    |
-$$include("testdata/includes/score3", "=something")
+'testdata/includes/score3=something
 #
 1        | 1   |  2    |    
 
@@ -1840,7 +1840,7 @@ TRACK | Voc | Piano |
 =SCORE   | Voc | Piano |
 # \minor^c
 1        | 1  | 2    |
-$$include("testdata/includes/score3", "=something2")
+'testdata/includes/score3=something2
 #
 1        | 1   |  2    |    
 
@@ -3436,7 +3436,7 @@ TRACK | Voc | Drums | Piano |
 # 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
-$$include("testdata/includes/score")
+'testdata/includes/score
 #
 1  | d   |      |       |
 
@@ -3448,7 +3448,7 @@ TRACK    | Voc | Drums | Piano |
  # 4/4
     1    | a"  | d     | b"    |
     2&   | c   |       | d     |
- $$include("testdata/includes/score")
+ 'testdata/includes/score
  #
     1    | d   |       |       |
 
@@ -3462,8 +3462,8 @@ TRACK | Voc | Drums | Piano |
 # 4/4
 1  | a"  | d    | b"    |
 2& | c   |      | d     |
-$$include("testdata/includes/score")
-$$include("testdata/includes/score")
+'testdata/includes/score
+'testdata/includes/score
 #
 1  | d   |      |       |
 
@@ -3475,8 +3475,8 @@ TRACK    | Voc | Drums | Piano |
  # 4/4
     1    | a"  | d     | b"    |
     2&   | c   |       | d     |
- $$include("testdata/includes/score")
- $$include("testdata/includes/score")
+ 'testdata/includes/score
+ 'testdata/includes/score
  #
     1    | d   |       |       |
 `,

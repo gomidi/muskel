@@ -71,7 +71,13 @@ func (t *Table) CalcColWidths() error {
 		for i, c := range line {
 			if i == 0 && len(line) == 1 && len(line[0]) > 0 {
 				switch line[0][0] {
-				case '$':
+				//case '$':
+				//	continue
+				case '\'':
+					continue
+				case '=':
+					continue
+				case '[':
 					continue
 				case '*':
 					continue
