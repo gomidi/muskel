@@ -682,7 +682,7 @@ func run() error {
 				fmt.Fprintf(os.Stderr, "this is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
 					"points to version "+v.String()+
 					"\ntherefor the "+name+" binary will be called. If you don't want this behavior or have no such file, "+
-					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"or pass the --current option")
+					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\n or pass the --current option\n\n")
 
 				cmd := runVersionated(name, os.Args)
 				cmd.Dir, _ = os.Getwd()
@@ -690,10 +690,10 @@ func run() error {
 				var out []byte
 				out, err = cmd.CombinedOutput()
 				if err != nil {
-					fmt.Fprintln(os.Stderr, out)
+					fmt.Fprintln(os.Stderr, string(out))
 					os.Exit(1)
 				}
-				fmt.Fprintln(os.Stdout, out)
+				fmt.Fprintln(os.Stdout, string(out))
 				os.Exit(0)
 			}
 		}
