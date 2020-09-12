@@ -690,7 +690,11 @@ func run() error {
 				var out []byte
 				out, err = cmd.CombinedOutput()
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "%T Error when calling %q:\n%s\n", err, name, string(out))
+					if _, notExeced := err.(*exec.Error); notExeced {
+						fmt.Fprintf(os.Stderr, "Error: could not run/find %q binary\n", name)
+						os.Exit(1)
+					}
+					fmt.Fprintln(os.Stderr, string(out))
 					os.Exit(1)
 				}
 				fmt.Fprintln(os.Stdout, string(out))
