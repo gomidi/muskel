@@ -1,4 +1,6 @@
-# Aufbau eines MuSkel Sketches
+# Grundlagen
+
+## Aufbau eines MuSkel Sketches
 
 Die `MuSkel`-Sprache erlaubt es, eine oder mehrere musikalische "Notizen" (engl. sketches) anzufertigen
 und zu einem Musikstück zu kombinieren.
@@ -79,7 +81,7 @@ Kanals aber auf mehrere Spuren verteilen, indem Sie den Spuren den gleichen Kana
 Im Folgenden lassen wir wegen der Lesbarkeit die erforderliche `TRACK`Tabelle weg, es sei denn, sie wird gerade
 besprochen.
 
-# Noten und Takte
+## Noten und Takte
 
 So ohne `Ereignisse` ist es noch nicht wirklich spannend, also lassen wir etwas passieren:
 
@@ -129,7 +131,7 @@ Das bedeutet auch, dass die Spalten "schief" sein können:
 
 Dies ist zwar nicht besonders leserlich, aber valide und kann, wenn wenig Zeit vorhanden ist, hilfreich sein. Verwendet man `MuSkel` am Computer, so kann man mit dem Programm `muskel` die Datei beobachten lassen, so dass das Programm die Spalten automatisch sauber anordnet, wenn man Änderungen speichert. In Verbindung mit einem Editor, der automatisch geänderte Dateien neu laden kann (z.B. `Vim`, `Sublime Text`), kann man somit sehr komfortabel arbeiten, da man sich nicht um die Spaltenanordnung kümmern muss.
 
-# Dauer der Töne und Monophonie einer Spur
+## Dauer der Töne und Monophonie einer Spur
 
 Wir erkennen nun die Startpunkte der Töne, aber wie definieren wir die Dauer einer Note? Eine Besonderheit von `MuSkel` ist, dass alle Spuren zunächst *einstimmig* (monophon) sind (zur Ausnahme kommen wir später), d.h. es erklingt pro `Spur` immer nur ein Ton zur gleichen Zeit und dieser endet, wenn der nächste Ton erklingt. Also so ähnlich, wie bei der menschlichen Stimme, oder bei Blasinstrumenten.
 
@@ -173,7 +175,7 @@ Wollen wir, dass schon der erste Takt ein `3/4`-Takt wird, so schreiben wir:
        1 |g    |
 ```
 
-# Noten und Oktavlage
+## Noten und Oktavlage
 
 Nun gibt es einige `c` in verschiedenen Oktaven. Das beschriebene `c` ist das sogenannte "kleine c" (MIDI-Note ...)
 Aufwärts kann man durch Verwenden von Hochkommata oktavieren. Es ergeben sich
@@ -202,7 +204,7 @@ usw.
 
 Die `Standardstimmung` ist die `gleichschwebende Stimmung`. Daher gilt `cis`= `des` usw. Abweichende Stimmungen können aber definiert werden.
 
-# Zeitpositionen im Takt
+## Zeitpositionen im Takt
 
 Für die Zeitpositionen im Takt gibt es auch noch feinere Aufteilungen, als die Schläge (Viertel) im Takt. Teilen wir einen Schlag (Viertel), so bekommen wir zwei Achtel. Diese werden mit "und" gezählt und mit `&` geschrieben:
 
@@ -290,8 +292,8 @@ Damit lässt sich der obere `sketch`auch so schreiben:
     2.875 |e'   |
 ```
 
-    
-# Stakkato
+
+## Stakkato
 
 Will man kurze Stakkato-Noten schreiben, kann es schnell unübersichtlich werden, z.B.:
 
@@ -334,7 +336,7 @@ Dafür gibt es eine spezielle Notation, die die Noten auf 64tel verkürzt und da
 Im obigen Beispiel wäre jedes `d'` eine 64tel, da die Note mit drei Doppelpunkten `:::` endet.
 Bei zwei Doppelpunkten `::` wäre es eine 32tel und bei einem Doppelpunkt `:` eine 16tel.
 
-# Überbindungen
+## Überbindungen
 
 Eine Note dauert bis die nächste Note oder eine Pause (Stille) notiert ist, **auch über Taktwechsel hinweg**:
 
@@ -374,7 +376,7 @@ Wollen wir die letzte Note wiederholen, so verwenden wir das isolierte Prozentze
     4&  |%    |
 ```
 
-# Anschlagsstärke (Dynamik)
+## Anschlagsstärke (Dynamik)
 
 Die `Dynamik` (Anschlagsstärke, laut-leise) wird durch nachgestellte `+` und `-`-Zeichen angezeigt:
 
@@ -406,7 +408,7 @@ Die `Dynamik` (Anschlagsstärke, laut-leise) wird durch nachgestellte `+` und `-
 
 In diesem Beispiel haben die Noten `c`, `e`, `d#'` und `f#` die Anschlagsstärke *normal*, `d` ist *etwas laut* und `f,`g und `a` sind *leise*.
 
-# Polyphonie
+## Polyphonie
 
 Wollen wir mehrere Töne gleichzeitig erklingen lassen, so benötigen wir mehrere `Spuren` - selbst, wenn das Instrument das gleiche ist, z.B.
 
@@ -457,7 +459,7 @@ Um eine Note zu beenden, wird der Unterstrich vor die Note gesetzt. Jede auf die
     4   |*     |      |
     4&  |_c    |_d'   |
 ```
- 
+
 Hier erklingen in Spur `piano2` ab Position `2& c'` und `d'` gleichzeitig, bis `c'` auf `3&` beendet wird und nur noch `d'` erklingt bis `4&`. In Spur `piano1` sind die *monophone* und die *polyphone* Schreibweise kombiniert: `c` erklingt von `1` bis `4&`, während `d` von `2` bis `3` klingt und `e` bis `4`.
 
 Beide Schreibweisen können auch in "Akkordschreibweise" kombiniert werden:
@@ -478,7 +480,7 @@ zum nächsten Akkord auf `4` klingen (obwohl dieser "Akkord" nur aus dem Notenen
 alles hindurch von `1` bis `4`.
 
 
-# Gesangstexte
+## Gesangstexte
 
 Bisher haben wir als `Ereignisse` nur Töne kennengelernt. Wollen wir jedoch Gesang notieren, 
 so brauchen wir zusätzlich die Möglichkeit, Text den Tönen zuzuordnen. `Text` ist ein weiterer 
@@ -527,7 +529,7 @@ Channel | 1           | 1            |
 
 Man kann die Texte auch in eine separate Tabelle schreiben und mit den Noten verbinden.
 
-# Kommentare
+## Kommentare
 
 Während des Notierens und Komponierens kommt immer mal wieder die Situation auf, dass man Ideen 
 ausprobiert und verwirft oder manchmal noch nicht genau weiß, ob man sie verwerfen will, oder sich 
@@ -598,7 +600,7 @@ Hier ist der Bereich von Schlag 2 des ersten Taktes bis Schlag 4 des nächsten T
 
 Kommentare können selbstverständlich auch im Kopfbereich verwendet werden.
 
-# Eigenschaften eines Stücks im Kopfbereich
+## Eigenschaften eines Stücks im Kopfbereich
 
 Zuletzt schauen wir uns an, wie Eigenschaften des Stückes im Kopfbereich notiert werden. Die Syntax ist sehr einfach: Je Eigenschaften wir eine neue Zeile benötigt, die mit einem `@` anfängt, gefolgt von dem Namen der Eigenschaften, gefolgt von einem Doppelpunkt `:`. Nach dem Doppelpunkt
 folgt der Wert der Eigenschaft. Hier ein Beispiel:

@@ -10,5 +10,7 @@ gitlab.com/gomidi/midi v1.15.3 h1:PSgwBOnB+8cY2IeMaBL3gKfehGt4q9B3vc70ISHJvvs=
 gitlab.com/gomidi/midi v1.15.3/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
 gitlab.com/gomidi/midi v1.16.4 h1:Cl2HrJh+ww7ivNlxyKbhEI7q3j9nqv7y/FF+8KFwz3s=
 gitlab.com/gomidi/midi v1.16.4/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
+gitlab.com/gomidi/midi v1.17.0 h1:ZdoiMv4SrzJffwcAohDSk4TI++n8noqieeVCVBLmxfY=
+gitlab.com/gomidi/midi v1.17.0/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
 gitlab.com/gomidi/muskel v0.9.8 h1:wattxXTVH5X3UD9dBWZ8zJ8JA5CNSaOkrdwUCJOwXyw=
 gitlab.com/gomidi/muskel v0.9.8/go.mod h1:t5vxTfwfqDUJyaYVVUj+d+7AMhcck0CxOOZAE/L1fwQ=

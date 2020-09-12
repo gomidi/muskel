@@ -1,5 +1,6 @@
-
 # MuSkel: Musical Sketch Language
+
+## Einführung
 
 `MuSkel` ist eine *Domain Specific Language* (`DSL`), d.h. eine Sprache, die für einen bestimmten 
 Einsatzzweck optimiert ist. Der Einsatzzweck ist in diesem Falle das Notieren und Skizzieren 

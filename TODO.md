@@ -3,9 +3,110 @@
 
 ## nächstes 
 
+### big table rewrite -> markdown tables
+- erste spalte von tabelle beginnt immer mit `|` die zweite zeile kann `|---|---|` etc enthalten. 
+- beim formatieren wird sie immer so umgeschrieben, dass sie `|---|---|` enthält. 
+- Damit werden muskel Dateien automatisch zu markdown Dateien und die muskel-tabellen
+  zu markdown tabellen. 
+- Damit können sie mit jedem markdown-Editor bearbeitet werden (und in schönes HTML oder PDF umgewandelt werden)
+- ein schöner Editor dafür ist Typora.
+- Alles, was nicht in Tabellen steht, ist Kommentar. (außer den `$includes`, `$embed` etc.) 
+- Damit kann man eine Komposition als normale markdown-Datei schreiben mit Überschriften etc. und ganz normal formatieren und trotzdem eine Komposition drinnen enthalten haben. Allerdings darf in den Kompositionstabellen nicht "formatiert" werden.
+- Das einzig blöde ist, dass es keine elegante Schreibweise für colspans gibt. also kommentare vergrößern damit die erste spalte (wenn es nicht auskommentieren einer ganzen Zeile ist, da muss das kommentarzeichen nur nach der ersten pipe geschrieben werden) 
+wichtig ist auch, dass ``\`\`\`` und `\~\~\~` am Anfang und Ende einer Zeile als Kommentar gewertet werden (damit auch Muskel-Code "zitiert" werden kann)
+- Das freistehende @ markiert die Position, ab der im Play-Modus gespielt wird (bis zum nächsten freistehenden @ oder zum Ende). Das freistehende @ wird nur beachtet, wenn es im SCORE steht (oder in der Tabelle, die dem Program als Haupttabelle genannt wurde). Ist das freistehende @ in der ersten Spalte, wird der gesamte SCORE ab dem freistehenden @ bis zum nächsten @ gespielt (alle Spalten/Stimmen).
+Steht das freistehende @ in einer anderen Spalte, wird nur diese Spalte gespielt (stummschaltung bei den Tracks bzw fehlende Midi-Kanäle werden natürlich respektiert).
+- Außerdem brauchen wir noch einen Webserver, über den direkte MIDI-Verbindungen zu einer DAW ausgewählt werden können, so dass man auch andere Instrumente gut direkt bespielen kann.
+- Da Programme, wie Typora keinen Formatierer brauchen, sollte es noch einen check-Modus geben, in dem die Datei nur geprüft wird und etwaige Fehler gemeldet werden (ohne, dass in die Datei geschrieben wird). Das kann dann auch wieder mit watch und SMF export und play kombiniert werden. (vielleicht passiert check auch automatisch, wenn fmt nicht extra gewählt wird).
+- Schön wäre auch ein Tool, mit dem man direkt in MIDI aufnehmen kann und gleichzeitig in eine muskel-Datei konvertieren kann.
+- Das interface könnte über einen Webserver laufen, wo man den MIDI-Input-Kanal und den Ausgang auf dem es erklingen soll auswählen kann und das Tempo und die Anzahl an Vorlauftakten des Klicks. - Außerdem kann man darüber dann die Aufnahme starten und beenden. Es wird immer an die gewählte Datei angehangen mit Vermerk des datums und der uhrzeit in einem kommentar. Möglicherweise erlaubt man auch eine Loop-Aufnahme über n Takte, so dass für jeden weiteren Durchlauf eine neue Spalte in der Tabelle angelegt wird. Auf jeden Fall wird in der Spalte der Tabelle der MIDI-Kanal erfasst, über den die Noten/CCs reinkamen, so dass man auch auf mehreren Kanälen gleichzeitig einspielen kann.
+- Möglicherweise benutzt man dafür im Hintergrund midish.
+- Um möglichst kompatibel zu bleiben, wird innerhalb einer Tabelle eine fehlendes vorangehendes Pipe-Zeichen ergänzt (solange die Tabelle nicht durch eine Leerzeile unterbrochen wurde). Lediglich die erste Zeile der Tabelle muss mit einem Pipesymbol beginnen.
+
+### weiteres
 - gleichheitszeichen frei machen, reset von dynamik mit +-
 
-- grundsätzliche überarbeitung:
+### big import rewrite und Gruppenspalten (ermöglichen "vertikale" Imports, bzw. auslagern von Spaltengruppen)
+DIE GANZE AUFLÖSEREI MIT ALLEN REGELN UND UMFANGREICHEN TESTS IST SCHON PROGRAMMIERT (reference package), DORT IN DER docs.go
+STEHT AUCH, WIE MAN DIE PACKAGE BENUTZT. ES FEHLT NUR DIE ANBINDUNG AN DEN PARSER, D.H. DAS EIGENTLICHE IMPORTIEREN.
+ZUM VERSTÄNDNIS RUHIG WEITERLESEN
+- es gibt eine einheitliche syntax für imports und referenzen, d.h. es gibt nur noch referenzen
+- eine referenz ist eine art pfad und bezieht sich auf einen kontext pfad in den sie importiert wird
+- der pfad besteht aus (groß nach klein, außen nach innen, links nach rechts):
+  - dem dateinamen, vorangestellt mit ' unter weglassen der Endung
+  - dem tabellennamen, vorangestellt mit = für Scores und . für shortcuts
+  - dem spaltennamen, vorangestellt mit .
+  - dem partnamen, in eckigen klammern
+- ein vollständiger pfad wäre z.B.
+  'piano=SCORE.timbre[CHORUS]
+  oder
+  'UVI.ks.tremolo.cello 
+- für Dateien gelten die normalen auflösungsregeln für dateien (lokal zu global)
+- der kontext, in den importiert wird, wird in der programmierung zur "vervollständigung" des gewünschten pfades immer berücksichtigt und ist dort immer vollständig:
+  - beim import in eine Datei aus dem vervollständigen dateinamen mit ordner
+  - beim import in eine shortcut tabellenzelle aus dem dateinamen, dem tabellennamen, der zeile und der spalte
+  - beim import in eine score tabelle aus dem dateinamen und dem tabellennamen
+  - beim import in eine score tabellenzelle aus dem dateinamen, dem tabellennamen und der spalte
+- importregeln:
+  - import in eine Datei: 
+    - wird zu importierende Datei komplett importiert: nur dateiname
+    - wird nur eine tabelle der Datei importiert: hinter dateiname noch tabellenname
+  - import in eine shortcut tabellenzelle:
+    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
+    - tabellenname immer angeben
+    - zeile immer angeben
+    - wenn spalte angegeben, andere spalte, sonst spalte mit gleichem namen wie zielspalte
+  - import in eine score tabelle:
+    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
+    - wenn tabellen name angegeben: abweichender tabellenname, sonst gleicher name wie zieltabelle 
+      (nicht bei gleicher datei möglich)
+      es können nur score tabellen in score tabellen importiert werden
+    - wenn partname angegeben: nur diesen part importieren, sonst gesamte tabelle
+  - import in eine score tabellenzelle:
+    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
+    - wenn tabellen name angegeben: abweichender tabellenname, sonst gleicher name wie zieltabelle 
+      (auch bei gleicher datei möglich), bei score Tabellen muss allerdings immer ein 
+      gleichheitszeichen erscheinen, bei shortcuts folgt automatisch der punkt (über die zeile)
+    - wenn Spaltenname angeben: abweichender spaltenname, sonst gleicher name wie zielspalte (nicht möglich, wenn
+      import aus gleicher datei und gleichem tabellennamen), bei kombispalten werden bei weglassen des spaltennamens
+      alle spalten gleichen namens importiert
+    - wenn partname angegeben: nur diesen part importieren, sonst gesamte spalte
+- kombispalten:
+  - um es (vor allem im main score) zu ermöglichen, auch score spalten gruppen in eigene dateien oder tabellen auszulagern 
+    (z.B. für controller oder keyswitches), kann man kombispalten erstellen:
+    - eine kombispalte enthält mehrere tracknamen als bezeichnung im spaltenkopf diese werden durch leerzeichen getrennt, z.B.
+      violin1KS violin2KS violaKS celloKS
+      das wäre eine kombispalte aus den tracks violin1KS, violin2KS, violaKS, celloKS
+    - in kombination mit spaltenimports lassen sich damit sehr komfortabel spaltengruppen auslagern:
+
+```
+=SCORE | violin1 violin2 viola cello | violin1KS violin2KS violaKS celloKS |
+#INTRO
+  1    | 'intro                      | 'keyswitch=intro                      |
+*10
+#A
+  1    | 'movement[A]                | 'keyswitch=a                          |
+*20
+#B
+  1    | 'movement[B]                | 'keyswitch=b                          |
+*12
+```
+
+im obigen score werden die Spalten violin1, violin2, viola und cello an den entsprechenden aus den jeweiligen
+spalten der =SCORE tabellen der dateien intro.mskl und movement.mskl importiert und
+in eigene trackspalten verwandelt, wobei aus der score tabelle der movement.mskl nur jeweils die part [A] und [B]
+übernommen werden
+
+die spalten violin1KS, violin2KS, violaKS und celloKS kommen hingegen aus der gleichen datei keyswitch.mskl,
+jedoch aus den verschiedenen tabellen  =intro, =a und =b und deren gleichlautenden spalten
+    
+diese ganzen auflösungsregeln werden in einem eigenen package reference ausgelagert (ist schon programmiert).
+
+DIE IDEE MIT DEN GRUPPEN SPALTEN KANN MAN AUCH NOCH AUSBAUEN, SO DASS DINGE, DIE IN DEN GLEICHEN SPALTEN VORKOMMEN
+SOLLEN, NUR EINMAL IN EINE GRUPPENSPALTE GESCHRIEBEN WERDEN MÜSSEN.
+
+
+#### grundsätzliche überarbeitung:
   Obergruppe 
     EventSequence: zeitliche Abfolge von Items einer Spur
         - haben eine Callbackfunktion, die die events holt; sie können von patterns/tabellenspalten, 
@@ -84,6 +185,7 @@
 
 - frei stehende Plus- und Minuszeichen erlauben "aufgepropfte" Dynamik/Dynamikverläufe, z.B.
 
+```muskel
     =pt  | piano |
     #
       1  | c'++  |
@@ -98,7 +200,8 @@
       1    |             | +-~~      |
     #
       1    |             | ++        |
-    
+```
+
 Die Plus- und Minuszeichen werden einfach auf die darunterliegende Dynamik "aufaddiert".
 
 
@@ -139,7 +242,7 @@ Oder (einfacher) mit smfimage.
 Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang und Ende der zu verschiebenden Noten markieren können. z.B. `^+(` für _Start verschieben nach unten_ mit Menge an Pluszeichen = Anzahl der Verschiebepositionen und analog `^-(` für _Start verschieben nach oben_ und `^)` für das _Ende der letzten Verschiebegruppe_ (kann am Ende der Spalte weggelassen werden)
 
 Letztlich können alle drei Features aber besser in einem eigens entwickelten Editor implementiert werden.
- 
+
 ## weiteres
 
 - dokumentation aktualisieren
@@ -172,7 +275,8 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
   beim aufruf gesetzt, z.B. .table.token.col(c')
   auf die gleiche Weise kann auch in Pattern tabellen gespeichert werden. Hierbei ist der key dann =pattern.col
 - diatonische verläufe mittels =, z.B.
-    
+
+ ```muskel
     =SCORE | piano |
     #
       1    | 2=&   |
@@ -193,6 +297,7 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
       4&   | 9     |
     #
       1    | 10    |
+ ```
 
   voraussetzung dazu ist, dass das Lautstärkeresetzeichen von = auf +- geändert wird. (nach einer note gleicht sich das sowieso aus,
   aber bei applizierung auf patterns etc. ist es wichtig)
@@ -208,14 +313,6 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
 - tuning
 - timbres
 - Ducking?
-
-
-
-
-
-
-
-
 
 
 # erledigt
@@ -248,8 +345,8 @@ dann gibt es folgende Wiederholungsarten:
 1. und 2. wiederholen immer die ganzen zurückliegenden takte
 3. wiederholt letztes event an angegebener position
 4.
-  a) sync: wiederholt, indem das erste event an das ende der vorigen wiederholung anschließt
-  b) kein sync: wiederholt, indem der abstand zwischen dem taktanfang und dem ersten event gleich dem abstand zwischen dem ende der vorigen wiederholung und dem ersten event der aktuellen wiederholung ist
+    a) sync: wiederholt, indem das erste event an das ende der vorigen wiederholung anschließt
+    b) kein sync: wiederholt, indem der abstand zwischen dem taktanfang und dem ersten event gleich dem abstand zwischen dem ende der vorigen wiederholung und dem ersten event der aktuellen wiederholung ist
 
 außerdem muss man bei den patterns unterscheiden zwischen verschiedenen zuständen/phasen
 
@@ -264,7 +361,7 @@ pahse 3: die events der spalte sind parametrisiert und anhand der aufrufposition
     =patt.col%9(a,c')[2:5]
     
   zu
-   
+  
     =patt.col(a,c')[2:5]%9
 
 - _ beendet ein Pattern und zwar auch mitten im Takt, sodass wiederholungen auf dem _ einsetzen, d.h. man kann auch Pattern machen,

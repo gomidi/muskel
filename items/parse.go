@@ -110,6 +110,10 @@ func getItem(data string) Item {
 func Parse(data string, posIn32th uint) (it Item, err error) {
 	data = strings.TrimSpace(data)
 
+	if DEBUG {
+		fmt.Printf("Parse(%q)\n", data)
+	}
+
 	switch len(data) {
 	case 0:
 		return nil, nil
