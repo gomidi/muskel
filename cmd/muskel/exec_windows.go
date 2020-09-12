@@ -4,6 +4,8 @@ package main
 
 import (
 	"os/exec"
+
+	"gitlab.com/gomidi/muskel"
 )
 
 func execCommand(c string) *exec.Cmd {
@@ -22,6 +24,6 @@ func runVersionated(file string, args []string) *exec.Cmd {
 	return exec.Command(file, args...)
 }
 
-func versionate(file string, v *version) string {
-	return Versionate(file+".exe", v)
+func versionate(file string, v *muskel.Version) string {
+	return muskel.Versionate(file+".exe", v)
 }

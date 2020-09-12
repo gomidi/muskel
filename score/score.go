@@ -315,7 +315,7 @@ func (sc *Score) FileGroup(trackName string) (fg string) {
 }
 
 func (sc *Score) findInclude(filename string) (fname string, err error) {
-	return findInclude(filepath.Dir(sc.mainFile), filename)
+	return FindInclude(filepath.Dir(sc.mainFile), filename)
 }
 
 func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {

@@ -8,21 +8,21 @@
 /home/user/.config/project1/
 */
 
-package score
+package muskel
 
 import (
 	"os"
 	"path/filepath"
 )
 
-func setUserDir() {
+func setUserDir(version string) {
 	xdg_config_home := os.Getenv("XDG_CONFIG_HOME")
 	if xdg_config_home == "" {
 		home := os.Getenv("HOME")
 		if home == "" {
 			home = filepath.Join("/home", os.Getenv("USER"))
 		}
-		xdg_config_home = filepath.Join(home, ".muskel")
+		xdg_config_home = filepath.Join(home, ".muskel", version)
 	}
 	USER_DIR = xdg_config_home
 }

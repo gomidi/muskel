@@ -24,13 +24,13 @@ import (
 	"gitlab.com/metakeule/config"
 )
 
-const MUSKEL_VERSION_FILE = "muskel_version.txt"
+//const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
 var (
 	cfg = config.MustNew("muskel", muskel.VERSION, "muskel is a musical sketch language")
 
 	argFile                = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
-	argIgnoreMuskelVersion = cfg.NewBool("current", "use the current version of the muskel command and ignore the "+MUSKEL_VERSION_FILE+" file", config.Default(false), config.Shortflag('c'))
+	argIgnoreMuskelVersion = cfg.NewBool("current", "use the current version of the muskel command and ignore the "+muskel.MUSKEL_VERSION_FILE+" file", config.Default(false), config.Shortflag('c'))
 	argSketch              = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
 	argFlow                = cfg.NewBool("flow", "flow mode; sets sketch to ! and pattern to !", config.Default(false))
 	argParams              = cfg.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
@@ -91,25 +91,6 @@ func fileCheckSum(file string) string {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil))
-}
-
-func readMuskelVersion(dir string) (*version, error) {
-	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
-	b, err := ioutil.ReadFile(p)
-	if err != nil {
-		return nil, err
-	}
-	v, err2 := parseVersion(strings.TrimSpace(string(b)))
-	if err2 != nil {
-		return nil, err2
-	}
-
-	return v, nil
-}
-
-func writeMuskelVersion(dir string) error {
-	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
-	return ioutil.WriteFile(p, []byte(muskel.VERSION), 0644)
 }
 
 func fmtFile(file string, params []string, opts ...score.Option) error {
@@ -674,15 +655,15 @@ func run() error {
 	srcdir := filepath.Dir(argFile.Get())
 
 	if !argIgnoreMuskelVersion.Get() {
-		var v *version
-		v, err = readMuskelVersion(srcdir)
+		var v *muskel.Version
+		v, err = muskel.ReadVERSIONFile(srcdir)
 		if err == nil {
 			if v.String() != muskel.VERSION {
 				name := versionate("muskel", v)
-				fmt.Fprintf(os.Stderr, "This is version "+muskel.VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
+				fmt.Fprintf(os.Stderr, "This is version "+muskel.VERSION+" of muskel and your "+muskel.MUSKEL_VERSION_FILE+
 					" points to version "+v.String()+
 					".\nTo preserve compatibility with your musical notation, the binary \""+name+"\" will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
-					"\nremove the file \""+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\"\nor pass the \"--current\" option to let your file be parsed anyway.\n\n")
+					"\nremove the file \""+filepath.Join(srcdir, muskel.MUSKEL_VERSION_FILE)+"\"\nor pass the \"--current\" option to let your file be parsed anyway.\n\n")
 
 				cmd := runVersionated(name, os.Args[1:])
 				cmd.Dir, _ = os.Getwd()
@@ -701,7 +682,7 @@ func run() error {
 				os.Exit(0)
 			}
 		}
-		writeMuskelVersion(srcdir)
+		muskel.WriteVersionFile(srcdir)
 	}
 
 	cmd, file, dir := runCmd()

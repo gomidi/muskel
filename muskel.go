@@ -3,7 +3,10 @@ package muskel
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/file"
@@ -11,6 +14,27 @@ import (
 	"gitlab.com/gomidi/muskel/smf"
 	"gitlab.com/gomidi/muskel/smfimport"
 )
+
+const MUSKEL_VERSION_FILE = "muskel_version.txt"
+
+func ReadVersionFile(dir string) (*Version, error) {
+	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
+	b, err := ioutil.ReadFile(p)
+	if err != nil {
+		return nil, err
+	}
+	v, err2 := ParseVersion(strings.TrimSpace(string(b)))
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return v, nil
+}
+
+func WriteVersionFile(dir string) error {
+	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
+	return ioutil.WriteFile(p, []byte(VERSION), 0644)
+}
 
 func Import(srcFile string, targetFile string) error {
 	fh, err := os.Open(srcFile)

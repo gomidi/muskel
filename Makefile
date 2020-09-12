@@ -11,8 +11,7 @@ build:
 
 release:
 	config release --versiondir='.' --package='muskel'
-	config build -v --workingdir='./cmd/muskel' --versiondir='.'
-	config build --workingdir='./cmd/muskel' --versiondir='.'
+	cd cmd/muskel && config build -v --workingdir='.' --versiondir='../../' && config build --workingdir='.' --versiondir='../../'
 
 test:
 	go test ./... -v -coverprofile .coverage.txt

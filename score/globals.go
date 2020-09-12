@@ -1,5 +1,7 @@
 package score
 
+var FindInclude func(relDir string, file string) (resolved string, err error) = nil
+
 var reservedNames = map[string]bool{
 	"MN": true,
 	"CC": true,
