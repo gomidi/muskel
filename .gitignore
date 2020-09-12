@@ -3,8 +3,10 @@
 cmd/muskel/*.mskl
 simple-reaper
 cmd/muskel/muskel
+cmd/muskel/muskel.exe
 *.gide
 *.test
 todos
 .coverage.txt
 cover.out
+*.mskl
