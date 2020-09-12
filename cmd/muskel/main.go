@@ -701,9 +701,8 @@ func run() error {
 				os.Exit(0)
 			}
 		}
+		writeMuskelVersion(srcdir)
 	}
-
-	writeMuskelVersion(srcdir)
 
 	cmd, file, dir := runCmd()
 
