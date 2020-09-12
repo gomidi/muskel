@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"gitlab.com/gomidi/muskel/table"
@@ -33,7 +34,7 @@ func (f *File) Name() string {
 
 func (f *File) writeComment() (bool, error) {
 	if cmt, has := f.commentLines[f.currentLine]; has {
-		err := f.println(cmt)
+		err := f.println(cmt, true)
 		if err != nil {
 			return false, err
 		}
@@ -47,15 +48,15 @@ func (f *File) writeComment() (bool, error) {
 		if mcomment.Contains(f.currentLine) {
 			//fmt.Printf("writing multicomment line: %v\n", f.currentLine)
 			if f.currentLine == mcomment.Start() {
-				err := f.println("/*")
+				err := f.println("/*", true)
 				return true, err
 			}
 
 			if f.currentLine == mcomment.End() {
-				err := f.println("*/")
+				err := f.println("*/", true)
 				return false, err
 			}
-			err := f.println(mcomment.lines[f.currentLine-start-1])
+			err := f.println(mcomment.lines[f.currentLine-start-1], true)
 			return true, err
 		}
 	}
@@ -71,13 +72,19 @@ func (f *File) WriteLine(line string) (err error) {
 			return err
 		}
 	}
-	return f.println(line)
+	return f.println(line, true)
 }
 
-func (f *File) println(line string) error {
+func (f *File) WriteDashLine(line string) (err error) {
+	return f.println(line, false)
+}
+
+func (f *File) println(line string, count bool) error {
 	_, err := fmt.Fprintln(f.output, line)
 	//fmt.Fprintf(os.Stderr, "printing line %v: %q\n", f.currentLine, line)
-	f.currentLine++
+	if count {
+		f.currentLine++
+	}
 	return err
 }
 
@@ -164,6 +171,8 @@ func (f *File) WriteTo(output io.Writer) (err error) {
 	return nil
 }
 
+var dashLine = regexp.MustCompile(`^\s*\|\s*-+\s*\|`)
+
 func (f *File) findPart(line string) (interface{}, error) {
 	if len(line) > 1 && line[:2] == "/*" {
 		if f.currentMultiLineComment != nil {
@@ -191,6 +200,11 @@ func (f *File) findPart(line string) (interface{}, error) {
 	}
 
 	if f.currentTable != nil {
+		//hmm := strings.ReplaceAll(strings.ReplaceAll(line, " ",""), "|", "")
+		if dashLine.MatchString(line) {
+			f.currentLine--
+		}
+
 		return f.currentTable, nil
 	}
 
@@ -208,39 +222,60 @@ func (f *File) findPart(line string) (interface{}, error) {
 		}, nil
 	}
 
-	idx := strings.Index(line, "|")
-	name := strings.TrimSpace(line)
-	if idx > 1 {
-		name = strings.TrimSpace(line[:idx])
-	}
-	//rest := strings.TrimSpace(line[idx+1:])
+	//fmt.Printf("line: %q\n", line)
 
-	//switch {
-	//case strings.Contains(rest, "|"):
-	switch name {
-	case "TRACK":
-		return table.NewTracks(f.currentLine, f.Score), nil
-	case "SCALE":
-		return table.NewScales(f.currentLine, f.Score), nil
-	case "TUNING":
-		return table.NewTunings(f.currentLine, f.Score), nil
-	case "TIMBRE":
-		return table.NewTimbres(f.currentLine, f.Score), nil
-	case "FILTER":
-		return table.NewFilters(f.currentLine, f.Score), nil
-	case "PROPERTY":
-		return table.NewProperties(f.currentLine, f.Score), nil
-	default:
-		switch name[0] {
-		case '=':
-			return table.NewSketch(name, f.currentLine, f.Score), nil
-		case '@':
-			return table.NewLyrics(name, f.currentLine, f.Score), nil
-		case '.':
-			return table.NewTokens(name, f.currentLine, f.Score), nil
-		default:
-			return nil, fmt.Errorf("invalid table name: %q", name)
+	trimmedLine := strings.TrimSpace(line)
+
+	idx := strings.Index(trimmedLine, "|")
+
+	if idx == 0 {
+
+		name := strings.TrimSpace(trimmedLine[1:])
+
+		//name := strings.TrimSpace(line)
+		nextIdx := strings.Index(name, "|")
+		if nextIdx > 1 {
+			name = strings.TrimSpace(name[:nextIdx])
 		}
+
+		//fmt.Printf("name: %q\n", name)
+		//rest := strings.TrimSpace(line[idx+1:])
+
+		//switch {
+		//case strings.Contains(rest, "|"):
+
+		currentLine := f.currentLine
+		//f.currentLine--
+
+		switch name {
+		case "TRACK":
+			return table.NewTracks(currentLine, f.Score), nil
+		case "SCALE":
+			return table.NewScales(currentLine, f.Score), nil
+		case "TUNING":
+			return table.NewTunings(currentLine, f.Score), nil
+		case "TIMBRE":
+			return table.NewTimbres(currentLine, f.Score), nil
+		case "FILTER":
+			return table.NewFilters(currentLine, f.Score), nil
+		case "PROPERTY":
+			return table.NewProperties(currentLine, f.Score), nil
+		default:
+			switch name[0] {
+			case '=':
+				return table.NewSketch(name, currentLine, f.Score), nil
+			case '@':
+				return table.NewLyrics(name, currentLine, f.Score), nil
+			case '.':
+				return table.NewTokens(name, currentLine, f.Score), nil
+			default:
+				return nil, fmt.Errorf("invalid table name: %q", name)
+			}
+		}
+
+	} else {
+		// just another possbly markdown syntax line
+		return line, nil
 	}
 	//case strings.Contains(rest, "$"):
 	//	return &CommandSketch{lineNo: f.currentLine, name: name, score: f.Score, data: rest}
@@ -327,11 +362,25 @@ func (f *File) Parse() (err error) {
 				f.Parts = append(f.Parts, v)
 				f.currentTable = v
 			}
-			err = v.ParseLine(line)
+			line = strings.TrimSpace(line)
+
+			if !dashLine.MatchString(line) {
+				if strings.LastIndex(line, "|") != len(line)-1 {
+					line += "|"
+				}
+				err = v.ParseLine(line)
+			}
 		case Part:
 			//fmt.Printf("appending part: %#v\n", v)
 			f.Parts = append(f.Parts, v)
-			err = v.ParseLine(line)
+			line = strings.TrimSpace(line)
+
+			if !dashLine.MatchString(line) {
+				if strings.LastIndex(line, "|") != len(line)-1 {
+					line += "|"
+				}
+				err = v.ParseLine(line)
+			}
 		}
 
 		if err != nil {

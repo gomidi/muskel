@@ -9,7 +9,7 @@ import (
 )
 
 func TestInclude(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -3317,7 +3317,7 @@ TRACK    | piano |
 }
 
 func TestInclude2(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	tests := []struct {
 		input    string
 		expected string

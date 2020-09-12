@@ -117,6 +117,11 @@ func (f *formatter) WriteLine(line string) error {
 	return err
 }
 
+func (f *formatter) WriteDashLine(line string) error {
+	_, err := fmt.Fprintln(f.wr, line)
+	return err
+}
+
 type sortedLines []line
 
 func (s sortedLines) Len() int {

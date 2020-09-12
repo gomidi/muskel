@@ -10,6 +10,7 @@ import (
 
 type Formatter interface {
 	WriteLine(line string) error
+	WriteDashLine(line string) error
 }
 
 type Score interface {

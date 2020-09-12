@@ -27,16 +27,36 @@ func Pad(s string, length int) string {
 	return bf.String()
 }
 
+func Dash(l int, length int) string {
+	s := strings.Repeat("-", l)
+	if l >= length {
+		return s
+	}
+
+	diff := length - l
+	var bf strings.Builder
+
+	bf.WriteString(s)
+
+	for i := 0; i < diff; i++ {
+		bf.WriteString(" ")
+	}
+	return bf.String()
+}
+
 func tableHeader(line string) (cols []string) {
 	c := strings.Split(line, "|")
 	//name = strings.TrimRight(strings.TrimSpace(strings.ToLower(c[0])), ":")
-	for i := 1; i < len(c)-1; i++ {
+	for i := 2; i < len(c)-1; i++ {
 		cols = append(cols, strings.TrimSpace(c[i]))
 	}
+	//fmt.Printf("cols: %q\n", cols)
 
-	if len(c) > 0 && strings.TrimSpace(c[len(c)-1]) != "" {
-		cols = append(cols, strings.TrimSpace(c[len(c)-1]))
-	}
+	/*
+		if len(c) > 0 && strings.TrimSpace(c[len(c)-1]) != "" {
+			cols = append(cols, strings.TrimSpace(c[len(c)-1]))
+		}
+	*/
 
 	return
 }
@@ -44,6 +64,11 @@ func tableHeader(line string) (cols []string) {
 type formatLine string
 
 func (f *formatLine) WriteLine(l string) error {
+	*f = formatLine(l)
+	return nil
+}
+
+func (f *formatLine) WriteDashLine(l string) error {
 	*f = formatLine(l)
 	return nil
 }

@@ -23,6 +23,7 @@ func (s *Sketch) addCols() {
 }
 
 func (s *Sketch) ParseLine(line string) error {
+	//line = strings.TrimRight(line, "|")
 	//fmt.Printf("table.Sketch.ParseLine(%q)\n", line)
 	if err := s.Table.ParseLine(line); err != nil {
 		//fmt.Printf("table.Sketch.ParseLine err: %v\n", err)
@@ -33,6 +34,7 @@ func (s *Sketch) ParseLine(line string) error {
 		s.colsAdded = true
 	}
 	if len(s.Table.Data) > 0 {
+		//	fmt.Printf("s.Table.Data = %#v\n", s.Table.Data)
 		return s.sketch.ParseLine(s.Table.Data[len(s.Table.Data)-1])
 	}
 	return nil
@@ -71,33 +73,46 @@ func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 
 	if len(line[0]) > 0 && (line[0][0] == '#' || line[0][0] == '$' || line[0][0] == '[' || line[0][0] == '*') {
 		var first, last string
+		var skipCols bool
 		first = " " + line[0]
 		if idx := strings.Index(line[0], "##"); idx > 0 {
 			var ff formatLine
-			t.Table.writeFirstLine(&ff)
+			t.Table._writeFirstLine(&ff, true)
 			last = string(ff)
 			idx2 := strings.Index(last, "|")
 			last = "## " + last[idx2:]
 			first = " " + line[0][:idx]
 			//t.Table.Pad(0, first)
 			first = Pad(first, t.Table.colWidths[0]-2)
+			skipCols = true
 			//fmt.Printf("first: %q last: %q\n", first, last)
 		}
-		return t.Table.writeLine(f, first+last)
+
+		s.WriteString(t.Table.separator() + t.Table.Pad(0, first+last))
+
+		if !skipCols {
+			for i, _ := range t.cols {
+				s.WriteString(t.Table.separator() + t.Table.Pad(i+1, " "))
+			}
+			s.WriteString(t.Table.separator())
+		}
+		return t.Table.writeLine(f, s.String())
 	}
-	s.WriteString(t.Table.Pad(0, "    "+formatPosition(line[0])) + t.Table.separator())
+	s.WriteString(t.Table.separator() + t.Table.Pad(0, "    "+formatPosition(line[0])))
 
 	for i, _ := range t.cols {
 		col := ""
 		if i+1 < len(line) {
 			col = line[i+1]
 		}
-		s.WriteString(t.Table.Pad(i+1, col) + t.Table.separator())
+		s.WriteString(t.Table.separator() + t.Table.Pad(i+1, col))
 	}
 
 	if ll := len(line); ll > len(t.cols)+1 {
 		s.WriteString(line[ll-1])
 	}
+
+	s.WriteString(t.Table.separator())
 	return t.Table.writeLine(f, s.String())
 }
 

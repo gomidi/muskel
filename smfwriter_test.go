@@ -16,7 +16,7 @@ import (
 )
 
 func TestSMFWriter(t *testing.T) {
-	//t.Skip()
+	t.Skip()
 	//	score.DEBUG = false
 
 	var tests = []struct {

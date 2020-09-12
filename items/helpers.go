@@ -799,7 +799,10 @@ func PositionTo32th(lastBeatNo uint, pos string) (completed string, num32th uint
 	case "&,;":
 		num32th += 7
 	default:
-		err = fmt.Errorf("invalid rest: %q in position %q", rest, pos)
+		err = fmt.Errorf("invalid leftover: %q in position %q", rest, pos)
+		if DEBUG {
+			panic(err.Error())
+		}
 	}
 
 	return

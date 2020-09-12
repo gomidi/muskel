@@ -16,7 +16,6 @@ func (t *Properties) Finish() (err error) {
 		t.Table.Score.AddProperty(line[0], line[1])
 	}
 
-	t.cols = nil
-
+	t.cols = []string{""}
 	return nil
 }

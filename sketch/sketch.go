@@ -930,9 +930,28 @@ func (p *Sketch) ParseLine(tabs []string) error {
 		}
 	}
 
-	if len(tabs) == 1 || (first != "" && first[0] == '#') {
+	//fmt.Printf("tabs == %#v\n", tabs)
+
+	if isBarLine(first, tabs) {
 		return p.parseBarLine(first)
 	}
 
 	return p.parseEventsLine(tabs)
+}
+
+func isBarLine(first string, tabs []string) bool {
+	if first != "" && first[0] == '#' {
+		return true
+	}
+
+	if len(tabs) == 1 {
+		return true
+	}
+
+	for _, t := range tabs[1:] {
+		if t != "" {
+			return false
+		}
+	}
+	return true
 }

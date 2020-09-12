@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+//var regAllDashes = regexp.MustCompile("^[-]+$")
+
 func newBlankFile() *File {
 	return &File{
 		multiComments: map[int]*MultiLineComment{},

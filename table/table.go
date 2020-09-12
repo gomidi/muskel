@@ -6,15 +6,16 @@ import (
 )
 
 type Table struct {
-	printSlim       bool
-	Score           Score
-	name            string
-	lineNo          int
-	firstLineParsed bool
-	cols            []string
-	skipCols        map[int]bool
-	Data            [][]string // lines -> cols
-	colWidths       []int
+	printSlim            bool
+	Score                Score
+	name                 string
+	lineNo               int
+	firstLineParsed      bool
+	secondLineInOriginal bool
+	cols                 []string
+	skipCols             map[int]bool
+	Data                 [][]string // lines -> cols
+	colWidths            []int
 }
 
 func NewTable(name string, lineNo int, sc Score) *Table {
@@ -49,6 +50,13 @@ func (i *Table) Pad(col int, s string) string {
 		return Pad(s, i.colWidths[col])
 	}
 	return Pad(s, i.colWidths[col]+1)
+}
+
+func (i *Table) Dash(col int) string {
+	if i.printSlim {
+		return Dash(i.colWidths[col], i.colWidths[col])
+	}
+	return Dash(i.colWidths[col], i.colWidths[col]+1)
 }
 
 func (t *Table) CalcColWidths() error {
@@ -133,6 +141,10 @@ func (t *Table) Finish() error {
 }
 
 func (t *Table) tabs(line string) []string {
+	line = strings.TrimSpace(line)
+	if idx := strings.Index(line, "|"); idx == 0 {
+		line = line[1:]
+	}
 	c := strings.Split(line, "|")
 
 	cc := make([]string, len(c))
@@ -147,7 +159,7 @@ func (t *Table) tabs(line string) []string {
 func (t *Table) ParseLine(line string) error {
 	//fmt.Printf("table: parseLine %q\n", line)
 	if !t.firstLineParsed {
-		tName := strings.TrimSpace(strings.Split(line, "|")[0])
+		tName := strings.TrimSpace(strings.Split(line, "|")[1])
 		if !tableNameRegEx.MatchString(tName) {
 			return fmt.Errorf("invalid syntax table name: %q", tName)
 		}
@@ -161,7 +173,7 @@ func (t *Table) ParseLine(line string) error {
 			}
 		}
 
-		//fmt.Printf("cols: %v\n", t.cols)
+		//fmt.Printf("tName: %q cols: %v\n", tName, t.cols)
 		//t.cols
 		t.firstLineParsed = true
 		return nil
@@ -185,16 +197,39 @@ func (t *Table) writeLine(f Formatter, s string) error {
 	return f.WriteLine(strings.TrimRight(s, " "))
 }
 
-func (t *Table) writeFirstLine(f Formatter) {
-	//fmt.Printf("write first line of table: %q\n", t.name)
+func (t *Table) _writeFirstLine(f Formatter, skipName bool) {
 	var s strings.Builder
-	s.WriteString(t.Pad(0, t.name) + t.separator())
-
-	for i, c := range t.cols {
-		s.WriteString(t.Pad(i+1, c) + t.separator())
+	if !skipName {
+		s.WriteString(t.separator() + t.Pad(0, t.name))
 	}
 
+	for i, c := range t.cols {
+		s.WriteString(t.separator() + t.Pad(i+1, c))
+	}
+
+	s.WriteString(t.separator())
+
 	t.writeLine(f, s.String())
+}
+
+func (t *Table) writeFirstLine(f Formatter) {
+	//fmt.Printf("write first line of table: %q cols: %v\n", t.name, t.cols)
+	t._writeFirstLine(f, false)
+	t.writeSecondLine(f)
+}
+
+func (t *Table) writeSecondLine(f Formatter) {
+	//fmt.Printf("write first line of table: %q\n", t.name)
+	var s strings.Builder
+	s.WriteString(t.separator() + t.Dash(0))
+
+	for i, _ := range t.cols {
+		s.WriteString(t.separator() + t.Dash(i+1))
+	}
+
+	s.WriteString(t.separator())
+
+	f.WriteDashLine(strings.TrimRight(s.String(), " "))
 }
 
 func (t *Table) separator() string {
@@ -209,7 +244,7 @@ func (t *Table) writeDataLine(f Formatter, line []string) (err error) {
 	//fmt.Printf("write data line: %v\n", line)
 	var s strings.Builder
 
-	s.WriteString(t.Pad(0, " "+line[0]) + t.separator())
+	s.WriteString(t.separator() + t.Pad(0, " "+line[0]))
 
 	for i, _ := range t.cols {
 		col := ""
@@ -218,12 +253,16 @@ func (t *Table) writeDataLine(f Formatter, line []string) (err error) {
 			col = line[i+1]
 		}
 
-		s.WriteString(t.Pad(i+1, col) + t.separator())
+		s.WriteString(t.separator() + t.Pad(i+1, col))
 	}
 
-	if ll := len(line); ll > len(t.cols)+1 {
-		s.WriteString(line[ll-1])
-	}
+	s.WriteString(t.separator())
+
+	/*
+		if ll := len(line); ll > len(t.cols)+1 && strings.TrimSpace(line[ll-1]) != "" {
+			s.WriteString(line[ll-1] + " " + t.separator())
+		}
+	*/
 
 	return t.writeLine(f, s.String())
 }
