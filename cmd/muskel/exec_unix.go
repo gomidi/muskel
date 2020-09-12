@@ -1,3 +1,5 @@
+// +build !windows,!linux
+
 package main
 
 import (
@@ -6,4 +8,12 @@ import (
 
 func execCommand(c string) *exec.Cmd {
 	return exec.Command("/bin/sh", "-c", c)
+}
+
+func alert(msg string, err error) {
+
+}
+
+func notify(msg, details string) {
+
 }
