@@ -216,30 +216,11 @@ func ParseContext(ctx string) (r *Reference, err error) {
 
 }
 
-func Parse(ref string, ctx Reference) (r *Reference, err error) {
-	switch ctx.Type {
-	case FileCtx:
-		r, err = parseFileCtx(ref, ctx)
-	case ScoreCtx:
-		r, err = parseScoreCtx(ref, ctx)
-	case ScoreColCtx:
-		r, err = parseScoreColCtx(ref, ctx)
-	case ShortCutCtx:
-		r, err = parseShortCutCtx(ref)
-	default:
-		return nil, fmt.Errorf("%#v is no valid context type", ctx.Type.String())
-	}
-
+func Parse(ref string) (r *Reference, err error) {
+	r, err = parse(ref)
 	if err != nil {
 		return nil, err
 	}
-
-	err = r.Complete(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
 	return r, nil
 }
 
@@ -413,11 +394,7 @@ func parse(ref string) (*Reference, error) {
 
 }
 
-func parseFileCtx(ref string, ctx Reference) (*Reference, error) {
-	r, err := parse(ref)
-	if err != nil {
-		return nil, err
-	}
+func (r *Reference) parseFileCtx(ctx Reference) error {
 	/* TODO
 	inside the file context, there could be only
 	whole files imported (Type File)
@@ -427,7 +404,7 @@ func parseFileCtx(ref string, ctx Reference) (*Reference, error) {
 
 	// in each case, we need a different file name
 	if r.File == "" || r.File == ctx.File {
-		return nil, fmt.Errorf("can't import from same file in file context")
+		return fmt.Errorf("can't import from same file in file context")
 	}
 
 	if r.Table == "" {
@@ -439,19 +416,14 @@ func parseFileCtx(ref string, ctx Reference) (*Reference, error) {
 		case '.':
 			r.Type = ShortCut
 		default:
-			return nil, fmt.Errorf("invalid table name: %#v", r.Table)
+			return fmt.Errorf("invalid table name: %#v", r.Table)
 		}
 	}
 
-	return r, nil
+	return nil
 }
 
-func parseScoreCtx(ref string, ctx Reference) (*Reference, error) {
-	r, err := parse(ref)
-	if err != nil {
-		return nil, err
-	}
-
+func (r *Reference) parseScoreCtx(ctx Reference) error {
 	/* TODO
 	inside the score context, there could be only
 	a single score of a file (Type Score)
@@ -463,20 +435,16 @@ func parseScoreCtx(ref string, ctx Reference) (*Reference, error) {
 	} else {
 		if r.Table == "" || r.Table == ctx.Table {
 			if r.File == "" || r.File == ctx.File {
-				return nil, fmt.Errorf("can't import from same score and same file in score context")
+				return fmt.Errorf("can't import from same score and same file in score context")
 			}
 		}
 		r.Type = Score
 	}
 
-	return r, nil
+	return nil
 }
 
-func parseScoreColCtx(ref string, ctx Reference) (*Reference, error) {
-	r, err := parse(ref)
-	if err != nil {
-		return nil, err
-	}
+func (r *Reference) parseScoreColCtx(ctx Reference) error {
 
 	/* TODO
 	inside the score col context, there could be only
@@ -486,12 +454,12 @@ func parseScoreColCtx(ref string, ctx Reference) (*Reference, error) {
 	*/
 
 	if r.Table == "" && r.Part == "" && r.File == "" {
-		return nil, fmt.Errorf("invalid reference in column context: must have table or '='")
+		return fmt.Errorf("invalid reference in column context: must have table or '='")
 	}
 
 	if r.File == "" || r.File == ctx.File {
 		if r.Part == "" && (r.Table == "=" || r.Table == ctx.Table) && (r.Col == "" || r.Col == ctx.Col) {
-			return nil, fmt.Errorf("invalid reference in column context: can't refer to same col in same score in same file")
+			return fmt.Errorf("invalid reference in column context: can't refer to same col in same score in same file")
 		}
 	}
 
@@ -502,7 +470,7 @@ func parseScoreColCtx(ref string, ctx Reference) (*Reference, error) {
 	switch r.Table[0] {
 	case '.':
 		if r.Row == "" {
-			return nil, fmt.Errorf("need row in shortcut reference")
+			return fmt.Errorf("need row in shortcut reference")
 		}
 		r.Type = ShortCutCell
 	case '=':
@@ -512,26 +480,22 @@ func parseScoreColCtx(ref string, ctx Reference) (*Reference, error) {
 			r.Type = ScoreCol
 		}
 	default:
-		return nil, fmt.Errorf("invalid table name")
+		return fmt.Errorf("invalid table name")
 	}
 
-	return r, nil
+	return nil
 }
 
-func parseShortCutCtx(ref string) (*Reference, error) {
+func (r *Reference) parseShortCutCtx() error {
 	/* TODO
 	inside the shortcut context, there could be only
 	a single shortcut entry (Type ShortCutCell)
 	*/
-	r, err := parse(ref)
-	if err != nil {
-		return nil, err
-	}
 	if r.Row == "" {
-		return nil, fmt.Errorf("need row in shortcut reference")
+		return fmt.Errorf("need row in shortcut reference")
 	}
 	r.Type = ShortCutCell
-	return r, nil
+	return nil
 }
 
 type Reference struct {
@@ -608,6 +572,10 @@ func (r Reference) Valid() bool {
 func (r *Reference) Complete(ctx Reference) error {
 	switch ctx.Type {
 	case FileCtx:
+		err := r.parseFileCtx(ctx)
+		if err != nil {
+			return err
+		}
 		switch r.Type {
 		case File:
 			if r.File == "" {
@@ -634,6 +602,10 @@ func (r *Reference) Complete(ctx Reference) error {
 			return fmt.Errorf("invalid reference type: %s", ctx.Type)
 		}
 	case ScoreCtx:
+		err := r.parseScoreCtx(ctx)
+		if err != nil {
+			return err
+		}
 		switch r.Type {
 		case Score:
 			if r.File == "" && (r.Table == "" || r.Table == "=") {
@@ -661,6 +633,10 @@ func (r *Reference) Complete(ctx Reference) error {
 		}
 
 	case ScoreColCtx:
+		err := r.parseScoreColCtx(ctx)
+		if err != nil {
+			return err
+		}
 		switch r.Type {
 		case ShortCutCell:
 			if r.File == "" {
@@ -700,6 +676,10 @@ func (r *Reference) Complete(ctx Reference) error {
 			return fmt.Errorf("invalid reference type: %s", ctx.Type)
 		}
 	case ShortCutCtx:
+		err := r.parseShortCutCtx()
+		if err != nil {
+			return err
+		}
 		switch r.Type {
 		case ShortCutCell:
 			if r.File == "" {

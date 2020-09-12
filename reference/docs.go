@@ -24,7 +24,7 @@ within the parser....
 
 1. prepare and store the current context by calling one of NewFileCtx, NewShortCutCtx, NewScoreColCtx or NewScoreCtx
 2. check if the given string is a reference by calling IsReference
-3. if you have a reference, parse it via Parse(ref, ctx)
+3. if you have a reference, parse it via Parse(ref) and complete it via Complete(ctx) method
 4. act according to the reference type, the following reference types are available in the corresponding contexts
 
  context     | reference type  | what to do

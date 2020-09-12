@@ -158,10 +158,20 @@ func TestAll(t *testing.T) {
 		}
 		//		ctx.Type = test.ctxTyp
 
-		r, err := Parse(test.ref, *ctx)
+		r, err := Parse(test.ref)
 
 		if err != nil && !test.err {
 			t.Errorf("[%v] Parse(%#v,%#v) returns error: %#v", i, test.ref, test.ctx, err.Error())
+		}
+
+		if err != nil {
+			continue
+		}
+
+		err = r.Complete(*ctx)
+
+		if err != nil && !test.err {
+			t.Errorf("[%v] Complete(%#v,%#v) returns error: %#v", i, test.ref, test.ctx, err.Error())
 		}
 
 		if err != nil {
