@@ -681,8 +681,8 @@ func run() error {
 				name := versionate("muskel", v)
 				fmt.Fprintf(os.Stderr, "This is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
 					" points to version "+v.String()+
-					".\nTo preserve compatibility with your musical notation, the "+name+" binary will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
-					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\n or pass the --current option to let your file be parsed by the current version.\n\n")
+					".\nTo preserve compatibility with your musical notation, the binary \""+name+"\" will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
+					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\n or pass the --current option \nto let your file be parsed anyway.\n\n")
 
 				cmd := runVersionated(name, os.Args[1:])
 				cmd.Dir, _ = os.Getwd()
