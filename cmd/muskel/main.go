@@ -671,19 +671,18 @@ func run() error {
 		}
 	}
 
-	dir := filepath.Dir(argFile.Get())
-	writeMuskelVersion(dir)
+	srcdir := filepath.Dir(argFile.Get())
 
 	if !argIgnoreMuskelVersion.Get() {
 		var v *version
-		v, err = readMuskelVersion(dir)
+		v, err = readMuskelVersion(srcdir)
 		if err == nil {
 			if v.String() != VERSION {
 				name := Versionate("muskel", v)
 				fmt.Fprintf(os.Stderr, "this is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
 					"points to version "+v.String()+
 					"\ntherefor the "+name+" binary will be called. If you don't want this behavior or have no such file, "+
-					"remove the file "+filepath.Join(dir, MUSKEL_VERSION_FILE)+"or pass the --current option")
+					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"or pass the --current option")
 
 				cmd := runVersionated(name, os.Args)
 				cmd.Dir, _ = os.Getwd()
@@ -699,6 +698,8 @@ func run() error {
 			}
 		}
 	}
+
+	writeMuskelVersion(srcdir)
 
 	cmd, file, dir := runCmd()
 
