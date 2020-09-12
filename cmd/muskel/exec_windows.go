@@ -19,5 +19,9 @@ func notify(msg, details string) {
 }
 
 func runVersionated(file string, args []string) *exec.Cmd {
-	return exec.Command(file+".exe ", args...)
+	return exec.Command(file, args...)
+}
+
+func versionate(file string, v *version) string {
+	return Versionate(file+".exe", v)
 }

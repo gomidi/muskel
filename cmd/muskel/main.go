@@ -678,7 +678,7 @@ func run() error {
 		v, err = readMuskelVersion(srcdir)
 		if err == nil {
 			if v.String() != VERSION {
-				name := Versionate("muskel", v)
+				name := versionate("muskel", v)
 				fmt.Fprintf(os.Stderr, "This is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
 					" points to version "+v.String()+
 					".\nTo preserve compatibility with your musical notation, the "+name+" binary will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
