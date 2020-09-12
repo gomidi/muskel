@@ -6,12 +6,11 @@ get:
 	go get ./...
 
 build:
-	config build -v --workingdir='./cmd/muskel' --versiondir='.'
-	config build --workingdir='./cmd/muskel' --versiondir='.'
+	cd cmd/muskel && config build -v --versiondir='../../' && config build --versiondir='../../'
 
 release:
 	config release --versiondir='.' --package='muskel'
-	cd cmd/muskel && config build -v --workingdir='.' --versiondir='../../' && config build --workingdir='.' --versiondir='../../'
+	cd cmd/muskel && config build -v --versiondir='../../' && config build --versiondir='../../'
 
 test:
 	go test ./... -v -coverprofile .coverage.txt

@@ -27,7 +27,7 @@ func init() {
 }
 
 func writePredefinedTemplates() {
-	fmt.Printf("USER_DIR: %q\n", USER_DIR)
+	//fmt.Printf("USER_DIR: %q\n", USER_DIR)
 	for name, templ := range predefined.SketchesAndTokens {
 		p := filepath.Join(USER_DIR, name+".mskl")
 		if !score.FileExists(p) {

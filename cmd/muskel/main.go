@@ -613,7 +613,7 @@ func run() error {
 
 	if cfg.ActiveCommand() == cmdTemplate {
 		if argTemplFile.IsSet() && argTemplFile.Get() != "" {
-			p := filepath.Join(score.USER_DIR, argTemplFile.Get()+".mskl")
+			p := filepath.Join(muskel.USER_DIR, argTemplFile.Get()+".mskl")
 			// p := filepath.Join(score.USERDIR)
 			if !score.FileExists(p) {
 				return fmt.Errorf("no such template: %q", p)
@@ -630,17 +630,17 @@ func run() error {
 			return nil
 			//ioutil.ReadFile(muskel.USERDIR)
 		} else {
-			fls, err := ioutil.ReadDir(score.USER_DIR)
+			fls, err := ioutil.ReadDir(muskel.USER_DIR)
 			if err != nil {
-				return fmt.Errorf("can't read user directory %q: %s", score.USER_DIR, err.Error())
+				return fmt.Errorf("can't read user directory %q: %s", muskel.USER_DIR, err.Error())
 			}
 
 			if len(fls) == 0 {
-				fmt.Fprintf(os.Stdout, "There are no template files stored inside %s\n\n", score.USER_DIR)
+				fmt.Fprintf(os.Stdout, "There are no template files stored inside %s\n\n", muskel.USER_DIR)
 				return nil
 			}
 
-			fmt.Fprintf(os.Stdout, "The following template files are stored inside %s:\n\n", score.USER_DIR)
+			fmt.Fprintf(os.Stdout, "The following template files are stored inside %s:\n\n", muskel.USER_DIR)
 
 			for _, fl := range fls {
 				// fmt.Printf("|%-10v|\n", values[i])
