@@ -684,7 +684,7 @@ func run() error {
 					"\ntherefor the "+name+" binary will be called. If you don't want this behavior or have no such file, "+
 					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\n or pass the --current option\n\n")
 
-				cmd := runVersionated(name, os.Args)
+				cmd := runVersionated(name, os.Args[1:])
 				cmd.Dir, _ = os.Getwd()
 				cmd.Env = os.Environ()
 				var out []byte
