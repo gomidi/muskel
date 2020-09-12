@@ -10,3 +10,4 @@ todos
 .coverage.txt
 cover.out
 *.mskl
+cmd/muskel/artifacts
