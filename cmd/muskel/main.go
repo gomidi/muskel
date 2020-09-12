@@ -679,10 +679,10 @@ func run() error {
 		if err == nil {
 			if v.String() != VERSION {
 				name := Versionate("muskel", v)
-				fmt.Fprintf(os.Stderr, "this is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
-					"points to version "+v.String()+
-					"\ntherefor the "+name+" binary will be called. If you don't want this behavior or have no such file, "+
-					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\n or pass the --current option\n\n")
+				fmt.Fprintf(os.Stderr, "This is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
+					" points to version "+v.String()+
+					".\nTo preserve compatibility with your musical notation, the "+name+" binary will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
+					"remove the file "+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\n or pass the --current option to let your file be parsed by the current version.\n\n")
 
 				cmd := runVersionated(name, os.Args[1:])
 				cmd.Dir, _ = os.Getwd()
