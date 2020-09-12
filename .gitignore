@@ -6,3 +6,5 @@ cmd/muskel/muskel
 *.gide
 *.test
 todos
+.coverage.txt
+cover.out

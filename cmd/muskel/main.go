@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gen2brain/beeep"
+	//"github.com/gen2brain/beeep"
 	"github.com/metakeule/observe/lib/runfunc"
 	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
@@ -95,8 +95,7 @@ func fmtFile(file string, params []string, opts ...score.Option) error {
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while parsing MuSkeL: %s\n", err.Error())
-		beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
-		beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
+		alert("ERROR while parsing MuSkeL:", err)
 		return err
 	}
 
@@ -112,7 +111,7 @@ func fmtFile(file string, params []string, opts ...score.Option) error {
 	err = sc.Format()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
-		beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
+		alert("ERROR while writing formatting MuSkeL:", err)
 		return err
 	}
 
@@ -280,20 +279,20 @@ func (c *callbackrunner) cmdSMF(sc *score.Score) error {
 	err := sc.Unroll()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while unrolling MuSkeL score: %s\n", err.Error())
-		beeep.Alert("ERROR while unrolling MuSkeL score", err.Error(), "assets/warning.png")
+		alert("ERROR while unrolling MuSkeL score", err)
 		return err
 	}
 	err = muskel.WriteSMFFile(sc, c.outFile, smfwriter.TimeFormat(smf.MetricTicks(argSMFTicks.Get())))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
-		beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
+		alert("ERROR while converting MuSkeL to SMF", err)
 		return err
 	}
 
 	if argWatch.Get() {
 		fmt.Fprint(os.Stdout, ".")
 	}
-	beeep.Notify("OK MuSkeL converted to SMF", path.Base(c.outFile), "assets/information.png")
+	notify("OK MuSkeL converted to SMF", path.Base(c.outFile))
 	return nil
 }
 
@@ -328,14 +327,14 @@ func (c *callbackrunner) cmdPlay(sc *score.Score) error {
 	err := muskel.WriteSMFFile(sc, c.outFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
-		beeep.Alert("ERROR while converting MuSkeL to SMF", err.Error(), "assets/warning.png")
+		alert("ERROR while converting MuSkeL to SMF", err)
 		return err
 	}
 
 	if argWatch.Get() {
 		fmt.Fprint(os.Stdout, ".")
 	}
-	beeep.Notify("OK MuSkeL converted to SMF", path.Base(c.outFile), "assets/information.png")
+	notify("OK MuSkeL converted to SMF", path.Base(c.outFile))
 	cm := strings.TrimSpace(argPlayCmd.Get())
 	cm = strings.ReplaceAll(cm, "$_file", c.outFile)
 	if cm != "" {
@@ -469,8 +468,7 @@ func (c *callbackrunner) prepare(dir, file string) error {
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while parsing MuSkeL: %s\n", err.Error())
-		beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
-		beeep.Alert("ERROR while parsing MuSkeL:", err.Error(), "assets/warning.png")
+		alert("ERROR while parsing MuSkeL:", err)
 		return err
 	}
 
@@ -502,7 +500,7 @@ func (c *callbackrunner) prepare(dir, file string) error {
 		//ur, err = unroller.Unroll(sc)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while unrolling MuSkeL: %s\n", err.Error())
-			beeep.Alert("ERROR while unrolling MuSkeL:", err.Error(), "assets/warning.png")
+			alert("ERROR while unrolling MuSkeL:", err)
 			return err
 		}
 
@@ -522,7 +520,7 @@ func (c *callbackrunner) prepare(dir, file string) error {
 		err = sc.Format()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while writing formatting MuSkeL: %s\n", err.Error())
-			beeep.Alert("ERROR while writing formatting MuSkeL:", err.Error(), "assets/warning.png")
+			alert("ERROR while writing formatting MuSkeL:", err)
 			return err
 		}
 
