@@ -27,7 +27,7 @@ import (
 const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
 var (
-	cfg = config.MustNew("muskel", VERSION, "muskel is a musical sketch language")
+	cfg = config.MustNew("muskel", muskel.VERSION, "muskel is a musical sketch language")
 
 	argFile                = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
 	argIgnoreMuskelVersion = cfg.NewBool("current", "use the current version of the muskel command and ignore the "+MUSKEL_VERSION_FILE+" file", config.Default(false), config.Shortflag('c'))
@@ -109,7 +109,7 @@ func readMuskelVersion(dir string) (*version, error) {
 
 func writeMuskelVersion(dir string) error {
 	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
-	return ioutil.WriteFile(p, []byte(VERSION), 0644)
+	return ioutil.WriteFile(p, []byte(muskel.VERSION), 0644)
 }
 
 func fmtFile(file string, params []string, opts ...score.Option) error {
@@ -677,9 +677,9 @@ func run() error {
 		var v *version
 		v, err = readMuskelVersion(srcdir)
 		if err == nil {
-			if v.String() != VERSION {
+			if v.String() != muskel.VERSION {
 				name := versionate("muskel", v)
-				fmt.Fprintf(os.Stderr, "This is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
+				fmt.Fprintf(os.Stderr, "This is version "+muskel.VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
 					" points to version "+v.String()+
 					".\nTo preserve compatibility with your musical notation, the binary \""+name+"\" will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
 					"\nremove the file \""+filepath.Join(srcdir, MUSKEL_VERSION_FILE)+"\"\nor pass the \"--current\" option to let your file be parsed anyway.\n\n")
