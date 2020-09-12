@@ -24,15 +24,18 @@ import (
 	"gitlab.com/metakeule/config"
 )
 
+const MUSKEL_VERSION_FILE = "muskel_version.txt"
+
 var (
 	cfg = config.MustNew("muskel", VERSION, "muskel is a musical sketch language")
 
-	argFile   = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
-	argSketch = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
-	argFlow   = cfg.NewBool("flow", "flow mode; sets sketch to ! and pattern to !", config.Default(false))
-	argParams = cfg.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
-	argPatt   = cfg.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
-	argFmt    = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
+	argFile                = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
+	argIgnoreMuskelVersion = cfg.NewBool("current", "use the current version of the muskel command and ignore the "+MUSKEL_VERSION_FILE+" file", config.Default(false), config.Shortflag('c'))
+	argSketch              = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
+	argFlow                = cfg.NewBool("flow", "flow mode; sets sketch to ! and pattern to !", config.Default(false))
+	argParams              = cfg.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
+	argPatt                = cfg.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
+	argFmt                 = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
 	//argAddMissing = cfg.NewBool("addprops", "add missing properties")
 	argWatch      = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
 	argDir        = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
@@ -88,6 +91,25 @@ func fileCheckSum(file string) string {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func readMuskelVersion(dir string) (*version, error) {
+	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
+	b, err := ioutil.ReadFile(p)
+	if err != nil {
+		return nil, err
+	}
+	v, err2 := parseVersion(strings.TrimSpace(string(b)))
+	if err2 != nil {
+		return nil, err2
+	}
+
+	return v, nil
+}
+
+func writeMuskelVersion(dir string) error {
+	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
+	return ioutil.WriteFile(p, []byte(VERSION), 0644)
 }
 
 func fmtFile(file string, params []string, opts ...score.Option) error {
@@ -646,6 +668,35 @@ func run() error {
 			}
 
 			return nil
+		}
+	}
+
+	dir := filepath.Dir(argFile.Get())
+	writeMuskelVersion(dir)
+
+	if !argIgnoreMuskelVersion.Get() {
+		var v *version
+		v, err = readMuskelVersion(dir)
+		if err == nil {
+			if v.String() != VERSION {
+				name := Versionate("muskel", v)
+				fmt.Fprintf(os.Stderr, "this is version "+VERSION+" of muskel and your "+MUSKEL_VERSION_FILE+
+					"points to version "+v.String()+
+					"\ntherefor the "+name+" binary will be called. If you don't want this behavior or have no such file, "+
+					"remove the file "+filepath.Join(dir, MUSKEL_VERSION_FILE)+"or pass the --current option")
+
+				cmd := runVersionated(name, os.Args)
+				cmd.Dir, _ = os.Getwd()
+				cmd.Env = os.Environ()
+				var out []byte
+				out, err = cmd.CombinedOutput()
+				if err != nil {
+					fmt.Fprintln(os.Stderr, out)
+					os.Exit(1)
+				}
+				fmt.Fprintln(os.Stdout, out)
+				os.Exit(0)
+			}
 		}
 	}
 

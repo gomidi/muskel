@@ -3,8 +3,9 @@
 package main
 
 import (
-	"github.com/gen2brain/beeep"
 	"os/exec"
+
+	"github.com/gen2brain/beeep"
 )
 
 func execCommand(c string) *exec.Cmd {
@@ -18,4 +19,8 @@ func alert(msg string, err error) {
 
 func notify(msg, details string) {
 	beeep.Notify(msg, details, "assets/information.png")
+}
+
+func runVersionated(file string, args []string) *exec.Cmd {
+	return exec.Command(file, args...)
 }
