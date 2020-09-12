@@ -656,7 +656,7 @@ func run() error {
 
 	if !argIgnoreMuskelVersion.Get() {
 		var v *muskel.Version
-		v, err = muskel.ReadVERSIONFile(srcdir)
+		v, err = muskel.ReadWDVersionFile(srcdir)
 		if err == nil {
 			if v.String() != muskel.VERSION {
 				name := versionate("muskel", v)
@@ -682,7 +682,7 @@ func run() error {
 				os.Exit(0)
 			}
 		}
-		muskel.WriteVersionFile(srcdir)
+		muskel.WriteWDVersionFile(srcdir)
 	}
 
 	cmd, file, dir := runCmd()

@@ -17,7 +17,7 @@ import (
 
 const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
-func ReadVersionFile(dir string) (*Version, error) {
+func ReadWDVersionFile(dir string) (*Version, error) {
 	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
 	b, err := ioutil.ReadFile(p)
 	if err != nil {
@@ -31,7 +31,7 @@ func ReadVersionFile(dir string) (*Version, error) {
 	return v, nil
 }
 
-func WriteVersionFile(dir string) error {
+func WriteWDVersionFile(dir string) error {
 	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
 	return ioutil.WriteFile(p, []byte(VERSION), 0644)
 }
