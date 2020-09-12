@@ -690,7 +690,7 @@ func run() error {
 				var out []byte
 				out, err = cmd.CombinedOutput()
 				if err != nil {
-					fmt.Fprintln(os.Stderr, string(out))
+					fmt.Fprintln(os.Stderr, "Error when calling %q: "+string(out))
 					os.Exit(1)
 				}
 				fmt.Fprintln(os.Stdout, string(out))
