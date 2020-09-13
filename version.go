@@ -1,2 +1,2 @@
-package main
-const VERSION="1.0.30"
+package muskel
+const VERSION="1.0.31"
