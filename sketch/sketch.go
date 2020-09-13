@@ -314,10 +314,12 @@ func (p *Sketch) parseBarLine(data string) error {
 
 	}
 
-	if data[0] == '$' {
-		p.barChangeRequired = true
-		return p.parseCommandLF(data)
-	}
+	/*
+		if data[0] == '$' {
+			p.barChangeRequired = true
+			return p.parseCommandLF(data)
+		}
+	*/
 
 	// its a jump
 	/*
@@ -818,7 +820,8 @@ func (p *Sketch) parseInclude(r *reference.Reference, data string) error {
 	return nil
 }
 
-func (p *Sketch) parseCommandLF(data string) error {
+// should be deprecated
+func (p *Sketch) _parseCommandLF(data string) error {
 	p.barChangeRequired = true
 	var c items.Command
 	err := c.Parse(data, 0)

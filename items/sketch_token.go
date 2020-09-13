@@ -79,12 +79,7 @@ func (pc *sketchToken) modifyEvents(start uint, until uint, evts []*Event) (evt 
 		evt = append(evt, nuEv)
 	}
 
-	evt, end = SliceEvents(pc.token.Slice, evt, projectedBarEnd)
-
-	if pc.token.Slice[0] > 0 {
-		evt = MoveBySyncFirst(evt)
-		evt = ForwardEvents(evt, start)
-	}
+	end = projectedBarEnd
 
 	return
 }

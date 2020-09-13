@@ -10,17 +10,13 @@ func TestSimpleTemplateParse(t *testing.T) {
 		data   string
 		name   string
 		params []string
-		_slice [2]int
 	}{
-		{"=hiho(a,d,e)", "=hiho", []string{"a", "d", "e"}, [2]int{-1, -1}},
-		{"=hi.ho(a,d,e)", "=hi.ho", []string{"a", "d", "e"}, [2]int{-1, -1}},
-		{"=hi.ho(=hu.ho,d,e)", "=hi.ho", []string{"=hu.ho", "d", "e"}, [2]int{-1, -1}},
-		{"=.ho(=hu.ho,d,e)", "=.ho", []string{"=hu.ho", "d", "e"}, [2]int{-1, -1}},
-		{"=hiho(a,d,e)[:2]", "=hiho", []string{"a", "d", "e"}, [2]int{0, 2}},
-		{"=hiho(a,d,(e))[:2]", "=hiho", []string{"a", "d", "(e)"}, [2]int{0, 2}},
-		{"=hiho(a,d,(e))[2:]", "=hiho", []string{"a", "d", "(e)"}, [2]int{2, -1}},
-		{"=hiho(a,d,(e))[2:4]", "=hiho", []string{"a", "d", "(e)"}, [2]int{2, 4}},
-		{"=hiho(a,d,(e f g))[:2]", "=hiho", []string{"a", "d", "(e f g)"}, [2]int{0, 2}},
+		{"=hiho(a,d,e)", "=hiho", []string{"a", "d", "e"}},
+		{"=hi.ho(a,d,e)", "=hi.ho", []string{"a", "d", "e"}},
+		{"=hi.ho(=hu.ho,d,e)", "=hi.ho", []string{"=hu.ho", "d", "e"}},
+		{"=.ho(=hu.ho,d,e)", "=.ho", []string{"=hu.ho", "d", "e"}},
+		{"=hiho(a,d,(e))", "=hiho", []string{"a", "d", "(e)"}},
+		{"=hiho(a,d,(e f g))", "=hiho", []string{"a", "d", "(e f g)"}},
 	}
 
 	//var pp Parser
@@ -41,10 +37,6 @@ func TestSimpleTemplateParse(t *testing.T) {
 
 		if !reflect.DeepEqual(p.Params, test.params) {
 			t.Errorf("[%v] PatternCall.SimpleParse(%q,0); params: %#v // expected: %#v", i, test.data, p.Params, test.params)
-		}
-
-		if !reflect.DeepEqual(p.Slice, test._slice) {
-			t.Errorf("[%v] PatternCall.SimpleParse(%q,0); slice: %v // expected: %v", i, test.data, p.Slice, test._slice)
 		}
 	}
 }

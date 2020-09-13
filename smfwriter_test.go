@@ -4043,6 +4043,7 @@ Ch     | 1   |
 		//79: true,
 		//80: true,
 		//104: true,
+		83: true,
 	}
 
 	//sketch.DEBUG = true

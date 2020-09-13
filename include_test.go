@@ -9,7 +9,7 @@ import (
 )
 
 func TestInclude(t *testing.T) {
-	//t.Skip()
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -755,8 +755,8 @@ TRACK | x | y |
 
 =SCORE | x            | y           |
 #  \major^c"
- 1     |              | =patt.2[1:] |
- 4&    | =!patt.2[1:] |             |
+ 1     |              | $from(=patt.2,2) |
+ 4&    | $from(=!patt.2,2) |             |
 *1
 `,
 			`
@@ -3280,6 +3280,7 @@ TRACK | Drums |
 		//99:  true,
 		//100: true,
 		//101: true,
+		//24: true,
 	}
 
 	for i, test := range tests {
@@ -3287,13 +3288,13 @@ TRACK | Drums |
 		//fmt.Printf("############ %v ###############\n", i)
 
 		/*
-				if i != 36 {
-					continue
-				}
-
-			if i != 23 {
+			if i != 24 {
 				continue
 			}
+
+				if i != 23 {
+					continue
+				}
 		*/
 
 		if skip[i] {

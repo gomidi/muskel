@@ -189,13 +189,7 @@ func (pc *sketchPattern) modifyEvents(start uint, until uint, evts []*Event) (ev
 		evt = append(evt, nuEv)
 	}
 
-	evt, end = SliceEvents(pc.pattern.Slice, evt, projectedBarEnd)
-
-	if pc.pattern.Slice[0] > 0 {
-		evt = MoveBySyncFirst(evt)
-		evt = ForwardEvents(evt, start)
-	}
-
+	end = projectedBarEnd
 	return
 }
 

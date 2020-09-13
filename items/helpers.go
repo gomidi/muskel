@@ -286,19 +286,21 @@ func ReplaceParams(s string, params []string) string {
 	})
 }
 
-// sliceEvents slices the events according to the template call slice definition
-func SliceEvents(slice [2]int, all []*Event, projectedBarEnd uint) (evs []*Event, absoluteEnd uint) {
+// sliceEvents slices the events
+func SliceEvents(slice [2]int, all []*Event) (evs []*Event) {
 	first, last := slice[0], slice[1]
-	absoluteEnd = projectedBarEnd
+	if first < 0 && last < 0 {
+		return all
+	}
+
 	if first < 0 {
-		return all, projectedBarEnd
+		first = 0
 	}
 
 	var collecting bool
 
 	for i, ev := range all {
 		if last > 0 && i >= last {
-			absoluteEnd = ev.Position
 			break
 		}
 
