@@ -3291,6 +3291,38 @@ kick      | 'drumnote.drums.kd |
     1                    | MN36::: |
 `,
 		},
+		{ // 108
+			`
+
+TRACK | Drums |
+
+=SCORE | Drums |
+#
+1  |  'testdata/includes/score3=template.drums(MN36:::,MN40:::)    | 
+`,
+			`
+=SCORE                   | Drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+    2                    | MN40::: |
+`,
+		},
+		{ // 109
+			`
+
+TRACK | drums |
+
+=SCORE | drums |
+#
+1  |  'testdata/includes/score3=template.(MN36:::,MN40:::)    | 
+`,
+			`
+=SCORE                   | drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+    2                    | MN40::: |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren

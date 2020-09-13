@@ -26,12 +26,19 @@ func (c *CellReference) Dup() Item {
 }
 
 func (c *CellReference) GetItem(targetCol string) (Item, error) {
-	ctx := reference.NewScoreColCtx("notimportant-file", "=SCORE", targetCol)
+	ctx := reference.NewScoreColCtx("notimportant-file", "=SCORE", "."+targetCol)
 
+	if DEBUG {
+		fmt.Printf("before complete: %#v\n", c.Reference)
+	}
 	err := c.Reference.Complete(ctx)
 
 	if err != nil {
 		return nil, err
+	}
+
+	if DEBUG {
+		fmt.Printf("after complete: %#v\n", c.Reference)
 	}
 
 	switch c.Reference.Type {
@@ -39,7 +46,10 @@ func (c *CellReference) GetItem(targetCol string) (Item, error) {
 		var pt Pattern
 		pt.Params = c.params
 		pt.IncludeFile = c.Reference.File
-		pt.Name = c.Reference.Table + "." + c.Reference.Col
+		pt.Name = c.Reference.Table + c.Reference.Col
+		//	fmt.Printf("data was: %q\n", c.data)
+		//fmt.Printf("params was: %v\n", c.params)
+		//	fmt.Printf("pattern name set to: %q\n", pt.Name)
 		// TODO what to do about the other properties?? dynamic add etc
 		return &pt, nil
 		// include a col
@@ -47,7 +57,8 @@ func (c *CellReference) GetItem(targetCol string) (Item, error) {
 		var pt Pattern
 		pt.Params = c.params
 		pt.IncludeFile = c.Reference.File
-		pt.Name = c.Reference.Table + "." + c.Reference.Col
+		pt.Name = c.Reference.Table + c.Reference.Col
+		//		fmt.Printf("pattern name set to: %q\n", pt.Name)
 		pt.Part = c.Reference.Part
 		// TODO what to do about the other properties?? dynamic add etc
 		return &pt, nil
@@ -56,11 +67,7 @@ func (c *CellReference) GetItem(targetCol string) (Item, error) {
 		// include an external token
 		var t Token
 		t.IncludeFile = c.Reference.File
-		if c.Reference.Col != "" {
-			t.Name = c.Reference.Table + "." + c.Reference.Row + "." + c.Reference.Col
-		} else {
-			t.Name = c.Reference.Table + "." + c.Reference.Row
-		}
+		t.Name = c.Reference.Table + c.Reference.Row + c.Reference.Col
 		t.itemGroupModifier.Params = c.params
 		// TODO what to do about the other properties of itemGroupModifier?? dynamic add, slicing with [] etc
 		return &t, nil
@@ -81,7 +88,7 @@ func (c *CellReference) Parse(data string, posIn32th uint) error {
 		c.data = data
 	}
 
-	r, err := reference.Parse(data)
+	r, err := reference.Parse(c.data)
 	if err != nil {
 		return err
 	}

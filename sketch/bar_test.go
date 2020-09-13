@@ -120,7 +120,7 @@ func TestBars(t *testing.T) {
 			[]string{
 				"[0] #0 @120.00 3/4 [A]",
 				"[24] #1 @120.00 4/4 [B]",
-				`[56] #2 @0.00 ("testinclude"."=testscore" len: 40)`,
+				`[56] #2 @0.00 ("testinclude"."=SCORE" len: 40)`,
 				"[96] #3 @120.00 6/8 [C]",
 				"[120] #4 @0.00 [->B]",
 				"[192] #5 @120.00 4/4",
@@ -142,8 +142,8 @@ func TestBars(t *testing.T) {
 			[]string{
 				"[0] #0 @120.00 3/4 [A]",
 				"[24] #1 @120.00 4/4 [B]",
-				`[56] #2 @0.00 ("testinclude"."=testscore" len: 40)`,
-				`[96] #3 @0.00 ("testinclude"."=testscore" len: 40)`,
+				`[56] #2 @0.00 ("testinclude"."=SCORE" len: 40)`,
+				`[96] #3 @0.00 ("testinclude"."=SCORE" len: 40)`,
 				"[136] #4 @120.00 6/8",
 				"[160] #5 @0.00 [->B]",
 				"[296] #6 @120.00 4/4",

@@ -334,6 +334,23 @@ func (sc *Score) findInclude(filename string) (fname string, err error) {
 	return FindInclude(filepath.Dir(sc.mainFile), filename)
 }
 
+func (sc *Score) GetExternalSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
+	if sketch_table == "" {
+		sketch_table = "=SCORE"
+	}
+
+	if sketch_table[0] != '=' {
+		return nil, fmt.Errorf("GetExternalSketch is only allowed for patterns, but got: %q", sketch_table)
+	}
+
+	s, err := sc.External(filename, params)
+	if err != nil {
+		return nil, fmt.Errorf("can't parse file %q for external sketch %q: %s", filename, sketch_table, err.Error())
+	}
+
+	return s.GetSketch(sketch_table)
+}
+
 func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
 
 	//fmt.Printf("GetIncludedSketch(%q,%q)\n", filename, sketch_table)

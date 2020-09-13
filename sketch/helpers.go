@@ -53,9 +53,9 @@ func EventsFromSketchDef(name string, sketchDef [][2]string, sc Score, params []
 	return
 }
 
-func findPattern(fromSketch *Sketch, fromCol string, patternName string) (sk *Sketch, column string, err error) {
+func findPattern(fromSketch *Sketch, fromCol string, patternFile string, patternName string, args []string) (sk *Sketch, column string, err error) {
 	var rs = &patternFinder{fromSketch}
-	return rs.FindPattern(fromCol, patternName)
+	return rs.FindPattern(patternFile, fromCol, patternName, args)
 }
 
 type patterncmdHelper struct {

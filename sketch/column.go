@@ -30,8 +30,8 @@ func (c *column) Lyric(name string, from, to int) ([]string, error) {
 	return c.sketch.Score.Lyric(name, from, to)
 }
 
-func (c *column) findPattern(pattern string) (sk *Sketch, colname string, err error) {
-	return findPattern(c.sketch, c.name, pattern)
+func (c *column) findPattern(patternFile, pattern string, args []string) (sk *Sketch, colname string, err error) {
+	return findPattern(c.sketch, c.name, patternFile, pattern, args)
 }
 
 func (c *column) EndPosition() uint {
@@ -100,7 +100,7 @@ func (c *column) GetToken(file string, origName string, params []string) (val st
 func (c *column) UnrollPattern(start uint, until uint, patt *items.Pattern) (evt []*items.Event, diff uint, end uint, err error) {
 	var sk *Sketch
 	var colname string
-	sk, colname, err = c.findPattern(patt.Name)
+	sk, colname, err = c.findPattern(patt.IncludeFile, patt.Name, patt.Params)
 	if err != nil {
 		return
 	}
