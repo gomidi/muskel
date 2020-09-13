@@ -44,7 +44,7 @@ func (r *patternFinder) FindPattern(includefile string, callingCol string, callN
 		}
 	}
 
-	if sname == r.fromSketch.Name {
+	if includefile == "" && sname == r.fromSketch.Name {
 		err = fmt.Errorf("can't resolve pattern name %q: same sketch must be referrenced via =.col", callName)
 		return
 	}
