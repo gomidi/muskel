@@ -17,8 +17,21 @@ func NewSketch(name string, lineNo int, sc Score) *Sketch {
 }
 
 func (s *Sketch) addCols() {
-	for _, name := range s.Table.Cols() {
-		s.sketch.AddColumn(name)
+	s.sketch.SetRealColNum(len(s.Table.Cols()))
+	for i, name := range s.Table.Cols() {
+		cols := strings.Split(strings.TrimSpace(name), " ")
+
+		var subCols []string
+
+		for _, cl := range cols {
+			cl = strings.TrimSpace(cl)
+			subCols = append(subCols, cl)
+			s.sketch.AddColumn(cl)
+		}
+
+		if len(subCols) > 1 {
+			s.sketch.SetGroupCol(i, subCols)
+		}
 	}
 }
 

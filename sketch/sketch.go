@@ -54,6 +54,8 @@ type Sketch struct {
 	Score             Score
 	File              string
 	barChangeRequired bool
+	RealColNum        int // is in the file, i.e. a group column counts as 1
+	GroupCols         map[int][]string
 
 	includes            []*include
 	colOrder            []string
@@ -81,6 +83,7 @@ func New(name string, sc Score) *Sketch {
 		currentTimeSignatur: [2]uint8{4, 4},
 		currentTempo:        120,
 		currentBeat:         0,
+		GroupCols:           map[int][]string{},
 	}
 
 	if sk.isScore() {
@@ -91,6 +94,14 @@ func New(name string, sc Score) *Sketch {
 		sk.currentScale = scale
 	}
 	return sk
+}
+
+func (s *Sketch) SetRealColNum(n int) {
+	s.RealColNum = n
+}
+
+func (s *Sketch) SetGroupCol(pos int, subcols []string) {
+	s.GroupCols[pos] = subcols
 }
 
 func (s *Sketch) calcColWidth(colName string) (colWidth int) {
@@ -727,7 +738,7 @@ func (p *Sketch) parseScale(data string, b *items.Bar) error {
 }
 
 func (p *Sketch) getColumnData(tabs []string) (colData []string, lastColumn string) {
-	numCols := len(p.Columns)
+	numCols := p.RealColNum // len(p.Columns)
 	if len(tabs)-2 > numCols {
 		numCols = len(tabs) - 2
 	}
@@ -965,13 +976,24 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 	}
 
 	for i, data := range colsData {
-		data = strings.TrimSpace(data)
+
 		if i < len(s.colOrder) {
-			colName := s.colOrder[i]
-			if s.isScore() && !s.Score.HasTrack(colName) {
-				return fmt.Errorf("can't find track %q", colName)
+
+			//if s.
+			var cls = []string{s.colOrder[i]}
+
+			if subs, has := s.GroupCols[i]; has {
+				cls = subs
 			}
-			s.Columns[colName] = append(s.Columns[colName], data)
+
+			data = strings.TrimSpace(data)
+
+			for _, c := range cls {
+				if s.isScore() && !s.Score.HasTrack(c) {
+					return fmt.Errorf("there is no track with the name %q", c)
+				}
+				s.Columns[c] = append(s.Columns[c], data)
+			}
 		}
 	}
 
@@ -982,6 +1004,11 @@ func (p *Sketch) AddColumn(name string) {
 	if disallowedColNames[name] {
 		panic(fmt.Sprintf("%q is not allowed as a column name of a sketch", name))
 	}
+
+	if len(strings.Split(name, " ")) > 1 {
+		panic(fmt.Sprintf("can't add group column %q", name))
+	}
+	//fmt.Printf("AddColumn %q\n", name)
 	p.colOrder = append(p.colOrder, name)
 	p.Columns[name] = []string{}
 }

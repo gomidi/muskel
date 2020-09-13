@@ -274,7 +274,7 @@ func (sc *Score) GetTrack(track string) (*track.Track, error) {
 	tr, has := sc.Tracks[track]
 	if !has {
 		// panic(fmt.Sprintf("can't find track %q", track))
-		return nil, fmt.Errorf("can't find track %q", track)
+		return nil, fmt.Errorf("can't find the track %q", track)
 	}
 	return tr, nil
 }
@@ -335,6 +335,7 @@ func (sc *Score) findInclude(filename string) (fname string, err error) {
 }
 
 func (sc *Score) GetExternalSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
+	//fmt.Printf("GetExternalSketch called for %q in %q\n", sketch_table, filename)
 	if sketch_table == "" {
 		sketch_table = "=SCORE"
 	}
@@ -348,7 +349,13 @@ func (sc *Score) GetExternalSketch(filename, sketch_table string, params []strin
 		return nil, fmt.Errorf("can't parse file %q for external sketch %q: %s", filename, sketch_table, err.Error())
 	}
 
+	//fmt.Printf("after External: %v\n", s.Sketches)
+
 	return s.GetSketch(sketch_table)
+}
+
+func (sc *Score) SetRealColNum(n int) {
+	panic("don't call me")
 }
 
 func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
@@ -417,6 +424,10 @@ func (sc *Score) applyAmbitus(unrolled []*items.Event, ambitus [2]string, ambitu
 	return
 }
 
+func (sc *Score) SetGroupCol(int, []string) {
+	panic("don't call me")
+}
+
 func (sc *Score) Unroll() error {
 	if sc.IsUnrolled {
 		return nil
@@ -454,6 +465,8 @@ func (sc *Score) Unroll() error {
 		col = sc.findMostExclamedCol(sketch)
 	}
 
+	//fmt.Printf("col: %q\n", col)
+
 	switch {
 	case col != "":
 		_col := col
@@ -490,16 +503,22 @@ func (sc *Score) Unroll() error {
 		//fmt.Printf("%v\n", sc.Tracks)
 		for c := range sketch.Columns {
 			//tr, _ := sc.GetTrack(strings.Trim(c, "!"))
+
 			tr, _ := sc.GetTrack(c)
 			if tr == nil {
 				//panic(fmt.Sprintf("could not find track %q\n", col))
 				return fmt.Errorf("could not find track %q\n", c)
 			}
 
+			//fmt.Printf("sketch Column: %q, track: %q\n", c, tr.Name)
+			//fmt.Printf("unrolling column %q track %q of sketch %q with params %v\n", c, tr.Name, sketch.Name, params[c])
+
 			events, err := sketch.Unroll(tr, c, params[c]...)
 			if err != nil {
-				return fmt.Errorf("error while unrolling column %q of sketch %q with params %v: %s", c, sketch.Name, params[c], err.Error())
+				return fmt.Errorf("error while unrolling column %q track %q of sketch %q with params %v: %s", c, tr.Name, sketch.Name, params[c], err.Error())
 			}
+
+			//fmt.Printf("succeded with track: %q\n", tr.Name)
 
 			sc.Unrolled[tr.Name] = sc.replaceScalenotesForCol(tr.Name, events)
 		}
@@ -1049,6 +1068,8 @@ func (sc *Score) AddTimbre(t *timbre.Timbre) {
 func (sc *Score) AddSketch(name string) interface {
 	ParseLine([]string) error
 	AddColumn(string)
+	SetRealColNum(n int)
+	SetGroupCol(int, []string)
 } {
 	//fmt.Printf("AddSketch %q called\n", name)
 	if idx := strings.Index(name, "!"); idx > 0 {
@@ -1120,7 +1141,7 @@ func (sc *Score) GetSketch(name string) (*sketch.Sketch, error) {
 	}
 
 	s.File = sc.mainFile
-
+	//fmt.Printf("returning sketch %q from file %q\n", name, s.File)
 	return s, nil
 }
 
@@ -1205,6 +1226,7 @@ func (sc *Score) External(filename string, params []string) (*Score, error) {
 	}
 	sco, has := sc.includedScores[fname]
 	if has {
+		//fmt.Printf("has included score %q\n", fname)
 		return sco, nil
 	}
 
@@ -1213,6 +1235,7 @@ func (sc *Score) External(filename string, params []string) (*Score, error) {
 	if err != nil {
 		return nil, err
 	}
+	sc.includedScores[fname] = sco
 	return sco, nil
 }
 

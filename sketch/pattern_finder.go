@@ -20,6 +20,8 @@ func (r *patternFinder) FindPattern(includefile string, callingCol string, callN
 	  tatsächlich erste spalte genommen
 	*/
 
+	//fmt.Printf("FindPattern includefile: %q callingCol: %q callName: %q\n", includefile, callingCol, callName)
+
 	callName = strings.TrimSpace(callName)
 	callingCol = strings.TrimSpace(callingCol)
 
@@ -84,5 +86,11 @@ func (r *patternFinder) FindPattern(includefile string, callingCol string, callN
 		}
 	}
 
+	//fmt.Printf("FindPattern includefile: %q sname: %q colName: %q\n", includefile, sname, colName)
+	/*
+		if len(strings.Split(colName, " ")) > 1 {
+			panic(colName)
+		}
+	*/
 	return
 }

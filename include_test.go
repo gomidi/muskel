@@ -3323,6 +3323,85 @@ TRACK | drums |
     2                    | MN40::: |
 `,
 		},
+		{ // 110
+			`
+
+TRACK | vocals |
+
+=SCORE | vocals |
+#
+1  |  'testdata/includes/score   | 
+`,
+			`
+=SCORE                   | vocals |
+ # 4/4 @120.00 \major^c'
+    1                    | e"     |
+    2&                   | c      |
+`,
+		},
+		{ // 111
+			`
+
+TRACK | Piano |
+
+=SCORE | Piano |
+#
+1  |  'testdata/includes/score=.   | 
+`,
+			`
+=SCORE                   | Piano |
+ # 4/4 @120.00 \major^c'
+    1                    | f"    |
+    2&                   | d     |
+`,
+		},
+		{ // 112
+			`
+
+TRACK | Piano | Voc
+
+=SCORE | Piano Voc |
+#
+1  |  'testdata/includes/score=.   | 
+`,
+			`
+=SCORE                   | Piano | Voc |
+ # 4/4 @120.00 \major^c'
+    1                    | f"    | e"  |
+    2&                   | d     | c   |
+`,
+		},
+		{ // 113
+			`
+
+TRACK | Piano | Voc
+
+=SCORE | Piano Voc |
+#
+1  |  f"   | 
+`,
+			`
+=SCORE                   | Piano | Voc |
+ # 4/4 @120.00 \major^c'
+    1                    | f"    | f"  |
+`,
+		},
+		{ // 114 TODO: fix this!
+			`
+
+TRACK | Piano | Voc
+
+=SCORE | Piano Voc |
+#
+1  |  'testdata/includes/score4=.   | 
+`,
+			`
+=SCORE                   | Piano | Voc |
+ # 4/4 @120.00 \major^c'
+    1                    | e"    | e"  |
+    2&                   | c     | c   |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -3369,6 +3448,8 @@ TRACK | drums |
 		//100: true,
 		//101: true,
 		//24: true,
+		//112: true,
+		114: true,
 	}
 
 	for i, test := range tests {
@@ -3376,7 +3457,7 @@ TRACK | drums |
 		//fmt.Printf("############ %v ###############\n", i)
 
 		/*
-			if i != 24 {
+			if i != 114 {
 				continue
 			}
 
@@ -3626,6 +3707,40 @@ TRACK    | Voc | Drums | Piano |
 
 `,
 		},
+		{ // 6
+			`
+
+TRACK | Piano | Voc
+
+=SCORE | Piano Voc |
+#
+1  |  f"   | 
+		`,
+			`
+TRACK    | Piano | Voc |
+
+=SCORE   | Piano Voc |
+ #
+    1    | f"        | 
+		`,
+		},
+		{ // 7
+			`
+
+TRACK | Piano | Voc
+
+=SCORE | Piano Voc |
+#
+1  |  'drumnote.drums.kd   | 
+		`,
+			`
+TRACK    | Piano | Voc |
+
+=SCORE   | Piano Voc          |
+ #
+    1    | 'drumnote.drums.kd | 
+		`,
+		},
 	}
 
 	//  score.DEBUG = true
@@ -3661,7 +3776,7 @@ TRACK    | Voc | Drums | Piano |
 		err := muskel.Format("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
 
 		if err != nil {
-			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
+			t.Errorf("[%v] could not format score YYY: %s\n%s\n", i, err.Error(), test.input)
 			continue
 		}
 
