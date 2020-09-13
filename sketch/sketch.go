@@ -151,7 +151,7 @@ func (s *Sketch) getBarIdxOf(pos uint) (baridx int) {
 }
 
 // loop = 0: column is not looped; loop > 0: column is looped n times
-func (s *Sketch) parseEvents(syncFirst bool, data []string, origEndPos uint) (es *items.EventStream, err error) {
+func (s *Sketch) parseEvents(column string, syncFirst bool, data []string, origEndPos uint) (es *items.EventStream, err error) {
 	es = &items.EventStream{}
 
 	var lastNoRestItem items.Item
@@ -169,6 +169,14 @@ func (s *Sketch) parseEvents(syncFirst bool, data []string, origEndPos uint) (es
 
 		if ev.Item != items.Rest {
 			lastNoRestItem = ev.Item
+		}
+
+		if cr, isCr := ev.Item.(*items.CellReference); isCr {
+			it, err := cr.GetItem(column)
+			if err != nil {
+				return nil, fmt.Errorf("can't get item out of cell reference: %s", err.Error())
+			}
+			ev.Item = it
 		}
 
 		if inc, isInc := ev.Item.(items.Include); isInc {

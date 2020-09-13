@@ -56,11 +56,11 @@ func (cl *column) ApplyLyricsTable(lt *items.LyricsTable, evts []*items.Event) (
 	return lt.ApplyLyrics(cl, evts)
 }
 
-func (c *column) ParseEvents(syncfirst bool, data []string) (es *items.EventStream, err error) {
-	return c.sketch.parseEvents(syncfirst, data, c.sketch.projectedBarEnd)
+func (c *column) ParseEvents(column string, syncfirst bool, data []string) (es *items.EventStream, err error) {
+	return c.sketch.parseEvents(column, syncfirst, data, c.sketch.projectedBarEnd)
 }
 
-func (c *column) GetToken(origName string, params []string) (val string, err error) {
+func (c *column) GetToken(file string, origName string, params []string) (val string, err error) {
 	var table, colname string
 	idx := strings.Index(origName[1:], ".")
 
@@ -86,7 +86,12 @@ func (c *column) GetToken(origName string, params []string) (val string, err err
 		token += "." + colname
 	}
 
-	val, err = c.sketch.Score.GetToken(token)
+	if file != "" {
+		val, err = c.sketch.Score.GetExternalToken(file, token)
+	} else {
+		val, err = c.sketch.Score.GetToken(token)
+	}
+
 	val = items.ReplaceParams(val, params)
 	return
 
@@ -261,7 +266,7 @@ func (c *column) Call(originalEndPos uint, syncFirst bool, params ...string) (ev
 	//var loop uint
 	var es *items.EventStream
 
-	es, err = s.parseEvents(syncFirst, data, endPos)
+	es, err = s.parseEvents(c.name, syncFirst, data, endPos)
 
 	if err != nil {
 		return

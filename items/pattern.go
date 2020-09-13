@@ -8,8 +8,8 @@ import (
 )
 
 type Pattern struct {
-	Name   string
-	Params []string
+	Name                               string
+	Params                             []string
 	SyncFirst                          bool
 	firstPos                           uint
 	DynamicAdd                         string
@@ -22,12 +22,14 @@ type Pattern struct {
 	Repeat                             uint
 	Lyrics                             *LyricsTable
 	Exploded                           bool // e.g. when token is (a b c) then =patt(token...) becomes =patt(a,b,c)
+	IncludeFile                        string
+	Part                               string
 }
 
 func (c *Pattern) Dup() Item {
 	return &Pattern{
-		Name:   c.Name,
-		Params: c.Params,
+		Name:                               c.Name,
+		Params:                             c.Params,
 		SyncFirst:                          c.SyncFirst,
 		firstPos:                           c.firstPos,
 		DynamicAdd:                         c.DynamicAdd,
@@ -40,6 +42,8 @@ func (c *Pattern) Dup() Item {
 		Repeat:                             c.Repeat,
 		Lyrics:                             c.Lyrics,
 		Exploded:                           c.Exploded,
+		IncludeFile:                        c.IncludeFile,
+		Part:                               c.Part,
 	}
 }
 

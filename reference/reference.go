@@ -503,6 +503,10 @@ type Reference struct {
 	Part  string // empty for shortcut tables
 }
 
+func (r Reference) Dup() Reference {
+	return r
+}
+
 // Valid checks, if the reference is valid
 func (r Reference) Valid() bool {
 	switch r.Type {
@@ -632,14 +636,16 @@ func (r *Reference) Complete(ctx Reference) error {
 		if err != nil {
 			return err
 		}
+		//fmt.Printf("completing type %s within %#v\n", r.Type.String(), r)
 		switch r.Type {
 		case ShortCutCell:
 			if r.File == "" {
 				r.File = ctx.File
 			}
-			if r.Col == "" {
-				r.Col = ctx.Col
-			}
+
+			//if r.Col == "" {
+			//	r.Col = ctx.Col
+			//}
 			return nil
 		case ScoreCol:
 			if r.File == "" && (r.Table == "" || r.Table == "=") && r.Col == "" {
@@ -680,9 +686,11 @@ func (r *Reference) Complete(ctx Reference) error {
 			if r.File == "" {
 				r.File = ctx.File
 			}
-			if r.Col == "" {
-				r.Col = ctx.Col
-			}
+			/*
+				if r.Col == "" {
+					r.Col = ctx.Col
+				}
+			*/
 			return nil
 		default:
 			return fmt.Errorf("invalid reference type: %s", ctx.Type)

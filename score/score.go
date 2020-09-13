@@ -249,6 +249,15 @@ func (sc *Score) GetToken(name string) (string, error) {
 	return tk, nil
 }
 
+func (sc *Score) GetExternalToken(file, name string) (string, error) {
+	s, err := sc.External(file, nil)
+	if err != nil {
+		return "", fmt.Errorf("can't parse external file %q for token %q: %s", file, name, err.Error())
+	}
+
+	return s.GetToken(name)
+}
+
 func (sc *Score) AddProperty(key, value string) {
 	//fmt.Printf("adding property: %q -> %q\n", key, value)
 	sc.properties[key] = value
@@ -271,12 +280,19 @@ func (sc *Score) GetTrack(track string) (*track.Track, error) {
 }
 
 func (sc *Score) parse(fname string, sco *Score) error {
+	if _, has := sc.Files[fname]; has {
+		return nil
+	}
+
 	f, err := file.New(fname, sco)
 	if err != nil {
 		return err
 	}
-	sc.Files[fname] = f
-	return f.Parse()
+	err = f.Parse()
+	if err == nil {
+		sc.Files[fname] = f
+	}
+	return err
 }
 
 func (sc *Score) Parse() error {
@@ -1164,6 +1180,25 @@ func (sc *Score) Include(filename string, sketch string, params []string) error 
 
 	return nil
 }
+
+func (sc *Score) External(filename string, params []string) (*Score, error) {
+	fname, err := sc.findInclude(filename)
+	if err != nil {
+		return nil, err
+	}
+	sco, has := sc.includedScores[fname]
+	if has {
+		return sco, nil
+	}
+
+	sco = New(filename, params)
+	err = sc.parse(fname, sco)
+	if err != nil {
+		return nil, err
+	}
+	return sco, nil
+}
+
 func (sc *Score) Format() error {
 	for _, fl := range sc.Files {
 		err := fl.Format()

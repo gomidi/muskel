@@ -31,14 +31,8 @@ DIE GANZE AUFLÖSEREI MIT ALLEN REGELN UND UMFANGREICHEN TESTS IST SCHON PROGRAM
 STEHT AUCH, WIE MAN DIE PACKAGE BENUTZT. ES FEHLT NUR DIE ANBINDUNG AN DEN PARSER, D.H. DAS EIGENTLICHE IMPORTIEREN.
 ZUM VERSTÄNDNIS RUHIG WEITERLESEN
 
-damit das alles auch mit den parts in den tabellenzellen funktioniert, muss die Slice Syntax [2:5] aufgegeben werden.
-ich glaube, das ist kein großer Verlust, denn
-1. können wir das gleiche, sogar verständlicher über pattern funktionen ereichen, wobei wir bei eins zu zählen anfangen, z.B.
-   $slice(=mypatt,1,3)
-   $from(=mypatt,3)
-   $until(=mypatt,5)
-2. ist die [3:6] syntax kryptisch und programmierer speak (0 ist das erste element, das erste und letzte kann weggelassen werden etc)
-3. wird es nicht so oft benötigt, dass es ein eigenes zeichen rechtfertigen würde
+FÜR ITEM GROUPS und ITEM GROUP modifiers (wie z.B. Tokens, Scales und Multiitems) soll das Slicing mit [] erhalten bleiben, da
+dort die pattern commands nicht zu verfügung stehen und parts auch nicht benötigt werden.
 
 - es gibt eine einheitliche syntax für imports und referenzen, d.h. es gibt nur noch referenzen
 - eine referenz ist eine art pfad und bezieht sich auf einen kontext pfad in den sie importiert wird
@@ -326,6 +320,16 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
 
 
 # erledigt
+
+damit das alles auch mit den parts in den tabellenzellen funktioniert, muss die Slice Syntax [2:5] aufgegeben werden.
+ich glaube, das ist kein großer Verlust, denn
+1. können wir das gleiche, sogar verständlicher über pattern funktionen ereichen, wobei wir bei eins zu zählen anfangen, z.B.
+   $slice(=mypatt,1,3)
+   $from(=mypatt,3)
+   $until(=mypatt,5)
+2. ist die [3:6] syntax kryptisch und programmierer speak (0 ist das erste element, das erste und letzte kann weggelassen werden etc)
+3. wird es nicht so oft benötigt, dass es ein eigenes zeichen rechtfertigen würde
+
 
 - fix mehrtaktiges pattern, dass mitten im takt endet
 

@@ -124,7 +124,7 @@ func (c *sketchToken) unroll(start uint, until uint) (evt []*Event, diff uint, e
 
 	var pEvents *EventStream
 
-	pEvents, err = c.column.ParseEvents(false, []string{sc})
+	pEvents, err = c.column.ParseEvents("", false, []string{sc})
 	if err != nil {
 		return
 	}
@@ -141,7 +141,7 @@ func (c *sketchToken) unroll(start uint, until uint) (evt []*Event, diff uint, e
 }
 
 func (pc *sketchToken) getToken() (val string, err error) {
-	return pc.column.GetToken(pc.token.Name, pc.token.Params)
+	return pc.column.GetToken(pc.token.IncludeFile, pc.token.Name, pc.token.Params)
 }
 
 func (c *sketchToken) getEventStream(start uint, end uint) (*EventStream, error) {

@@ -7,6 +7,7 @@ import (
 type Token struct {
 	Name string
 	itemGroupModifier
+	IncludeFile string
 }
 
 func (t *Token) newSketchToken(column Columner) *sketchToken {
@@ -60,6 +61,9 @@ func (t Token) Dup() Item {
 }
 
 func (t *Token) String() string {
+	if t.IncludeFile != "" {
+		return "!" + t.IncludeFile + "." + t.Name + t.itemGroupModifier.string()
+	}
 	return t.Name + t.itemGroupModifier.string()
 }
 

@@ -15,8 +15,8 @@ type Columner interface {
 	UnrollPattern(start uint, until uint, cc *Pattern) (evt []*Event, diff uint, end uint, err error)
 	ModifyToken(tk *Token) (Item, error)
 	ApplyLyricsTable(lt *LyricsTable, evts []*Event) ([]*Event, error)
-	ParseEvents(syncfirst bool, data []string) (es *EventStream, err error)
-	GetToken(origName string, params []string) (val string, err error)
+	ParseEvents(column string, syncfirst bool, data []string) (es *EventStream, err error)
+	GetToken(file string, origName string, params []string) (val string, err error)
 
 	GetBarIdxOf(pos uint) int
 	GetPart(partname string) (part [2]uint, has bool)

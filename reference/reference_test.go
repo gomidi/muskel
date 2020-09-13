@@ -101,8 +101,8 @@ func TestAll(t *testing.T) {
 		{"=.col", "'file=table.col", ScoreColCtx, true, "ScoreCol", false, false, ""},
 
 		// ok
-		{"'file.table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
-		{".table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
+		//{"'file.table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
+		//{".table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
 
 		// errors
 		{".row", "'file=table.col", ScoreColCtx, true, "ShortCutCell", false, false, ""},

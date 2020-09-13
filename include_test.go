@@ -3235,6 +3235,62 @@ TRACK | Drums |
     2                    | MN40::: |
 `,
 		},
+		{ // 105
+			`
+
+TRACK | Drums |
+Channel | 10  |
+
+'drumnote
+
+.short | |
+a | .drums.kd |
+
+=SCORE | Drums |
+#
+1  |  .short.a    | 
+`,
+			`
+=SCORE                   | Drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+`,
+		},
+		{ // 106
+			`
+
+TRACK | Drums |
+Channel | 10  |
+
+=SCORE | Drums |
+#
+1  |  'drumnote.drums.kd    | 
+`,
+			`
+=SCORE                   | Drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+`,
+		},
+		{ // 107
+			`
+
+TRACK | Drums |
+Channel | 10  |
+
+.short | |
+kick      | 'drumnote.drums.kd |
+
+=SCORE | Drums |
+#
+1  |  .short.kick    | 
+`,
+			`
+=SCORE                   | Drums   |
+ # 4/4 @120.00 \major^c'
+    1                    | MN36::: |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
