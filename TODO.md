@@ -3,6 +3,131 @@
 
 ## nächstes 
 
+### für die midi bibliothek
+vielleicht mehr für smftrack: 
+funktion, die in einem track überlappende noten beseitigt / den track monophon macht (innerhalb des gleichen channels) und 
+eine weitere funktion, die prüft, ob ein track monophon ist (innerhalb des gleichen channels).
+macht natürlich nur sinn, wenn in einem track keine keyswitches sind, d.h. die müssen in einem extra track sein.
+
+dann könnte mein importer prüfen, ob ein track monophon ist, und falls ja eine normale monophone spalte schreiben.
+
+bevor man meinen importer mit einer midi datei füttert, lässt man sie auf monophone bzw. polyphone tracks prüfen 
+(das tool sollte die anzahl gefundener überlappener noten pro Track/channel kombi ausgeben, als indiz).
+
+und behebt tracks, von denen man weiß / will, dass sie monophon sind.
+
+außerdem kann der importer eine option bekommen, dass bestimmte track eigenschaften übergeben werden können, wie z.B.
+- track ist monophon
+- track ist drumtrack / keyswitch track (keine Töne, sondern MN und staccato ::)
+eigentlich reichen diese eigenschaften, so dass jeder track, der nicht polyfon ist
+mit entweder der eigenschaft 'mono', 'drums' oder 'ks' versehen wird (wobei 'drums' und 'ks' zunächst das gleiche machen werden) 
+also z.B. --trackconfig='violin1:mono,drum:drums,violin1ks:drums'
+
+eine andere option des importers könnte sein, eben alle tracks mit namen auszugeben und auf überlappene noten
+zu prüfen und einem das ergebnis anzuzeigen. indiz für einen drum track könnten die gm noten für kick und snare sein,
+der name drums, hihat, etc., der midi kanal 10; indiz für einen keyswitch track könnten extrem niedigre noten in den untersten drei
+oktaven sein.
+
+### externe takt eigenschaften importieren
+- es wäre schön, wenn man globale takt eigenschaften, wie
+  - partname
+  - taktart
+  - tempo
+  - tonart
+  - tempoverläufe
+ in eine eigene datei auslagern könnte. dass wäre dann eine =SCORE tabelle mit irgendwelchen normalen spalten
+wo dann die ganzen takteigenschaften normal notiert drin stehen
+für den import würde man dann einfach in dem entsprechenden Takt (in der Regel im ersten) folgendes schreiben
+
+=SCORE | voc | bass |
+#'externalbars
+  1    | c   | g    | 
+#
+  2    |     |      |
+
+etc
+
+damit würden die taktinformationen aus der datei externalbars.mskl und deren tabelle =SCORE übernommen werden bis
+zu einem weiteren takt der eine externe datei referenziert.
+sämtliche folgenden taktinformationen im zielscore überschreiben gleichartige der eingebundenen datei, also z.b.
+
+inhalt von externalbars.mskl
+=SCORE | something |
+# 4/4 @120
+#INTRO @60
+
+inhalt von main.mskl 
+
+
+=SCORE | voc | bass |
+#'externalbars
+  1    | c   | g    | 
+#OUTRO
+  2    |     |      |
+
+hier wird für den zweiten Takt der partname OUTRO verwendet, das Tempo aber dennoch auf 60 bpm geändert
+
+### import bugs: 
+- tack property VelocityScale is somehow wrong
+- track names with spaces should have their spaces replaced by dashes
+- tempo import seems to be buggy (with time signature change, the tempo was reset to 120)
+
+### andere bugs:
+- wenn auf eine gruppenspalte eine normale spalte folgt, kann diese nicht ordentlich geparst werden (panic)
+- zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden
+
+### not for imports, but general: 
+- we need a formatting option to delete empty lines
+- eine option um überflüssige note start/end kombinationen zu entfernen,
+i.e. 
+
+2 | c_ |
+3 | _c |
+3 | g  |
+
+kann umgeschrieben werden als
+
+2 | c |
+3 | g |
+
+
+das würde idealerweise beim import passieren, wäre aber general als option interessant.
+
+wobei der unterschied wäre:
+
+1 | f  |
+2 | c_ |
+3 | _c |
+3 | g  |
+
+hier würde das f bis zum g klingen
+
+1 | f |
+2 | c |
+3 | g |
+
+hier würde das f bis zum c klingen
+
+deshalb ist es vielleicht besser, es als option anzubieten
+(monophonic), so dass generell eine spalte monophon gemacht wird (oder man zeigt es an durch ein besonderes Zeichen im namen der spalte, etwa auf ! endend)
+dann würde aus 
+
+2 | c_ |
+3 | _c |
+4 | g  |
+
+2 | c  |
+3 | *  |
+4 | g  |
+
+da man beim import das nicht genau wissen kann, macht man es besser erst im nachhinein
+das entfernen der leeren zeilen kann aber generell erfolgen
+
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte die töne durch midi notes zu ersetzen, etwa, wenn der spaltenname auf # endet
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle töne als verkürzt umzunotieren, etwa, wenn der spaltenname auf :, :: oder ::: endet
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle töne als scalentöne umzunotieren, etwa, wenn der spaltenname auf ^ endet, zusätzlich muss eine scala per parameter der kommandozeile angegeben werden (dem fmt subcommand, etwa --scale=major^c'#)
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle dynamikzeichen zu entfernen, etwa, wenn der spaltenname auf +- endet
+
 ### big table rewrite -> markdown tables
 - erste spalte von tabelle beginnt immer mit `|` die zweite zeile kann `|---|---|` etc enthalten. 
 - beim formatieren wird sie immer so umgeschrieben, dass sie `|---|---|` enthält. 
