@@ -1,24 +1,20 @@
-// +build darwin
+// +build !linux,!windows,!darwin
 
-package score
+package muskel
 
-/*
-according to http://wiki.freepascal.org/Multiplatform_Programming_Guide#Configuration_files
-/etc
-/Users/user/.config/project1
-*/
+// environment for unixy system that are not linux and not darwin, like the BSD family
 
 import (
 	"os"
 	"path/filepath"
 )
 
-func setUserDir() {
+func setUserDir(version string) {
 	home := os.Getenv("HOME")
 	if home == "" {
 		home = filepath.Join("/home", os.Getenv("USER"))
 	}
-	USER_DIR = filepath.Join(home + ".muskel")
+	USER_DIR = filepath.Join(home+".muskel", version)
 }
 
 func setWorkingDir() {

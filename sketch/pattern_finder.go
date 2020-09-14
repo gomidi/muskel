@@ -9,7 +9,7 @@ type patternFinder struct {
 	fromSketch *Sketch
 }
 
-func (r *patternFinder) FindPattern(callingCol string, callName string) (s *Sketch, colName string, err error) {
+func (r *patternFinder) FindPattern(includefile string, callingCol string, callName string, callArgs []string) (s *Sketch, colName string, err error) {
 	/*
 	  =.a ist das pattern im gleichen sketch in der spalte a, alle patterns des gleichen sketches müssen über =. angesprochen werden (und nicht über den Namen des sketches)
 	  =~.a ist das pattern in der spalte a im sketch der heißt, wie die aktuelle spalte
@@ -19,6 +19,8 @@ func (r *patternFinder) FindPattern(callingCol string, callName string) (s *Sket
 	  die letzte spalte, die als Namen mit "!" beginnt, wird als erste Spalte behandelt, gibt es keine solche spalte, wird die
 	  tatsächlich erste spalte genommen
 	*/
+
+	//fmt.Printf("FindPattern includefile: %q callingCol: %q callName: %q\n", includefile, callingCol, callName)
 
 	callName = strings.TrimSpace(callName)
 	callingCol = strings.TrimSpace(callingCol)
@@ -44,7 +46,7 @@ func (r *patternFinder) FindPattern(callingCol string, callName string) (s *Sket
 		}
 	}
 
-	if sname == r.fromSketch.Name {
+	if includefile == "" && sname == r.fromSketch.Name {
 		err = fmt.Errorf("can't resolve pattern name %q: same sketch must be referrenced via =.col", callName)
 		return
 	}
@@ -52,15 +54,22 @@ func (r *patternFinder) FindPattern(callingCol string, callName string) (s *Sket
 	sname = strings.ReplaceAll(sname, "~", callingCol)
 	colName = strings.ReplaceAll(cname, "~", callingCol)
 
-	if sname == "=" {
-		if callingCol == colName {
-			err = fmt.Errorf("can't resolve pattern name %q from column: %q (self reference)", callName, callingCol)
-		}
-		s = r.fromSketch
-	} else {
-		s, err = r.fromSketch.Score.GetSketch(sname)
+	if includefile != "" {
+		s, err = r.fromSketch.Score.GetExternalSketch(includefile, sname, callArgs)
 		if err != nil {
 			return
+		}
+	} else {
+		if sname == "=" {
+			if callingCol == colName {
+				err = fmt.Errorf("can't resolve pattern name %q from column: %q (self reference)", callName, callingCol)
+			}
+			s = r.fromSketch
+		} else {
+			s, err = r.fromSketch.Score.GetSketch(sname)
+			if err != nil {
+				return
+			}
 		}
 	}
 
@@ -77,5 +86,11 @@ func (r *patternFinder) FindPattern(callingCol string, callName string) (s *Sket
 		}
 	}
 
+	//fmt.Printf("FindPattern includefile: %q sname: %q colName: %q\n", includefile, sname, colName)
+	/*
+		if len(strings.Split(colName, " ")) > 1 {
+			panic(colName)
+		}
+	*/
 	return
 }

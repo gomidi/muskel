@@ -111,7 +111,7 @@ func TestBars(t *testing.T) {
 1 | a | c |
 #B 4/4
 1 | c | d |
-$$include("testinclude")
+'testinclude
 #C 6/8
 1 | f | g |
 [B]
@@ -132,8 +132,8 @@ $$include("testinclude")
 1 | a | c |
 #B 4/4
 1 | c | d |
-$$include("testinclude")
-$$include("testinclude")
+'testinclude
+'testinclude
 # 6/8
 1 | f | g |
 [B]
@@ -175,7 +175,7 @@ $$include("testinclude")
 
 	for i, test := range tests {
 
-		sk := New("testscore", &testScore{include: inc})
+		sk := New("=testscore", &testScore{include: inc})
 		sk.AddColumn("col1")
 		sk.AddColumn("col2")
 		lines := strings.Split(strings.TrimSpace(test.lines), "\n")

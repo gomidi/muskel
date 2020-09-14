@@ -459,11 +459,19 @@ func (t testScore) FilterTrack(s string, ev []*items.Event) []*items.Event {
 	return ev
 }
 
+func (t testScore) GetExternalSketch(filename, sketch_table string, params []string) (*Sketch, error) {
+	return nil, fmt.Errorf("external sketch %q not found in file %q", sketch_table, filename)
+}
+
 func (t testScore) GetIncludedSketch(a, b string, params []string) (*Sketch, error) {
 	if t.include != nil && t.include.Name == a {
 		return t.include, nil
 	}
 	return nil, fmt.Errorf("included sketch %q not found in file %q", b, a)
+}
+
+func (t testScore) GetExternalToken(file, name string) (string, error) {
+	return "", fmt.Errorf("external token %q not found in file %q", name, file)
 }
 
 func (t *testScore) GetSketch(name string) (*Sketch, error) {
@@ -533,9 +541,6 @@ func TestCall(t *testing.T) {
 		{"a|b|c", "d|=sk.col1|", "g,b", "1d|1&a|2b|2&c"},
 		{"a|b|c", "d|=sk.col1|#1", "g,b", "1d|1&a|2g"},
 		{"#1|#1|#1", "=sk.col1(#1)|=sk.col1(#2)|", "g,b", "1g|1&b|2b|2&b"},
-		{"#1|#1|#1", "=sk.col1(#1)|=sk.col1(#2)[:2]|", "g,b", "1g|1&b|2b"},
-		{"#1|#1|#1", "=sk.col1(#1)|=sk.col1(#2)[:1]|", "g,b", "1g|1&b"},
-		{"#1|#1|#1", "=sk.col1(#1)|/=sk.col1(#2)[:1]|", "g,b", "1g|1&b"},
 		{"|b|c", "=sk.col1||", "", "1&b|2c"},
 		{"|b|c", "=!sk.col1|", "", "1b|1&c"},
 		{"|b|c", "=!sk.col1||", "", "1b|1&c"},

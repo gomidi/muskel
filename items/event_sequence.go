@@ -111,7 +111,9 @@ func (s EventSequence) Call(mod *eventSequenceModifier) EventSequence {
 	panic("TODO implement")
 }
 
+/*
 func (s EventSequence) Slice(mod *eventSequenceModifier) (evs EventSequence) {
+
 	if mod.SingleSlice >= 0 {
 		if len(s) <= mod.SingleSlice {
 			return nil
@@ -141,6 +143,7 @@ func (s EventSequence) Slice(mod *eventSequenceModifier) (evs EventSequence) {
 	}
 	return
 }
+*/
 
 func (s EventSequence) Override(over EventSequence) EventSequence {
 	panic("TODO implement")

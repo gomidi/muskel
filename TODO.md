@@ -3,6 +3,131 @@
 
 ## nächstes 
 
+### für die midi bibliothek
+vielleicht mehr für smftrack: 
+funktion, die in einem track überlappende noten beseitigt / den track monophon macht (innerhalb des gleichen channels) und 
+eine weitere funktion, die prüft, ob ein track monophon ist (innerhalb des gleichen channels).
+macht natürlich nur sinn, wenn in einem track keine keyswitches sind, d.h. die müssen in einem extra track sein.
+
+dann könnte mein importer prüfen, ob ein track monophon ist, und falls ja eine normale monophone spalte schreiben.
+
+bevor man meinen importer mit einer midi datei füttert, lässt man sie auf monophone bzw. polyphone tracks prüfen 
+(das tool sollte die anzahl gefundener überlappener noten pro Track/channel kombi ausgeben, als indiz).
+
+und behebt tracks, von denen man weiß / will, dass sie monophon sind.
+
+außerdem kann der importer eine option bekommen, dass bestimmte track eigenschaften übergeben werden können, wie z.B.
+- track ist monophon
+- track ist drumtrack / keyswitch track (keine Töne, sondern MN und staccato ::)
+eigentlich reichen diese eigenschaften, so dass jeder track, der nicht polyfon ist
+mit entweder der eigenschaft 'mono', 'drums' oder 'ks' versehen wird (wobei 'drums' und 'ks' zunächst das gleiche machen werden) 
+also z.B. --trackconfig='violin1:mono,drum:drums,violin1ks:drums'
+
+eine andere option des importers könnte sein, eben alle tracks mit namen auszugeben und auf überlappene noten
+zu prüfen und einem das ergebnis anzuzeigen. indiz für einen drum track könnten die gm noten für kick und snare sein,
+der name drums, hihat, etc., der midi kanal 10; indiz für einen keyswitch track könnten extrem niedigre noten in den untersten drei
+oktaven sein.
+
+### externe takt eigenschaften importieren
+- es wäre schön, wenn man globale takt eigenschaften, wie
+  - partname
+  - taktart
+  - tempo
+  - tonart
+  - tempoverläufe
+ in eine eigene datei auslagern könnte. dass wäre dann eine =SCORE tabelle mit irgendwelchen normalen spalten
+wo dann die ganzen takteigenschaften normal notiert drin stehen
+für den import würde man dann einfach in dem entsprechenden Takt (in der Regel im ersten) folgendes schreiben
+
+=SCORE | voc | bass |
+#'externalbars
+  1    | c   | g    | 
+#
+  2    |     |      |
+
+etc
+
+damit würden die taktinformationen aus der datei externalbars.mskl und deren tabelle =SCORE übernommen werden bis
+zu einem weiteren takt der eine externe datei referenziert.
+sämtliche folgenden taktinformationen im zielscore überschreiben gleichartige der eingebundenen datei, also z.b.
+
+inhalt von externalbars.mskl
+=SCORE | something |
+# 4/4 @120
+#INTRO @60
+
+inhalt von main.mskl 
+
+
+=SCORE | voc | bass |
+#'externalbars
+  1    | c   | g    | 
+#OUTRO
+  2    |     |      |
+
+hier wird für den zweiten Takt der partname OUTRO verwendet, das Tempo aber dennoch auf 60 bpm geändert
+
+### import bugs: 
+- tack property VelocityScale is somehow wrong
+- track names with spaces should have their spaces replaced by dashes
+- tempo import seems to be buggy (with time signature change, the tempo was reset to 120)
+
+### andere bugs:
+- wenn auf eine gruppenspalte eine normale spalte folgt, kann diese nicht ordentlich geparst werden (panic)
+- zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden
+
+### not for imports, but general: 
+- we need a formatting option to delete empty lines
+- eine option um überflüssige note start/end kombinationen zu entfernen,
+i.e. 
+
+2 | c_ |
+3 | _c |
+3 | g  |
+
+kann umgeschrieben werden als
+
+2 | c |
+3 | g |
+
+
+das würde idealerweise beim import passieren, wäre aber general als option interessant.
+
+wobei der unterschied wäre:
+
+1 | f  |
+2 | c_ |
+3 | _c |
+3 | g  |
+
+hier würde das f bis zum g klingen
+
+1 | f |
+2 | c |
+3 | g |
+
+hier würde das f bis zum c klingen
+
+deshalb ist es vielleicht besser, es als option anzubieten
+(monophonic), so dass generell eine spalte monophon gemacht wird (oder man zeigt es an durch ein besonderes Zeichen im namen der spalte, etwa auf ! endend)
+dann würde aus 
+
+2 | c_ |
+3 | _c |
+4 | g  |
+
+2 | c  |
+3 | *  |
+4 | g  |
+
+da man beim import das nicht genau wissen kann, macht man es besser erst im nachhinein
+das entfernen der leeren zeilen kann aber generell erfolgen
+
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte die töne durch midi notes zu ersetzen, etwa, wenn der spaltenname auf # endet
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle töne als verkürzt umzunotieren, etwa, wenn der spaltenname auf :, :: oder ::: endet
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle töne als scalentöne umzunotieren, etwa, wenn der spaltenname auf ^ endet, zusätzlich muss eine scala per parameter der kommandozeile angegeben werden (dem fmt subcommand, etwa --scale=major^c'#)
+- außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle dynamikzeichen zu entfernen, etwa, wenn der spaltenname auf +- endet
+
 ### big table rewrite -> markdown tables
 - erste spalte von tabelle beginnt immer mit `|` die zweite zeile kann `|---|---|` etc enthalten. 
 - beim formatieren wird sie immer so umgeschrieben, dass sie `|---|---|` enthält. 
@@ -23,87 +148,24 @@ Steht das freistehende @ in einer anderen Spalte, wird nur diese Spalte gespielt
 - Möglicherweise benutzt man dafür im Hintergrund midish.
 - Um möglichst kompatibel zu bleiben, wird innerhalb einer Tabelle eine fehlendes vorangehendes Pipe-Zeichen ergänzt (solange die Tabelle nicht durch eine Leerzeile unterbrochen wurde). Lediglich die erste Zeile der Tabelle muss mit einem Pipesymbol beginnen.
 
+
+### was noch fehlt bei den gruppenspalten und der include vereinheitlichung
+
+- Parts von externen Score includes sind noch nicht implementiert
+- Parts von externen ScoreCell includes sind noch nicht implementiert
+- gruppenspalten die auf andere gruppenspalten referenzieren, funktionieren nicht (ist das nötig?)
+- verheitlichung und überall nutzung der reference library, insbesondere der kontexte (auch zur validitätsprüfung), zur zeit unheitlicher mischmasch
+- slicing ([]) von externen tokens funktioniert noch nicht und auch sämtliche anderen modifier ++ ^2 etc.
+- parameter übergabe an externe tokens funktioniert noch nicht
+- modifier von externen patterns funktionieren noch nicht
+- parameterübergabe an externe und interne Score level includes funktioniert noch nicht
+- parameterübergabe an externe File level includes funktioniert noch nicht
+- dieses ganze parameter und modifiergedöns müsste auch vernünftig in die references bibliothek integriert werden.
+
+
 ### weiteres
 - gleichheitszeichen frei machen, reset von dynamik mit +-
 
-### big import rewrite und Gruppenspalten (ermöglichen "vertikale" Imports, bzw. auslagern von Spaltengruppen)
-DIE GANZE AUFLÖSEREI MIT ALLEN REGELN UND UMFANGREICHEN TESTS IST SCHON PROGRAMMIERT (reference package), DORT IN DER docs.go
-STEHT AUCH, WIE MAN DIE PACKAGE BENUTZT. ES FEHLT NUR DIE ANBINDUNG AN DEN PARSER, D.H. DAS EIGENTLICHE IMPORTIEREN.
-ZUM VERSTÄNDNIS RUHIG WEITERLESEN
-- es gibt eine einheitliche syntax für imports und referenzen, d.h. es gibt nur noch referenzen
-- eine referenz ist eine art pfad und bezieht sich auf einen kontext pfad in den sie importiert wird
-- der pfad besteht aus (groß nach klein, außen nach innen, links nach rechts):
-  - dem dateinamen, vorangestellt mit ' unter weglassen der Endung
-  - dem tabellennamen, vorangestellt mit = für Scores und . für shortcuts
-  - dem spaltennamen, vorangestellt mit .
-  - dem partnamen, in eckigen klammern
-- ein vollständiger pfad wäre z.B.
-  'piano=SCORE.timbre[CHORUS]
-  oder
-  'UVI.ks.tremolo.cello 
-- für Dateien gelten die normalen auflösungsregeln für dateien (lokal zu global)
-- der kontext, in den importiert wird, wird in der programmierung zur "vervollständigung" des gewünschten pfades immer berücksichtigt und ist dort immer vollständig:
-  - beim import in eine Datei aus dem vervollständigen dateinamen mit ordner
-  - beim import in eine shortcut tabellenzelle aus dem dateinamen, dem tabellennamen, der zeile und der spalte
-  - beim import in eine score tabelle aus dem dateinamen und dem tabellennamen
-  - beim import in eine score tabellenzelle aus dem dateinamen, dem tabellennamen und der spalte
-- importregeln:
-  - import in eine Datei: 
-    - wird zu importierende Datei komplett importiert: nur dateiname
-    - wird nur eine tabelle der Datei importiert: hinter dateiname noch tabellenname
-  - import in eine shortcut tabellenzelle:
-    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
-    - tabellenname immer angeben
-    - zeile immer angeben
-    - wenn spalte angegeben, andere spalte, sonst spalte mit gleichem namen wie zielspalte
-  - import in eine score tabelle:
-    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
-    - wenn tabellen name angegeben: abweichender tabellenname, sonst gleicher name wie zieltabelle 
-      (nicht bei gleicher datei möglich)
-      es können nur score tabellen in score tabellen importiert werden
-    - wenn partname angegeben: nur diesen part importieren, sonst gesamte tabelle
-  - import in eine score tabellenzelle:
-    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
-    - wenn tabellen name angegeben: abweichender tabellenname, sonst gleicher name wie zieltabelle 
-      (auch bei gleicher datei möglich), bei score Tabellen muss allerdings immer ein 
-      gleichheitszeichen erscheinen, bei shortcuts folgt automatisch der punkt (über die zeile)
-    - wenn Spaltenname angeben: abweichender spaltenname, sonst gleicher name wie zielspalte (nicht möglich, wenn
-      import aus gleicher datei und gleichem tabellennamen), bei kombispalten werden bei weglassen des spaltennamens
-      alle spalten gleichen namens importiert
-    - wenn partname angegeben: nur diesen part importieren, sonst gesamte spalte
-- kombispalten:
-  - um es (vor allem im main score) zu ermöglichen, auch score spalten gruppen in eigene dateien oder tabellen auszulagern 
-    (z.B. für controller oder keyswitches), kann man kombispalten erstellen:
-    - eine kombispalte enthält mehrere tracknamen als bezeichnung im spaltenkopf diese werden durch leerzeichen getrennt, z.B.
-      violin1KS violin2KS violaKS celloKS
-      das wäre eine kombispalte aus den tracks violin1KS, violin2KS, violaKS, celloKS
-    - in kombination mit spaltenimports lassen sich damit sehr komfortabel spaltengruppen auslagern:
-
-```
-=SCORE | violin1 violin2 viola cello | violin1KS violin2KS violaKS celloKS |
-#INTRO
-  1    | 'intro                      | 'keyswitch=intro                      |
-*10
-#A
-  1    | 'movement[A]                | 'keyswitch=a                          |
-*20
-#B
-  1    | 'movement[B]                | 'keyswitch=b                          |
-*12
-```
-
-im obigen score werden die Spalten violin1, violin2, viola und cello an den entsprechenden aus den jeweiligen
-spalten der =SCORE tabellen der dateien intro.mskl und movement.mskl importiert und
-in eigene trackspalten verwandelt, wobei aus der score tabelle der movement.mskl nur jeweils die part [A] und [B]
-übernommen werden
-
-die spalten violin1KS, violin2KS, violaKS und celloKS kommen hingegen aus der gleichen datei keyswitch.mskl,
-jedoch aus den verschiedenen tabellen  =intro, =a und =b und deren gleichlautenden spalten
-    
-diese ganzen auflösungsregeln werden in einem eigenen package reference ausgelagert (ist schon programmiert).
-
-DIE IDEE MIT DEN GRUPPEN SPALTEN KANN MAN AUCH NOCH AUSBAUEN, SO DASS DINGE, DIE IN DEN GLEICHEN SPALTEN VORKOMMEN
-SOLLEN, NUR EINMAL IN EINE GRUPPENSPALTE GESCHRIEBEN WERDEN MÜSSEN.
 
 
 #### grundsätzliche überarbeitung:
@@ -316,6 +378,100 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
 
 
 # erledigt
+
+### big import rewrite und Gruppenspalten (ermöglichen "vertikale" Imports, bzw. auslagern von Spaltengruppen)
+DIE GANZE AUFLÖSEREI MIT ALLEN REGELN UND UMFANGREICHEN TESTS IST SCHON PROGRAMMIERT (reference package), DORT IN DER docs.go
+STEHT AUCH, WIE MAN DIE PACKAGE BENUTZT. ES FEHLT NUR DIE ANBINDUNG AN DEN PARSER, D.H. DAS EIGENTLICHE IMPORTIEREN.
+ZUM VERSTÄNDNIS RUHIG WEITERLESEN
+
+FÜR ITEM GROUPS und ITEM GROUP modifiers (wie z.B. Tokens, Scales und Multiitems) soll das Slicing mit [] erhalten bleiben, da
+dort die pattern commands nicht zu verfügung stehen und parts auch nicht benötigt werden.
+
+- es gibt eine einheitliche syntax für imports und referenzen, d.h. es gibt nur noch referenzen
+- eine referenz ist eine art pfad und bezieht sich auf einen kontext pfad in den sie importiert wird
+- der pfad besteht aus (groß nach klein, außen nach innen, links nach rechts):
+  - dem dateinamen, vorangestellt mit ' unter weglassen der Endung
+  - dem tabellennamen, vorangestellt mit = für Scores und . für shortcuts
+  - dem spaltennamen, vorangestellt mit .
+  - dem partnamen, in eckigen klammern
+- ein vollständiger pfad wäre z.B.
+  'piano=SCORE.timbre[CHORUS]
+  oder
+  'UVI.ks.tremolo.cello 
+- für Dateien gelten die normalen auflösungsregeln für dateien (lokal zu global)
+- der kontext, in den importiert wird, wird in der programmierung zur "vervollständigung" des gewünschten pfades immer berücksichtigt und ist dort immer vollständig:
+  - beim import in eine Datei aus dem vervollständigen dateinamen mit ordner
+  - beim import in eine shortcut tabellenzelle aus dem dateinamen, dem tabellennamen, der zeile und der spalte
+  - beim import in eine score tabelle aus dem dateinamen und dem tabellennamen
+  - beim import in eine score tabellenzelle aus dem dateinamen, dem tabellennamen und der spalte
+- importregeln:
+  - import in eine Datei: 
+    - wird zu importierende Datei komplett importiert: nur dateiname
+    - wird nur eine tabelle der Datei importiert: hinter dateiname noch tabellenname
+  - import in eine shortcut tabellenzelle:
+    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
+    - tabellenname immer angeben
+    - zeile immer angeben
+    - wenn spalte angegeben, andere spalte, sonst spalte mit gleichem namen wie zielspalte
+  - import in eine score tabelle:
+    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
+    - wenn tabellen name angegeben: abweichender tabellenname, sonst gleicher name wie zieltabelle 
+      (nicht bei gleicher datei möglich)
+      es können nur score tabellen in score tabellen importiert werden
+    - wenn partname angegeben: nur diesen part importieren, sonst gesamte tabelle
+  - import in eine score tabellenzelle:
+    - wenn datei angegeben: aus fremder datei, sonst aus der gleichen datei
+    - wenn tabellen name angegeben: abweichender tabellenname, sonst gleicher name wie zieltabelle 
+      (auch bei gleicher datei möglich), bei score Tabellen muss allerdings immer ein 
+      gleichheitszeichen erscheinen, bei shortcuts folgt automatisch der punkt (über die zeile)
+    - wenn Spaltenname angeben: abweichender spaltenname, sonst gleicher name wie zielspalte (nicht möglich, wenn
+      import aus gleicher datei und gleichem tabellennamen), bei kombispalten werden bei weglassen des spaltennamens
+      alle spalten gleichen namens importiert
+    - wenn partname angegeben: nur diesen part importieren, sonst gesamte spalte
+- kombispalten:
+  - um es (vor allem im main score) zu ermöglichen, auch score spalten gruppen in eigene dateien oder tabellen auszulagern 
+    (z.B. für controller oder keyswitches), kann man kombispalten erstellen:
+    - eine kombispalte enthält mehrere tracknamen als bezeichnung im spaltenkopf diese werden durch leerzeichen getrennt, z.B.
+      violin1KS violin2KS violaKS celloKS
+      das wäre eine kombispalte aus den tracks violin1KS, violin2KS, violaKS, celloKS
+    - in kombination mit spaltenimports lassen sich damit sehr komfortabel spaltengruppen auslagern:
+
+```
+=SCORE | violin1 violin2 viola cello | violin1KS violin2KS violaKS celloKS |
+#INTRO
+  1    | 'intro                      | 'keyswitch=intro                      |
+*10
+#A
+  1    | 'movement[A]                | 'keyswitch=a                          |
+*20
+#B
+  1    | 'movement[B]                | 'keyswitch=b                          |
+*12
+```
+
+im obigen score werden die Spalten violin1, violin2, viola und cello an den entsprechenden aus den jeweiligen
+spalten der =SCORE tabellen der dateien intro.mskl und movement.mskl importiert und
+in eigene trackspalten verwandelt, wobei aus der score tabelle der movement.mskl nur jeweils die part [A] und [B]
+übernommen werden
+
+die spalten violin1KS, violin2KS, violaKS und celloKS kommen hingegen aus der gleichen datei keyswitch.mskl,
+jedoch aus den verschiedenen tabellen  =intro, =a und =b und deren gleichlautenden spalten
+    
+diese ganzen auflösungsregeln werden in einem eigenen package reference ausgelagert (ist schon programmiert).
+
+DIE IDEE MIT DEN GRUPPEN SPALTEN KANN MAN AUCH NOCH AUSBAUEN, SO DASS DINGE, DIE IN DEN GLEICHEN SPALTEN VORKOMMEN
+SOLLEN, NUR EINMAL IN EINE GRUPPENSPALTE GESCHRIEBEN WERDEN MÜSSEN.
+
+
+damit das alles auch mit den parts in den tabellenzellen funktioniert, muss die Slice Syntax [2:5] aufgegeben werden.
+ich glaube, das ist kein großer Verlust, denn
+1. können wir das gleiche, sogar verständlicher über pattern funktionen ereichen, wobei wir bei eins zu zählen anfangen, z.B.
+   $slice(=mypatt,1,3)
+   $from(=mypatt,3)
+   $until(=mypatt,5)
+2. ist die [3:6] syntax kryptisch und programmierer speak (0 ist das erste element, das erste und letzte kann weggelassen werden etc)
+3. wird es nicht so oft benötigt, dass es ein eigenes zeichen rechtfertigen würde
+
 
 - fix mehrtaktiges pattern, dass mitten im takt endet
 

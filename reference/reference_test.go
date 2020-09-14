@@ -75,23 +75,27 @@ func TestAll(t *testing.T) {
 		str      string
 	}{
 		// ok
-		{"'file=table.col[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
-		{"'file=table[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
-		{"'file=table[part]", "'file=table.col1 col2 col3", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col1 col2 col3[part]"},
-		{"'file[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
-		{"'file[part]", "'file=table.col1 col2 col3", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col1 col2 col3[part]"},
-		{"=table.col[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
-		{"=.col[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
+		{"'file=table.colx[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.colx[part]"},
+		{"'file=table[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table[part]"},
+		{"'file=table.[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
+		{"'file=table.[part]", "'file=table.col1 col2 col3", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col1 col2 col3[part]"},
+		{"'file[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=SCORE[part]"},
+		{"'file=.[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=SCORE.col[part]"},
+		{"=table.colx[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.colx[part]"},
+		{"=.colx[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.colx[part]"},
 		{"=.[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
 		{"[part]", "'file=table.col", ScoreColCtx, false, "ScoreColPart", true, true, "'file=table.col[part]"},
 
 		{"'file=table.col2", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file=table.col2"},
-		{"'file2=table", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=table.col"},
-		{"'file=table2", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file=table2.col"},
-		{"'file=table2", "'file=table.col1 col2 col3", ScoreColCtx, false, "ScoreCol", true, true, "'file=table2.col1 col2 col3"},
-		{"'file2=", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=table.col"},
-		{"'file2", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=table.col"},
-		{"'file2", "'file=table.col1 col2 col3", ScoreColCtx, false, "ScoreCol", true, true, "'file2=table.col1 col2 col3"},
+		{"'file2=table", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=table"},
+		{"'file2=table.", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=table.col"},
+		{"'file=table2", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file=table2"},
+		{"'file=table2.", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file=table2.col"},
+		{"'file=table2.", "'file=table.col1 col2 col3", ScoreColCtx, false, "ScoreCol", true, true, "'file=table2.col1 col2 col3"},
+		{"'file2=", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=SCORE"},
+		{"'file2=.", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=SCORE.col"},
+		{"'file2", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file2=SCORE"},
+		{"'file2=.", "'file=table.col1 col2 col3", ScoreColCtx, false, "ScoreCol", true, true, "'file2=SCORE.col1 col2 col3"},
 		{"=table.col2", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file=table.col2"},
 		{"=.col2", "'file=table.col", ScoreColCtx, false, "ScoreCol", true, true, "'file=table.col2"},
 
@@ -101,17 +105,17 @@ func TestAll(t *testing.T) {
 		{"=.col", "'file=table.col", ScoreColCtx, true, "ScoreCol", false, false, ""},
 
 		// ok
-		{"'file.table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
-		{".table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
+		//{"'file.table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
+		//{".table.row", "'file=table.col", ScoreColCtx, false, "ShortCutCell", true, true, "'file.table.row.col"},
 
 		// errors
 		{".row", "'file=table.col", ScoreColCtx, true, "ShortCutCell", false, false, ""},
 
 		// ok
 		{"'file=table2", "'file=table", ScoreCtx, false, "Score", true, true, "'file=table2"},
-		{"'file2", "'file=table", ScoreCtx, false, "Score", true, true, "'file2=table"},
+		{"'file2", "'file=table", ScoreCtx, false, "Score", true, true, "'file2=SCORE"},
 		{"'file=table2[part]", "'file=table", ScoreCtx, false, "ScorePart", true, true, "'file=table2[part]"},
-		{"'file2[part]", "'file=table", ScoreCtx, false, "ScorePart", true, true, "'file2=table[part]"},
+		{"'file2[part]", "'file=table", ScoreCtx, false, "ScorePart", true, true, "'file2=SCORE[part]"},
 		{"[part]", "'file=table", ScoreCtx, false, "ScorePart", true, true, "'file=table[part]"},
 		{"=table2[part]", "'file=table", ScoreCtx, false, "ScorePart", true, true, "'file=table2[part]"},
 		{"=table[part]", "'file=table", ScoreCtx, false, "ScorePart", true, true, "'file=table[part]"},
@@ -158,10 +162,20 @@ func TestAll(t *testing.T) {
 		}
 		//		ctx.Type = test.ctxTyp
 
-		r, err := Parse(test.ref, *ctx)
+		r, err := Parse(test.ref)
 
 		if err != nil && !test.err {
 			t.Errorf("[%v] Parse(%#v,%#v) returns error: %#v", i, test.ref, test.ctx, err.Error())
+		}
+
+		if err != nil {
+			continue
+		}
+
+		err = r.Complete(*ctx)
+
+		if err != nil && !test.err {
+			t.Errorf("[%v] Complete(%#v,%#v) returns error: %#v", i, test.ref, test.ctx, err.Error())
 		}
 
 		if err != nil {
@@ -176,7 +190,7 @@ func TestAll(t *testing.T) {
 		got, expected := r.Type.String(), test.typ
 
 		if got != expected {
-			t.Errorf("[%v] Parse(%#v,%#v) = %#v // expected: %#v", i, test.ref, test.ctx, got, expected)
+			t.Errorf("[%v] Parse(%#v,%#v   = %#v // expected: %#v", i, test.ref, test.ctx, got, expected)
 		}
 
 		if r.Valid() != test.valid {
@@ -188,7 +202,7 @@ func TestAll(t *testing.T) {
 		}
 
 		if r.String() != test.str {
-			t.Errorf("[%v] Parse(%#v,%#v).String() = %#v // expected: %#v", i, test.ref, test.ctx, r.String(), test.str)
+			t.Errorf("[%v] in context %s Parse(%#v,%#v).String() \n           = %#v [%s]\n// expected: %#v", i, test.ctxTyp.String(), test.ref, test.ctx, r.String(), r.Type.String(), test.str)
 		}
 	}
 }

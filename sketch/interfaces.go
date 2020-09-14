@@ -8,9 +8,11 @@ import (
 type Score interface {
 	GetSketch(sketch_table string) (*Sketch, error)
 	GetIncludedSketch(filename, sketch_table string, params []string) (*Sketch, error)
+	GetExternalSketch(filename, sketch_table string, params []string) (*Sketch, error)
 	HasTrack(name string) bool
 	GetTrack(track string) (*track.Track, error)
 	GetToken(name string) (string, error)
+	GetExternalToken(file string, token string) (string, error)
 	Embed(patterns ...string) error
 	GetMode(name string) items.Mode
 	FilterTrack(colName string, events []*items.Event) []*items.Event

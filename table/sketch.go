@@ -17,8 +17,21 @@ func NewSketch(name string, lineNo int, sc Score) *Sketch {
 }
 
 func (s *Sketch) addCols() {
-	for _, name := range s.Table.Cols() {
-		s.sketch.AddColumn(name)
+	s.sketch.SetRealColNum(len(s.Table.Cols()))
+	for i, name := range s.Table.Cols() {
+		cols := strings.Split(strings.TrimSpace(name), " ")
+
+		var subCols []string
+
+		for _, cl := range cols {
+			cl = strings.TrimSpace(cl)
+			subCols = append(subCols, cl)
+			s.sketch.AddColumn(cl)
+		}
+
+		if len(subCols) > 1 {
+			s.sketch.SetGroupCol(i, subCols)
+		}
 	}
 }
 
@@ -71,7 +84,7 @@ func formatPosition(pos string) string {
 func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 	var s strings.Builder
 
-	if len(line[0]) > 0 && (line[0][0] == '#' || line[0][0] == '$' || line[0][0] == '[' || line[0][0] == '*') {
+	if len(line[0]) > 0 && (line[0][0] == '#' || line[0][0] == '\'' || line[0][0] == '=' || line[0][0] == '[' || line[0][0] == '*') {
 		var first, last string
 		var skipCols bool
 		first = " " + line[0]

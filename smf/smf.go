@@ -60,7 +60,7 @@ func (s *smf) write() error {
 	for _, trackName := range tracks {
 		track, err := s.score.GetTrack(trackName)
 		if err != nil {
-			return fmt.Errorf("can't find track %q", trackName)
+			return fmt.Errorf("can't get the track %q", trackName)
 		}
 
 		if s.fileGroup != "*" && track.FileGroup != s.fileGroup {

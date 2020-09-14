@@ -22,6 +22,8 @@ type Score interface {
 	AddSketch(name string) interface {
 		ParseLine([]string) error
 		AddColumn(string)
+		SetRealColNum(n int)
+		SetGroupCol(pos int, subcols []string)
 	}
 	AddProperty(key, value string)
 	AddLyrics(map[string][]string)
@@ -32,4 +34,6 @@ type Score interface {
 type sketch interface {
 	ParseLine([]string) error
 	AddColumn(name string)
+	SetRealColNum(int)
+	SetGroupCol(pos int, subcols []string)
 }

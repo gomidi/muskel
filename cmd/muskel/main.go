@@ -24,15 +24,18 @@ import (
 	"gitlab.com/metakeule/config"
 )
 
-var (
-	cfg = config.MustNew("muskel", "1.0.4", "muskel is a musical sketch language")
+//const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
-	argFile   = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
-	argSketch = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
-	argFlow   = cfg.NewBool("flow", "flow mode; sets sketch to ! and pattern to !", config.Default(false))
-	argParams = cfg.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
-	argPatt   = cfg.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
-	argFmt    = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
+var (
+	cfg = config.MustNew("muskel", muskel.VERSION, "muskel is a musical sketch language")
+
+	argFile                = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
+	argIgnoreMuskelVersion = cfg.NewBool("current", "use the current version of the muskel command and ignore the "+muskel.MUSKEL_VERSION_FILE+" file", config.Default(false), config.Shortflag('c'))
+	argSketch              = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
+	argFlow                = cfg.NewBool("flow", "flow mode; sets sketch to ! and pattern to !", config.Default(false))
+	argParams              = cfg.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
+	argPatt                = cfg.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
+	argFmt                 = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
 	//argAddMissing = cfg.NewBool("addprops", "add missing properties")
 	argWatch      = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
 	argDir        = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
@@ -610,7 +613,7 @@ func run() error {
 
 	if cfg.ActiveCommand() == cmdTemplate {
 		if argTemplFile.IsSet() && argTemplFile.Get() != "" {
-			p := filepath.Join(score.USER_DIR, argTemplFile.Get()+".mskl")
+			p := filepath.Join(muskel.USER_DIR, argTemplFile.Get()+".mskl")
 			// p := filepath.Join(score.USERDIR)
 			if !score.FileExists(p) {
 				return fmt.Errorf("no such template: %q", p)
@@ -627,17 +630,17 @@ func run() error {
 			return nil
 			//ioutil.ReadFile(muskel.USERDIR)
 		} else {
-			fls, err := ioutil.ReadDir(score.USER_DIR)
+			fls, err := ioutil.ReadDir(muskel.USER_DIR)
 			if err != nil {
-				return fmt.Errorf("can't read user directory %q: %s", score.USER_DIR, err.Error())
+				return fmt.Errorf("can't read user directory %q: %s", muskel.USER_DIR, err.Error())
 			}
 
 			if len(fls) == 0 {
-				fmt.Fprintf(os.Stdout, "There are no template files stored inside %s\n\n", score.USER_DIR)
+				fmt.Fprintf(os.Stdout, "There are no template files stored inside %s\n\n", muskel.USER_DIR)
 				return nil
 			}
 
-			fmt.Fprintf(os.Stdout, "The following template files are stored inside %s:\n\n", score.USER_DIR)
+			fmt.Fprintf(os.Stdout, "The following template files are stored inside %s:\n\n", muskel.USER_DIR)
 
 			for _, fl := range fls {
 				// fmt.Printf("|%-10v|\n", values[i])
@@ -647,6 +650,39 @@ func run() error {
 
 			return nil
 		}
+	}
+
+	srcdir := filepath.Dir(argFile.Get())
+
+	if !argIgnoreMuskelVersion.Get() {
+		var v *muskel.Version
+		v, err = muskel.ReadWDVersionFile(srcdir)
+		if err == nil {
+			if v.String() != muskel.VERSION {
+				name := versionate("muskel", v)
+				fmt.Fprintf(os.Stderr, "This is version "+muskel.VERSION+" of muskel and your "+muskel.MUSKEL_VERSION_FILE+
+					" points to version "+v.String()+
+					".\nTo preserve compatibility with your musical notation, the binary \""+name+"\" will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
+					"\nremove the file \""+filepath.Join(srcdir, muskel.MUSKEL_VERSION_FILE)+"\"\nor pass the \"--current\" option to let your file be parsed anyway.\n\n")
+
+				cmd := runVersionated(name, os.Args[1:])
+				cmd.Dir, _ = os.Getwd()
+				cmd.Env = os.Environ()
+				var out []byte
+				out, err = cmd.CombinedOutput()
+				if err != nil {
+					if _, notExeced := err.(*exec.Error); notExeced {
+						fmt.Fprintf(os.Stderr, "Error: could not find %q binary\n", name)
+						os.Exit(1)
+					}
+					fmt.Fprintln(os.Stderr, string(out))
+					os.Exit(1)
+				}
+				fmt.Fprintln(os.Stdout, string(out))
+				os.Exit(0)
+			}
+		}
+		muskel.WriteWDVersionFile(srcdir)
 	}
 
 	cmd, file, dir := runCmd()

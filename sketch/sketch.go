@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"gitlab.com/gomidi/muskel/items"
+	"gitlab.com/gomidi/muskel/reference"
 	"gitlab.com/gomidi/muskel/track"
 )
 
@@ -53,6 +54,8 @@ type Sketch struct {
 	Score             Score
 	File              string
 	barChangeRequired bool
+	RealColNum        int // is in the file, i.e. a group column counts as 1
+	GroupCols         map[int][]string
 
 	includes            []*include
 	colOrder            []string
@@ -80,6 +83,7 @@ func New(name string, sc Score) *Sketch {
 		currentTimeSignatur: [2]uint8{4, 4},
 		currentTempo:        120,
 		currentBeat:         0,
+		GroupCols:           map[int][]string{},
 	}
 
 	if sk.isScore() {
@@ -90,6 +94,14 @@ func New(name string, sc Score) *Sketch {
 		sk.currentScale = scale
 	}
 	return sk
+}
+
+func (s *Sketch) SetRealColNum(n int) {
+	s.RealColNum = n
+}
+
+func (s *Sketch) SetGroupCol(pos int, subcols []string) {
+	s.GroupCols[pos] = subcols
 }
 
 func (s *Sketch) calcColWidth(colName string) (colWidth int) {
@@ -150,7 +162,7 @@ func (s *Sketch) getBarIdxOf(pos uint) (baridx int) {
 }
 
 // loop = 0: column is not looped; loop > 0: column is looped n times
-func (s *Sketch) parseEvents(syncFirst bool, data []string, origEndPos uint) (es *items.EventStream, err error) {
+func (s *Sketch) parseEvents(column string, syncFirst bool, data []string, origEndPos uint) (es *items.EventStream, err error) {
 	es = &items.EventStream{}
 
 	var lastNoRestItem items.Item
@@ -168,6 +180,14 @@ func (s *Sketch) parseEvents(syncFirst bool, data []string, origEndPos uint) (es
 
 		if ev.Item != items.Rest {
 			lastNoRestItem = ev.Item
+		}
+
+		if cr, isCr := ev.Item.(*items.CellReference); isCr {
+			it, err := cr.GetItem(column)
+			if err != nil {
+				return nil, fmt.Errorf("can't get item out of cell reference: %s", err.Error())
+			}
+			ev.Item = it
 		}
 
 		if inc, isInc := ev.Item.(items.Include); isInc {
@@ -280,20 +300,57 @@ func (p *Sketch) parseBarLine(data string) error {
 		return nil
 	}
 
-	if data[0] == '$' {
+	if reference.IsReference(data) {
+		//fmt.Printf("is reference %q\n", data)
+		r, err := reference.Parse(data)
+		if err != nil {
+			return fmt.Errorf("can't parse reference: %q: %s", data, err.Error())
+		}
+
+		ctx := reference.NewScoreCtx(p.File, p.Name)
+
+		err = r.Complete(ctx)
+
+		if err != nil {
+			return fmt.Errorf("can't complete reference: %q: %s", data, err.Error())
+		}
+
 		p.barChangeRequired = true
-		return p.parseCommandLF(data)
+
+		switch r.Type {
+		case reference.ScorePart:
+			// its a jump
+			if p.currentBarNo == -1 {
+				return fmt.Errorf("can't start with a jump: we need bars and parts first")
+			}
+			// TODO handle jumps from included files
+			return p.handleJump(data)
+		case reference.Score:
+			return p.parseInclude(r, data)
+		default:
+			return fmt.Errorf("invalid reference type %s in score context: %q", r.Type.String(), data)
+		}
+
 	}
+
+	/*
+		if data[0] == '$' {
+			p.barChangeRequired = true
+			return p.parseCommandLF(data)
+		}
+	*/
 
 	// its a jump
-	if data[0] == '[' {
-		p.barChangeRequired = true
-		if p.currentBarNo == -1 {
-			return fmt.Errorf("can't start with a jump: we need bars and parts first")
-		}
-		return p.handleJump(data)
+	/*
+		if data[0] == '[' {
+			p.barChangeRequired = true
+			if p.currentBarNo == -1 {
+				return fmt.Errorf("can't start with a jump: we need bars and parts first")
+			}
+			return p.handleJump(data)
 
-	}
+		}
+	*/
 
 	if data[0] == '*' {
 		p.barChangeRequired = true
@@ -681,7 +738,7 @@ func (p *Sketch) parseScale(data string, b *items.Bar) error {
 }
 
 func (p *Sketch) getColumnData(tabs []string) (colData []string, lastColumn string) {
-	numCols := len(p.Columns)
+	numCols := p.RealColNum // len(p.Columns)
 	if len(tabs)-2 > numCols {
 		numCols = len(tabs) - 2
 	}
@@ -760,7 +817,30 @@ func (s *Sketch) includeCol(start uint, column string, inc items.Include) (evts 
 	return
 }
 
-func (p *Sketch) parseCommandLF(data string) error {
+// in fact is reference parsing
+func (p *Sketch) parseInclude(r *reference.Reference, data string) error {
+	p.barChangeRequired = true
+
+	var inc items.Include
+	inc.File = r.File
+	inc.Sketch = r.Table
+
+	sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
+	if err != nil {
+		return fmt.Errorf("can't find sketch table %q in include %q: %s", inc.Sketch, inc.File, err.Error())
+	}
+
+	inc.Length32ths = sk.projectedBarEnd
+	end := p.projectedBarEnd
+	b := items.NewBar() //score.NewBar()
+	b.Include = &inc
+	p.newBar(b)
+	p.projectedBarEnd = end + uint(inc.Length32ths)
+	return nil
+}
+
+// should be deprecated
+func (p *Sketch) _parseCommandLF(data string) error {
 	p.barChangeRequired = true
 	var c items.Command
 	err := c.Parse(data, 0)
@@ -773,27 +853,29 @@ func (p *Sketch) parseCommandLF(data string) error {
 		if err != nil {
 			return err
 		}
-	case "$include":
-		it, err := items.Parse(data, 0)
-		if err != nil {
-			return fmt.Errorf("can't parse include: $%q", data)
-		}
+		/*
+			case "$include":
+				it, err := items.Parse(data, 0)
+				if err != nil {
+					return fmt.Errorf("can't parse include: $%q", data)
+				}
 
-		if inc, isInc := it.(items.Include); isInc {
-			sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
-			if err != nil {
-				return fmt.Errorf("can't find sketch table %q in include %q: %s", inc.Sketch, inc.File, err.Error())
-			}
+				if inc, isInc := it.(items.Include); isInc {
+					sk, err := p.Score.GetIncludedSketch(inc.File, inc.Sketch, inc.Params)
+					if err != nil {
+						return fmt.Errorf("can't find sketch table %q in include %q: %s", inc.Sketch, inc.File, err.Error())
+					}
 
-			inc.Length32ths = sk.projectedBarEnd
-			end := p.projectedBarEnd
-			b := items.NewBar() //score.NewBar()
-			b.Include = &inc
-			p.newBar(b)
-			p.projectedBarEnd = end + uint(inc.Length32ths)
-		} else {
-			return fmt.Errorf("not a proper include: $%q", data)
-		}
+					inc.Length32ths = sk.projectedBarEnd
+					end := p.projectedBarEnd
+					b := items.NewBar() //score.NewBar()
+					b.Include = &inc
+					p.newBar(b)
+					p.projectedBarEnd = end + uint(inc.Length32ths)
+				} else {
+					return fmt.Errorf("not a proper include: $%q", data)
+				}
+		*/
 		return nil
 	default:
 	}
@@ -894,13 +976,24 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 	}
 
 	for i, data := range colsData {
-		data = strings.TrimSpace(data)
+
 		if i < len(s.colOrder) {
-			colName := s.colOrder[i]
-			if s.isScore() && !s.Score.HasTrack(colName) {
-				return fmt.Errorf("can't find track %q", colName)
+
+			//if s.
+			var cls = []string{s.colOrder[i]}
+
+			if subs, has := s.GroupCols[i]; has {
+				cls = subs
 			}
-			s.Columns[colName] = append(s.Columns[colName], data)
+
+			data = strings.TrimSpace(data)
+
+			for _, c := range cls {
+				if s.isScore() && !s.Score.HasTrack(c) {
+					return fmt.Errorf("there is no track with the name %q", c)
+				}
+				s.Columns[c] = append(s.Columns[c], data)
+			}
 		}
 	}
 
@@ -911,6 +1004,11 @@ func (p *Sketch) AddColumn(name string) {
 	if disallowedColNames[name] {
 		panic(fmt.Sprintf("%q is not allowed as a column name of a sketch", name))
 	}
+
+	if len(strings.Split(name, " ")) > 1 {
+		panic(fmt.Sprintf("can't add group column %q", name))
+	}
+	//fmt.Printf("AddColumn %q\n", name)
 	p.colOrder = append(p.colOrder, name)
 	p.Columns[name] = []string{}
 }

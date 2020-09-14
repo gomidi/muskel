@@ -22,6 +22,9 @@ var Commands = map[string]Command{
 	"rabbit":   Rabbit,
 	"mirror":   Mirror,
 	"negative": Negative,
+	"slice":    Slice,
+	"from":     From,
+	"until":    Until,
 }
 
 type Helper interface {
