@@ -3,6 +3,146 @@
 
 ## nächstes 
 
+### pattern einbettung
+
+- zunächst sollten mit eckigen klammern die takte ausgewählt werden
+
+[1:4]
+Takt zwei bis vier
+
+das sollte für patterns, aber auch für wiederholungen und parts gelten:
+
+[part][1:4]
+=pattern[1:4]
+.6.[1:4]
+
+
+-dann sollte das normale einbetten mit 
+
+=pattern
+
+so einbetten, dass die einbettungsposition im takt als startpunkt
+für die nächsten noten genommen wird (also bezogen auf den ersten Takt des patterns)
+
+Beispiel
+
+```
+=bass |   |
+#
+ 1    | c |
+#
+ 1&   | d |
+ 2    | e |
+#
+ 3    | g |
+ 4    | b |
+
+
+=SCORE | bass        |
+#
+ 2     | =bass[1:]%2 |
+*3
+```
+
+resultiert in
+
+```
+=SCORE | bass  |
+#
+ 2     | e     |
+#
+ 3     | g     |
+ 4     | b     |
+#
+ 1&    | d     |
+ 2     | e     |
+#
+ 3     | g     |
+ 4     | b     |
+```
+
+
+
+- das einbetten mit =! ist wie gehabt (aber bezogen auf das, was nach [1:4] überig bleibt)
+
+
+
+
+### pattern funktionen als on/off modifier pipe
+
+- die idee ist, dass wir die events in einem track durch eine reihe von funktionen schicken, die sie modifizieren
+  und die unabhängig von einander aktiviert und deaktiviert/verändert werden können
+  also z.B. die töne werden transponiert, rückwärts gespielt und gespiegelt.
+  dann könnte das rückwärtsspielen deaktiviert werden, wobei aber transponieren und spiegelung erhalten bleibt
+  wichtig dabei ist, dass die dauern und wiederholungsraten
+  der funktionen sich von denjenigen der töne unterscheiden können
+  ich habe die Vermutung, dass es der beste weg sein könnte, wenn jede dieser funktionen in einem pattern steht und wir eine syntax haben,
+  mit der die reihenfolge jener pattern verknüpft wird. die frage, wie die länge und wiederholungsrate bestimmt wird, ist noch offen
+  die einfachste möglichkeit wäre, auch dass über pattern funktionen zu machen, z.B.
+
+
+=transpose|                               |
+#
+  1       | =#/$bars(1,5)/$transpose(3)   |
+*2
+#
+  1       |                               |
+#
+  1       | =#/$bars(5,6)/$transpose(5)   |
+#
+  1       | _                             |
+
+ 
+=reverse  |                         |
+#
+  1       | =#/$slice(5,9)/$reverse |
+#
+  1       | ...                     |
+#
+  1       | =#/$slice(5,9)          |
+#
+  1       | _                       |
+
+
+=mirror   |            |
+#
+  1       | =#/$mirror |
+#
+  1       | _          |
+
+
+=melody   |         |
+#
+  1       | c       |
+  1&      | e       |
+  3       | f       |
+  4&      | e       |
+#
+  1       | ...     |
+#
+  1       | _       |
+
+
+=SCORE    |                                               |   
+#
+  1       | =melody%12/=transpose%2/=reverse%4/=mirror%12 |
+
+zu ändern wären dann nur, dass bei der pipe auch pattern wie funktionen angegeben werden können, wobei dann =# durch den unique-namen 
+eines temporär erstellten patterns, welches die aktuellen elemente beinhaltet, ersetzt wird und die parameter normal übergeben werden.
+
+innerhalb der "modifikationspattern" können dann die jeweiligen funktionen aufgerufen, ersetzt werden etc.
+wichtig ist, dass wir eine zusätzliche funktion $bars(from,to) haben, welche slicing basierend auf takten ermöglicht und 
+$position(from,to), welche slicing basierend auf positionen im takt erlaubt (unabhängig von der taktart), z.B. $position(4&,7) kann auch auf einen
+4/4 takt bezogen werden, würde dann auf der 3 des Folgetaktes enden.
+
+zu überlegen wäre, ob =# nicht in jedem takt einfach die elemente des gleichen taktes übergibt, wodurch man sich das taktzählen und bars raussuchen sparen
+könnte. allerdings ist es weniger klar und explizit und zudem unklar, was passiert, wenn die funktionen nicht auf der position 1 aufgerufen werden.
+also erstmal besser nicht. (sonst vielleicht durch ein anderes symbol, z.B. =!#)
+
+die länge ist ja durch die länge des patterns vorgegeben.
+
+  
+
 ### für die midi bibliothek
 vielleicht mehr für smftrack: 
 funktion, die in einem track überlappende noten beseitigt / den track monophon macht (innerhalb des gleichen channels) und 

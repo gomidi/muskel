@@ -9,7 +9,7 @@ import (
 )
 
 func TestInclude(t *testing.T) {
-	//	t.Skip()
+	t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -3796,3 +3796,69 @@ TRACK    | Piano | Voc |
 		}
 	}
 }
+
+/*
+func TestInclude3(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{ // 0
+			`
+TRACK | Voc |
+VelocityScale | min:0 max:0 random:0 step:0 center:0 |
+
+=SCORE | Voc |
+#
+1      | a"  |
+2&     | c   |
+#
+1      |     |
+`,
+			`
+TRACK | Voc |
+VelocityScale | min:0 max:0 random:0 step:0 center:0 |
+
+=SCORE | Voc |
+#
+1      | a"  |
+2&     | c   |
+#
+1      |     |
+
+`,
+		},
+	}
+
+	items.DEBUG = true
+
+	for i, test := range tests {
+
+		var bf strings.Builder
+
+		err := muskel.Unroll("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+
+		if err != nil {
+			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		result := bf.String()
+
+		//    fmt.Println(result)
+
+		//res := strings.Split(result, "=\n")
+		//exp := strings.Split(test.expected, "=\n")
+
+		got := strings.TrimSpace(result)
+		wanted := strings.TrimSpace(test.expected)
+
+		if got != wanted {
+			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, got, wanted, got, wanted)
+			//      t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
+		}
+	}
+
+	items.DEBUG = false
+}
+*/
