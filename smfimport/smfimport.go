@@ -32,6 +32,25 @@ type Importer struct {
 	IgnoreCC     bool
 	lastTick     uint64
 	monoTracks   map[int16]bool
+	drumTracks   map[int16]bool
+}
+
+type Option func(*Importer)
+
+func MonoTracks(monoTracks ...int) Option {
+	return func(i *Importer) {
+		for _, t := range monoTracks {
+			i.monoTracks[int16(t)] = true
+		}
+	}
+}
+
+func DrumTracks(drumTracks ...int) Option {
+	return func(i *Importer) {
+		for _, t := range drumTracks {
+			i.drumTracks[int16(t)] = true
+		}
+	}
 }
 
 func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
@@ -42,17 +61,19 @@ func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
 		tracknames:   map[int16]string{},
 		trackMetaMsg: map[int16][]positionedMsg{},
 		monoTracks:   map[int16]bool{},
+		drumTracks:   map[int16]bool{},
 	}
 	opts = append(opts, reader.NoLogger(), reader.Each(im.registerMsg))
 	im.rd = reader.New(opts...)
 	return im
 }
 
-func (c *Importer) WriteMsklTo(wr io.Writer, monoTracks []int) error {
+func (c *Importer) WriteMsklTo(wr io.Writer, opts ...Option) error {
 	//fmt.Printf("monoTracks: %v\n", monoTracks)
-	for _, t := range monoTracks {
-		c.monoTracks[int16(t)] = true
+	for _, opt := range opts {
+		opt(c)
 	}
+
 	err := c.readSMF()
 	if err != nil {
 		return err
@@ -187,7 +208,7 @@ func (c *Importer) setBars() {
 	c.addMissingBars(c.lastTick, lastBar)
 }
 
-func (c *Importer) msgToEvent(m positionedMsg) *items.Event {
+func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 	var ev items.Event
 	ev.Position = c.ticksTo32ths(m.absPos)
 	comp := ev.AbsPosTicks(c.ticks4th, 0)
@@ -211,16 +232,28 @@ func (c *Importer) msgToEvent(m positionedMsg) *items.Event {
 
 	switch vv := m.msg.(type) {
 	case channel.NoteOn:
-		var it items.Note
-		it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
-		it.Dynamic = items.VelocityToDynamic(vv.Velocity())
-		it.NoteOn = true
-		ev.Item = &it
+		if isDrumTrack {
+			var it items.MIDINote
+			it.Dotted = "::"
+			it.Note = int8(vv.Key())
+			it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			ev.Item = &it
+		} else {
+			var it items.Note
+			it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
+			it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			it.NoteOn = true
+			ev.Item = &it
+		}
 	case channel.NoteOff:
-		var it items.Note
-		it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
-		it.NoteOff = true
-		ev.Item = &it
+		if isDrumTrack {
+			return nil
+		} else {
+			var it items.Note
+			it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
+			it.NoteOff = true
+			ev.Item = &it
+		}
 	case channel.Aftertouch:
 		var it items.MIDIAftertouch
 		it.Value = vv.Pressure()
@@ -268,6 +301,7 @@ func (c *Importer) setTracks() {
 		c.score.AddTrack(trk)
 
 		isMono := c.monoTracks[k.trackNo]
+		isDrum := c.drumTracks[k.trackNo]
 		var lastRestPos uint
 		var lastRestShift int
 		var lastRest bool
@@ -279,7 +313,7 @@ func (c *Importer) setTracks() {
 		*/
 
 		for _, m := range msgs {
-			ev := c.msgToEvent(m)
+			ev := c.msgToEvent(m, isDrum)
 			if ev == nil {
 				continue
 			}
