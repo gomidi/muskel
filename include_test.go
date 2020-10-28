@@ -3526,7 +3526,7 @@ TRACK | Piano | Voc
 }
 
 func TestInclude2(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input    string
 		expected string
@@ -3535,26 +3535,28 @@ func TestInclude2(t *testing.T) {
 			`
 'drumnote
 
-TRACK | Voc | Drums | Piano |
+|TRACK | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums | Piano |
-#
-1      | a"  | .drums.kd    | b"    |
-2&     | c   | .drums.sn    | d     |
-#
-1      |     | .drums.ho    |       |
+|=SCORE | Voc | Drums | Piano |
+|#
+|1      | a"  | .drums.kd    | b"    |
+|2&     | c   | .drums.sn    | d     |
+|#
+|1      |     | .drums.ho    |       |
 `,
 			`
 'drumnote
 
-TRACK    | Voc | Drums | Piano |
+| TRACK    | Voc | Drums | Piano |
+| -------- | --- | ----- | ----- |
 
-=SCORE   | Voc | Drums     | Piano |
- #
-    1    | a"  | .drums.kd | b"    |
-    2&   | c   | .drums.sn | d     |
- #
-    1    |     | .drums.ho |       |
+| =SCORE   | Voc | Drums     | Piano |
+| -------- | --- | --------- | ----- |
+|  #       |     |           |       |
+|     1    | a"  | .drums.kd | b"    |
+|     2&   | c   | .drums.sn | d     |
+|  #       |     |           |       |
+|     1    |     | .drums.ho |       |
 
 `,
 		},
@@ -3563,118 +3565,127 @@ TRACK    | Voc | Drums | Piano |
 'testdata/includes/header
 'drumnote
 
-=hu | a        |
-#
-1   | .drums.sn |
-2   | .drums.kd |
+|=hu | a        |
+|#
+|1   | .drums.sn |
+|2   | .drums.kd |
 
-TRACK | Voc | Drums | Piano |
+|TRACK | Voc | Drums | Piano |
 
-=SCORE   | Voc | Drums | Piano |
-#
- 1       | a"  | .drums.kd    | b"    |
- 2&      | c   | .drums.sn    | d     |
-#
- 1       |     | =hu.a       |       |
+|=SCORE   | Voc | Drums | Piano |
+|#
+| 1       | a"  | .drums.kd    | b"    |
+| 2&      | c   | .drums.sn    | d     |
+|#
+| 1       |     | =hu.a       |       |
 
 `,
 			`
 'testdata/includes/header
 'drumnote
 
-=hu      | a         |
- #
-    1    | .drums.sn |
-    2    | .drums.kd |
+| =hu      | a         |
+| -------- | --------- |
+|  #       |           |
+|     1    | .drums.sn |
+|     2    | .drums.kd |
 
-TRACK    | Voc | Drums | Piano |
+| TRACK    | Voc | Drums | Piano |
+| -------- | --- | ----- | ----- |
 
-=SCORE   | Voc | Drums     | Piano |
- #
-    1    | a"  | .drums.kd | b"    |
-    2&   | c   | .drums.sn | d     |
- #
-    1    |     | =hu.a     |       |
+| =SCORE   | Voc | Drums     | Piano |
+| -------- | --- | --------- | ----- |
+|  #       |     |           |       |
+|     1    | a"  | .drums.kd | b"    |
+|     2&   | c   | .drums.sn | d     |
+|  #       |     |           |       |
+|     1    |     | =hu.a     |       |
 
 `,
 		},
 		{ // 2
 			`
-TRACK | Voc | Drums | Piano |
+|TRACK | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums | Piano |
-# 4/4
-1  | a"  | d    | b"    |
-2& | c   |      | d     |
-'testdata/includes/score
-#
-1  | d   |      |       |
+|=SCORE | Voc | Drums | Piano |
+|# 4/4
+|1  | a"  | d    | b"    |
+|2& | c   |      | d     |
+|'testdata/includes/score
+|#
+|1  | d   |      |       |
 
 `,
 			`
-TRACK    | Voc | Drums | Piano |
+| TRACK    | Voc | Drums | Piano |
+| -------- | --- | ----- | ----- |
 
-=SCORE   | Voc | Drums | Piano |
- # 4/4
-    1    | a"  | d     | b"    |
-    2&   | c   |       | d     |
- 'testdata/includes/score
- #
-    1    | d   |       |       |
+| =SCORE                    | Voc | Drums | Piano |
+| ------------------------- | --- | ----- | ----- |
+|  # 4/4                    |     |       |       |
+|     1                     | a"  | d     | b"    |
+|     2&                    | c   |       | d     |
+|  'testdata/includes/score |     |       |       |
+|  #                        |     |       |       |
+|     1                     | d   |       |       |
 
 `,
 		},
 		{ // 3
 			`
-TRACK | Voc | Drums | Piano |
+|TRACK | Voc | Drums | Piano |
 
-=SCORE   | Voc | Drums | Piano |
-# 4/4
-1  | a"  | d    | b"    |
-2& | c   |      | d     |
-'testdata/includes/score
-'testdata/includes/score
-#
-1  | d   |      |       |
+|=SCORE   | Voc | Drums | Piano |
+|# 4/4
+|1  | a"  | d    | b"    |
+|2& | c   |      | d     |
+|'testdata/includes/score
+|'testdata/includes/score
+|#
+|1  | d   |      |       |
 
 `,
 			`
-TRACK    | Voc | Drums | Piano |
+| TRACK    | Voc | Drums | Piano |
+| -------- | --- | ----- | ----- |
 
-=SCORE   | Voc | Drums | Piano |
- # 4/4
-    1    | a"  | d     | b"    |
-    2&   | c   |       | d     |
- 'testdata/includes/score
- 'testdata/includes/score
- #
-    1    | d   |       |       |
+| =SCORE                    | Voc | Drums | Piano |
+| ------------------------- | --- | ----- | ----- |
+|  # 4/4                    |     |       |       |
+|     1                     | a"  | d     | b"    |
+|     2&                    | c   |       | d     |
+|  'testdata/includes/score |     |       |       |
+|  'testdata/includes/score |     |       |       |
+|  #                        |     |       |       |
+|     1                     | d   |       |       |
 `,
 		},
 		{ // 4
 			`
 'drumnote.drums
 
-TRACK | Voc | Drums | Piano |
+|TRACK | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums | Piano |
-#
-1      | a"  | .drums.kd    | b"    |
-2&     | c   | .drums.sn    | d     |
-#
-1      |     | .drums.ho    |       |
+|=SCORE | Voc | Drums | Piano |
+|#
+|1      | a"  | .drums.kd    | b"    |
+|2&     | c   | .drums.sn    | d     |
+|#
+|1      |     | .drums.ho    |       |
 `,
 			`
 'drumnote.drums
 
-TRACK    | Voc | Drums | Piano |
+| TRACK    | Voc | Drums | Piano |
+| -------- | --- | ----- | ----- |
 
-=SCORE   | Voc | Drums     | Piano |
- #
-    1    | a"  | .drums.kd | b"    |
-    2&   | c   | .drums.sn | d     |
- #
-    1    |     | .drums.ho |       |
+| =SCORE   | Voc | Drums     | Piano |
+| -------- | --- | --------- | ----- |
+|  #       |     |           |       |
+|     1    | a"  | .drums.kd | b"    |
+|     2&   | c   | .drums.sn | d     |
+|  #       |     |           |       |
+|     1    |     | .drums.ho |       |
 
 `,
 		},
@@ -3683,74 +3694,80 @@ TRACK    | Voc | Drums | Piano |
 'testdata/includes/score3=template
 'drumnote.drums
 
-TRACK | Voc | Drums | Piano |
+|TRACK | Voc | Drums | Piano |
 
-=SCORE | Voc | Drums | Piano |
-#
-1      | a"  | .drums.kd    | b"    |
-2&     | c   | .drums.sn    | d     |
-#
-1      |     | .drums.ho    |       |
+|=SCORE | Voc | Drums | Piano |
+|#
+|1      | a"  | .drums.kd    | b"    |
+|2&     | c   | .drums.sn    | d     |
+|#
+|1      |     | .drums.ho    |       |
 `,
 			`
 'testdata/includes/score3=template
 'drumnote.drums
 
-TRACK    | Voc | Drums | Piano |
+| TRACK    | Voc | Drums | Piano |
+| -------- | --- | ----- | ----- |
 
-=SCORE   | Voc | Drums     | Piano |
- #
-    1    | a"  | .drums.kd | b"    |
-    2&   | c   | .drums.sn | d     |
- #
-    1    |     | .drums.ho |       |
+| =SCORE   | Voc | Drums     | Piano |
+| -------- | --- | --------- | ----- |
+|  #       |     |           |       |
+|     1    | a"  | .drums.kd | b"    |
+|     2&   | c   | .drums.sn | d     |
+|  #       |     |           |       |
+|     1    |     | .drums.ho |       |
 
 `,
 		},
 		{ // 6
 			`
 
-TRACK | Piano | Voc
+|TRACK | Piano | Voc
 
-=SCORE | Piano Voc |
-#
-1  |  f"   | 
+|=SCORE | Piano Voc |
+|#
+|1  |  f"   | 
 		`,
 			`
-TRACK    | Piano | Voc |
+| TRACK    | Piano | Voc |
+| -------- | ----- | --- |
 
-=SCORE   | Piano Voc |
- #
-    1    | f"        | 
+| =SCORE   | Piano Voc |
+| -------- | --------- |
+|  #       |           |
+|     1    | f"        | 
 		`,
 		},
 		{ // 7
 			`
 
-TRACK | Piano | Voc
+|TRACK | Piano | Voc
 
-=SCORE | Piano Voc |
-#
-1  |  'drumnote.drums.kd   | 
+|=SCORE | Piano Voc |
+|#
+|1  |  'drumnote.drums.kd   | 
 		`,
 			`
-TRACK    | Piano | Voc |
+| TRACK    | Piano | Voc |
+| -------- | ----- | --- |
 
-=SCORE   | Piano Voc          |
- #
-    1    | 'drumnote.drums.kd | 
+| =SCORE   | Piano Voc          |
+| -------- | ------------------ |
+|  #       |                    |
+|     1    | 'drumnote.drums.kd | 
 		`,
 		},
 	}
 
-	//  score.DEBUG = true
+	//items.DEBUG = true
 
 	for i, test := range tests {
 
 		/*
-		   if i > 1 {
-		     continue
-		   }
+			if i > 3 {
+				continue
+			}
 		*/
 		/*
 		   sc, err := muskel.Parse(strings.NewReader(strings.TrimSpace(test.input)), "include main")
@@ -3797,7 +3814,6 @@ TRACK    | Piano | Voc |
 	}
 }
 
-/*
 func TestInclude3(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -3805,32 +3821,41 @@ func TestInclude3(t *testing.T) {
 	}{
 		{ // 0
 			`
-TRACK | Voc |
-VelocityScale | min:0 max:0 random:0 step:0 center:0 |
+|TRACK | Voc |
+|VelocityScale | min:0 max:0 random:0 step:0 center:0 |
 
-=SCORE | Voc |
-#
-1      | a"  |
-2&     | c   |
-#
-1      |     |
+|=SCORE | Voc |
+|#
+|1      | a"  |
+|2&     | c   |
+|#
+|1      |     |
 `,
-			`
-TRACK | Voc |
-VelocityScale | min:0 max:0 random:0 step:0 center:0 |
+			`| TRACK           | Voc                                  |
+| --------------- | ------------------------------------ |
+|  File           |                                      |
+|  Channel        |                                      |
+|  Program        |                                      |
+|  Bank           |                                      |
+|  Transpose      |                                      |
+|  Volume         |                                      |
+|  Delay          |                                      |
+|  PitchbendRange | 2                                    |
+|  VelocityScale  | min:0 max:0 random:0 step:0 center:0 |
+|  Ambitus        |                                      |
+|  Import         |                                      |
 
-=SCORE | Voc |
-#
-1      | a"  |
-2&     | c   |
-#
-1      |     |
-
+| =SCORE                   | Voc |
+| ------------------------ | --- |
+|  # 4/4 @120.00 \major^c' |     |
+|     1                    | a"  |
+|     2&                   | c   |
+|  #                       |     |
 `,
 		},
 	}
 
-	items.DEBUG = true
+	//items.DEBUG = true
 
 	for i, test := range tests {
 
@@ -3859,6 +3884,5 @@ VelocityScale | min:0 max:0 random:0 step:0 center:0 |
 		}
 	}
 
-	items.DEBUG = false
+	//items.DEBUG = false
 }
-*/

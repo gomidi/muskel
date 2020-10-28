@@ -708,29 +708,29 @@ X     | c' | d' |
 }
 
 func TestProperty(t *testing.T) {
-	t.Skip()
+	//	t.Skip()
 	tests := []struct {
 		input    string
 		expected map[string]interface{}
 	}{
 		{
 			`
-PROPERTY |
-a        | b     |
+|PROPERTY |
+|a        | b     |
 
-PROPERTY |
-c        | d     |
+|PROPERTY |
+|c        | d     |
 
 `,
 			map[string]interface{}{"a": "b", "c": "d"},
 		},
 		{
 			`
-PROPERTY |
-a        | b     |
+|PROPERTY |
+|a        | b     |
 
-PROPERTY |
-a        | d     |
+|PROPERTY |
+|a        | d     |
 
 `,
 			map[string]interface{}{"a": "d"},
@@ -763,19 +763,19 @@ a        | d     |
 }
 
 func TestParseParts(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input string
 		parts []string
 	}{
 		//	{"@a: b\n$include(\"main\",\"myfile\")\ntexter: | a | b | c\n1 | |\n\n", []string{"Property", "Include", "SketchTable", "EmptyLine"}},
 		//	{"@a: b\ntexter: | a | b | c\n1 | |\n\n$include(\"my_file\")\n", []string{"Property", "SketchTable", "EmptyLine", "Include"}},
-		{"//=a: b\n=texter | a | b | c\n#\n1 | |\n\n", []string{"Sketch", "EmptyLine"}},
-		{"//=a: b\n=texter | a | b | c\n#\n1 | |\n\n=texter2 | a | b | c\n#\n1 | |\n", []string{"Sketch", "EmptyLine", "Sketch"}},
-		{"//=a: b\n=texter | a | b | c\n#\n1 | |\n//c |d|\n2 | |\n\n", []string{"Sketch", "EmptyLine"}},
-		{"//=a: b\n=texter | a | b | c\n#\n1 | |\n/*\nc |d|\n*/\n2 | |\n\n", []string{"Sketch", "EmptyLine"}},
-		{"PROPERTY | \nwhow | yeah \n/*\n=texter | a | b | c\n#\n1 | |\n*/\n\n", []string{"Properties", "EmptyLine"}},
-		{".drums | a |\nkd | MN12++|\n/*\n=texter | a | b | c\n#\n1 | |\n*/\n\n", []string{"Tokens", "EmptyLine"}},
+		{"//=a: b\n|=texter | a | b | c\n#\n1 | |\n\n", []string{"Sketch", "EmptyLine"}},
+		{"//=a: b\n|=texter | a | b | c\n#\n1 | |\n\n|=texter2 | a | b | c\n#\n1 | |\n", []string{"Sketch", "EmptyLine", "Sketch"}},
+		{"//=a: b\n|=texter | a | b | c\n#\n1 | |\n//c |d|\n2 | |\n\n", []string{"Sketch", "EmptyLine"}},
+		{"//=a: b\n|=texter | a | b | c\n#\n1 | |\n/*\nc |d|\n*/\n2 | |\n\n", []string{"Sketch", "EmptyLine"}},
+		{"|PROPERTY | \nwhow | yeah \n/*\n|=texter | a | b | c\n#\n1 | |\n*/\n\n", []string{"Properties", "EmptyLine"}},
+		{"|.drums | a |\nkd | MN12++|\n/*\n|=texter | a | b | c\n#\n1 | |\n*/\n\n", []string{"Tokens", "EmptyLine"}},
 		//{"rythm: $euclid(3,5,&)\n/*\ntexter: | a | b | c\n#\n1 | |\n*/\n\n", []string{"CommandSketch", "EmptyLine"}},
 	}
 
@@ -805,16 +805,16 @@ func TestParseParts(t *testing.T) {
 }
 
 func TestParseTableHeader(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	tests := []struct {
 		input string
 		name  string
 		cols  []string
 	}{
-		{"=texter |a|b|c|\n#\n1 | | | |", "=texter", []string{"a", "b", "c"}},
-		{"=tex_ter | a | B | c |\n#\n1 | | | |\n", "=tex_ter", []string{"a", "B", "c"}},
-		{".test\nx|y\nc|d", ".test", []string{".test"}},
-		{".test ||\nx|y|\nc|d|", ".test", []string{""}},
+		{"|=texter |a|b|c|\n#\n1 | | | |", "=texter", []string{"a", "b", "c"}},
+		{"|=tex_ter | a | B | c |\n#\n1 | | | |\n", "=tex_ter", []string{"a", "B", "c"}},
+		{"|.test|a|\n|x|y\n|c|d", ".test", []string{"a"}},
+		{"|.test ||\nx|y|\nc|d|", ".test", []string{""}},
 	}
 
 	for i, test := range tests {
@@ -823,28 +823,28 @@ func TestParseTableHeader(t *testing.T) {
 		err := fl.Parse()
 
 		if err != nil {
-			t.Errorf("%v error: %s", i, err)
+			t.Errorf("[%v] error: %s", i, err)
 			continue
 		}
 
 		if len(fl.Parts) < 1 {
-			t.Errorf("%v parsed less than one part: %#v", i, fl.Parts)
+			t.Errorf("[%v] parsed less than one part: %#v", i, fl.Parts)
 			continue
 		}
 
 		tbl, ok := fl.Parts[0].(tabler)
 
 		if !ok {
-			t.Errorf("%v part is no tabler, but %T", i, fl.Parts[0])
+			t.Errorf("[%v] part is no tabler, but %T", i, fl.Parts[0])
 			continue
 		}
 
 		if tbl.Name() != test.name {
-			t.Errorf("%v Parse(%q): table.Name = %q // expected %q", i, test.name, tbl.Name(), test.cols)
+			t.Errorf("[%v] Parse(%q): table.Name = %q // expected %q", i, test.input, tbl.Name(), test.name)
 		}
 
 		if !reflect.DeepEqual(test.cols, tbl.Cols()) {
-			t.Errorf("%v Parse(%q): table.Cols = %#v // expected %#v", i, test.name, tbl.Cols(), test.cols)
+			t.Errorf("[%v] Parse(%q): table.Cols = %#v // expected %#v", i, test.input, tbl.Cols(), test.cols)
 		}
 
 	}

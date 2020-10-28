@@ -14,7 +14,7 @@ import (
 )
 
 func TestSMFImport(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	var tests = []struct {
 		msklIn               string
 		midiOut              string
@@ -25,41 +25,42 @@ func TestSMFImport(t *testing.T) {
 	}{
 		{ // 0
 			`
-TRACK | bass | git |
-Channel | 9   | 8   |
+|TRACK | bass | git |
+|Channel | 9   | 8   |
 
-=SCORE | bass | git |
-#
-1      | c    | d   |
-#
-1      | *    |     |
-2      |      | *   |
+|=SCORE | bass | git |
+|#
+|1      | c    | d   |
+|#
+|1      | *    |     |
+|2      |      | *   |
 `,
 			`
 [0] channel.NoteOn channel 8 key 48 dyn =
 [3840] channel.NoteOff channel 8 key 48
 `,
 			`
-TRACK           | bass--8                                   | git--7                                    |
- File           |                                           |                                           |
- Channel        | 9                                         | 8                                         |
- Program        | 1                                         | 1                                         |
- Bank           | 1                                         | 1                                         |
- Transpose      |                                           |                                           |
- Volume         | 1                                         | 1                                         |
- Delay          |                                           |                                           |
- PitchbendRange |                                           |                                           |
- VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
- Ambitus        |                                           |                                           |
- Import         |                                           |                                           |
+| TRACK           | bass--8                                  | git--7                                   |
+| --------------- | ---------------------------------------- | ---------------------------------------- |
+|  File           |                                          |                                          |
+|  Channel        | 9                                        | 8                                        |
+|  Program        |                                          |                                          |
+|  Bank           |                                          |                                          |
+|  Transpose      |                                          |                                          |
+|  Volume         |                                          |                                          |
+|  Delay          |                                          |                                          |
+|  PitchbendRange | 2                                        | 2                                        |
+|  VelocityScale  | min:1 max:127 random:4 step:15 center:63 | min:1 max:127 random:4 step:15 center:63 |
+|  Ambitus        |                                          |                                          |
+|  Import         |                                          |                                          |
 
-=SCORE     | bass--8 | git--7 |
- # @120.00
-    1      | c=_     | d=_    |
- #
-    1      | _c      |        |
-    2      |         | _d     |
-
+| =SCORE     | bass--8 | git--7 |
+| ---------- | ------- | ------ |
+|  # @120.00 |         |        |
+|     1      | c=_     | d=_    |
+|  #         |         |        |
+|     1      | _c      |        |
+|     2      |         | _d     |
 `,
 			2,
 			false,
@@ -67,42 +68,43 @@ TRACK           | bass--8                                   | git--7            
 		},
 		{ // 1
 			`
-TRACK | bass | git | git2 |
-Channel | 9   | 8   | 7   |
-Import  |     |     | git |
+|TRACK | bass | git | git2 |
+|Channel | 9   | 8   | 7   |
+|Import  |     |     | git |
 
-=SCORE | bass | git |
-#
-1      | c    | d   |
-# 3/4
-1      | *    |     |
-2      |      | *   |
+|=SCORE | bass | git |
+|#
+|1      | c    | d   |
+|# 3/4
+|1      | *    |     |
+|2      |      | *   |
 `,
 			`
 [0] channel.NoteOn channel 8 key 48 dyn =
 [3840] channel.NoteOff channel 8 key 48
 `,
 			`
-TRACK           | bass--8                                   | git--7                                    | git2--6                                   |
- File           |                                           |                                           |                                           |
- Channel        | 9                                         | 8                                         | 7                                         |
- Program        | 1                                         | 1                                         | 1                                         |
- Bank           | 1                                         | 1                                         | 1                                         |
- Transpose      |                                           |                                           |                                           |
- Volume         | 1                                         | 1                                         | 1                                         |
- Delay          |                                           |                                           |                                           |
- PitchbendRange |                                           |                                           |                                           |
- VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
- Ambitus        |                                           |                                           |                                           |
- Import         |                                           |                                           |                                           |
+| TRACK           | bass--8                                  | git--7                                   | git2--6                                  |
+| --------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+|  File           |                                          |                                          |                                          |
+|  Channel        | 9                                        | 8                                        | 7                                        |
+|  Program        |                                          |                                          |                                          |
+|  Bank           |                                          |                                          |                                          |
+|  Transpose      |                                          |                                          |                                          |
+|  Volume         |                                          |                                          |                                          |
+|  Delay          |                                          |                                          |                                          |
+|  PitchbendRange | 2                                        | 2                                        | 2                                        |
+|  VelocityScale  | min:1 max:127 random:4 step:15 center:63 | min:1 max:127 random:4 step:15 center:63 | min:1 max:127 random:4 step:15 center:63 |
+|  Ambitus        |                                          |                                          |                                          |
+|  Import         |                                          |                                          |                                          |
 
-=SCORE     | bass--8 | git--7 | git2--6 |
- # @120.00
-    1      | c=_     | d=_    | d=_     |
- # 3/4
-    1      | _c      |        |         |
-    2      |         | _d     | _d      |
-
+| =SCORE     | bass--8 | git--7 | git2--6 |
+| ---------- | ------- | ------ | ------- |
+|  # @120.00 |         |        |         |
+|     1      | c=_     | d=_    | d=_     |
+|  # 3/4     |         |        |         |
+|     1      | _c      |        |         |
+|     2      |         | _d     | _d      |
 `,
 			2,
 			false,
@@ -110,41 +112,42 @@ TRACK           | bass--8                                   | git--7            
 		},
 		{ // 2
 			`
-TRACK | bass | git |
-Channel | 9   | 8   |
+|TRACK | bass | git |
+|Channel | 9   | 8   |
 
-=SCORE | bass | git |
-# 3/4 @110
-1      | c    | d   |
-# 4/4 @200
-1      | *    |     |
-2      |      | *   |
+|=SCORE | bass | git |
+|# 3/4 @110
+|1      | c    | d   |
+|# 4/4 @200
+|1      | *    |     |
+|2      |      | *   |
 `,
 			`
 [0] channel.NoteOn channel 8 key 48 dyn =
 [2880] channel.NoteOff channel 8 key 48
 `,
 			`
-TRACK           | bass--8                                   | git--7                                    |
- File           |                                           |                                           |
- Channel        | 9                                         | 8                                         |
- Program        | 1                                         | 1                                         |
- Bank           | 1                                         | 1                                         |
- Transpose      |                                           |                                           |
- Volume         | 1                                         | 1                                         |
- Delay          |                                           |                                           |
- PitchbendRange |                                           |                                           |
- VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
- Ambitus        |                                           |                                           |
- Import         |                                           |                                           |
+| TRACK           | bass--8                                  | git--7                                   |
+| --------------- | ---------------------------------------- | ---------------------------------------- |
+|  File           |                                          |                                          |
+|  Channel        | 9                                        | 8                                        |
+|  Program        |                                          |                                          |
+|  Bank           |                                          |                                          |
+|  Transpose      |                                          |                                          |
+|  Volume         |                                          |                                          |
+|  Delay          |                                          |                                          |
+|  PitchbendRange | 2                                        | 2                                        |
+|  VelocityScale  | min:1 max:127 random:4 step:15 center:63 | min:1 max:127 random:4 step:15 center:63 |
+|  Ambitus        |                                          |                                          |
+|  Import         |                                          |                                          |
 
-=SCORE         | bass--8 | git--7 |
- # 3/4 @110.00
-    1          | c=_     | d=_    |
- # 4/4 @200.00
-    1          | _c      |        |
-    2          |         | _d     |
-
+| =SCORE         | bass--8 | git--7 |
+| -------------- | ------- | ------ |
+|  # 3/4 @110.00 |         |        |
+|     1          | c=_     | d=_    |
+|  # 4/4 @200.00 |         |        |
+|     1          | _c      |        |
+|     2          |         | _d     |
 `,
 			2,
 			false,
@@ -152,42 +155,43 @@ TRACK           | bass--8                                   | git--7            
 		},
 		{ // 3
 			`
-TRACK | bass | git |
-Channel | 9   | 8   |
+|TRACK | bass | git |
+|Channel | 9   | 8   |
 
-=SCORE | bass | git |
-# 3/4 @110
-1      | c    | d   |
-2 @115 | *    |     |
-# 4/4 @200
-2      |      | *   |
+|=SCORE | bass | git |
+|# 3/4 @110
+|1      | c    | d   |
+|2 @115 | *    |     |
+|# 4/4 @200
+|2      |      | *   |
 `,
 			`
 [0] channel.NoteOn channel 8 key 48 dyn =
 [960] channel.NoteOff channel 8 key 48
 `,
 			`
-TRACK           | bass--8                                   | git--7                                    |
- File           |                                           |                                           |
- Channel        | 9                                         | 8                                         |
- Program        | 1                                         | 1                                         |
- Bank           | 1                                         | 1                                         |
- Transpose      |                                           |                                           |
- Volume         | 1                                         | 1                                         |
- Delay          |                                           |                                           |
- PitchbendRange |                                           |                                           |
- VelocityScale  | min: 0 max: 0 random: 0 step: 0 center: 0 | min: 0 max: 0 random: 0 step: 0 center: 0 |
- Ambitus        |                                           |                                           |
- Import         |                                           |                                           |
+| TRACK           | bass--8                                  | git--7                                   |
+| --------------- | ---------------------------------------- | ---------------------------------------- |
+|  File           |                                          |                                          |
+|  Channel        | 9                                        | 8                                        |
+|  Program        |                                          |                                          |
+|  Bank           |                                          |                                          |
+|  Transpose      |                                          |                                          |
+|  Volume         |                                          |                                          |
+|  Delay          |                                          |                                          |
+|  PitchbendRange | 2                                        | 2                                        |
+|  VelocityScale  | min:1 max:127 random:4 step:15 center:63 | min:1 max:127 random:4 step:15 center:63 |
+|  Ambitus        |                                          |                                          |
+|  Import         |                                          |                                          |
 
-=SCORE         | bass--8 | git--7 |
- # 3/4 @110.00
-    1          | c=_     | d=_    |
-    2 @115.00  |         |        |
-    2          | _c      |        |
- # 4/4 @200.00
-    2          |         | _d     |
-
+| =SCORE         | bass--8 | git--7 |
+| -------------- | ------- | ------ |
+|  # 3/4 @110.00 |         |        |
+|     1          | c=_     | d=_    |
+|     2 @115.00  |         |        |
+|     2          | _c      |        |
+|  # 4/4 @200.00 |         |        |
+|     2          |         | _d     |
 `,
 			2,
 			false,
@@ -241,7 +245,7 @@ TRACK           | bass--8                                   | git--7            
 
 		var bf bytes.Buffer
 
-		err = cv.WriteMsklTo(&bf, nil)
+		err = cv.WriteMsklTo(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not write imported score: %s\n%s\n", i, err.Error(), test.midiOut)

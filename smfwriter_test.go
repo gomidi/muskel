@@ -16,7 +16,7 @@ import (
 )
 
 func TestSMFWriter(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	//	score.DEBUG = false
 
 	var tests = []struct {
@@ -29,13 +29,13 @@ func TestSMFWriter(t *testing.T) {
 		{
 			// 0
 			`
-TRACK |p  |
-Ch     |1  |
+|TRACK |p  |
+|Ch     |1  |
 
-=SCORE |p  |
-#
-1      |c" |
-2      |d  |
+|=SCORE |p  |
+|#
+|1      |c" |
+|2      |d  |
 
 			`,
 			2,
@@ -51,13 +51,13 @@ Ch     |1  |
 		{
 			// 1
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-=SCORE |p        |
-#
-1      |{c,e,g#} |
-2      |*        |
+|=SCORE |p        |
+|#
+|1      |{c,e,g#} |
+|2      |*        |
 
 			`,
 			2,
@@ -76,12 +76,12 @@ Ch      |1 |
 		{
 			// 2
 			`
-TRACK |p  |
-Ch      |1  |
+|TRACK |p  |
+|Ch      |1  |
 
-=SCORE |p |
-#
-1      |c |
+|=SCORE |p |
+|#
+|1      |c |
 
 			`,
 			2,
@@ -95,12 +95,12 @@ Ch      |1  |
 		{
 			// 3
 			`
-TRACK |p  |
-Ch      |1  |
+|TRACK |p  |
+|Ch      |1  |
 
-=SCORE |p        |
-#
-1      |{c,e,g#} |
+|=SCORE |p        |
+|#
+|1      |{c,e,g#} |
 
 			`,
 			2,
@@ -119,15 +119,15 @@ Ch      |1  |
 		{
 			// 4
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1      |c |
-#
-1      |  |
-2      |* |
+|=SCORE |p |
+|#
+|1      |c |
+|#
+|1      |  |
+|2      |* |
 
 			`,
 			2,
@@ -141,15 +141,15 @@ Ch      |1|
 		{
 			// 5
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |{c,e,g#}|
-#
-1  ||
-2  |*|
+|=SCORE |p |
+|#
+|1  |{c,e,g#}|
+|#
+|1  ||
+|2  |*|
 
 			`,
 			2,
@@ -168,16 +168,16 @@ Ch      |1|
 		{
 			// 6
 			`
-TRACK |p|
-Ch      |1|
-Delay|1/32|
+|TRACK |p|
+|Ch      |1|
+|Delay|1/32|
 
-=SCORE |p |
-#
-1  |{c,e,g#} |
-#
-1  ||
-2  |*|
+|=SCORE |p |
+|#
+|1  |{c,e,g#} |
+|#
+|1  ||
+|2  |*|
 
 			`,
 			2,
@@ -196,18 +196,18 @@ Delay|1/32|
 		{
 			// 7
 			`
-TRACK |p|
-Ch      |1|
-Delay|-1/32|
+|TRACK |p|
+|Ch      |1|
+|Delay|-1/32|
 
-=SCORE |p |
-#
-1  | |
-#
-1  |{c,e,g#} |
-#
-1  ||
-2  |*|
+|=SCORE |p |
+|#
+|1  | |
+|#
+|1  |{c,e,g#} |
+|#
+|1  ||
+|2  |*|
 
 			`,
 			2,
@@ -226,15 +226,15 @@ Delay|-1/32|
 		{
 			// 8
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c |
-2  |d |
-3  |e |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c |
+|2  |d |
+|3  |e |
+|4  |* |
 
 			`,
 			2,
@@ -252,15 +252,15 @@ Ch      |1|
 		{
 			// 9
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c> |
-2  |d |
-3  |e |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c> |
+|2  |d |
+|3  |e |
+|4  |* |
 
 			`,
 			2,
@@ -278,15 +278,15 @@ Ch      |1|
 		{
 			// 10
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |MN48> |
-2  |MN50 |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |MN48> |
+|2  |MN50 |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -304,15 +304,15 @@ Ch      |1|
 		{
 			// 11
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c |
-2  |d> |
-3  |e |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c |
+|2  |d> |
+|3  |e |
+|4  |* |
 			`,
 			2,
 			false,
@@ -329,15 +329,15 @@ Ch      |1|
 		{
 			// 12
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |MN48 |
-2  |MN50> |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |MN48 |
+|2  |MN50> |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -355,15 +355,15 @@ Ch      |1|
 		{
 			// 13
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c |
-2  |d |
-3  |e> |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c |
+|2  |d |
+|3  |e> |
+|4  |* |
 
 			`,
 			2,
@@ -381,15 +381,15 @@ Ch      |1|
 		{
 			// 14
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c |
-2  |d< |
-3  |e |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c |
+|2  |d< |
+|3  |e |
+|4  |* |
 			`,
 			2,
 			false,
@@ -406,18 +406,18 @@ Ch      |1|
 		{
 			// 15
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-.cc |
-sc  | MN48+
+|.cc |
+|sc  | MN48+
 
-=SCORE |p |
-#
-1  |.cc.sc |
-2  |MN50< |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |.cc.sc |
+|2  |MN50< |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -435,15 +435,15 @@ sc  | MN48+
 		{
 			// 16
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c |
-2  |d |
-3  |e< |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c |
+|2  |d |
+|3  |e< |
+|4  |* |
 
 			`,
 			2,
@@ -461,15 +461,15 @@ Ch      |1|
 		{
 			// 17
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c< |
-2  |d |
-3  |e |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c< |
+|2  |d |
+|3  |e |
+|4  |* |
 
 			`,
 			2,
@@ -487,17 +487,17 @@ Ch      |1|
 		{
 			// 18
 			`
-TRACK |p        |
-Ch      |1        |
+|TRACK |p        |
+|Ch      |1        |
 
-=SCORE  |p        |
-#
-1       |         |
-#
-1       |{c,e,g#}>|
-#
-1       |         |
-2       |*        |
+|=SCORE  |p        |
+|#
+|1       |         |
+|#
+|1       |{c,e,g#}>|
+|#
+|1       |         |
+|2       |*        |
 			`,
 			2,
 			false,
@@ -515,17 +515,17 @@ Ch      |1        |
 		{
 			// 19
 			`
-TRACK  |p|
-Ch |1  |
+|TRACK  |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | |
-#
-1  |{c,e,g#}< |
-#
-1  ||
-2  |*|
+|=SCORE |p|
+|#
+|1  | |
+|#
+|1  |{c,e,g#}< |
+|#
+|1  ||
+|2  |*|
 			`,
 			2,
 			false,
@@ -543,17 +543,17 @@ Ch |1  |
 		{
 			// 20
 			`
-=templ |p|
-#
-1      |{c,e,g#}|
-2      |*|
+|=templ |p|
+|#
+|1      |{c,e,g#}|
+|2      |*|
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |=templ |
+|=SCORE |p|
+|#
+|1  |=templ |
 			`,
 			2,
 			false,
@@ -572,18 +572,18 @@ Ch |1  |
 			// 21
 			`
 
-.tt |
-a|c
-b|e
-c|g#
+|.tt |
+|a|c
+|b|e
+|c|g#
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |{.tt.a,.tt.b,.tt.c}|
-2  |*|
+|=SCORE |p|
+|#
+|1  |{.tt.a,.tt.b,.tt.c}|
+|2  |*|
 			`,
 			2,
 			false,
@@ -601,18 +601,18 @@ Ch |1  |
 		{
 			// 22
 			`
-.dr |
-ta | MN48
-tb | MN52
-tc | MN56
+|.dr |
+|ta | MN48
+|tb | MN52
+|tc | MN56
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |{.dr.ta,.dr.tb,.dr.tc} |
-2  |*|
+|=SCORE |p|
+|#
+|1  |{.dr.ta,.dr.tb,.dr.tc} |
+|2  |*|
 			`,
 			2,
 			false,
@@ -630,19 +630,19 @@ Ch |1  |
 		{
 			// 23
 			`
-.dr |
-ta | MN48
-tb | MN52
-tc | MN56
+|.dr |
+|ta | MN48
+|tb | MN52
+|tc | MN56
 
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |{.dr.ta+,.dr.tb-,.dr.tc--} |
-2  |*|
+|=SCORE |p|
+|#
+|1  |{.dr.ta+,.dr.tb-,.dr.tc--} |
+|2  |*|
 			`,
 			2,
 			false,
@@ -660,12 +660,12 @@ Ch |1  |
 		{
 			// 24
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |c::: |
+|=SCORE |p|
+|#
+|1  |c::: |
 
 			`,
 			2,
@@ -679,13 +679,13 @@ Ch |1  |
 		{
 			// 25
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |{c:::,e:::,g#:::} |
-2  |* |
+|=SCORE |p|
+|#
+|1  |{c:::,e:::,g#:::} |
+|2  |* |
 
 			`,
 			2,
@@ -704,13 +704,13 @@ Ch |1  |
 		{
 			// 26
 			`			
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |{c,e,g#} |
-2  |a::: |
+|=SCORE |p|
+|#
+|1  |{c,e,g#} |
+|2  |a::: |
 			`,
 			2,
 			false,
@@ -730,13 +730,13 @@ Ch |1  |
 		{
 			// 27
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |{c:::,e:::,g#:::} |
-2  |a::: |
+|=SCORE |p|
+|#
+|1  |{c:::,e:::,g#:::} |
+|2  |a::: |
 			`,
 			2,
 			false,
@@ -756,15 +756,15 @@ Ch |1  |
 		{
 			// 28
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d |
-2  |{c,e,g#} |
-3  |a |
-4 |*|
+|=SCORE |p|
+|#
+|1  | d |
+|2  |{c,e,g#} |
+|3  |a |
+|4 |*|
 			`,
 			2,
 			false,
@@ -786,16 +786,16 @@ Ch |1  |
 		{
 			// 29
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d |
-4  |{c,e,g#} |
-#
-1  |a |
-2 |*|
+|=SCORE |p|
+|#
+|1  | d |
+|4  |{c,e,g#} |
+|#
+|1  |a |
+|2 |*|
 			`,
 			2,
 			false,
@@ -817,12 +817,12 @@ Ch |1  |
 		{
 			// 30
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d |
+|=SCORE |p|
+|#
+|1  | d |
 
 `,
 			2,
@@ -836,12 +836,12 @@ Ch |1  |
 		{
 			// 31
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d |
+|=SCORE |p|
+|#
+|1  | d |
 
 `,
 			2,
@@ -857,16 +857,16 @@ Ch |1  |
 		{
 			// 32
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |c |
-#
-1  |* |
-#
-1  |e |
+|=SCORE |p|
+|#
+|1  |c |
+|#
+|1  |* |
+|#
+|1  |e |
 
 			`,
 			2,
@@ -882,16 +882,16 @@ Ch |1  |
 		{
 			// 33
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |c |
-#
-1  | * |
-#
-1  |e |
+|=SCORE |p|
+|#
+|1  |c |
+|#
+|1  | * |
+|#
+|1  |e |
 
 			`,
 			2,
@@ -907,16 +907,16 @@ Ch |1  |
 		{
 			// 34
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |c |
-#
-1  | |
-#
-1  |e |
+|=SCORE |p|
+|#
+|1  |c |
+|#
+|1  | |
+|#
+|1  |e |
 
 			`,
 			2,
@@ -932,16 +932,16 @@ Ch |1  |
 		{
 			// 35
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |a' |
-#
-1  |* |
-#
-1  |b' |
+|=SCORE |p|
+|#
+|1  |a' |
+|#
+|1  |* |
+|#
+|1  |b' |
 			`,
 			2,
 			false,
@@ -956,16 +956,16 @@ Ch |1  |
 		{
 			// 36
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |a' |
-#
-1  | * |
-#
-1  |b' |
+|=SCORE |p|
+|#
+|1  |a' |
+|#
+|1  | * |
+|#
+|1  |b' |
 
 			`,
 			2,
@@ -981,16 +981,16 @@ Ch |1  |
 		{
 			// 37
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | (a' b') |
-#
-1  | * |
-#
-1  | (b' c") |
+|=SCORE |p|
+|#
+|1  | (a' b') |
+|#
+|1  | * |
+|#
+|1  | (b' c") |
 			`,
 			2,
 			false,
@@ -1009,16 +1009,16 @@ Ch |1  |
 		{
 			// 38
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | (a' b') |
-#
-1  |  |
-#
-1  | (b' c") |
+|=SCORE |p|
+|#
+|1  | (a' b') |
+|#
+|1  |  |
+|#
+|1  | (b' c") |
 			`,
 			2,
 			false,
@@ -1037,16 +1037,16 @@ Ch |1  |
 		{
 			// 39
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | (a' b'_) |
-#
-1  |  |
-#
-1  | (_b' c") |
+|=SCORE |p|
+|#
+|1  | (a' b'_) |
+|#
+|1  |  |
+|#
+|1  | (_b' c") |
 			`,
 			2,
 			false,
@@ -1063,18 +1063,18 @@ Ch |1  |
 		{
 			// 40
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |a' |
-1& |b_|
-#
-1  |  |
-1& |_b|
-#
-1  |c" |
+|=SCORE |p|
+|#
+|1  |a' |
+|1& |b_|
+|#
+|1  |  |
+|1& |_b|
+|#
+|1  |c" |
 			`,
 			2,
 			false,
@@ -1091,18 +1091,18 @@ Ch |1  |
 		{
 			// 41
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |a' |
-1& |b'_|
-#
-1  |  |
-1& | (_b' :)|
-#
-1  |c" |
+|=SCORE |p|
+|#
+|1  |a' |
+|1& |b'_|
+|#
+|1  |  |
+|1& | (_b' :)|
+|#
+|1  |c" |
 			`,
 			2,
 			false,
@@ -1119,14 +1119,14 @@ Ch |1  |
 		{
 			// 42
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | (a' b'_) |
-#
-1  | _b' |
+|=SCORE |p|
+|#
+|1  | (a' b'_) |
+|#
+|1  | _b' |
 			`,
 			2,
 			false,
@@ -1141,14 +1141,14 @@ Ch |1  |
 		{
 			// 43
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | (a' b'_ c"_) |
-#
-1  | (_b' _c") |
+|=SCORE |p|
+|#
+|1  | (a' b'_ c"_) |
+|#
+|1  | (_b' _c") |
 			`,
 			2,
 			false,
@@ -1165,12 +1165,12 @@ Ch |1  |
 		{
 			// 44
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-2  | (a' "hiho") |
+|=SCORE |p|
+|#
+|2  | (a' "hiho") |
 			`,
 			2,
 			false,
@@ -1184,12 +1184,12 @@ Ch |1  |
 		{
 			// 45
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-2  |"hiho" |
+|=SCORE |p|
+|#
+|2  |"hiho" |
 			`,
 			2,
 			false,
@@ -1201,12 +1201,12 @@ Ch |1  |
 		{
 			// 46
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |c:: |
+|=SCORE |p|
+|#
+|1  |c:: |
 			`,
 			2,
 			false,
@@ -1219,12 +1219,12 @@ Ch |1  |
 		{
 			// 47
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |c: |
+|=SCORE |p|
+|#
+|1  |c: |
 			`,
 			2,
 			false,
@@ -1237,12 +1237,12 @@ Ch |1  |
 		{
 			// 48
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |AT(23):: |
+|=SCORE |p|
+|#
+|1  |AT(23):: |
 			`,
 			2,
 			false,
@@ -1255,12 +1255,12 @@ Ch |1  |
 		{
 			// 49
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |AT(23): |
+|=SCORE |p|
+|#
+|1  |AT(23): |
 			`,
 			2,
 			false,
@@ -1273,18 +1273,18 @@ Ch |1  |
 		{
 			// 50
 			`
-=cc  |x|
-#
-1    |c<|
-2    |* |
+|=cc  |x|
+|#
+|1    |c<|
+|2    |* |
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-2  |=cc |
-3  |*  |
+|=SCORE |p|
+|#
+|2  |=cc |
+|3  |*  |
 			`,
 			2,
 			false,
@@ -1297,18 +1297,18 @@ Ch |1  |
 		{
 			// 51
 			`
-=cc  |x|
-#
-1    |c<|
-2    |* |
+|=cc  |x|
+|#
+|1    |c<|
+|2    |* |
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-2  |=cc> |
-3  |*  |
+|=SCORE |p|
+|#
+|2  |=cc> |
+|3  |*  |
 			`,
 			2,
 			false,
@@ -1321,18 +1321,18 @@ Ch |1  |
 		{
 			// 52
 			`
-=cc  |x|
-#
-1    |c|
-2    |* |
+|=cc  |x|
+|#
+|1    |c|
+|2    |* |
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-2  |=cc< |
-3  |*  |
+|=SCORE |p|
+|#
+|2  |=cc< |
+|3  |*  |
 			`,
 			2,
 			false,
@@ -1345,12 +1345,12 @@ Ch |1  |
 		{
 			// 53
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d+ |`,
+|=SCORE |p|
+|#
+|1  | d+ |`,
 			2,
 			false,
 			false,
@@ -1364,12 +1364,12 @@ Ch |1  |
 		{
 			// 54
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d++ |`,
+|=SCORE |p|
+|#
+|1  | d++ |`,
 			2,
 			false,
 			false,
@@ -1383,12 +1383,12 @@ Ch |1  |
 		{
 			// 55
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d+++ |`,
+|=SCORE |p|
+|#
+|1  | d+++ |`,
 			2,
 			false,
 			false,
@@ -1402,12 +1402,12 @@ Ch |1  |
 		{
 			// 56
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d- |`,
+|=SCORE |p|
+|#
+|1  | d- |`,
 			2,
 			false,
 			false,
@@ -1421,12 +1421,12 @@ Ch |1  |
 		{
 			// 57
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | d-- |`,
+|=SCORE |p|
+|#
+|1  | d-- |`,
 			2,
 			false,
 			false,
@@ -1440,13 +1440,13 @@ Ch |1  |
 		{
 			// 58
 			`
-TRACK |p|
-Ch |1  |
-VelScale|step:30|
+|TRACK |p|
+|Ch |1  |
+|VelScale|step:30|
 
-=SCORE |p|
-#
-1  | d+ |`,
+|=SCORE |p|
+|#
+|1  | d+ |`,
 			2,
 			false,
 			false,
@@ -1460,13 +1460,13 @@ VelScale|step:30|
 		{
 			// 59
 			`
-TRACK |p|
-Ch |1  |
-VelScale|step:30|
+|TRACK |p|
+|Ch |1  |
+|VelScale|step:30|
 
-=SCORE |p|
-#
-1  | d++ |
+|=SCORE |p|
+|#
+|1  | d++ |
 
 `,
 			2,
@@ -1482,13 +1482,13 @@ VelScale|step:30|
 		{
 			// 60
 			`
-TRACK |p|
-Ch |1  |
-VelScale|step:30|
+|TRACK |p|
+|Ch |1  |
+|VelScale|step:30|
 
-=SCORE |p|
-#
-1  | d- |
+|=SCORE |p|
+|#
+|1  | d- |
 `,
 			2,
 			false,
@@ -1503,13 +1503,13 @@ VelScale|step:30|
 		{
 			// 61
 			`
-TRACK |p|
-Ch |1  |
-VelScale|step:30|
+|TRACK |p|
+|Ch |1  |
+|VelScale|step:30|
 
-=SCORE |p|
-#
-1  | d-- |
+|=SCORE |p|
+|#
+|1  | d-- |
 `,
 			2,
 			false,
@@ -1524,13 +1524,13 @@ VelScale|step:30|
 		{
 			// 62
 			`
-TRACK |p|
-Ch |1  |
-VelScale|min:30|
+|TRACK |p|
+|Ch |1  |
+|VelScale|min:30|
 
-=SCORE |p|
-#
-1  | d---- |
+|=SCORE |p|
+|#
+|1  | d---- |
 `,
 			2,
 			false,
@@ -1545,13 +1545,13 @@ VelScale|min:30|
 		{
 			// 63
 			`
-TRACK |p|
-Ch |1  |
-VelScale|max:100|
+|TRACK |p|
+|Ch |1  |
+|VelScale|max:100|
 
-=SCORE |p|
-#
-1  | d++++ |
+|=SCORE |p|
+|#
+|1  | d++++ |
 `,
 			2,
 			false,
@@ -1566,13 +1566,13 @@ VelScale|max:100|
 		{
 			// 64
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-1  | d |
+|=SCORE |p|
+|#
+|1  | d |
 `,
 			2,
 			false,
@@ -1587,18 +1587,18 @@ VelScale|center:78|
 		{
 			// 65
 			`
-TRACK   | git | Vocals |
-Ch      | 2   | 1      |
-PbRange | 2   | 2      |
+|TRACK   | git | Vocals |
+|Ch      | 2   | 1      |
+|PbRange | 2   | 2      |
 
-=SCORE  | git      | Vocals |
-#
-1       | =.Vocals |        |
-#
-1       |       | f++       |   
-2       |        |    g-    |
-#
-1       |        |      c'  |
+|=SCORE  | git      | Vocals |
+|#
+|1       | =.Vocals |        |
+|#
+|1       |       | f++       |   
+|2       |        |    g-    |
+|#
+|1       |        |      c'  |
 `,
 			3,
 			false,
@@ -1615,20 +1615,20 @@ PbRange | 2   | 2      |
 		{
 			// 66
 			`
-TRACK |Vocals|git|
-Ch      |1       |2    |
-PbRange |2       |2    |
+|TRACK |Vocals|git|
+|Ch      |1       |2    |
+|PbRange |2       |2    |
 
-=SCORE  |Vocals|git|
-#
-1   |        | =.Vocals|
-    |        | /d   |
-#
-1   | f++    |     |   
-2   | g-     |     |
-#
-1   |        | /c   |
-2   |        | /PB(20) |
+|=SCORE  |Vocals|git|
+|#
+|1   |        | =.Vocals|
+|    |        | /d   |
+|#
+|1   | f++    |     |   
+|2   | g-     |     |
+|#
+|1   |        | /c   |
+|2   |        | /PB(20) |
 `,
 			3,
 			false,
@@ -1648,14 +1648,14 @@ PbRange |2       |2    |
 		{
 			// 67
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#A
-1  |c" |
-2  |d  |
-[A]
+|=SCORE |p|
+|#A
+|1  |c" |
+|2  |d  |
+|[A]
 			`,
 			2,
 			false,
@@ -1674,18 +1674,18 @@ Ch |1  |
 		{
 			// 68
 			`
-=rhythm | x |
-#
-1       | $euclid(3,8,&) |
+|=rhythm | x |
+|#
+|1       | $euclid(3,8,&) |
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  | =rhythm(c"+,d) |
-#
-1  |*|
+|=SCORE |p|
+|#
+|1  | =rhythm(c"+,d) |
+|#
+|1  |*|
 			`,
 			2,
 			false,
@@ -1712,21 +1712,21 @@ Ch |1  |
 		{
 			// 69
 			`
-=rhythm |x|
-#
-1 | $euclid(3,8,1) |
-*2
+|=rhythm |x|
+|#
+|1 | $euclid(3,8,1) |
+|*2
 
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#
-1  |=rhythm(c"+,d) |
-#
-1 | |
-#
-1  |*|
+|=SCORE |p|
+|#
+|1  |=rhythm(c"+,d) |
+|#
+|1 | |
+|#
+|1  |*|
 			`,
 			2,
 			false,
@@ -1753,15 +1753,15 @@ Ch |1  |
 		{
 			// 70
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-1  | d |
-2  | % |
-3  | * |
+|=SCORE |p|
+|#
+|1  | d |
+|2  | % |
+|3  | * |
 `,
 			2,
 			false,
@@ -1776,16 +1776,16 @@ VelScale|center:78|
 		{
 			// 71
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-1  | d |
-2  | * |
-3  | % |
-4  | * |
+|=SCORE |p|
+|#
+|1  | d |
+|2  | * |
+|3  | % |
+|4  | * |
 `,
 			2,
 			false,
@@ -1800,17 +1800,17 @@ VelScale|center:78|
 		{
 			// 72
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-1  | d |
-3  | e |
-4  | * |
-#
-1  | ./. |
+|=SCORE |p|
+|#
+|1  | d |
+|3  | e |
+|4  | * |
+|#
+|1  | ./. |
 `,
 			2,
 			false,
@@ -1829,23 +1829,23 @@ VelScale|center:78|
 		{
 			// 73
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-2  | g |
-#
-1  | d |
-3  | e |
-4  | * |
-#
-1  | .2. |
-*3
-#
-1  | c |
-2  | * |
+|=SCORE |p|
+|#
+|2  | g |
+|#
+|1  | d |
+|3  | e |
+|4  | * |
+|#
+|1  | .2. |
+|*3
+|#
+|1  | c |
+|2  | * |
 `,
 			2,
 			false,
@@ -1876,23 +1876,23 @@ VelScale|center:78|
 		{
 			// 74
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-2  | g |
-#
-1  | d |
-3  | e |
-4  | * |
-#
-1  | .2. |
-*5
-#
-1  | c |
-2  | * |
+|=SCORE |p|
+|#
+|2  | g |
+|#
+|1  | d |
+|3  | e |
+|4  | * |
+|#
+|1  | .2. |
+|*5
+|#
+|1  | c |
+|2  | * |
 `,
 			2,
 			false,
@@ -1929,23 +1929,23 @@ VelScale|center:78|
 		{
 			// 75
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-2  | g |
-#
-1  | d |
-3  | e |
-4  | * |
-#
-1  | .2. |
-*4
-#
-1  | c |
-2  | * |
+|=SCORE |p|
+|#
+|2  | g |
+|#
+|1  | d |
+|3  | e |
+|4  | * |
+|#
+|1  | .2. |
+|*4
+|#
+|1  | c |
+|2  | * |
 `,
 			2,
 			false,
@@ -1978,20 +1978,20 @@ VelScale|center:78|
 		{
 			// 76
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=SCORE |p|
-#
-2  | g |
-#
-1  | d |
-3  | e |
-4  | * |
-#
-1  | .2. |
-*5
+|=SCORE |p|
+|#
+|2  | g |
+|#
+|1  | d |
+|3  | e |
+|4  | * |
+|#
+|1  | .2. |
+|*5
 `,
 			2,
 			false,
@@ -2026,26 +2026,26 @@ VelScale|center:78|
 		{
 			// 77
 			`
-TRACK |p|
-Ch |1  |
-VelScale|center:78|
+|TRACK |p|
+|Ch |1  |
+|VelScale|center:78|
 
-=patt |a|
-#
-2  | g |
-#
-1  | d |
-3  | e |
-4  | * |
-#
-1  | .2. |
-#
-1  |     |
+|=patt |a|
+|#
+|2  | g |
+|#
+|1  | d |
+|3  | e |
+|4  | * |
+|#
+|1  | .2. |
+|#
+|1  |     |
 
-=SCORE |p|
-#
-1  | =patt.a%2 |
-*7
+|=SCORE |p|
+|#
+|1  | =patt.a%2 |
+|*7
 `,
 			2,
 			false,
@@ -2080,15 +2080,15 @@ VelScale|center:78|
 		{
 			// 78
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#A
-1  |c" |
-2  |d  |
-[A]
-[A]
+|=SCORE |p|
+|#A
+|1  |c" |
+|2  |d  |
+|[A]
+|[A]
 			`,
 			2,
 			false,
@@ -2111,18 +2111,18 @@ Ch |1  |
 		{
 			// 79
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#A
-1  |c" |
-2  |d  |
-[A]
-#
-1  | c' |
-2 |* |
-[A]
+|=SCORE |p|
+|#A
+|1  |c" |
+|2  |d  |
+|[A]
+|#
+|1  | c' |
+|2 |* |
+|[A]
 			`,
 			2,
 			false,
@@ -2147,22 +2147,22 @@ Ch |1  |
 		{
 			// 80
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=SCORE |p|
-#A
-1  |c" |
-3  |*|
-#B
-1  |f"  |
-3 |*|
-[A]
-#
-1  | c' |
-3 |* |
-[A]
-[B]
+|=SCORE |p|
+|#A
+|1  |c" |
+|3  |*|
+|#B
+|1  |f"  |
+|3 |*|
+|[A]
+|#
+|1  | c' |
+|3 |* |
+|[A]
+|[B]
 			`,
 			2,
 			false,
@@ -2185,27 +2185,27 @@ Ch |1  |
 		{
 			// 81
 			`
-TRACK |p|
-Ch |1  |
+|TRACK |p|
+|Ch |1  |
 
-=temp |a|
-#A
-1  |c" | 
-3  |*|
-#B
-1  |f"  | 
-3 |*|
-[A]
-#
-1  | c' |
-3 |* |
-[A]
-[B]
+|=temp |a|
+|#A
+|1  |c" | 
+|3  |*|
+|#B
+|1  |f"  | 
+|3 |*|
+|[A]
+|#
+|1  | c' |
+|3 |* |
+|[A]
+|[B]
 
-=SCORE |p|
-#
-1    |=temp.a|
-*6
+|=SCORE |p|
+|#
+|1    |=temp.a|
+|*6
 			`,
 			2,
 			false,
@@ -2228,28 +2228,28 @@ Ch |1  |
 		{
 			// 82
 			`
-TRACK  | Voice |
-Channel | 3     |
+|TRACK  | Voice |
+|Channel | 3     |
 
-@voice  |        
-Hi      | V1 
-ho-ha   |        
-hu      |
+|@voice  |        
+|Hi      | V1 
+|ho-ha   |        
+|hu      |
 
-=melody | Verse |
-#A
-1       | c"    |
-3       | *     |
-#B
-1       | f"    | 
-4       | *     |
-[A]
-[B]
+|=melody | Verse |
+|#A
+|1       | c"    |
+|3       | *     |
+|#B
+|1       | f"    | 
+|4       | *     |
+|[A]
+|[B]
 
-=SCORE  | Voice                     |
-# 4/4 @120
-1       | =melody.Verse@voice.V1[0:2] |
-*3
+|=SCORE  | Voice                     |
+|# 4/4 @120
+|1       | =melody.Verse@voice.V1[0:2] |
+|*3
 
 			`,
 			2,
@@ -2273,28 +2273,28 @@ hu      |
 		{
 			// 83
 			`
-TRACK  | Voice |
-Channel | 3     |
+|TRACK  | Voice |
+|Channel | 3     |
 
-@voice   |        
-Hi      | V1 
-ho-ha   |        
-hu      |
+|@voice   |        
+|Hi      | V1 
+|ho-ha   |        
+|hu      |
 
-=melody | Verse |
-#A
-1       | c"    | 
-3       | *     |
-#B
-1       | f"    | 
-4       | *     |
-[A]
-[B]
+|=melody | Verse |
+|#A
+|1       | c"    | 
+|3       | *     |
+|#B
+|1       | f"    | 
+|4       | *     |
+|[A]
+|[B]
 
-=SCORE  | Voice                     |
-# 4/4 @120
-1       | =melody.Verse[2:]@voice.V1[0:2] |
-*3
+|=SCORE  | Voice                     |
+|# 4/4 @120
+|1       | =melody.Verse[2:]@voice.V1[0:2] |
+|*3
 
 			`,
 			2,
@@ -2315,15 +2315,15 @@ hu      |
 		{
 			// 84
 			`
-TRACK  | Voice |
-Channel | 3     |
+|TRACK  | Voice |
+|Channel | 3     |
 
-=SCORE  | Voice                     |
-# 4/4 @120
-1       | e_ |
-1       | f  |
-3       | *  |
-4       | _e |
+|=SCORE  | Voice                     |
+|# 4/4 @120
+|1       | e_ |
+|1       | f  |
+|3       | *  |
+|4       | _e |
 
 			`,
 			2,
@@ -2339,15 +2339,15 @@ Channel | 3     |
 		{
 			// 85
 			`
-TRACK  | Voice |
-Channel | 3     |
+|TRACK  | Voice |
+|Channel | 3     |
 
-=SCORE  | Voice                     |
-# 4/4 @120
-1       | e_ |
-        | f  |
-3       | *  |
-4       | _e |
+|=SCORE  | Voice                     |
+|# 4/4 @120
+|1       | e_ |
+|        | f  |
+|3       | *  |
+|4       | _e |
 
 			`,
 			2,
@@ -2363,14 +2363,14 @@ Channel | 3     |
 		{
 			// 86
 			`
-TRACK  | Voice |
-Channel | 3     |
+|TRACK  | Voice |
+|Channel | 3     |
 
-=SCORE  | Voice                     |
-# 4/4 @120
-1       | 1 |
-2       | 2  |
-3       | * |
+|=SCORE  | Voice                     |
+|# 4/4 @120
+|1       | 1 |
+|2       | 2  |
+|3       | * |
 
 			`,
 			2,
@@ -2386,14 +2386,14 @@ Channel | 3     |
 		{
 			// 87
 			`
-TRACK  | Voice |
-Channel | 3     |
+|TRACK  | Voice |
+|Channel | 3     |
 
-=SCORE  | Voice                     |
-# 4/4 @120 \major^d#'
-1       | 1 |
-2       | 2  |
-3       | * |
+|=SCORE  | Voice                     |
+|# 4/4 @120 \major^d#'
+|1       | 1 |
+|2       | 2  |
+|3       | * |
 
 			`,
 			2,
@@ -2409,14 +2409,14 @@ Channel | 3     |
 		{
 			// 88
 			`
-TRACK |p  |
-Ch     |1  |
+|TRACK |p  |
+|Ch     |1  |
 
-=SCORE |p  |
-#
-1      |c" |
-1&     |:  |
-2      |d  |
+|=SCORE |p  |
+|#
+|1      |c" |
+|1&     |:  |
+|2      |d  |
 
 			`,
 			2,
@@ -2432,19 +2432,19 @@ Ch     |1  |
 		{
 			// 89
 			`
-TRACK |p  |
-Ch     |1  |
+|TRACK |p  |
+|Ch     |1  |
 
-=patt | |
-#
-1      |c" |
-2      |d  |
+|=patt | |
+|#
+|1      |c" |
+|2      |d  |
 
-=SCORE |p  |
-#
-1      |=patt |
-2      |/:  |
-3      |d  |
+|=SCORE |p  |
+|#
+|1      |=patt |
+|2      |/:  |
+|3      |d  |
 
 			`,
 			2,
@@ -2460,14 +2460,14 @@ Ch     |1  |
 		{
 			// 90
 			`
-TRACK |p  |
-Ch     |1  |
+|TRACK |p  |
+|Ch     |1  |
 
-=SCORE |p  |
-#
-1      |c"+- |
-2      |1----+++  |
-3      |d+++-  |
+|=SCORE |p  |
+|#
+|1      |c"+- |
+|2      |1----+++  |
+|3      |d+++-  |
 
 			`,
 			2,
@@ -2485,13 +2485,13 @@ Ch     |1  |
 		{
 			// 91
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-=SCORE |p        |
-#
-1      |{c,e,g#,a} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{c,e,g#,a} |
+|3      |*        |
 
 			`,
 			2,
@@ -2512,13 +2512,13 @@ Ch      |1 |
 		{
 			// 92
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-=SCORE |p        |
-#
-1      |{c,e,g#,{a,b}} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{c,e,g#,{a,b}} |
+|3      |*        |
 
 			`,
 			2,
@@ -2542,13 +2542,13 @@ Ch      |1 |
 		{
 			// 93
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-=SCORE |p        |
-#
-1      |{c,e,{a,b},g#} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{c,e,{a,b},g#} |
+|3      |*        |
 
 			`,
 			2,
@@ -2572,13 +2572,13 @@ Ch      |1 |
 		{
 			// 94
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-=SCORE |p        |
-#
-1      |{c,e,{a,b,c#,d},g#} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{c,e,{a,b,c#,d},g#} |
+|3      |*        |
 
 			`,
 			2,
@@ -2606,13 +2606,13 @@ Ch      |1 |
 		{
 			// 95
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-=SCORE |p        |
-#
-1      |{c,e,{c,e,c,e},c} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{c,e,{c,e,c,e},c} |
+|3      |*        |
 
 			`,
 			2,
@@ -2640,13 +2640,13 @@ Ch      |1 |
 		{
 			// 96
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-=SCORE |p        |
-#
-1      |{c,e,{c,e,c,{g,b}},c} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{c,e,{c,e,c,{g,b}},c} |
+|3      |*        |
 
 			`,
 			2,
@@ -2677,19 +2677,19 @@ Ch      |1 |
 		{
 			// 97
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-.sh |
-xx | c
-yy | e
-zz | g
-pp | b
+|.sh |
+|xx | c
+|yy | e
+|zz | g
+|pp | b
 
-=SCORE |p        |
-#
-1      |{.sh.xx,.sh.yy,{.sh.xx,.sh.yy,.sh.xx,{.sh.zz,.sh.pp}},.sh.xx} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{.sh.xx,.sh.yy,{.sh.xx,.sh.yy,.sh.xx,{.sh.zz,.sh.pp}},.sh.xx} |
+|3      |*        |
 
 			`,
 			2,
@@ -2720,19 +2720,19 @@ pp | b
 		{
 			// 98
 			`
-TRACK |p |
-Ch      |1 |
+|TRACK |p |
+|Ch      |1 |
 
-.sh |
-xx | c
-yy | e
-zz | g
-pp | b
+|.sh |
+|xx | c
+|yy | e
+|zz | g
+|pp | b
 
-=SCORE |p        |
-#
-1      |{.sh.xx,.sh.yy,{.sh.xx,:,.sh.xx,{.sh.zz,.sh.pp}},.sh.xx} |
-3      |*        |
+|=SCORE |p        |
+|#
+|1      |{.sh.xx,.sh.yy,{.sh.xx,:,.sh.xx,{.sh.zz,.sh.pp}},.sh.xx} |
+|3      |*        |
 
 			`,
 			2,
@@ -2761,21 +2761,21 @@ pp | b
 		{
 			// 99
 			`
-=melody | Verse1 |
- #
-  1     | a      |
-  1     | b>     |
-  2     | c      |
+|=melody | Verse1 |
+| #
+|  1     | a      |
+|  1     | b>     |
+|  2     | c      |
 
-TRACK   | Vocals |
- Channel| 1      |
+|TRACK   | Vocals |
+| Channel| 1      |
 
-@lyr  |
- a b c| V1
+|@lyr  |
+| a b c| V1
 
-=SCORE | Vocals         |
- #
-  1    | =melody@lyr.V1 |
+|=SCORE | Vocals         |
+| #
+|  1    | =melody@lyr.V1 |
 
 			`,
 			2,
@@ -2796,21 +2796,21 @@ TRACK   | Vocals |
 		{
 			// 100
 			`
-=melody | Verse1 |
- #
-  1     | a      |
-  1     | b>     |
-  2     | c      |
+|=melody | Verse1 |
+| #
+|  1     | a      |
+|  1     | b>     |
+|  2     | c      |
 
-TRACK   | Vocals | Drums |
- Channel| 1      |       |
+|TRACK   | Vocals | Drums |
+| Channel| 1      |       |
 
-@lyr  |
- a b c| V1
+|@lyr  |
+| a b c| V1
 
-=SCORE | Vocals         |
- #
-  1    | =melody@lyr.V1 |
+|=SCORE | Vocals         |
+| #
+|  1    | =melody@lyr.V1 |
 
 			`,
 			2,
@@ -2832,13 +2832,13 @@ TRACK   | Vocals | Drums |
 			// 101
 			`
 
-TRACK   | Vocals | 
- Channel| 1      |      
+|TRACK   | Vocals | 
+| Channel| 1      |      
 
-=SCORE | Vocals |
- #
-  1    | 1^1--     |
-  2    | 1^-1++     |
+|=SCORE | Vocals |
+| #
+|  1    | 1^1--     |
+|  2    | 1^-1++     |
 
 			`,
 			2,
@@ -2855,13 +2855,13 @@ TRACK   | Vocals |
 			// 102
 			`
 
-TRACK   | Vocals | 
- Channel| 1      |      
+|TRACK   | Vocals | 
+| Channel| 1      |      
 
-=SCORE | Vocals |
- #
-  1    | 1^2--     |
-  2    | 1^-1++     |
+|=SCORE | Vocals |
+| #
+|  1    | 1^2--     |
+|  2    | 1^-1++     |
 
 			`,
 			2,
@@ -2878,13 +2878,13 @@ TRACK   | Vocals |
 			// 103
 			`
 
-TRACK   | Vocals | 
- Channel| 1      |      
+|TRACK   | Vocals | 
+| Channel| 1      |      
 
-=SCORE | Vocals |
- #
-  1    | PC(2)  |
-  2    | PC(3)  |
+|=SCORE | Vocals |
+| #
+|  1    | PC(2)  |
+|  2    | PC(3)  |
 
 			`,
 			2,
@@ -2900,12 +2900,12 @@ TRACK   | Vocals |
 			`
 'cc
 
-TRACK   | Vocals | 
- Channel| 1      |      
+|TRACK   | Vocals | 
+| Channel| 1      |      
 
-=SCORE | Vocals |
- #
-  2    | =!reset(2,3) |
+|=SCORE | Vocals |
+| #
+|  2    | =!reset(2,3) |
 
 			`,
 			2,
@@ -2936,15 +2936,15 @@ TRACK   | Vocals |
 		{
 			// 105
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |(MN46 MN48>) |
-2  |MN50 |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |(MN46 MN48>) |
+|2  |MN50 |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -2964,15 +2964,15 @@ Ch      |1|
 		{
 			// 106
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |(MN48> MN46) |
-2  |MN50 |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |(MN48> MN46) |
+|2  |MN50 |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -2992,15 +2992,15 @@ Ch      |1|
 		{
 			// 107
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |{MN48>,MN46} |
-2  |MN50 |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |{MN48>,MN46} |
+|2  |MN50 |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -3021,17 +3021,17 @@ Ch      |1|
 		{
 			// 108
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1 | |
-#
-1  |{MN48,MN46<} |
-2  |MN50 |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1 | |
+|#
+|1  |{MN48,MN46<} |
+|2  |MN50 |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -3052,15 +3052,15 @@ Ch      |1|
 		{
 			// 109
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |CC(35,10)~ |
-2  |CC(35,20) |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |CC(35,10)~ |
+|2  |CC(35,20) |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -3098,15 +3098,15 @@ Ch      |1|
 		{
 			// 110
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-1  |c~ |
-2  |d |
-3  |MN52 |
-4  |* |
+|=SCORE |p |
+|#
+|1  |c~ |
+|2  |d |
+|3  |MN52 |
+|4  |* |
 
 			`,
 			2,
@@ -3139,20 +3139,20 @@ Ch      |1|
 		{
 			// 111
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-    1    | d#+++                        |
-    1&,  | (d#+++ g+ a#++ d#'+++)  |
-    1&,; | *                             |
-    2&   | (d#+++ g+ a#++ d#'+++)  |
-    3;   | *                             |
-    3&   |                               |
-    3&,  | d+++                         |
-    4&   | (d+++ f+ b++ d'+++)     |
-    4&;  | *                             |
+|=SCORE |p |
+|#
+|    1    | d#+++                        |
+|    1&,  | (d#+++ g+ a#++ d#'+++)  |
+|    1&,; | *                             |
+|    2&   | (d#+++ g+ a#++ d#'+++)  |
+|    3;   | *                             |
+|    3&   |                               |
+|    3&,  | d+++                         |
+|    4&   | (d+++ f+ b++ d'+++)     |
+|    4&;  | *                             |
 			`,
 			2,
 			false,
@@ -3191,19 +3191,19 @@ Ch      |1|
 		{
 			// 112
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-    1    | d#+++                    |
-    1&,  | (d#+++ g+< a#++< d#'+++) |
-    1&,; | *                        |
-    2&   | (d#+++ g+< a#++< d#'+++) |
-    3;   | *                        |
-    3&,  | d+++                     |
-    4&   | (d+++ f+< b++ d'+++)    |
-    4&;  | *                        |
+|=SCORE |p |
+|#
+|    1    | d#+++                    |
+|    1&,  | (d#+++ g+< a#++< d#'+++) |
+|    1&,; | *                        |
+|    2&   | (d#+++ g+< a#++< d#'+++) |
+|    3;   | *                        |
+|    3&,  | d+++                     |
+|    4&   | (d+++ f+< b++ d'+++)    |
+|    4&;  | *                        |
 			`,
 			2,
 			false,
@@ -3242,14 +3242,14 @@ Ch      |1|
 		{
 			// 113
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-# @110
-    1    | d#                    |
-# @130
-  1 | e |
+|=SCORE |p |
+|# @110
+|    1    | d#                    |
+|# @130
+|  1 | e |
 			`,
 			1,
 			true,
@@ -3263,15 +3263,15 @@ Ch      |1|
 		{
 			// 114
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-# @110
-    1    | d#                    |
-    2 @130 | |
-# @140
-  1 | e |
+|=SCORE |p |
+|# @110
+|    1    | d#                    |
+|    2 @130 | |
+|# @140
+|  1 | e |
 			`,
 			1,
 			true,
@@ -3286,16 +3286,16 @@ Ch      |1|
 		{
 			// 115
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-# @110
-    1    | d#                    |
-    2 @130 | |
-    3 @135 ||
-# @140
-  1 | e |
+|=SCORE |p |
+|# @110
+|    1    | d#                    |
+|    2 @130 | |
+|    3 @135 ||
+|# @140
+|  1 | e |
 			`,
 			1,
 			true,
@@ -3311,28 +3311,28 @@ Ch      |1|
 		{
 			// 116
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-    1    | c                    |
-    1;   | d                    |
-    1,    | e                    |
-    1,;    | f                    |
-    1&    | g                    |
-    1&;    | a                    |
-    1&,    | b                    |
-    1&,;    | c'                    |
-     2    | c"                    |
-    2;   | d"                    |
-    2,    | e"                    |
-    2,;    | f"                    |
-    2&    | g"                    |
-    2&;    | a"                    |
-    2&,    | b"                    |
-    2&,;    | c"'                    |
-    3  | * |
+|=SCORE |p |
+|#
+|    1    | c                    |
+|    1;   | d                    |
+|    1,    | e                    |
+|    1,;    | f                    |
+|    1&    | g                    |
+|   1&;    | a                    |
+|    1&,    | b                    |
+|    1&,;    | c'                    |
+|     2    | c"                    |
+|    2;   | d"                    |
+|    2,    | e"                    |
+|    2,;    | f"                    |
+|    2&    | g"                    |
+|    2&;    | a"                    |
+|    2&,    | b"                    |
+|    2&,;    | c"'                    |
+|    3  | * |
 
 			`,
 			2,
@@ -3376,28 +3376,28 @@ Ch      |1|
 		{
 			// 117
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-    1    | c                    |
-    1.125   | d                    |
-    1.25    | e                    |
-    1.375    | f                    |
-    1.5    | g                    |
-    1.625    | a                    |
-    1.75    | b                    |
-    1.875    | c'                    |
-     2    | c"                    |
-    2.125   | d"                    |
-    2.25    | e"                    |
-    2.375   | f"                    |
-    2.5    | g"                    |
-    2.625    | a"                    |
-    2.75    | b"                    |
-    2.875    | c"'                    |
-    3  | * |
+|=SCORE |p |
+|#
+|    1    | c                    |
+|    1.125   | d                    |
+|    1.25    | e                    |
+|    1.375    | f                    |
+|    1.5    | g                    |
+|    1.625    | a                    |
+|    1.75    | b                    |
+|    1.875    | c'                    |
+|     2    | c"                    |
+|    2.125   | d"                    |
+|    2.25    | e"                    |
+|    2.375   | f"                    |
+|    2.5    | g"                    |
+|    2.625    | a"                    |
+|    2.75    | b"                    |
+|    2.875    | c"'                    |
+|    3  | * |
 
 			`,
 			2,
@@ -3441,14 +3441,14 @@ Ch      |1|
 		{
 			// 118
 			`
-TRACK |p|
-Ch      |1|
+|TRACK |p|
+|Ch      |1|
 
-=SCORE |p |
-#
-    1    | d#+                    |
-  2      | eb-                    |
-3 | * |
+|=SCORE |p |
+|#
+|    1    | d#+                    |
+|  2      | eb-                    |
+|3 | * |
 			`,
 			2,
 			false,
@@ -3465,19 +3465,19 @@ Ch      |1|
 			`
 'drumnote
 			
-TRACK  | dr |
-Ch     | 1  |
+|TRACK  | dr |
+|Ch     | 1  |
 
-=test     | 1                | 2   |
-1         | $euclid(3,8,0.5) | =.1(.drums.kd++,.drums.sn+) |
-#
-1         |                   |...       |
-#
-#
+|=test     | 1                | 2   |
+|1         | $euclid(3,8,0.5) | =.1(.drums.kd++,.drums.sn+) |
+|#
+|1         |                   |...       |
+|#
+|#
 
-=SCORE | dr     |
- 1     | =test.2 |
- *3
+|=SCORE | dr     |
+| 1     | =test.2 |
+| *3
             `,
 			2,
 			false,
@@ -3552,20 +3552,20 @@ Ch     | 1  |
 		{
 			// 120
 			`
-TRACK    | a | 
-Ch       | 1 | 
+|TRACK    | a | 
+|Ch       | 1 | 
  
-=patt    | a    | 
-    1    | c++  | 
-    4    | D~~  |
-    4&   | E+   | 
-    4&,  | *    |
+|=patt    | a    | 
+|    1    | c++  | 
+|    4    | D~~  |
+|    4&   | E+   | 
+|    4&,  | *    |
 
-=SCORE   | a          | 
- #
-    1    | =patt.a%2 | 
- #
-    1&   | *         |
+|=SCORE   | a          | 
+| #
+|    1    | =patt.a%2 | 
+| #
+|    1&   | *         |
 
             `,
 			2,
@@ -3591,35 +3591,35 @@ Ch       | 1 |
 		},
 		{ // 121
 			`
-TRACK  | voc | git |
-Ch     | 1   | 2   |
+|TRACK  | voc | git |
+|Ch     | 1   | 2   |
 
-=patt | 1  |
-#
-  1   | c  |
-#
-  1   | d  |
-#
-  1   | e  |
-#
-  1   | f  |
-#
-  1   | g  |
-#
-  1   | b  |
-#
-  1   | c# |
-#
-  1   | d# |
+|=patt | 1  |
+|#
+|  1   | c  |
+|#
+|  1   | d  |
+|#
+|  1   | e  |
+|#
+|  1   | f  |
+|#
+|  1   | g  |
+|#
+|  1   | b  |
+|#
+|  1   | c# |
+|#
+|  1   | d# |
 
-=SCORE | voc     | git        |
-#A
- 1     | =patt.1 | =patt.1%10 |
-*3
-#
- 1     | .4.     |            |
-*3
-[A]
+|=SCORE | voc     | git        |
+|#A
+| 1     | =patt.1 | =patt.1%10 |
+|*3
+|#
+| 1     | .4.     |            |
+|*3
+|[A]
   `,
 			2,
 			false,
@@ -3661,35 +3661,35 @@ Ch     | 1   | 2   |
 		},
 		{ // 122
 			`
-TRACK  | voc | git |
-Ch     | 2   | 1   |
+|TRACK  | voc | git |
+|Ch     | 2   | 1   |
 
-=patt | 1  |
-#
-  1   | c  |
-#
-  1   | d  |
-#
-  1   | e  |
-#
-  1   | f  |
-#
-  1   | g  |
-#
-  1   | b  |
-#
-  1   | c# |
-#
-  1   | d# |
+|=patt | 1  |
+|#
+|  1   | c  |
+|#
+|  1   | d  |
+|#
+|  1   | e  |
+|#
+|  1   | f  |
+|#
+|  1   | g  |
+|#
+|  1   | b  |
+|#
+|  1   | c# |
+|#
+|  1   | d# |
 
-=SCORE | voc     | git        |
-#A
- 1     | =patt.1 | =patt.1%10 |
-*3
-#
- 1     | .4.     |            |
-*3
-[A]
+|=SCORE | voc     | git        |
+|#A
+| 1     | =patt.1 | =patt.1%10 |
+|*3
+|#
+| 1     | .4.     |            |
+|*3
+|[A]
   `,
 			2,
 			false,
@@ -3731,24 +3731,24 @@ Ch     | 2   | 1   |
 		},
 		{ // 123
 			`
-TRACK  | voc |
-Ch     | 1   |
+|TRACK  | voc |
+|Ch     | 1   |
 
-=SCORE | voc  |
-#
-  1   | 1  |
-#
-  1   | 2  |
-#
-  1   | 1' |
-#
-  1   | 2"  |
-#
-  1   | -1  |
-#
-  1   | -1'  |
-#
-  1   | -2" |
+|=SCORE | voc  |
+|#
+|  1   | 1  |
+|#
+|  1   | 2  |
+|#
+|  1   | 1' |
+|#
+|  1   | 2"  |
+|#
+|  1   | -1  |
+|#
+|  1   | -1'  |
+|#
+|  1   | -2" |
 `,
 			2,
 			false,
@@ -3772,12 +3772,12 @@ Ch     | 1   |
 		},
 		{ // 124
 			`
-TRACK  | voc |
-Ch     | 1   |
+|TRACK  | voc |
+|Ch     | 1   |
 
-=SCORE | voc  |
-# @110~
-# @140
+|=SCORE | voc  |
+|# @110~
+|# @140
 `,
 			1,
 			true,
@@ -3854,12 +3854,12 @@ Ch     | 1   |
 		},
 		{ // 125
 			`
-TRACK  | voc |
-Ch     | 1   |
+|TRACK  | voc |
+|Ch     | 1   |
 
-=SCORE | voc  |
-# @110~~
-# @140
+|=SCORE | voc  |
+|# @110~~
+|# @140
 `,
 			1,
 			true,
@@ -4042,8 +4042,9 @@ Ch     | 1   |
 		//121: true,
 		//79: true,
 		//80: true,
-		//104: true,
-		83: true,
+		104: true,
+		119: true,
+		83:  true,
 	}
 
 	//sketch.DEBUG = true
@@ -4055,7 +4056,7 @@ Ch     | 1   |
 					continue
 				}
 
-			if i != 79 {
+			if i > 0 {
 				continue
 			}
 		*/

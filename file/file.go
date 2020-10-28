@@ -376,7 +376,7 @@ func (f *File) Parse() (err error) {
 			line = strings.TrimSpace(line)
 
 			if !dashLine.MatchString(line) {
-				if strings.LastIndex(line, "|") != len(line)-1 {
+				if strings.LastIndex(line, "|") != len(line)-1 && len(line) > 0 && line[0] != '\'' {
 					line += "|"
 				}
 				err = v.ParseLine(line)
