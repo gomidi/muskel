@@ -4042,9 +4042,7 @@ func TestSMFWriter(t *testing.T) {
 		//121: true,
 		//79: true,
 		//80: true,
-		104: true,
-		119: true,
-		83:  true,
+		83: true,
 	}
 
 	//sketch.DEBUG = true
