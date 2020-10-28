@@ -685,7 +685,7 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		var v string
 		// "min: %v max: %v random: %v step: %v center: %v"
 		//0: min 1: max 2: randomize-factor 3: step-width, 4: center
-		v = fmt.Sprintf("min: %v max: %v random: %v step: %v center: %v", val[0], val[1], val[2], val[3], val[4])
+		v = fmt.Sprintf("min:%v max:%v random:%v step:%v center:%v", val[0], val[1], val[2], val[3], val[4])
 		data = append(data, v)
 	}
 	trks.AddLine(data)
@@ -695,7 +695,7 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		val := sc.Tracks[tr].Ambitus
 		var v string
 		if val[0] != "" || val[1] != "" {
-			v = fmt.Sprintf("from: %v to: %v cut: %v", val[0], val[1], sc.Tracks[tr].AmbitusCutOverFlow)
+			v = fmt.Sprintf("from:%v to:%v cut:%v", val[0], val[1], sc.Tracks[tr].AmbitusCutOverFlow)
 			data = append(data, v)
 		} else {
 			data = append(data, "")

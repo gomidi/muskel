@@ -91,12 +91,15 @@ func (t *Track) SetAmbitus(ambString string) error {
 }
 
 func (t *Track) SetVelScale(velScale string) error {
+	//  VelocityScale  | min:1 max:127 random:4 step:15 center:63 |
 	// "min: %v max: %v random: %v step: %v"
 	//0: min 1: max 2: randomize-factor 3: step-width, 4: center
 
 	//fmt.Printf("velScale of track %s: %q\n", track.Name, velScale)
 
 	props := strings.Split(velScale, " ")
+
+	//fmt.Printf("props: %#v\n", props)
 
 	res := DefaultVeloctiyScale
 

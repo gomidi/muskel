@@ -32,7 +32,7 @@ func TestFormatSimple(t *testing.T) {
 | TRACK   | Voc | - | Bass 
 Channel | 2 | 3 | 4 |
 Delay   | 1/8 | 1/5 | -1/5 |
-
+VelocityScale  | min:1 max:127 random:4 step:15 center:63 | | min:10 max:127 random:2 step:12 center:73 |
 
 | PROPERTY |
 x          | y
@@ -42,11 +42,11 @@ x          | y
 1 | |
 
 `, `
-| TRACK    | Voc | Bass |
-| -------- | --- | ---- |
-|  Channel | 2   | 4    |
-|  Delay   | 1/8 | -1/5 |
-
+| TRACK          | Voc                                      | Bass                                      |
+| -------------- | ---------------------------------------- | ----------------------------------------- |
+|  Channel       | 2                                        | 4                                         |
+|  Delay         | 1/8                                      | -1/5                                      |
+|  VelocityScale | min:1 max:127 random:4 step:15 center:63 | min:10 max:127 random:2 step:12 center:73 |
 
 | PROPERTY |   |
 | -------- | - |
