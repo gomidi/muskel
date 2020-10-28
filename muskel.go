@@ -36,7 +36,7 @@ func WriteWDVersionFile(dir string) error {
 	return ioutil.WriteFile(p, []byte(VERSION), 0644)
 }
 
-func Import(srcFile string, targetFile string) error {
+func Import(srcFile string, targetFile string, monoTracks []int, drumTracks []int) error {
 	fh, err := os.Open(srcFile)
 
 	if err != nil {
@@ -55,7 +55,7 @@ func Import(srcFile string, targetFile string) error {
 
 	defer tg.Close()
 
-	return im.WriteMsklTo(tg)
+	return im.WriteMsklTo(tg, smfimport.MonoTracks(monoTracks...), smfimport.DrumTracks(drumTracks...))
 }
 
 func newFile(filename string, params []string, rd io.Reader, opts ...score.Option) *file.File {
@@ -80,7 +80,7 @@ func Unroll(mainFile string, params []string, rd io.Reader, wr io.Writer, opts .
 
 	err := f.Parse()
 	if err != nil {
-		return err
+		return fmt.Errorf("parsing error: %s", err)
 	}
 
 	err = sc.Unroll()

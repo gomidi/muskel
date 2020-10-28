@@ -241,7 +241,7 @@ TRACK           | bass--8                                   | git--7            
 
 		var bf bytes.Buffer
 
-		err = cv.WriteMsklTo(&bf)
+		err = cv.WriteMsklTo(&bf, nil)
 
 		if err != nil {
 			t.Errorf("[%v] could not write imported score: %s\n%s\n", i, err.Error(), test.midiOut)

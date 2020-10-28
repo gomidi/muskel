@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -52,6 +53,8 @@ var (
 	cmdImport        = cfg.MustCommand("import", "convert a Standard MIDI file to a muskel file").Relax("file")
 	argImportSMF     = cmdImport.NewString("smf", "path of the Standard MIDI file file.", config.Shortflag('i'), config.Required)
 	argOutMuskelFile = cmdImport.NewString("mskl", "path of the muskel file.", config.Shortflag('o'), config.Required)
+	argMonoTracks    = cmdImport.NewString("mono", "mono tracks (e.g. 0,4,5)", config.Shortflag('m'))
+	argDrumTracks    = cmdImport.NewString("drums", "drums or keyswitch tracks (e.g. 0,4,5)", config.Shortflag('d'))
 
 	//cmdAddTrack     = cfg.MustCommand("addtrack", "add a track")
 	//argAddTrackName = cmdAddTrack.NewString("name", "name of the track", config.Required)
@@ -608,7 +611,32 @@ func run() error {
 	}
 
 	if cfg.ActiveCommand() == cmdImport {
-		return muskel.Import(argImportSMF.Get(), argOutMuskelFile.Get())
+		var monoTracks []int
+		var drumTracks []int
+
+		if argMonoTracks.IsSet() {
+			ms := strings.Split(argMonoTracks.Get(), ",")
+
+			for _, m := range ms {
+				i, errI := strconv.Atoi(strings.TrimSpace(m))
+				if errI == nil {
+					monoTracks = append(monoTracks, i)
+				}
+			}
+		}
+
+		if argDrumTracks.IsSet() {
+			ms := strings.Split(argDrumTracks.Get(), ",")
+
+			for _, m := range ms {
+				i, errI := strconv.Atoi(strings.TrimSpace(m))
+				if errI == nil {
+					drumTracks = append(drumTracks, i)
+				}
+			}
+		}
+
+		return muskel.Import(argImportSMF.Get(), argOutMuskelFile.Get(), monoTracks, drumTracks)
 	}
 
 	if cfg.ActiveCommand() == cmdTemplate {

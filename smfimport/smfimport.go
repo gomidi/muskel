@@ -31,6 +31,26 @@ type Importer struct {
 	ticks4th     uint32
 	IgnoreCC     bool
 	lastTick     uint64
+	monoTracks   map[int16]bool
+	drumTracks   map[int16]bool
+}
+
+type Option func(*Importer)
+
+func MonoTracks(monoTracks ...int) Option {
+	return func(i *Importer) {
+		for _, t := range monoTracks {
+			i.monoTracks[int16(t)] = true
+		}
+	}
+}
+
+func DrumTracks(drumTracks ...int) Option {
+	return func(i *Importer) {
+		for _, t := range drumTracks {
+			i.drumTracks[int16(t)] = true
+		}
+	}
 }
 
 func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
@@ -40,13 +60,20 @@ func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
 		cols:         map[colsKey][]positionedMsg{}, // key: trackno and midi channel
 		tracknames:   map[int16]string{},
 		trackMetaMsg: map[int16][]positionedMsg{},
+		monoTracks:   map[int16]bool{},
+		drumTracks:   map[int16]bool{},
 	}
 	opts = append(opts, reader.NoLogger(), reader.Each(im.registerMsg))
 	im.rd = reader.New(opts...)
 	return im
 }
 
-func (c *Importer) WriteMsklTo(wr io.Writer) error {
+func (c *Importer) WriteMsklTo(wr io.Writer, opts ...Option) error {
+	//fmt.Printf("monoTracks: %v\n", monoTracks)
+	for _, opt := range opts {
+		opt(c)
+	}
+
 	err := c.readSMF()
 	if err != nil {
 		return err
@@ -89,10 +116,13 @@ func (c *Importer) addMissingBars(until uint64, lastBar *items.Bar) (no int) {
 
 	pos := c.ticksTo32ths(until)
 	diff := pos - lastBar.Position
+	//	fmt.Printf("addMissingBars until: %v lastBar %v diff: %v lastbarLength: %v\n", until, lastBar.No, diff, lastBar.Length32th())
 
 	if diff > uint(lastBar.Length32th()) {
 		num := diff / uint(lastBar.Length32th())
+		//	fmt.Printf("num: %v\n", num)
 
+		//for n := uint(1); n < num; n++ {
 		for n := uint(1); n < num; n++ {
 			no++
 			b := items.NewBar()
@@ -100,7 +130,7 @@ func (c *Importer) addMissingBars(until uint64, lastBar *items.Bar) (no int) {
 			b.TempoChange = lastBar.TempoChange
 			b.TimeSig = lastBar.TimeSig
 			b.Position = lastBar.Position + n*uint(lastBar.Length32th())
-			//fmt.Printf("add missing bar: #%v\n", no)
+			//		fmt.Printf("add missing bar: #%v\n", no)
 			c.addBar(b)
 		}
 	}
@@ -169,7 +199,7 @@ func (c *Importer) setBars() {
 		b.Position = pos
 		b.TimeSig = [2]uint8{tts.Numerator, tts.Denominator}
 		b.TimeSigChange = [2]uint8{tts.Numerator, tts.Denominator}
-		b.TempoChange = lastBar.TempoChange
+		//b.TempoChange = lastBar.TempoChange
 		lastBar = b
 		//fmt.Printf("add time sig change bar; adding #%v\n", lastBar.No)
 		c.addBar(lastBar)
@@ -178,7 +208,7 @@ func (c *Importer) setBars() {
 	c.addMissingBars(c.lastTick, lastBar)
 }
 
-func (c *Importer) msgToEvent(m positionedMsg) *items.Event {
+func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 	var ev items.Event
 	ev.Position = c.ticksTo32ths(m.absPos)
 	comp := ev.AbsPosTicks(c.ticks4th, 0)
@@ -202,16 +232,28 @@ func (c *Importer) msgToEvent(m positionedMsg) *items.Event {
 
 	switch vv := m.msg.(type) {
 	case channel.NoteOn:
-		var it items.Note
-		it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
-		it.Dynamic = items.VelocityToDynamic(vv.Velocity())
-		it.NoteOn = true
-		ev.Item = &it
+		if isDrumTrack {
+			var it items.MIDINote
+			it.Dotted = "::"
+			it.Note = int8(vv.Key())
+			it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			ev.Item = &it
+		} else {
+			var it items.Note
+			it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
+			it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			it.NoteOn = true
+			ev.Item = &it
+		}
 	case channel.NoteOff:
-		var it items.Note
-		it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
-		it.NoteOff = true
-		ev.Item = &it
+		if isDrumTrack {
+			return nil
+		} else {
+			var it items.Note
+			it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
+			it.NoteOff = true
+			ev.Item = &it
+		}
 	case channel.Aftertouch:
 		var it items.MIDIAftertouch
 		it.Value = vv.Pressure()
@@ -249,17 +291,67 @@ func (c *Importer) msgToEvent(m positionedMsg) *items.Event {
 func (c *Importer) setTracks() {
 	for k, msgs := range c.cols {
 		kk := fmt.Sprintf("%s--%v", c.tracknames[k.trackNo], k.channel)
-		var trk track.Track
+		//var trk track.Track
+		trk := track.New(kk)
 		trk.Name = kk
 		trk.MIDIChannel = int8(k.channel)
-		c.score.AddTrack(&trk)
+		//trk.MIDIBank = -1
+		//trk.MIDIVolume = -1
+
+		c.score.AddTrack(trk)
+
+		isMono := c.monoTracks[k.trackNo]
+		isDrum := c.drumTracks[k.trackNo]
+		var lastRestPos uint
+		var lastRestShift int
+		var lastRest bool
+
+		/*
+			if isMono {
+				fmt.Println("isMono: " + kk)
+			}
+		*/
 
 		for _, m := range msgs {
-			ev := c.msgToEvent(m)
-			if ev != nil {
-				//fmt.Printf("[%v] adding event %q to %q\n", ev.Position, ev.String(), kk)
-				c.score.Unrolled[kk] = append(c.score.Unrolled[kk], ev)
+			ev := c.msgToEvent(m, isDrum)
+			if ev == nil {
+				continue
 			}
+			if nt, ok := ev.Item.(*items.Note); ok && isMono {
+				if nt.NoteOff {
+					//ev.Item = items.Rest
+					lastRestPos = ev.Position
+					lastRestShift = ev.PosShift
+					lastRest = true
+					continue
+				}
+
+				if nt.NoteOn {
+					nt.NoteOn = false
+					ev.Item = nt
+
+					if lastRest && lastRestPos != ev.Position {
+						evpre := ev.Dup()
+						evpre.Position = lastRestPos
+						evpre.PosShift = lastRestShift
+						evpre.Item = items.Rest
+						c.score.Unrolled[kk] = append(c.score.Unrolled[kk], evpre)
+					}
+
+					lastRest = false
+				}
+
+			}
+
+			c.score.Unrolled[kk] = append(c.score.Unrolled[kk], ev)
+		}
+
+		if lastRest {
+			ev := &items.Event{}
+			ev.Position = lastRestPos
+			ev.PosShift = lastRestShift
+			ev.Item = items.Rest
+			c.score.Unrolled[kk] = append(c.score.Unrolled[kk], ev)
 		}
 	}
 
