@@ -16,7 +16,6 @@ das sollte für patterns, aber auch für wiederholungen und parts gelten:
 =pattern[1:4]
 .6.[1:4]
 
-
 -dann sollte das normale einbetten mit 
 
 =pattern
@@ -61,12 +60,7 @@ resultiert in
  4     | b     |
 ```
 
-
-
 - das einbetten mit =! ist wie gehabt (aber bezogen auf das, was nach [1:4] überig bleibt)
-
-
-
 
 ### pattern funktionen als on/off modifier pipe
 
@@ -142,32 +136,6 @@ also erstmal besser nicht. (sonst vielleicht durch ein anderes symbol, z.B. =!#)
 die länge ist ja durch die länge des patterns vorgegeben.
 
   
-
-### für die midi bibliothek
-vielleicht mehr für smftrack: 
-funktion, die in einem track überlappende noten beseitigt / den track monophon macht (innerhalb des gleichen channels) und 
-eine weitere funktion, die prüft, ob ein track monophon ist (innerhalb des gleichen channels).
-macht natürlich nur sinn, wenn in einem track keine keyswitches sind, d.h. die müssen in einem extra track sein.
-
-dann könnte mein importer prüfen, ob ein track monophon ist, und falls ja eine normale monophone spalte schreiben.
-
-bevor man meinen importer mit einer midi datei füttert, lässt man sie auf monophone bzw. polyphone tracks prüfen 
-(das tool sollte die anzahl gefundener überlappener noten pro Track/channel kombi ausgeben, als indiz).
-
-und behebt tracks, von denen man weiß / will, dass sie monophon sind.
-
-außerdem kann der importer eine option bekommen, dass bestimmte track eigenschaften übergeben werden können, wie z.B.
-- track ist monophon
-- track ist drumtrack / keyswitch track (keine Töne, sondern MN und staccato ::)
-eigentlich reichen diese eigenschaften, so dass jeder track, der nicht polyfon ist
-mit entweder der eigenschaft 'mono', 'drums' oder 'ks' versehen wird (wobei 'drums' und 'ks' zunächst das gleiche machen werden) 
-also z.B. --trackconfig='violin1:mono,drum:drums,violin1ks:drums'
-
-eine andere option des importers könnte sein, eben alle tracks mit namen auszugeben und auf überlappene noten
-zu prüfen und einem das ergebnis anzuzeigen. indiz für einen drum track könnten die gm noten für kick und snare sein,
-der name drums, hihat, etc., der midi kanal 10; indiz für einen keyswitch track könnten extrem niedigre noten in den untersten drei
-oktaven sein.
-
 ### externe takt eigenschaften importieren
 - es wäre schön, wenn man globale takt eigenschaften, wie
   - partname
@@ -207,61 +175,10 @@ inhalt von main.mskl
 
 hier wird für den zweiten Takt der partname OUTRO verwendet, das Tempo aber dennoch auf 60 bpm geändert
 
-### import bugs: 
-- tack property VelocityScale is somehow wrong
-- track names with spaces should have their spaces replaced by dashes
-- tempo import seems to be buggy (with time signature change, the tempo was reset to 120)
-
 ### andere bugs:
 - wenn auf eine gruppenspalte eine normale spalte folgt, kann diese nicht ordentlich geparst werden (panic)
 - zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden
 
-### not for imports, but general: 
-- we need a formatting option to delete empty lines
-- eine option um überflüssige note start/end kombinationen zu entfernen,
-i.e. 
-
-2 | c_ |
-3 | _c |
-3 | g  |
-
-kann umgeschrieben werden als
-
-2 | c |
-3 | g |
-
-
-das würde idealerweise beim import passieren, wäre aber general als option interessant.
-
-wobei der unterschied wäre:
-
-1 | f  |
-2 | c_ |
-3 | _c |
-3 | g  |
-
-hier würde das f bis zum g klingen
-
-1 | f |
-2 | c |
-3 | g |
-
-hier würde das f bis zum c klingen
-
-deshalb ist es vielleicht besser, es als option anzubieten
-(monophonic), so dass generell eine spalte monophon gemacht wird (oder man zeigt es an durch ein besonderes Zeichen im namen der spalte, etwa auf ! endend)
-dann würde aus 
-
-2 | c_ |
-3 | _c |
-4 | g  |
-
-2 | c  |
-3 | *  |
-4 | g  |
-
-da man beim import das nicht genau wissen kann, macht man es besser erst im nachhinein
-das entfernen der leeren zeilen kann aber generell erfolgen
 
 - außerdem wäre es nützlich, eine option zu haben, um in einer spalte die töne durch midi notes zu ersetzen, etwa, wenn der spaltenname auf # endet
 - außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle töne als verkürzt umzunotieren, etwa, wenn der spaltenname auf :, :: oder ::: endet
@@ -269,14 +186,7 @@ das entfernen der leeren zeilen kann aber generell erfolgen
 - außerdem wäre es nützlich, eine option zu haben, um in einer spalte alle dynamikzeichen zu entfernen, etwa, wenn der spaltenname auf +- endet
 
 ### big table rewrite -> markdown tables
-- erste spalte von tabelle beginnt immer mit `|` die zweite zeile kann `|---|---|` etc enthalten. 
-- beim formatieren wird sie immer so umgeschrieben, dass sie `|---|---|` enthält. 
-- Damit werden muskel Dateien automatisch zu markdown Dateien und die muskel-tabellen
-  zu markdown tabellen. 
-- Damit können sie mit jedem markdown-Editor bearbeitet werden (und in schönes HTML oder PDF umgewandelt werden)
-- ein schöner Editor dafür ist Typora.
-- Alles, was nicht in Tabellen steht, ist Kommentar. (außer den `$includes`, `$embed` etc.) 
-- Damit kann man eine Komposition als normale markdown-Datei schreiben mit Überschriften etc. und ganz normal formatieren und trotzdem eine Komposition drinnen enthalten haben. Allerdings darf in den Kompositionstabellen nicht "formatiert" werden.
+
 - Das einzig blöde ist, dass es keine elegante Schreibweise für colspans gibt. also kommentare vergrößern damit die erste spalte (wenn es nicht auskommentieren einer ganzen Zeile ist, da muss das kommentarzeichen nur nach der ersten pipe geschrieben werden) 
 wichtig ist auch, dass ``\`\`\`` und `\~\~\~` am Anfang und Ende einer Zeile als Kommentar gewertet werden (damit auch Muskel-Code "zitiert" werden kann)
 - Das freistehende @ markiert die Position, ab der im Play-Modus gespielt wird (bis zum nächsten freistehenden @ oder zum Ende). Das freistehende @ wird nur beachtet, wenn es im SCORE steht (oder in der Tabelle, die dem Program als Haupttabelle genannt wurde). Ist das freistehende @ in der ersten Spalte, wird der gesamte SCORE ab dem freistehenden @ bis zum nächsten @ gespielt (alle Spalten/Stimmen).
@@ -287,7 +197,6 @@ Steht das freistehende @ in einer anderen Spalte, wird nur diese Spalte gespielt
 - Das interface könnte über einen Webserver laufen, wo man den MIDI-Input-Kanal und den Ausgang auf dem es erklingen soll auswählen kann und das Tempo und die Anzahl an Vorlauftakten des Klicks. - Außerdem kann man darüber dann die Aufnahme starten und beenden. Es wird immer an die gewählte Datei angehangen mit Vermerk des datums und der uhrzeit in einem kommentar. Möglicherweise erlaubt man auch eine Loop-Aufnahme über n Takte, so dass für jeden weiteren Durchlauf eine neue Spalte in der Tabelle angelegt wird. Auf jeden Fall wird in der Spalte der Tabelle der MIDI-Kanal erfasst, über den die Noten/CCs reinkamen, so dass man auch auf mehreren Kanälen gleichzeitig einspielen kann.
 - Möglicherweise benutzt man dafür im Hintergrund midish.
 - Um möglichst kompatibel zu bleiben, wird innerhalb einer Tabelle eine fehlendes vorangehendes Pipe-Zeichen ergänzt (solange die Tabelle nicht durch eine Leerzeile unterbrochen wurde). Lediglich die erste Zeile der Tabelle muss mit einem Pipesymbol beginnen.
-
 
 ### was noch fehlt bei den gruppenspalten und der include vereinheitlichung
 
@@ -518,6 +427,43 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
 
 
 # erledigt
+
+- we need a formatting option to delete empty lines
+
+### big table rewrite -> markdown tables
+- erste spalte von tabelle beginnt immer mit `|` die zweite zeile kann `|---|---|` etc enthalten. 
+- beim formatieren wird sie immer so umgeschrieben, dass sie `|---|---|` enthält. 
+- Damit werden muskel Dateien automatisch zu markdown Dateien und die muskel-tabellen zu markdown tabellen. 
+- Damit können sie mit jedem markdown-Editor bearbeitet werden (und in schönes HTML oder PDF umgewandelt werden)
+- ein schöner Editor dafür ist Typora.
+- Alles, was nicht in Tabellen steht, ist Kommentar. (außer den `$includes`, `$embed` etc.) 
+- Damit kann man eine Komposition als normale markdown-Datei schreiben mit Überschriften etc. und ganz normal formatieren und trotzdem eine Komposition drinnen enthalten haben. Allerdings darf in den Kompositionstabellen nicht "formatiert" werden.
+
+### für die midi bibliothek
+vielleicht mehr für smftrack: 
+funktion, die in einem track überlappende noten beseitigt / den track monophon macht (innerhalb des gleichen channels) und 
+eine weitere funktion, die prüft, ob ein track monophon ist (innerhalb des gleichen channels).
+macht natürlich nur sinn, wenn in einem track keine keyswitches sind, d.h. die müssen in einem extra track sein.
+
+dann könnte mein importer prüfen, ob ein track monophon ist, und falls ja eine normale monophone spalte schreiben.
+
+bevor man meinen importer mit einer midi datei füttert, lässt man sie auf monophone bzw. polyphone tracks prüfen 
+(das tool sollte die anzahl gefundener überlappener noten pro Track/channel kombi ausgeben, als indiz).
+
+und behebt tracks, von denen man weiß / will, dass sie monophon sind.
+
+außerdem kann der importer eine option bekommen, dass bestimmte track eigenschaften übergeben werden können, wie z.B.
+- track ist monophon
+- track ist drumtrack / keyswitch track (keine Töne, sondern MN und staccato ::)
+eigentlich reichen diese eigenschaften, so dass jeder track, der nicht polyfon ist
+mit entweder der eigenschaft 'mono', 'drums' oder 'ks' versehen wird (wobei 'drums' und 'ks' zunächst das gleiche machen werden) 
+also z.B. --trackconfig='violin1:mono,drum:drums,violin1ks:drums'
+
+eine andere option des importers könnte sein, eben alle tracks mit namen auszugeben und auf überlappene noten
+zu prüfen und einem das ergebnis anzuzeigen. indiz für einen drum track könnten die gm noten für kick und snare sein,
+der name drums, hihat, etc., der midi kanal 10; indiz für einen keyswitch track könnten extrem niedigre noten in den untersten drei
+oktaven sein.
+
 
 ### big import rewrite und Gruppenspalten (ermöglichen "vertikale" Imports, bzw. auslagern von Spaltengruppen)
 DIE GANZE AUFLÖSEREI MIT ALLEN REGELN UND UMFANGREICHEN TESTS IST SCHON PROGRAMMIERT (reference package), DORT IN DER docs.go

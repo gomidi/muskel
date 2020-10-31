@@ -29,6 +29,7 @@ type Score interface {
 	AddLyrics(map[string][]string)
 	AddInclude(file, sketch string, params []string) error
 	AddToken(key, value string)
+	NoEmptyLines() bool
 }
 
 type sketch interface {

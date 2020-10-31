@@ -29,7 +29,7 @@ func TestImport(t *testing.T) {
 	//writer.Meter(wr, 3, 4)
 	writer.EndOfTrack(wr)
 
-	writer.TrackSequenceName(wr, "piano")
+	writer.TrackSequenceName(wr, "piano A")
 	wr.SetChannel(1)
 	writer.ProgramChange(wr, 2)
 	//writer.ControlChange(wr, cc.VolumeMSB, 90)
@@ -43,7 +43,7 @@ func TestImport(t *testing.T) {
 	writer.NoteOff(wr, 74)
 	writer.EndOfTrack(wr)
 
-	writer.TrackSequenceName(wr, "vocal")
+	writer.TrackSequenceName(wr, "vocal B")
 	wr.SetChannel(2)
 	writer.ProgramChange(wr, 20)
 	//writer.ControlChange(wr, cc.VolumeMSB, 80)
@@ -76,7 +76,7 @@ func TestImport(t *testing.T) {
 
 	im.WriteMsklTo(&out, MonoTracks(2), DrumTracks(3))
 
-	expected := `| TRACK           | drums--9                                 | piano--1                                 | vocal--2                                 |
+	expected := `| TRACK           | drums--9                                 | piano-A--1                               | vocal-B--2                               |
 | --------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
 |  File           |                                          |                                          |                                          |
 |  Channel        | 10                                       | 2                                        | 3                                        |
@@ -90,20 +90,20 @@ func TestImport(t *testing.T) {
 |  Ambitus        |                                          |                                          |                                          |
 |  Import         |                                          |                                          |                                          |
 
-| =SCORE         | drums--9   | piano--1 | vocal--2 |
-| -------------- | ---------- | -------- | -------- |
-|  # 3/4 @110.00 |            |          |          |
-|     1          | MN35++++:: | PC(2)    | PC(20)   |
-|     1&         | MN38--::   | c'++_    |          |
-|     2          |            | d"+_     |          |
-|     2&         |            | _c'      |          |
-|  # 4/4         |            |          |          |
-|     1          |            | _d"      | f'++++   |
-|  # @130.00     |            |          |          |
-|     1          |            |          | G--      |
-|  # 3/4         |            |          |          |
-|     2          |            |          | a'++     |
-|     3          |            |          | *        |
+| =SCORE         | drums--9   | piano-A--1 | vocal-B--2 |
+| -------------- | ---------- | ---------- | ---------- |
+|  # 3/4 @110.00 |            |            |            |
+|     1          | MN35++++:: | PC(2)      | PC(20)     |
+|     1&         | MN38--::   | c'++_      |            |
+|     2          |            | d"+_       |            |
+|     2&         |            | _c'        |            |
+|  # 4/4         |            |            |            |
+|     1          |            | _d"        | f'++++     |
+|  # @130.00     |            |            |            |
+|     1          |            |            | G--        |
+|  # 3/4         |            |            |            |
+|     2          |            |            | a'++       |
+|     3          |            |            | *          |
 
 `
 

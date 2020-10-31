@@ -45,6 +45,12 @@ func PrintBarComments() Option {
 	}
 }
 
+func NoEmptyLines() Option {
+	return func(s *Score) {
+		s.noEmptyLines = true
+	}
+}
+
 type Score struct {
 	mainFile       string
 	mainSketch     string
@@ -56,6 +62,7 @@ type Score struct {
 	tokens         map[string]string
 	IsUnrolled     bool
 	exclSketch     map[string]string
+	noEmptyLines   bool
 
 	printBarComments bool
 
@@ -1193,6 +1200,10 @@ func (sc *Score) Embed(patterns ...string) error {
 		}
 	}
 	return nil
+}
+
+func (sc *Score) NoEmptyLines() bool {
+	return sc.noEmptyLines
 }
 
 func (sc *Score) Include(filename string, sketch string, params []string) error {

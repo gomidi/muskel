@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 
 	"gitlab.com/gomidi/midi"
 	"gitlab.com/gomidi/midi/reader"
@@ -56,7 +57,7 @@ func DrumTracks(drumTracks ...int) Option {
 func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
 	im := &Importer{
 		src:          src,
-		score:        score.New(fname, nil),
+		score:        score.New(fname, nil, score.NoEmptyLines()),
 		cols:         map[colsKey][]positionedMsg{}, // key: trackno and midi channel
 		tracknames:   map[int16]string{},
 		trackMetaMsg: map[int16][]positionedMsg{},
@@ -369,9 +370,9 @@ func (c *Importer) registerMsg(pos *reader.Position, msg midi.Message) {
 
 	switch v := msg.(type) {
 	case meta.Instrument:
-		c.tracknames[pos.Track] = v.Text()
+		c.tracknames[pos.Track] = strings.ReplaceAll(v.Text(), " ", "-")
 	case meta.TrackSequenceName:
-		c.tracknames[pos.Track] = v.Text()
+		c.tracknames[pos.Track] = strings.ReplaceAll(v.Text(), " ", "-")
 	case meta.Tempo:
 		c.tempos = append(c.tempos, positionedMsg{pos.AbsoluteTicks, msg})
 	case meta.TimeSig:

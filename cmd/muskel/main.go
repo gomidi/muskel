@@ -37,6 +37,7 @@ var (
 	argParams              = cfg.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
 	argPatt                = cfg.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
 	argFmt                 = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
+	argNoEmptyLines        = cfg.NewBool("noemptylines", "remove empty lines from the score", config.Shortflag('e'))
 	//argAddMissing = cfg.NewBool("addprops", "add missing properties")
 	argWatch      = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
 	argDir        = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
@@ -436,6 +437,10 @@ func (c *callbackrunner) prepare(dir, file string) error {
 
 	if argPatt.IsSet() && argPatt.Get() != "" {
 		opts = append(opts, score.Column(argPatt.Get()))
+	}
+
+	if argNoEmptyLines.Get() {
+		opts = append(opts, score.NoEmptyLines())
 	}
 
 	if argParams.IsSet() {

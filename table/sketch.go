@@ -111,6 +111,12 @@ func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 		}
 		return t.Table.writeLine(f, s.String())
 	}
+
+	if t.Score != nil && t.Score.NoEmptyLines() && t.IsEmptyLine(line[1:]) {
+		//fmt.Printf("line[1:]: %#v\n", line[1:])
+		return
+	}
+
 	s.WriteString(t.Table.separator() + t.Table.Pad(0, "    "+formatPosition(line[0])))
 
 	for i, _ := range t.cols {
@@ -137,4 +143,14 @@ func (t *Sketch) writeDataLines(f Formatter) (err error) {
 		}
 	}
 	return
+}
+
+func (s *Sketch) IsEmptyLine(data []string) bool {
+	for _, d := range data {
+		if strings.TrimSpace(d) != "" {
+			return false
+		}
+	}
+
+	return true
 }
