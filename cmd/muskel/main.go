@@ -55,7 +55,7 @@ var (
 	argImportSMF     = cmdImport.NewString("smf", "path of the Standard MIDI file file.", config.Shortflag('i'), config.Required)
 	argOutMuskelFile = cmdImport.NewString("mskl", "path of the muskel file.", config.Shortflag('o'), config.Required)
 	argMonoTracks    = cmdImport.NewString("mono", "mono tracks (e.g. 0,4,5)", config.Shortflag('m'))
-	argDrumTracks    = cmdImport.NewString("drums", "drums or keyswitch tracks (e.g. 0,4,5)", config.Shortflag('d'))
+	argDrumTracks    = cmdImport.NewString("drums", "drums or keyswitch tracks (e.g. 0,4,5)", config.Shortflag('r'))
 
 	//cmdAddTrack     = cfg.MustCommand("addtrack", "add a track")
 	//argAddTrackName = cmdAddTrack.NewString("name", "name of the track", config.Required)
