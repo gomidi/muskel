@@ -13,17 +13,18 @@ import (
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/smf"
 	"gitlab.com/gomidi/muskel/smfimport"
+	"gitlab.com/metakeule/config"
 )
 
 const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
-func ReadWDVersionFile(dir string) (*Version, error) {
+func ReadWDVersionFile(dir string) (*config.Version, error) {
 	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
 	b, err := ioutil.ReadFile(p)
 	if err != nil {
 		return nil, err
 	}
-	v, err2 := ParseVersion(strings.TrimSpace(string(b)))
+	v, err2 := config.ParseVersion(strings.TrimSpace(string(b)))
 	if err2 != nil {
 		return nil, err2
 	}

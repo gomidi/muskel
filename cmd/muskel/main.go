@@ -688,7 +688,7 @@ func run() error {
 	srcdir := filepath.Dir(argFile.Get())
 
 	if !argIgnoreMuskelVersion.Get() {
-		var v *muskel.Version
+		var v *config.Version
 		v, err = muskel.ReadWDVersionFile(srcdir)
 		if err == nil {
 			if v.String() != muskel.VERSION {

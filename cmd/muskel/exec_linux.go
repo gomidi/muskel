@@ -6,7 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/gen2brain/beeep"
-	"gitlab.com/gomidi/muskel"
+	"gitlab.com/metakeule/config"
 )
 
 func execCommand(c string) *exec.Cmd {
@@ -26,6 +26,6 @@ func runVersionated(file string, args []string) *exec.Cmd {
 	return exec.Command(file, args...)
 }
 
-func versionate(file string, v *muskel.Version) string {
-	return muskel.Versionate(file, v)
+func versionate(file string, v *config.Version) string {
+	return config.Versionate(file, v)
 }

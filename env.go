@@ -8,6 +8,7 @@ import (
 
 	"gitlab.com/gomidi/muskel/predefined"
 	"gitlab.com/gomidi/muskel/score"
+	"gitlab.com/metakeule/config"
 )
 
 var USER_DIR string
@@ -15,7 +16,7 @@ var WORKING_DIR string
 
 func init() {
 
-	v, err := ParseVersion(VERSION)
+	v, err := config.ParseVersion(VERSION)
 	if err != nil {
 		panic("invalid VERSION: " + VERSION)
 	}
