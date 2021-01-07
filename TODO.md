@@ -1,7 +1,277 @@
 # TODOs
 
 
-## nächstes 
+## nächstes
+
+### parts/sprungmarken
+
+- es wäre wahrscheinlich besser, statt von parts von sprungmarken zu sprechen und wirklich zu springen, d.h. die nachfolgenden sprungmarken werden weiter
+geschrieben; solange, bis was neues kommt (neue sprungmarke oder was anderes).
+
+- da sprungmarken sich immer auf einen Takt beziehen, sollte es eine syntax geben, um innerhalb des Taktes an eine bestimmte Stelle zu springen, z.B.
+  #MARKE:1&
+  oder 
+  #MARKE:-2&  (würde bedeuten 5 Achtel vor #MARKE)
+
+- auf ähnliche weise könnte man die patternwiederholung automatisch/implizit machen und .1. bedeutet dann: springe nach einem takt wieder an die stelle
+  vor einem takt etc. die % zeichen hinter einem pattern fallen dann weg. ich würde dann gerne das % für die Wiederholung der Takte verwenden
+  also % bzw %1 statt .1., %2 statt .2. usw. anbestimmte Stellen im vorangehenden Takt würde man dann mit %2:2& springen.
+  dann könnte man den Punkt statt des % Zeichens verwenden, z.B. .+++ statt %+++ für das Spielen der letzten Note, aber auch .5 für das Spielen der
+  der exakte Note, die fünf Noten vor der jetzigen gespielt wurde (gleiche Noten werden in der Sammlung berücksichtigt) und .!5 für das Spielen der verschiedenen 
+  Note, die fünf Noten vor der vorherigen gespielt wurde (gleiche Noten werden in der Sammlung nicht berücksichtigt)
+  um das gut gewährleisten zu können, werden die letzten 60 ungleichen und die letzten 50 gleichen Noten eines Tracks immer mitgeschleift.
+  bei den Takten werden immer die letzten 60 Takte eines Tracks mitgeschleift.
+
+- dann kommt dem patternende eine besondere bedeutung zu: es kann mitten im takt sein und dann wird im ersten takt an der gleichen stelle bei der 
+  wiederholung fortgesetzt. EIN PATTERNENDE KANN EIN PATTERN AUCH KLEINER ALS EINEN TAKT MACHEN, DANN WIRD INNERHALB DES TAKTES WIEDERHOLT:
+
+  z.B. wird aus
+
+  | =mot |   |
+  | #    |   |
+  | 1    | a |
+  | 1&   | g |
+  | 2    | g |
+  | 3    | _ |
+
+
+  | =mot |   |
+  | #    |   |
+  | 1    | a |
+  | 1&   | g |
+  | 2    | g |
+  | 3    | a |
+  | 3&   | g |
+  | 4    | g |
+
+oder aus 
+
+  | =mot |    |
+  | #    |    |
+  | 1    | #1 |
+  | 1,   | #2 |
+  | 1&   | #3 |
+  | 1&,  | _  |
+
+wird
+
+  | =mot |    |
+  | #    |    |
+  | 1    | #1 |
+  | 1,   | #2 |
+  | 1&   | #3 |
+  | 1&,  | #1 |
+  | 2    | #2 |
+  | 2,   | #3 |
+  | 2&   | #1 |
+  | 2&,  | #2 |
+  | 3    | #3 |
+  | 3,   | #1 |
+  | 3&   | #2 |
+  | 3&,  | #3 |
+  | 4    | #1 |
+  | 4,   | #2 |
+  | 4&   | #3 |
+  | 4&,  | #1 |
+
+
+mit diesen Änderungen wird die pattern einbettung mit eckigen Klammern und die part-adressierung mit eckigen klammern überflüssig.
+stattdessen kann man auf folgende Weise an Stellen im pattern springen:
+
+=patt
+
+springt in den ersten Takt des patterns =patt in die gleiche Zeitposition wie diejenige, an der wir uns befinden (synchron)
+
+=patt#2
+
+springt in den zweiten Takt des patterns =patt in die gleiche Zeitposition wie diejenige, an der wir uns befinden (synchron)
+
+=patt#2:2&
+
+springt in den zweiten Takt des patterns =patt in die Zeitposition 2& und verschiebt dadurch ggf. die tonpositionen im Takt, wenn wir uns
+nicht auch in Zeitposition 2& befinden
+
+dadurch wird =! obsolet und das ! kann für andere Zwecke verwendet werden.
+
+### export auf spalten beschränken, ab einer bestimmten position nur exportieren
+
+wenn in einer Spalte auf das | ein > folgt, so wird diese Spalte eine Solospalte. wenn es mindestens eine Solospalte gibt, wird nur diese in die MIDI-Datei
+exportiert. die anderen Tracks werden zwar in die MIDI-Datei geschrieben, aber ohne Töne (stumm)
+
+wenn in einer Zeile auf das erste | ein > folgt, so wird erst ab dieser Zeile in die MIDI-Datei exportiert. diese Stelle wird also
+zum startpunkt der MIDI-Datei. liegt diese Zeile nicht am Anfang des Taktes, so beginnt der Takt normal in der MIDI-Datei hat aber erst Töne ab der
+entsprechenden Zeitposition im Takt.
+
+wenn es mehrere Zeilen gibt, bei denen auf das erste | ein > folgt, so zählt die letzte dieser Zeilen als Startpunkt
+
+folgt ein _ auf ein |, so endet die MIDI-Datei dort. alle noch klingenden Noten werden dort beendet.
+
+wenn es mehrere Zeilen mit _ gibt, so zählt die erste Zeile mit _
+
+### auch in Taktpositionen gibt es wiederholungen durch .
+
+z.B.
+
+| =SCORE | git |
+| #      |     |
+| 1      | a   |
+| 1&     | .   |
+| .      | .   |
+
+ist das gleiche wie 
+
+| =SCORE | git |
+| #      |     |
+| 1      | a   |
+| 1&     | a   |
+| 2      | a   |
+| 2&     | a   |
+| 3      | a   |
+| 3&     | a   |
+| 4      | a   |
+| 4&     | a   |
+
+und
+
+| =patt |   |
+| #     |   |
+| 1     | # |
+| 1&    | . |
+| .     | . |
+
+| =bass |          | 1        |
+| #     |          |          |
+| 1     | =patt(d) | =patt(b) |
+| 2     | /f       |          |
+| 3     | /a       | /c       |
+
+ist das gleiche wie
+
+| =bass |   | 1 |
+| #     |   |   |
+| 1     | d | b |
+| 1&    | d | b |
+| 2     | f | b |
+| 2&    | f | b |
+| 3     | a | c |
+| 3&    | a | c |
+| 4     | a | c |
+| 4&    | a | c |
+
+
+### es gibt eine neue Schreibweise, um tonlängen zu definieren. 
+
+normalerweise klingt eine note bis zur nächsten note, es sei denn, sie hat :, ::, oder ::: am Ende.
+jetzt erweitert sich diese Schreibweise, so dass eine Dauer angegeben werden kann:
+
+a:& bedeutet, dass das a für eine Achtel note lang klingt (es sei denn, es wird vorher durch eine andere Note oder Pause unterbrochen)
+
+wenn nun ohne note in eine zelle
+
+:&
+
+geschrieben wird, bedeutet das, dass alle normal notierten noten, die in der spalte folgen, maximal eine Achtelnote lang sind
+d.h.
+
+a+++
+
+wäre max eine Achtel lang
+
+| =SCORE | melody |
+| #      |        |
+| 1      | :&     |
+| 1&     | a:::   |
+| 2      | a      |
+| 3      | b      |
+| 3,     | *      |
+
+wäre gleichbedeutend mit
+
+| =SCORE | melody |
+| #      |        |
+| 1&     | a:::   |
+| 2      | a      |
+| 2&     | *      |
+| 3      | b      |
+| 3,     | *      |
+
+in der alten Notation
+
+:=
+
+hebt die Definition wieder auf, sodass alle Noten ohne Doppelpunkte wieder bis zur nächsten klingen
+
+::
+
+setzt die Standardlänge auf ::
+
+| =SCORE | melody |
+| #      |        |
+| 1      | ::     |
+| 1&     | a      |
+| 2      | a:=    |
+| 3      | b      |
+| 3,     | *      |
+
+wäre gleichbedeutend mit
+
+| =SCORE | melody |
+| #      |        |
+| 1&     | a::    |
+| 2      | a      |
+| 3      | b      |
+| 3,     | *      |
+
+
+### standard lautheit
+
+wenn in einer Zelle freistehend ein oder mehrere
+
++
+
+oder 
+
+-
+
+Zeichen stehen, so setzen sie die Standardlautstärke von Noten, die ansonsten keine Dynamikvorschrift haben
+
+ein
+
+=
+
+setzt die Standardlautstärke wieder auf den Standardwert
+
+wenn eine Note nicht der so im Kontext gesetzten Standardlautstärke entsprechen will, sondern die 
+ursprüngliche Standardlautstärke haben will, so setzt man ein = ans Ende:
+
+a=
+
+wenn die Lautstärke eine "darunterliegenden Note" (von einer Pattern oder Taktwiederholung oder einer Sprungwiederholung)
+überschrieben werden soll, geschieht dies an der entsprechenden Position mit vorangehendem Slash
+also
+
+/++
+/---
+/=
+
+
+### ereignisse in taktwechsel zeile
+
+es ist möglich, in der zeile des taktwechsels in die entsprechenden Spalten ereignisse zu schreiben.
+dies dürfen jedoch nicht notenereignisse sein.
+die so in den Taktwechsel geschriebenen ereignisse geschehen am Taktanfang, jedoch vor den ereignissen, die in die Taktposition 1 geschrieben sind.
+hier können z.B. Programwechsel, Controllereinstellungen, Sprungmarken, Patterns, Skalen, Pitchbendereignisse etc. stehen.
+sollen hier in der gleichen Zelle mehrere Ereignisse stehen, so müssen sie in runde Klammern gefasst sein und durch Leerzeichen getrennt:
+
+(PB0 [VERSE1] PC9)
+
+sie werden von links nach rechts geschrieben
+
+### grundsätzlich gilt: alles klingt und bleibt gleich, bis es verändert wird: noten erklingen bis zur nächsten, pattern werden wiederholt bis
+zum nächsten ereignis. letzte Töne bleiben gleich bis zum nächsten, sprünge wiederholen, taktpositionen, standartlängen bis zur nächsten usw.
+
+ 
+### CSV export von OpenOffice als mögliches Eingabe-Format akzeptieren (CSV wird nur gelesen)
 
 ### pattern einbettung
 

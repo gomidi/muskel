@@ -8,7 +8,7 @@ require (
 	github.com/metakeule/observe v0.0.0-20170406094839-eba094fd212a
 	gitlab.com/gomidi/midi v1.20.2
 	gitlab.com/gomidi/muskel v1.0.0
-	gitlab.com/metakeule/config v1.15.7
+	gitlab.com/metakeule/config v1.18.1
 	golang.org/x/sys v0.0.0-20190209173611-3b5209105503 // indirect
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 )
