@@ -555,14 +555,12 @@ func (c *callbackrunner) prepare(dir, file string) error {
 		return c.cmdSMF(sc)
 	case cmdPlay:
 		return c.cmdPlay(sc)
-	case cmdConfigDirs:
-		return c.configDirs()
 	default:
 		return nil
 	}
 }
 
-func (c *callbackrunner) configDirs() error {
+func configDirs() error {
 	fmt.Fprintf(os.Stdout, "USER_DIR: %q\nWORKING_DIR: %q\n\n", muskel.USER_DIR, muskel.WORKING_DIR)
 	return nil
 }
@@ -622,6 +620,10 @@ func run() error {
 	if err != nil {
 		fmt.Println(cfg.Usage())
 		return err
+	}
+
+	if cfg.ActiveCommand() == cmdConfigDirs {
+		return configDirs()
 	}
 
 	if cfg.ActiveCommand() == cmdImport {
