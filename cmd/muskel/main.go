@@ -30,7 +30,7 @@ import (
 var (
 	cfg = config.MustNew("muskel", muskel.VERSION, "muskel is a musical sketch language")
 
-	argFile                = cfg.NewString("file", "path of the muskel file", config.Shortflag('f'), config.Required)
+	argFile                = cfg.LastString("file", "path of the muskel file", config.Required)
 	argIgnoreMuskelVersion = cfg.NewBool("current", "use the current version of the muskel command and ignore the "+muskel.MUSKEL_VERSION_FILE+" file", config.Default(false), config.Shortflag('c'))
 	argSketch              = cfg.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
 	argFlow                = cfg.NewBool("flow", "flow mode; sets sketch to ! and pattern to !", config.Default(false))
@@ -51,11 +51,11 @@ var (
 	cmdSMF      = cfg.MustCommand("smf", "convert a muskel file to Standard MIDI file format (SMF)")
 	argSMFTicks = cmdSMF.NewInt32("ticks", "resolution of SMF file in ticks", config.Default(int32(960)))
 
-	cmdImport        = cfg.MustCommand("import", "convert a Standard MIDI file to a muskel file").Relax("file")
-	argImportSMF     = cmdImport.NewString("smf", "path of the Standard MIDI file file.", config.Shortflag('i'), config.Required)
-	argOutMuskelFile = cmdImport.NewString("mskl", "path of the muskel file.", config.Shortflag('o'), config.Required)
-	argMonoTracks    = cmdImport.NewString("mono", "mono tracks (e.g. 0,4,5)", config.Shortflag('m'))
-	argDrumTracks    = cmdImport.NewString("drums", "drums or keyswitch tracks (e.g. 0,4,5)", config.Shortflag('r'))
+	cmdImport        = cfg.MustCommand("import", "convert a Standard MIDI file to a muskel file").Skip("file").Skip("sketch").Skip("flow").Skip("params").Skip("pattern").Skip("noemptylines").Skip("trackfiles").Skip("unroll").Skip("debug").Skip("fmt").Skip("dir").Skip("out").Skip("watch").Skip("sleep").Skip("current")
+	argImportSMF     = cmdImport.LastString("midifile", "the source SMF/MIDI file.", config.Required)
+	argOutMuskelFile = cmdImport.NewString("out", "the target muskel file.", config.Shortflag('o'), config.Required)
+	argMonoTracks    = cmdImport.NewString("mono", "tracks that are considered to be monophon (e.g. 0,4,5)", config.Shortflag('m'))
+	argDrumTracks    = cmdImport.NewString("onset", "tracks that only have onset data (e.g. drum notes of or keyswitches) (e.g. 0,4,5)", config.Shortflag('r'))
 
 	//cmdAddTrack     = cfg.MustCommand("addtrack", "add a track")
 	//argAddTrackName = cmdAddTrack.NewString("name", "name of the track", config.Required)
@@ -78,8 +78,8 @@ var (
 	//argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("audacious -1 -H -p -q $_file"))
 	argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("timidity $_file"))
 
-	cmdTemplate  = cfg.MustCommand("template", "show global template files").Relax("file")
-	argTemplFile = cmdTemplate.NewString("template", "file name of the template file", config.Shortflag('t'))
+	cmdTemplate  = cfg.MustCommand("template", "show global template files").Skip("file").Skip("sketch").Skip("flow").Skip("params").Skip("pattern").Skip("noemptylines").Skip("trackfiles").Skip("unroll").Skip("debug").Skip("fmt").Skip("dir").Skip("out").Skip("watch").Skip("sleep").Skip("current")
+	argTemplFile = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
 )
 
 func fileCheckSum(file string) string {
