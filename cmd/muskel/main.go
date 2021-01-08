@@ -78,7 +78,7 @@ var (
 	//argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("audacious -1 -H -p -q $_file"))
 	argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("timidity $_file"))
 
-	cmdTemplate  = cfg.MustCommand("template", "show global template files").Skip("file").Skip("sketch").Skip("flow").Skip("params").Skip("pattern").Skip("noemptylines").Skip("trackfiles").Skip("unroll").Skip("debug").Skip("fmt").Skip("dir").Skip("out").Skip("watch").Skip("sleep").Skip("current")
+	cmdTemplate  = cfg.MustCommand("template", "show global template files").SkipAllBut()
 	argTemplFile = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
 )
 
