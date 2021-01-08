@@ -4,5 +4,5 @@ go 1.14
 
 require (
 	gitlab.com/gomidi/midi v1.20.2
-	gitlab.com/metakeule/config v1.18.5
+	gitlab.com/metakeule/config v1.18.6
 )
