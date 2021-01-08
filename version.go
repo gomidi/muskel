@@ -1,2 +1,2 @@
 package muskel
-const VERSION="1.1.4"
+const VERSION="1.1.5"
