@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	appdir "github.com/emersion/go-appdir"
 	"gitlab.com/gomidi/muskel/predefined"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/metakeule/config"
@@ -13,6 +14,10 @@ import (
 
 var USER_DIR string
 var WORKING_DIR string
+
+func setUserDir(version string) {
+	USER_DIR = filepath.Join(appdir.New("muskel").UserConfig(), version)
+}
 
 func init() {
 

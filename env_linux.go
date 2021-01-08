@@ -12,9 +12,10 @@ package muskel
 
 import (
 	"os"
-	"path/filepath"
+	//"github.com/emersion/go-appdir"
 )
 
+/*
 func setUserDir(version string) {
 	xdg_config_home := os.Getenv("XDG_CONFIG_HOME")
 	if xdg_config_home == "" {
@@ -26,6 +27,7 @@ func setUserDir(version string) {
 	}
 	USER_DIR = xdg_config_home
 }
+*/
 
 func setWorkingDir() {
 	wd, err := os.Getwd()

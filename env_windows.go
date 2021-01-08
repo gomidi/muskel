@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 )
 
+/*
 func setUserDir(version string) {
 	user_app_data := filepath.ToSlash(os.Getenv("LOCALAPPDATA"))
 	if user_app_data == "" {
@@ -16,6 +17,7 @@ func setUserDir(version string) {
 	}
 	USER_DIR = filepath.ToSlash(user_app_data)
 }
+*/
 
 func setWorkingDir() {
 	wd, err := os.Getwd()

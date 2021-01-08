@@ -10,9 +10,9 @@ according to http://wiki.freepascal.org/Multiplatform_Programming_Guide#Configur
 
 import (
 	"os"
-	"path/filepath"
 )
 
+/*
 func setUserDir(version string) {
 	home := os.Getenv("HOME")
 	if home == "" {
@@ -20,6 +20,7 @@ func setUserDir(version string) {
 	}
 	USER_DIR = filepath.Join(home, ".muskel", version)
 }
+*/
 
 func setWorkingDir() {
 	wd, err := os.Getwd()

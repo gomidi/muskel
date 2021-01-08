@@ -80,6 +80,8 @@ var (
 
 	cmdTemplate  = cfg.MustCommand("template", "show global template files").SkipAllBut()
 	argTemplFile = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
+
+	cmdConfigDirs = cfg.MustCommand("dirs", "show configuration dirs").SkipAllBut()
 )
 
 func fileCheckSum(file string) string {
@@ -553,9 +555,16 @@ func (c *callbackrunner) prepare(dir, file string) error {
 		return c.cmdSMF(sc)
 	case cmdPlay:
 		return c.cmdPlay(sc)
+	case cmdConfigDirs:
+		return c.configDirs()
 	default:
 		return nil
 	}
+}
+
+func (c *callbackrunner) configDirs() error {
+	fmt.Fprintf(os.Stdout, "USER_DIR: %q\nWORKING_DIR: %q\n\n", muskel.USER_DIR, muskel.WORKING_DIR)
+	return nil
 }
 
 func (c *callbackrunner) mkcallback() (callback func(dir, file string) error) {
