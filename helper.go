@@ -11,9 +11,13 @@ func init() {
 	score.FindInclude = findInclude
 }
 
+var FILE_EXTENSION = ".mskl"
+
 func findInclude(relDir string, file string) (resolved string, err error) {
-	if filepath.Ext(file) != ".mskl" {
-		file = file + ".mskl"
+	switch filepath.Ext(file) {
+	case FILE_EXTENSION, ".md":
+	default:
+		file = file + FILE_EXTENSION
 	}
 
 	if filepath.IsAbs(file) {

@@ -780,7 +780,6 @@ func TestParseParts(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		// fl := NewFile("test.mskl", "", strings.NewReader(test.input))
 		fl := _newFile(test.input)
 		err := fl.Parse()
 
@@ -818,7 +817,6 @@ func TestParseTableHeader(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		// fl := NewFile("test.mskl", "", strings.NewReader(test.input))
 		fl := _newFile(test.input)
 		err := fl.Parse()
 

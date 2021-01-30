@@ -39,6 +39,10 @@ func writePredefinedTemplates() {
 		if !score.FileExists(p) {
 			ioutil.WriteFile(p, []byte(templ), 0644)
 		}
+		p = filepath.Join(USER_DIR, name+".md")
+		if !score.FileExists(p) {
+			ioutil.WriteFile(p, []byte(templ), 0644)
+		}
 	}
 
 }

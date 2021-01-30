@@ -379,7 +379,7 @@ func writeUnrolled(sc *score.Score) error {
 func (c *callbackrunner) prepare(dir, file string) error {
 	//fmt.Printf("prepare(%q, %q) called with %#v\n", dir, file, c)
 
-	if filepath.Ext(file) != ".mskl" {
+	if filepath.Ext(file) != muskel.FILE_EXTENSION {
 		return nil
 	}
 
@@ -657,7 +657,7 @@ func run() error {
 
 	if cfg.ActiveCommand() == cmdTemplate {
 		if argTemplFile.IsSet() && argTemplFile.Get() != "" {
-			p := filepath.Join(muskel.USER_DIR, argTemplFile.Get()+".mskl")
+			p := filepath.Join(muskel.USER_DIR, argTemplFile.Get()+muskel.FILE_EXTENSION)
 			// p := filepath.Join(score.USERDIR)
 			if !score.FileExists(p) {
 				return fmt.Errorf("no such template: %q", p)
@@ -694,6 +694,10 @@ func run() error {
 
 			return nil
 		}
+	}
+
+	if filepath.Ext(argFile.Get()) == ".md" {
+		muskel.FILE_EXTENSION = ".md"
 	}
 
 	srcdir := filepath.Dir(argFile.Get())
@@ -796,21 +800,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-/*
-import (
-	"fmt"
-	"os"
-
-	muskel "gitlab.com/gomidi/muskel_new_new"
-)
-
-func main() {
-	err := muskel.Convert("main.mskl", "=SCORE", "main.mid")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %v", err)
-		os.Exit(1)
-	}
-	os.Exit(0)
-}
-*/
