@@ -10,7 +10,7 @@ import (
 )
 
 func execCommand(c string) *exec.Cmd {
-	return exec.Command("/bin/sh", "-c", c)
+	return exec.Command("/bin/sh", "-c", "exec "+c)
 }
 
 func alert(msg string, err error) {

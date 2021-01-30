@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	//"github.com/gen2brain/beeep"
@@ -24,8 +25,6 @@ import (
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/metakeule/config"
 )
-
-//const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
 var (
 	cfg = config.MustNew("muskel", muskel.VERSION, "muskel is a musical sketch language")
@@ -38,12 +37,11 @@ var (
 	argPatt                = cfg.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
 	argFmt                 = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
 	argNoEmptyLines        = cfg.NewBool("noemptylines", "don't remove empty lines from the score", config.Shortflag('e'))
-	//argAddMissing = cfg.NewBool("addprops", "add missing properties")
-	argWatch      = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
-	argDir        = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
-	argOutFile    = cfg.NewString("out", "path of the output file (SMF). If it includes the placeholder %s, that will be replaced by the File property of the corresponding track", config.Shortflag('o'))
-	argTrackFiles = cfg.NewBool("trackfiles", "sets out to '%s' in order to write to the file names as given in the track properties")
-	argSleep      = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(100)))
+	argWatch               = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
+	argDir                 = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
+	argOutFile             = cfg.NewString("out", "path of the output file (SMF). If it includes the placeholder %s, that will be replaced by the File property of the corresponding track", config.Shortflag('o'))
+	argTrackFiles          = cfg.NewBool("trackfiles", "sets out to '%s' in order to write to the file names as given in the track properties")
+	argSleep               = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(100)))
 	//argSmallCols = cfg.NewBool("small", "small columns in formatting", config.Shortflag('s'), config.Default(false))
 	argUnroll = cfg.NewString("unroll", "unroll the source to the given file name", config.Shortflag('u'))
 	argDebug  = cfg.NewBool("debug", "print debug messages")
@@ -74,15 +72,19 @@ var (
 	//cmdSyncTracks = cfg.MustCommand("synctracks", "sync tracks in include files to the tracks within the given main file")
 
 	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs timidity)")
-	// timidity $file
 	//argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("audacious -1 -H -p -q $_file"))
-	argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("timidity $_file"))
+	argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing (timidity,audacious or custom (pass $_file variable)", config.Default("timidity"))
 
 	cmdTemplate  = cfg.MustCommand("template", "show global template files").SkipAllBut()
 	argTemplFile = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
 
 	cmdConfigDirs = cfg.MustCommand("dirs", "show configuration dirs").SkipAllBut()
 )
+
+var cmdMaps = map[string]string{
+	"timidity":  "timidity --quiet -V linear --noise-shaping=1 $_file",
+	"audacious": "audacious -1 -H -p -q $_file",
+}
 
 func fileCheckSum(file string) string {
 	f, err := os.Open(file)
@@ -306,55 +308,149 @@ func (c *callbackrunner) cmdSMF(sc *score.Score) error {
 }
 
 var mx sync.Mutex
-var playCmd *exec.Cmd
-var lastStarted time.Time
-var playWG sync.WaitGroup
 
-func play(cm string) {
-	mx.Lock()
-	if playCmd != nil {
-		playCmd.Process.Kill()
+//var playCmd *exec.Cmd
+//var lastStarted time.Time
+//var playWG sync.WaitGroup
+var playCh = make(chan string, 1)
+var stopCh = make(chan bool, 1)
+var stopPlayer = make(chan bool, 1)
+var stoppedCh = make(chan bool, 1)
+var finishedCh = make(chan bool, 1)
+var playerStopped = make(chan bool, 1)
+var gotPid = make(chan int, 1)
+
+func player() {
+	var cmd *exec.Cmd
+	var pid int
+	//var wg sync.WaitGroup
+
+	for {
+		select {
+		case <-stopPlayer:
+			if cmd != nil {
+				syscall.Kill(pid, 9)
+				//os.Kill.Signal()
+				//cmd.Process.Kill()
+				cmd = nil
+			}
+			playerStopped <- true
+			return
+		case pid = <-gotPid:
+			//fmt.Printf("got pid %v\n", pid)
+		case cm := <-playCh:
+			//fmt.Println("received play")
+			if cmd != nil {
+				syscall.Kill(pid, 9)
+				//cmd.Process.Kill()
+				cmd = nil
+			}
+			//fmt.Println("everything stopped")
+			cmd = execCommand(cm)
+			//wg.Add(1)
+			go func() {
+				pid_ := runThePlayerCommand(cm, cmd)
+				gotPid <- pid_
+				//wg.Done()
+				//finishedCh <- true
+			}()
+		case <-stopCh:
+			if cmd != nil {
+				//cmd.Process.Kill()
+				syscall.Kill(pid, 9)
+				cmd = nil
+			}
+			stoppedCh <- true
+			/*
+				case <-finishedCh:
+					fmt.Println("finished")
+					cmd = nil
+			*/
+		default:
+		}
 	}
-	time.Sleep(time.Second * 1)
-	playCmd = execCommand(cm)
-	mx.Unlock()
-	playWG.Add(1)
-	go func() {
-		//cmd := exec.Command("/bin/sh", "e", cm)
-		// cmd := exec.Command("audacious", "-1", "-H", "-p", "-q", c.outFile)
-		//fmt.Fprintf(os.Stderr, "running %q", cm, err)
-		b, err := playCmd.CombinedOutput()
+}
+
+func runThePlayerCommand(cm string, cmd *exec.Cmd) int {
+	var err error
+	if argWatch.Get() {
+		err = cmd.Start()
+		return cmd.Process.Pid
+	} else {
+		fmt.Fprintf(os.Stderr, "%s\n", cm)
+		var b []byte
+		b, err = cmd.CombinedOutput()
 		if len(b) > 0 {
 			os.Stdout.Write(b)
 		}
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR while running %q: %v", cm, err)
+	}
+	/*
+		b, err := cmd.CombinedOutput()
+		if len(b) > 0 {
+			os.Stdout.Write(b)
 		}
-		playWG.Done()
-	}()
+	*/
+	//
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR while running %q: %v", cm, err)
+	}
+
+	return -1
+}
+
+func play(cm string) {
+	//func play() {
+	if argWatch.Get() {
+		playCh <- cm
+		return
+	}
+	//cmd := exec.Command("/bin/sh", "e", cm)
+	// cmd := exec.Command("audacious", "-1", "-H", "-p", "-q", c.outFile)
+	runThePlayerCommand(cm, execCommand(cm))
+}
+
+func (c *callbackrunner) mkPlayCmdString() string {
+	cm := strings.TrimSpace(argPlayCmd.Get())
+
+	if cc, has := cmdMaps[cm]; has {
+		cm = cc
+	}
+
+	cm = strings.ReplaceAll(cm, "$_file", c.outFile)
+	return cm
 }
 
 func (c *callbackrunner) cmdPlay(sc *score.Score) error {
-	now := time.Now()
-	if now.Sub(lastStarted) < 300*time.Millisecond {
-		return nil
-	}
-	mx.Lock()
-	lastStarted = now
-	mx.Unlock()
-
+	//fmt.Println("running play")
 	err := c.cmdSMF(sc)
 	if err != nil {
+		fmt.Println("error while creating smf")
 		return err
 	}
 
-	cm := strings.TrimSpace(argPlayCmd.Get())
-	cm = strings.ReplaceAll(cm, "$_file", c.outFile)
-	if cm != "" {
-		//fmt.Printf("playing")
-		play(cm)
-	}
-	playWG.Wait()
+	/*
+		if argWatch.Get() {
+			fmt.Println(time.Now().Sub(lastStarted))
+			now := time.Now()
+			if now.Sub(lastStarted) < 300*time.Millisecond {
+				return nil
+			}
+			mx.Lock()
+			lastStarted = now
+			mx.Unlock()
+		}
+	*/
+
+	/*
+		cm := strings.TrimSpace(argPlayCmd.Get())
+		cm = strings.ReplaceAll(cm, "$_file", c.outFile)
+		if cm != "" {
+			//fmt.Printf("playing")
+			play(cm)
+		}
+	*/
+	play(c.mkPlayCmdString())
+
 	//beeep.Alert("audacious not found", err.Error(), "assets/warning.png")
 	//return fmt.Errorf("play command not defined not found")
 	return nil
@@ -387,7 +483,8 @@ func (c *callbackrunner) prepare(dir, file string) error {
 	//fmt.Printf("prepare(%q, %q) called with %#v file extension: %q\n", dir, file, c, muskel.FILE_EXTENSION)
 
 	if filepath.Ext(file) != muskel.FILE_EXTENSION {
-		return fmt.Errorf("wrong file extension %q (expected %q)", filepath.Ext(file), muskel.FILE_EXTENSION)
+		//return fmt.Errorf("wrong file extension %q (expected %q)", filepath.Ext(file), muskel.FILE_EXTENSION)
+		return nil
 	}
 
 	if strings.Contains(dir, "muskel-fmt") || strings.Contains(file, "muskel-fmt") {
@@ -584,7 +681,7 @@ func (c *callbackrunner) mkcallback() (callback func(dir, file string) error) {
 	return
 }
 
-func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
+func runCmd() (cbru *callbackrunner, file_, dir_ string) {
 
 	inFile := argFile.Get()
 	outFile := inFile
@@ -615,7 +712,8 @@ func runCmd() (callback func(dir, file string) error, file_, dir_ string) {
 	cbr.outFile = outFile
 	// cbr.audacious = audacious
 
-	callback = cbr.mkcallback()
+	//callback = cbr.mkcallback()
+	cbru = &cbr
 
 	return
 }
@@ -743,9 +841,13 @@ func run() error {
 		muskel.WriteWDVersionFile(srcdir)
 	}
 
-	cmd, file, dir := runCmd()
+	cbr, file, dir := runCmd()
 
-	lastStarted = time.Now()
+	//if argWatch.Get() {
+	//lastStarted = time.Now()
+	//time.Sleep(800 * time.Millisecond)
+	//}
+	//lastStarted = time.Now()
 
 	if argWatch.Get() {
 		if argDir.Get() {
@@ -753,7 +855,13 @@ func run() error {
 		} else {
 			fmt.Printf("watching %q\n", argFile.Get())
 		}
-		r := runfunc.New(dir, cmd, runfunc.Sleep(time.Millisecond*time.Duration(int(argSleep.Get()))))
+
+		if cfg.ActiveCommand() == cmdPlay {
+			//fmt.Println("starting player loop")
+			go player()
+		}
+
+		r := runfunc.New(dir, cbr.mkcallback(), runfunc.Sleep(time.Millisecond*time.Duration(int(argSleep.Get()))))
 
 		errors := make(chan error, 1)
 		stopped, err := r.Run(errors)
@@ -764,10 +872,19 @@ func run() error {
 		}
 
 		go func() {
-			for e := range errors {
-				fmt.Fprintf(os.Stderr, "error: %s\n", e)
-				_ = e
+			for {
+				select {
+				case er := <-errors:
+					fmt.Fprintf(os.Stderr, "error: %s\n", er)
+				default:
+				}
 			}
+			/*
+				for e := range errors {
+					fmt.Fprintf(os.Stderr, "error: %s\n", e)
+					_ = e
+				}
+			*/
 		}()
 
 		sigchan := make(chan os.Signal, 10)
@@ -778,6 +895,10 @@ func run() error {
 		// interrupt has happend
 		<-sigchan
 		fmt.Println("\n--interrupted!")
+		if cfg.ActiveCommand() == cmdPlay {
+			stopPlayer <- true
+			<-playerStopped
+		}
 
 		stopped.Kill()
 
@@ -785,7 +906,7 @@ func run() error {
 		return nil
 	}
 
-	return cmd(dir, filepath.Join(dir, file))
+	return cbr.mkcallback()(dir, filepath.Join(dir, file))
 
 }
 
