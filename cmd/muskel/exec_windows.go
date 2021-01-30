@@ -9,7 +9,14 @@ import (
 )
 
 func killCmd(c *exec.Cmd, pid int) {
-	c.Process.Kill()
+	//	c.Process.Kill()
+	cmd := exec.Command("taskkill", "/F", "/PID", pid)
+	_, _ := cmd.CombinedOutput()
+}
+
+func defaultPlayCmd() string {
+	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
+	return "fluidsynth.exe -i -q -n $_file"
 }
 
 func execCommand(c string) *exec.Cmd {

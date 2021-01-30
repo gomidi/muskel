@@ -75,7 +75,7 @@ var (
 
 	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs timidity)")
 	//argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("audacious -1 -H -p -q $_file"))
-	argPlayCmd    = cmdPlay.NewString("cmd", "command to execute when playing (timidity,audacious or custom (pass $_file variable)", config.Default("timidity"))
+	argPlayCmd    = cmdPlay.NewString("cmd", "command to execute when playing (fluidsynth,timidity,audacious or custom (pass $_file variable))", config.Default("fluidsynth"))
 	argPlayServer = cmdPlay.NewBool("server", "start command server for playing and stopping")
 	cmdTemplate   = cfg.MustCommand("template", "show global template files").SkipAllBut()
 	argTemplFile  = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
@@ -88,8 +88,9 @@ var (
 )
 
 var cmdMaps = map[string]string{
-	"timidity":  "timidity --quiet -V linear --noise-shaping=1 $_file",
-	"audacious": "audacious -1 -H -p -q $_file",
+	"timidity":   "timidity --quiet -V linear --noise-shaping=1 $_file",
+	"audacious":  "audacious -1 -H -p -q $_file",
+	"fluidsynth": defaultPlayCmd(),
 }
 
 func fileCheckSum(file string) string {

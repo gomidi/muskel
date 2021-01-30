@@ -14,6 +14,10 @@ func killCmd(c *exec.Cmd, pid int) {
 	syscall.Kill(pid, 9)
 }
 
+func defaultPlayCmd() string {
+	return "fluidsynth -i -q -n $_file"
+}
+
 func execCommand(c string) *exec.Cmd {
 	return exec.Command("/bin/sh", "-c", "exec "+c)
 }
