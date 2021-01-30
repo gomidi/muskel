@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -41,6 +42,8 @@ var (
 	argOutFile             = cfg.NewString("out", "path of the output file (SMF). If it includes the placeholder %s, that will be replaced by the File property of the corresponding track", config.Shortflag('o'))
 	argTrackFiles          = cfg.NewBool("trackfiles", "sets out to '%s' in order to write to the file names as given in the track properties")
 	argSleep               = cfg.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(100)))
+	argPlayServerAddr      = cfg.NewString("addr", "address of the command/play server", config.Default("localhost:8800"))
+
 	//argSmallCols = cfg.NewBool("small", "small columns in formatting", config.Shortflag('s'), config.Default(false))
 	argUnroll = cfg.NewString("unroll", "unroll the source to the given file name", config.Shortflag('u'))
 	argDebug  = cfg.NewBool("debug", "print debug messages")
@@ -72,10 +75,13 @@ var (
 
 	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs timidity)")
 	//argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("audacious -1 -H -p -q $_file"))
-	argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing (timidity,audacious or custom (pass $_file variable)", config.Default("timidity"))
+	argPlayCmd    = cmdPlay.NewString("cmd", "command to execute when playing (timidity,audacious or custom (pass $_file variable)", config.Default("timidity"))
+	argPlayServer = cmdPlay.NewBool("server", "start command server for playing and stopping")
+	cmdTemplate   = cfg.MustCommand("template", "show global template files").SkipAllBut()
+	argTemplFile  = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
 
-	cmdTemplate  = cfg.MustCommand("template", "show global template files").SkipAllBut()
-	argTemplFile = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
+	cmdPlayClient = cfg.MustCommand("client", "client to the play server. allows play and stop").SkipAllBut("addr")
+	argClientPlay = cmdPlayClient.NewBool("play", "play or stop the current file", config.Shortflag('p'), config.Default(true))
 
 	cmdConfigDirs = cfg.MustCommand("dirs", "show configuration dirs").SkipAllBut()
 )
@@ -276,6 +282,35 @@ func runRenamePattern() error {
 }
 */
 
+func serverPlay(wr http.ResponseWriter, r *http.Request) {
+	playCh <- true
+	wr.Write([]byte("start playing"))
+}
+
+func serverStop(wr http.ResponseWriter, r *http.Request) {
+	stopCh <- true
+	<-stoppedCh
+	wr.Write([]byte("stopped playing"))
+}
+
+func runServer() {
+	if !argPlayServer.Get() {
+		return
+	}
+
+	addr := argPlayServerAddr.Get()
+
+	http.HandleFunc("/play", serverPlay)
+	http.HandleFunc("/stop", serverStop)
+	/*
+		http.Handle("/play", http.HandleFunc(r *http.Request, wr http.ResponseWriter) {
+
+		})
+	*/
+
+	go http.ListenAndServe(addr, nil)
+}
+
 type callbackrunner struct {
 	inFile  string
 	outFile string
@@ -311,7 +346,9 @@ var mx sync.Mutex
 //var playCmd *exec.Cmd
 //var lastStarted time.Time
 //var playWG sync.WaitGroup
-var playCh = make(chan string, 1)
+var playCh = make(chan bool, 1)
+
+//var playerPlay = make(chan bool, 1)
 var stopCh = make(chan bool, 1)
 var stopPlayer = make(chan bool, 1)
 var stoppedCh = make(chan bool, 1)
@@ -319,9 +356,12 @@ var finishedCh = make(chan bool, 1)
 var playerStopped = make(chan bool, 1)
 var gotPid = make(chan int, 1)
 
+var playCmdString string
+
 func player() {
 	var cmd *exec.Cmd
 	var pid int
+	//var cm string
 	//var wg sync.WaitGroup
 
 	for {
@@ -335,17 +375,17 @@ func player() {
 			return
 		case pid = <-gotPid:
 			//fmt.Printf("got pid %v\n", pid)
-		case cm := <-playCh:
+		case <-playCh:
 			//fmt.Println("received play")
 			if cmd != nil {
 				killCmd(cmd, pid)
 				cmd = nil
 			}
 			//fmt.Println("everything stopped")
-			cmd = execCommand(cm)
+			cmd = execCommand(playCmdString)
 			//wg.Add(1)
 			go func() {
-				pid_ := runThePlayerCommand(cm, cmd)
+				pid_ := runThePlayerCommand(playCmdString, cmd)
 				gotPid <- pid_
 				//wg.Done()
 				//finishedCh <- true
@@ -393,15 +433,17 @@ func runThePlayerCommand(cm string, cmd *exec.Cmd) int {
 	return -1
 }
 
-func play(cm string) {
+func play() {
 	//func play() {
 	if argWatch.Get() {
-		playCh <- cm
+		if !argPlayServer.Get() {
+			playCh <- true
+		}
 		return
 	}
 	//cmd := exec.Command("/bin/sh", "e", cm)
 	// cmd := exec.Command("audacious", "-1", "-H", "-p", "-q", c.outFile)
-	runThePlayerCommand(cm, execCommand(cm))
+	runThePlayerCommand(playCmdString, execCommand(playCmdString))
 }
 
 func (c *callbackrunner) mkPlayCmdString() string {
@@ -444,7 +486,8 @@ func (c *callbackrunner) cmdPlay(sc *score.Score) error {
 			play(cm)
 		}
 	*/
-	play(c.mkPlayCmdString())
+	playCmdString = c.mkPlayCmdString()
+	play()
 
 	//beeep.Alert("audacious not found", err.Error(), "assets/warning.png")
 	//return fmt.Errorf("play command not defined not found")
@@ -728,6 +771,24 @@ func run() error {
 		return configDirs()
 	}
 
+	if cfg.ActiveCommand() == cmdPlayClient {
+		var r *http.Response
+		var err error
+		addr := "http://" + argPlayServerAddr.Get() + "/"
+		if argClientPlay.Get() {
+			r, err = http.Get(addr + "play")
+		} else {
+			r, err = http.Get(addr + "stop")
+		}
+
+		if r != nil {
+			ioutil.ReadAll(r.Body)
+			r.Body.Close()
+		}
+
+		return err
+	}
+
 	if cfg.ActiveCommand() == cmdImport {
 		var monoTracks []int
 		var drumTracks []int
@@ -855,6 +916,8 @@ func run() error {
 			//fmt.Println("starting player loop")
 			go player()
 		}
+
+		runServer()
 
 		r := runfunc.New(dir, cbr.mkcallback(), runfunc.Sleep(time.Millisecond*time.Duration(int(argSleep.Get()))))
 
