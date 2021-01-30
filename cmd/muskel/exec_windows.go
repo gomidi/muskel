@@ -16,7 +16,7 @@ func (p *Process) Start() error {
 		"/Command",
 		`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
 	)
-	_, err := c.CombinedOutput()
+	out, err := c.CombinedOutput()
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func (p *Process) Run() error {
 		"/Command",
 		`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
 	)
-	_, err := c.CombinedOutput()
+	out, err := c.CombinedOutput()
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (p *Process) Run() error {
 }
 
 func (p *Process) Kill() {
-	cmd := exec.Command("taskkill.exe", "/F", "/PID", fmt.Sprintf("%v", pid))
+	cmd := exec.Command("taskkill.exe", "/F", "/PID", fmt.Sprintf("%v", p.PID))
 	_, _ = cmd.CombinedOutput()
 }
 
