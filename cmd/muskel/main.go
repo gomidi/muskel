@@ -322,7 +322,7 @@ func play(cm string) {
 	go func() {
 		//cmd := exec.Command("/bin/sh", "e", cm)
 		// cmd := exec.Command("audacious", "-1", "-H", "-p", "-q", c.outFile)
-
+		//fmt.Fprintf(os.Stderr, "running %q", cm, err)
 		b, err := playCmd.CombinedOutput()
 		if len(b) > 0 {
 			os.Stdout.Write(b)
@@ -336,24 +336,18 @@ func play(cm string) {
 
 func (c *callbackrunner) cmdPlay(sc *score.Score) error {
 	now := time.Now()
-	if now.Sub(lastStarted) < time.Second*2 {
+	if now.Sub(lastStarted) < 300*time.Millisecond {
 		return nil
 	}
 	mx.Lock()
 	lastStarted = now
 	mx.Unlock()
 
-	err := muskel.WriteSMFFile(sc, c.outFile)
+	err := c.cmdSMF(sc)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
-		alert("ERROR while converting MuSkeL to SMF", err)
 		return err
 	}
 
-	if argWatch.Get() {
-		fmt.Fprint(os.Stdout, ".")
-	}
-	notify("OK MuSkeL converted to SMF", path.Base(c.outFile))
 	cm := strings.TrimSpace(argPlayCmd.Get())
 	cm = strings.ReplaceAll(cm, "$_file", c.outFile)
 	if cm != "" {
@@ -791,20 +785,6 @@ func run() error {
 		return nil
 	}
 
-	/*
-		switch cfg.ActiveCommand() {
-		case cmdAddTrack:
-			return runAddTrack()
-		case cmdRmTrack:
-			return runRmTrack()
-		case cmdSyncTracks:
-			return runSyncTracks()
-		case cmdRenameTrack:
-			return runRenameTrack()
-		case cmdRenameTemplate:
-			return runRenamePattern()
-		}
-	*/
 	return cmd(dir, filepath.Join(dir, file))
 
 }
