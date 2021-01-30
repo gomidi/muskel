@@ -3,6 +3,7 @@
 package main
 
 import (
+	"fmt"
 	"os/exec"
 
 	"gitlab.com/metakeule/config"
@@ -10,7 +11,7 @@ import (
 
 func killCmd(c *exec.Cmd, pid int) {
 	//	c.Process.Kill()
-	cmd := exec.Command("taskkill", "/F", "/PID", pid)
+	cmd := exec.Command("taskkill", "/F", "/PID", fmt.Sprintf("%v", pid))
 	_, _ = cmd.CombinedOutput()
 }
 
