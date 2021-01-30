@@ -20,7 +20,7 @@ func (p *Process) Start() error {
 	if err != nil {
 		return err
 	}
-	p.PID, err = strconv.Atoi(strings.TrimSpaces(string(out)))
+	p.PID, err = strconv.Atoi(strings.TrimSpace(string(out)))
 	return err
 }
 
@@ -33,7 +33,7 @@ func (p *Process) Run() error {
 	if err != nil {
 		return err
 	}
-	p.PID, err = strconv.Atoi(strings.TrimSpaces(string(out)))
+	p.PID, err = strconv.Atoi(strings.TrimSpace(string(out)))
 	return err
 }
 
