@@ -1,7 +1,11 @@
 # TODOs
 
 
+
 ## nächstes
+
+1. normale Markdown-Dateien akzeptieren als input
+
 
 ### parts/sprungmarken
 
@@ -107,6 +111,99 @@ wenn es mehrere Zeilen gibt, bei denen auf das erste | ein > folgt, so zählt di
 folgt ein _ auf ein |, so endet die MIDI-Datei dort. alle noch klingenden Noten werden dort beendet.
 
 wenn es mehrere Zeilen mit _ gibt, so zählt die erste Zeile mit _
+
+### sprungmarken können mit pattern modifizierern manipuliert werden
+
+$merge([chorus],[verse])/$reverse(=)
+
+### extra euclid funktion zum plazieren der schläge auf platzhaltern
+
+d.h. die eigentliche Positionen der euclidifizierung sind nur indizes, die in die platzhalter
+positionen des übergebenen patterns eingesetzt werden. (euclidpositioner o.ä. als name)
+
+ggf ist es viel geiler, ein Funktion $placeinto zu haben, die vom aktuellen pattern nur die events in der 
+reihenfolge nimmt und diese als parameter an das zweite pattern übergibt und damit "platziert".
+dann könnte man einfach die rückgabe der $euclid als erstes pattern "reinpipen".
+
+### syntaxerweiterung für geschweifte klammern
+
+wir brauchen eine möglichkeit, der geschweiften klammer mitteilen zu können, wie lang ihre gesamtlänge ist,
+unabhängig von dem was folgt. damit sind dann einfache ersetzungen besser vorhersehbar möglich.
+vorschlag wäre, an den anfang nach der geöffneten geschweiften Klammer ein gleichheiszeichen zu setzen, gefolgt von 
+der gesamtdauer und einem doppeltpunkt, also z.B.
+
+{=&:4,6}
+
+oder 
+
+{=0.5:c#,.drums.sn++}
+
+die alte syntax wird ungültig und der gleiche effekt, wie bei der alten Syntax wird erzielt, indem zwischen dem : und dem = nichts
+steht:
+
+{=:a,c,d}
+
+damit sind ersetzungen besser vorhersehbar
+
+### syntaxerweiterung skalennoten
+
+es sollte erlaubt sein, die iteration (in der regel oktave) separat von der note anzugeben
+dazu wird als trenner der slash verwendet, also
+
+1/3
+
+bedeutet: 1. ton der skala, drei oktaven höher
+
+4/-2
+
+bedeutet 4. ton der skala, zwei oktaven niedriger
+
+auf diese Weise könnte man die negativen zahlen als deprecated definieren und fehler werfen, wenn die zahl größer ist,
+als die elemente der skala (erleichtert das schreiben und erkennen gleicher noten ohne rechnen zu müssen)
+
+für die "außenseiter noten" kann man dann den vorangestellten backslash benutzen
+
+\2/3
+
+bedeutet dann: 2. Außenseiternote der skala, drei oktaven höher
+
+bei der skaltendefinition kann man dabei den zweiten backslash benutzen
+
+\(c e g)\(b d')^C
+
+(scala besteht aus c e und g) mit den außenseiter noten b und d' und dem Grundton C.
+
+der Grundton der aktuellen skala kann dann einfach mit 
+
+^
+
+aufgerufen werden und mit
+
+^/3
+
+um drei oktaven nach oben transponiert werden.
+
+
+
+### mengenfunktionen für patterns mit platzhaltern
+
+schnittmenge: positionen, die in pattern1 und pattern2 vorkommen
+exclusive: positionen, die in pattern1 und nicht in pattern2 vorkommen
+outside: positionen, die in pattern1, aber weder in pattern2 noch in pattern3 vorkommen
+
+diese mengen funktionen sollten auch für scalen gelten (schnittmenge von skalen, exclusive etc.)
+
+entsprechend könnten $sub, $sub7 etc die subdominante, subdominante mit Septime etc als scala zurückgeben
+
+### scalen sollen mit "outlaws" noten haben können, die nicht zur scala gehören,
+aber eine besondere characteristic haben (z.B. Bluenote) und zu bestimmten zielskalen
+modulieren können.
+
+dann braucht es noch eine syntax, um das aufzurufen, z.B.
+
+$outlaw(1)  // hole den 1. outlaw aus der aktuellen scala (könnte bei einem Dur-Akkord die Septime sein)
+$modulate(1,2) // moduliere mittels des 1. outlaws der aktuellen scala zur 2. zielskala des 1. outlaws
+               // setzt also diese zielskala als aktuelle skala
 
 ### auch in Taktpositionen gibt es wiederholungen durch .
 
