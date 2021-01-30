@@ -12,9 +12,13 @@ import (
 )
 
 func (p *Process) Start() error {
+	/*
+		powershell.exe /C '$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo; $ProcessInfo.FileName = \"fluidsynth.exe\" ; $ProcessInfo.RedirectStandardError = $true ; $ProcessInfo.RedirectStandardOutput = $true; $ProcessInfo.UseShellExecute = $false; $ProcessInfo.Arguments = \"-i -q -n main.mid\"; $Process = New-Object System.Diagnostics.Process; $Process.StartInfo = $ProcessInfo ; $Process.Start() ; echo $Process.Id'
+	*/
 	c := exec.Command("powershell.exe",
 		"/Command",
-		`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
+		//`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
+		`$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo; $ProcessInfo.FileName = "`+p.Program+`.exe" ; $ProcessInfo.RedirectStandardError = $true ; $ProcessInfo.RedirectStandardOutput = $true; $ProcessInfo.UseShellExecute = $false; $ProcessInfo.Arguments = "`+p.Args+`"; $Process = New-Object System.Diagnostics.Process; $Process.StartInfo = $ProcessInfo ; $Process.Start() ; echo $Process.Id `,
 	)
 	out, err := c.CombinedOutput()
 	if err != nil {
