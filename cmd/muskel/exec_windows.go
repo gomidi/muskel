@@ -5,24 +5,43 @@ package main
 import (
 	"fmt"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"gitlab.com/metakeule/config"
 )
 
-func killCmd(c *exec.Cmd, pid int) {
-	//	c.Process.Kill()
-	cmd := exec.Command("taskkill", "/F", "/PID", fmt.Sprintf("%v", pid))
+func (p *Process) Run() error {
+	c := exec.Command("powershell.exe",
+		"/Command",
+		`$Process = [Diagnostics.Process]::Start("`+p.Program+`", "`+p.Args+`") ; echo $Process.Id `,
+	)
+	_, err := c.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	p.PID, err = strconv.Atoi(strings.TrimSpaces(string(out)))
+	return err
+}
+
+func (p *Process) Kill() {
+	cmd := exec.Command("taskkill.exe", "/F", "/PID", fmt.Sprintf("%v", pid))
 	_, _ = cmd.CombinedOutput()
 }
 
-func defaultPlayCmd() string {
+func defaultPlayCmd() [2]string {
 	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
-	return "fluidsynth.exe -i -q -n $_file"
+	//return "fluidsynth.exe -i -q -n $_file"
+	return [2]string{"fluidsynth.exe", "-i -q -n $_file"}
 }
 
+/*
 func execCommand(c string) *exec.Cmd {
-	return exec.Command("cmd.exe", "/C", c)
+	//return exec.Command("powershell.exe", "/Command",  `$Process = [Diagnostics.Process]::Start("` + c + `") ; echo $Process.Id `)
+	return exec.Command("powershell.exe", "/Command", `$Process = [Diagnostics.Process]::Start("fluidsynth.exe", "-i -q -n $_file") ; echo $Process.Id `)
+	//return exec.Command("cmd.exe", "/C", c)
 }
+*/
 
 func alert(msg string, err error) {
 

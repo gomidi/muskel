@@ -10,17 +10,30 @@ import (
 	"gitlab.com/metakeule/config"
 )
 
-func killCmd(c *exec.Cmd, pid int) {
-	syscall.Kill(pid, 9)
+func (p *Process) Run() error {
+	c := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	err := c.Start()
+	if err != nil {
+		return err
+	}
+
+	p.PID = c.Process.Pid
+	return nil
 }
 
-func defaultPlayCmd() string {
-	return "fluidsynth -i -q -n $_file"
+func (p *Process) Kill() {
+	syscall.Kill(p.PID, 9)
 }
 
+func defaultPlayCmd() [2]string {
+	return [2]string{"fluidsynth", "-i -q -n $_file"}
+}
+
+/*
 func execCommand(c string) *exec.Cmd {
 	return exec.Command("/bin/sh", "-c", "exec "+c)
 }
+*/
 
 func alert(msg string, err error) {
 	//beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)

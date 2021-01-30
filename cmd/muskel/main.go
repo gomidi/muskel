@@ -87,9 +87,9 @@ var (
 	cmdConfigDirs = cfg.MustCommand("dirs", "show configuration dirs").SkipAllBut()
 )
 
-var cmdMaps = map[string]string{
-	"timidity":   "timidity --quiet -V linear --noise-shaping=1 $_file",
-	"audacious":  "audacious -1 -H -p -q $_file",
+var cmdMaps = map[string][2]string{
+	"timidity":   [2]string{"timidity", "--quiet -V linear --noise-shaping=1 $_file"},
+	"audacious":  [2]string{"audacious", "-1 -H -p -q $_file"},
 	"fluidsynth": defaultPlayCmd(),
 }
 
@@ -366,11 +366,12 @@ var playerStopped = make(chan bool, 1)
 var gotPid = make(chan int, 1)
 var toggleCh = make(chan bool, 1)
 
-var playCmdString string
+var playCmdString [2]string
 
 func player() {
-	var cmd *exec.Cmd
-	var pid int
+	//var cmd *exec.Cmd
+	var cmd *Process
+	//var pid int
 	//var cm string
 	//var wg sync.WaitGroup
 
@@ -378,45 +379,49 @@ func player() {
 		select {
 		case <-toggleCh:
 			if cmd != nil {
-				killCmd(cmd, pid)
+				cmd.Kill()
 				cmd = nil
 			} else {
-				cmd = execCommand(playCmdString)
+				cmd = newProcess(playCmdString[0], playCmdString[1])
+				//cmd = execCommand(playCmdString)
 				//wg.Add(1)
 				go func() {
-					pid_ := runThePlayerCommand(playCmdString, cmd)
-					gotPid <- pid_
+					runThePlayerCommand(cmd)
+					//gotPid <- pid_
 					//wg.Done()
 					//finishedCh <- true
 				}()
 			}
 		case <-stopPlayer:
 			if cmd != nil {
-				killCmd(cmd, pid)
+				cmd.Kill()
+				//killCmd(cmd, pid)
 				cmd = nil
 			}
 			playerStopped <- true
 			return
-		case pid = <-gotPid:
-			fmt.Printf("got pid %v\n", pid)
 		case <-playCh:
 			//fmt.Println("received play")
 			if cmd != nil {
-				killCmd(cmd, pid)
+				cmd.Kill()
+				//killCmd(cmd, pid)
 				cmd = nil
 			}
 			//fmt.Println("everything stopped")
-			cmd = execCommand(playCmdString)
+			cmd = newProcess(playCmdString[0], playCmdString[1])
+			//cmd = execCommand(playCmdString)
 			//wg.Add(1)
 			go func() {
-				pid_ := runThePlayerCommand(playCmdString, cmd)
-				gotPid <- pid_
+				//pid_ := runThePlayerCommand(playCmdString, cmd)
+				//gotPid <- pid_
+				runThePlayerCommand(cmd)
 				//wg.Done()
 				//finishedCh <- true
 			}()
 		case <-stopCh:
 			if cmd != nil {
-				killCmd(cmd, pid)
+				cmd.Kill()
+				//killCmd(cmd, pid)
 				cmd = nil
 			}
 			stoppedCh <- true
@@ -430,19 +435,24 @@ func player() {
 	}
 }
 
-func runThePlayerCommand(cm string, cmd *exec.Cmd) int {
-	var err error
-	if argWatch.Get() {
-		err = cmd.Start()
-		return cmd.Process.Pid
-	} else {
-		fmt.Fprintf(os.Stderr, "%s\n", cm)
-		var b []byte
-		b, err = cmd.CombinedOutput()
-		if len(b) > 0 {
-			os.Stdout.Write(b)
+//func runThePlayerCommand(cm string, cmd *exec.Cmd) int {
+func runThePlayerCommand(cmd *Process) {
+
+	/*
+		var err error
+		if argWatch.Get() {
+			err = cmd.Start()
+			return cmd.Process.Pid
+		} else {
+			fmt.Fprintf(os.Stderr, "%s\n", cm)
+			var b []byte
+			b, err = cmd.CombinedOutput()
+			if len(b) > 0 {
+				os.Stdout.Write(b)
+			}
 		}
-	}
+	*/
+	err := cmd.Run()
 	/*
 		b, err := cmd.CombinedOutput()
 		if len(b) > 0 {
@@ -451,10 +461,10 @@ func runThePlayerCommand(cm string, cmd *exec.Cmd) int {
 	*/
 	//
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR while running %q: %v", cm, err)
+		fmt.Fprintf(os.Stderr, "ERROR while running %s %s: %v", cmd.Program, cmd.Args, err)
 	}
 
-	return -1
+	return
 }
 
 func play() {
@@ -467,18 +477,24 @@ func play() {
 	}
 	//cmd := exec.Command("/bin/sh", "e", cm)
 	// cmd := exec.Command("audacious", "-1", "-H", "-p", "-q", c.outFile)
-	runThePlayerCommand(playCmdString, execCommand(playCmdString))
+	cmd := newProcess(playCmdString[0], playCmdString[1])
+	runThePlayerCommand(cmd)
+	//runThePlayerCommand(playCmdString, execCommand(playCmdString))
 }
 
-func (c *callbackrunner) mkPlayCmdString() string {
+func (c *callbackrunner) mkPlayCmdString() [2]string {
 	cm := strings.TrimSpace(argPlayCmd.Get())
-
+	var cmm [2]string
 	if cc, has := cmdMaps[cm]; has {
-		cm = cc
+		cmm = cc
+	} else {
+		cmm_ := strings.SplitN(cm, " ", 2)
+		cmm[0] = cmm_[0]
+		cmm[1] = cmm_[1]
 	}
 
-	cm = strings.ReplaceAll(cm, "$_file", c.outFile)
-	return cm
+	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", c.outFile)
+	return cmm
 }
 
 func (c *callbackrunner) cmdPlay(sc *score.Score) error {
@@ -1003,5 +1019,37 @@ func main() {
 	if err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		os.Exit(1)
+	}
+}
+
+/*
+func killCmd(c *exec.Cmd, pid int) {
+	//	c.Process.Kill()
+	cmd := exec.Command("taskkill.exe", "/F", "/PID", fmt.Sprintf("%v", pid))
+	_, _ = cmd.CombinedOutput()
+}
+
+func defaultPlayCmd() string {
+	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
+	return "fluidsynth.exe -i -q -n $_file"
+}
+
+func execCommand(c string) *exec.Cmd {
+	//return exec.Command("powershell.exe", "/Command",  `$Process = [Diagnostics.Process]::Start("` + c + `") ; echo $Process.Id `)
+	return exec.Command("powershell.exe", "/Command",  `$Process = [Diagnostics.Process]::Start("fluidsynth.exe", "-i -q -n $_file") ; echo $Process.Id `)
+	//return exec.Command("cmd.exe", "/C", c)
+}
+*/
+
+type Process struct {
+	Program string
+	Args    string
+	PID     int
+}
+
+func newProcess(program string, args string) *Process {
+	return &Process{
+		Program: program,
+		Args:    args,
 	}
 }
