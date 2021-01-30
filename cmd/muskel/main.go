@@ -73,7 +73,7 @@ var (
 
 	//cmdSyncTracks = cfg.MustCommand("synctracks", "sync tracks in include files to the tracks within the given main file")
 
-	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs audacious)")
+	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs timidity)")
 	// timidity $file
 	//argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("audacious -1 -H -p -q $_file"))
 	argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("timidity $_file"))
@@ -308,6 +308,7 @@ func (c *callbackrunner) cmdSMF(sc *score.Score) error {
 var mx sync.Mutex
 var playCmd *exec.Cmd
 var lastStarted time.Time
+var playWG sync.WaitGroup
 
 func play(cm string) {
 	mx.Lock()
@@ -317,10 +318,19 @@ func play(cm string) {
 	time.Sleep(time.Second * 1)
 	playCmd = execCommand(cm)
 	mx.Unlock()
+	playWG.Add(1)
 	go func() {
 		//cmd := exec.Command("/bin/sh", "e", cm)
 		// cmd := exec.Command("audacious", "-1", "-H", "-p", "-q", c.outFile)
-		_, _ = playCmd.CombinedOutput()
+
+		b, err := playCmd.CombinedOutput()
+		if len(b) > 0 {
+			os.Stdout.Write(b)
+		}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR while running %q: %v", cm, err)
+		}
+		playWG.Done()
 	}()
 }
 
@@ -347,10 +357,13 @@ func (c *callbackrunner) cmdPlay(sc *score.Score) error {
 	cm := strings.TrimSpace(argPlayCmd.Get())
 	cm = strings.ReplaceAll(cm, "$_file", c.outFile)
 	if cm != "" {
+		//fmt.Printf("playing")
 		play(cm)
 	}
+	playWG.Wait()
 	//beeep.Alert("audacious not found", err.Error(), "assets/warning.png")
-	return fmt.Errorf("play command not defined not found")
+	//return fmt.Errorf("play command not defined not found")
+	return nil
 }
 
 func writeUnrolled(sc *score.Score) error {
