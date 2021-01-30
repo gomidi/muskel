@@ -10,9 +10,20 @@ import (
 	"gitlab.com/metakeule/config"
 )
 
-func (p *Process) Run() error {
+func (p *Process) Start() error {
 	c := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
 	err := c.Start()
+	if err != nil {
+		return err
+	}
+
+	p.PID = c.Process.Pid
+	return nil
+}
+
+func (p *Process) Run() error {
+	c := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	_, err := c.CombinedOutput()
 	if err != nil {
 		return err
 	}
@@ -26,7 +37,7 @@ func (p *Process) Kill() {
 }
 
 func defaultPlayCmd() [2]string {
-	return [2]string{"fluidsynth", "-i -q -n $_file"}
+	return [2]string{"audacious", "-1 -H -p -q $_file"}
 }
 
 /*

@@ -11,10 +11,23 @@ import (
 	"gitlab.com/metakeule/config"
 )
 
+func (p *Process) Start() error {
+	c := exec.Command("powershell.exe",
+		"/Command",
+		`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
+	)
+	_, err := c.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	p.PID, err = strconv.Atoi(strings.TrimSpaces(string(out)))
+	return err
+}
+
 func (p *Process) Run() error {
 	c := exec.Command("powershell.exe",
 		"/Command",
-		`$Process = [Diagnostics.Process]::Start("`+p.Program+`", "`+p.Args+`") ; echo $Process.Id `,
+		`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
 	)
 	_, err := c.CombinedOutput()
 	if err != nil {
@@ -32,7 +45,7 @@ func (p *Process) Kill() {
 func defaultPlayCmd() [2]string {
 	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
 	//return "fluidsynth.exe -i -q -n $_file"
-	return [2]string{"fluidsynth.exe", "-i -q -n $_file"}
+	return [2]string{"fluidsynth", "-i -n $_file"}
 }
 
 /*
