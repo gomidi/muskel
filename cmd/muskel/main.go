@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	//"github.com/gen2brain/beeep"
@@ -329,9 +328,7 @@ func player() {
 		select {
 		case <-stopPlayer:
 			if cmd != nil {
-				syscall.Kill(pid, 9)
-				//os.Kill.Signal()
-				//cmd.Process.Kill()
+				killCmd(cmd, pid)
 				cmd = nil
 			}
 			playerStopped <- true
@@ -341,8 +338,7 @@ func player() {
 		case cm := <-playCh:
 			//fmt.Println("received play")
 			if cmd != nil {
-				syscall.Kill(pid, 9)
-				//cmd.Process.Kill()
+				killCmd(cmd, pid)
 				cmd = nil
 			}
 			//fmt.Println("everything stopped")
@@ -356,8 +352,7 @@ func player() {
 			}()
 		case <-stopCh:
 			if cmd != nil {
-				//cmd.Process.Kill()
-				syscall.Kill(pid, 9)
+				killCmd(cmd, pid)
 				cmd = nil
 			}
 			stoppedCh <- true

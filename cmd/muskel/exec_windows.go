@@ -8,6 +8,10 @@ import (
 	"gitlab.com/metakeule/config"
 )
 
+func killCmd(c *exec.Cmd, pid int) {
+	c.Process.Kill()
+}
+
 func execCommand(c string) *exec.Cmd {
 	return exec.Command("cmd.exe", "/C", c)
 }

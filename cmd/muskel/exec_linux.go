@@ -4,10 +4,15 @@ package main
 
 import (
 	"os/exec"
+	"syscall"
 
 	"github.com/gen2brain/beeep"
 	"gitlab.com/metakeule/config"
 )
+
+func killCmd(c *exec.Cmd, pid int) {
+	syscall.Kill(pid, 9)
+}
 
 func execCommand(c string) *exec.Cmd {
 	return exec.Command("/bin/sh", "-c", "exec "+c)
