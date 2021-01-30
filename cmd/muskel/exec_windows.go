@@ -27,7 +27,7 @@ func (p *Process) Start() error {
 func (p *Process) Run() error {
 	c := exec.Command("powershell.exe",
 		"/Command",
-		`"p.Program+`.exe`+p.Args+`"`,
+		`"p.Program`+`.exe`+p.Args+`"`,
 	)
 	out, err := c.CombinedOutput()
 	if err != nil {
