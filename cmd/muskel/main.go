@@ -37,7 +37,7 @@ var (
 	argParams              = cfg.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
 	argPatt                = cfg.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
 	argFmt                 = cfg.NewBool("fmt", "format the muskel file (overwrites the input file)")
-	argNoEmptyLines        = cfg.NewBool("noemptylines", "remove empty lines from the score", config.Shortflag('e'))
+	argNoEmptyLines        = cfg.NewBool("noemptylines", "don't remove empty lines from the score", config.Shortflag('e'))
 	//argAddMissing = cfg.NewBool("addprops", "add missing properties")
 	argWatch      = cfg.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
 	argDir        = cfg.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
@@ -377,10 +377,10 @@ func writeUnrolled(sc *score.Score) error {
 }
 
 func (c *callbackrunner) prepare(dir, file string) error {
-	//fmt.Printf("prepare(%q, %q) called with %#v\n", dir, file, c)
+	//fmt.Printf("prepare(%q, %q) called with %#v file extension: %q\n", dir, file, c, muskel.FILE_EXTENSION)
 
 	if filepath.Ext(file) != muskel.FILE_EXTENSION {
-		return nil
+		return fmt.Errorf("wrong file extension %q (expected %q)", filepath.Ext(file), muskel.FILE_EXTENSION)
 	}
 
 	if strings.Contains(dir, "muskel-fmt") || strings.Contains(file, "muskel-fmt") {
@@ -622,6 +622,8 @@ func run() error {
 		return err
 	}
 
+	//fmt.Println("hello")
+
 	if cfg.ActiveCommand() == cmdConfigDirs {
 		return configDirs()
 	}
@@ -697,6 +699,7 @@ func run() error {
 	}
 
 	if filepath.Ext(argFile.Get()) == ".md" {
+		//fmt.Println("setting file extension to .md")
 		muskel.FILE_EXTENSION = ".md"
 	}
 
