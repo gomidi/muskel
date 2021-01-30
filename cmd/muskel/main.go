@@ -80,8 +80,9 @@ var (
 	cmdTemplate   = cfg.MustCommand("template", "show global template files").SkipAllBut()
 	argTemplFile  = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
 
-	cmdPlayClient = cfg.MustCommand("client", "client to the play server. allows play and stop").SkipAllBut("addr")
-	argClientPlay = cmdPlayClient.NewBool("play", "play or stop the current file", config.Shortflag('p'), config.Default(true))
+	cmdPlayClient   = cfg.MustCommand("client", "client to the play server. allows play and stop").SkipAllBut("addr")
+	argClientToggle = cmdPlayClient.NewBool("toggle", "toggle between play/stop playing the current file", config.Shortflag('t'))
+	argClientPlay   = cmdPlayClient.NewBool("play", "play (true) or stop (false) playing the current file", config.Shortflag('p'))
 
 	cmdConfigDirs = cfg.MustCommand("dirs", "show configuration dirs").SkipAllBut()
 )
@@ -293,6 +294,11 @@ func serverStop(wr http.ResponseWriter, r *http.Request) {
 	wr.Write([]byte("stopped playing"))
 }
 
+func serverToggle(wr http.ResponseWriter, r *http.Request) {
+	toggleCh <- true
+	wr.Write([]byte("toggle playing"))
+}
+
 func runServer() {
 	if !argPlayServer.Get() {
 		return
@@ -302,6 +308,8 @@ func runServer() {
 
 	http.HandleFunc("/play", serverPlay)
 	http.HandleFunc("/stop", serverStop)
+	http.HandleFunc("/toggle", serverToggle)
+
 	/*
 		http.Handle("/play", http.HandleFunc(r *http.Request, wr http.ResponseWriter) {
 
@@ -355,6 +363,7 @@ var stoppedCh = make(chan bool, 1)
 var finishedCh = make(chan bool, 1)
 var playerStopped = make(chan bool, 1)
 var gotPid = make(chan int, 1)
+var toggleCh = make(chan bool, 1)
 
 var playCmdString string
 
@@ -366,6 +375,20 @@ func player() {
 
 	for {
 		select {
+		case <-toggleCh:
+			if cmd != nil {
+				killCmd(cmd, pid)
+				cmd = nil
+			} else {
+				cmd = execCommand(playCmdString)
+				//wg.Add(1)
+				go func() {
+					pid_ := runThePlayerCommand(playCmdString, cmd)
+					gotPid <- pid_
+					//wg.Done()
+					//finishedCh <- true
+				}()
+			}
 		case <-stopPlayer:
 			if cmd != nil {
 				killCmd(cmd, pid)
@@ -775,10 +798,16 @@ func run() error {
 		var r *http.Response
 		var err error
 		addr := "http://" + argPlayServerAddr.Get() + "/"
-		if argClientPlay.Get() {
-			r, err = http.Get(addr + "play")
+		if argClientToggle.Get() {
+			r, err = http.Get(addr + "toggle")
 		} else {
-			r, err = http.Get(addr + "stop")
+			if argClientPlay.IsSet() {
+				if argClientPlay.Get() {
+					r, err = http.Get(addr + "play")
+				} else {
+					r, err = http.Get(addr + "stop")
+				}
+			}
 		}
 
 		if r != nil {
