@@ -398,7 +398,7 @@ func player() {
 			playerStopped <- true
 			return
 		case pid = <-gotPid:
-			//fmt.Printf("got pid %v\n", pid)
+			fmt.Printf("got pid %v\n", pid)
 		case <-playCh:
 			//fmt.Println("received play")
 			if cmd != nil {
