@@ -24,7 +24,9 @@ func (p *Process) Start() error {
 	if err != nil {
 		return err
 	}
-	p.PID, err = strconv.Atoi(strings.TrimSpace(string(out)))
+
+	str := strings.Replace(string(out), "True", "", -1)
+	p.PID, err = strconv.Atoi(strings.TrimSpace(str))
 	return err
 }
 
