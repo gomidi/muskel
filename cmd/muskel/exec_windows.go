@@ -27,7 +27,7 @@ func (p *Process) Start() error {
 func (p *Process) Run() error {
 	c := exec.Command("powershell.exe",
 		"/Command",
-		`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
+		p.Program+`.exe`+p.Args,
 	)
 	out, err := c.CombinedOutput()
 	if err != nil {
@@ -45,7 +45,7 @@ func (p *Process) Kill() {
 func defaultPlayCmd() [2]string {
 	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
 	//return "fluidsynth.exe -i -q -n $_file"
-	return [2]string{"fluidsynth", "-i -n $_file"}
+	return [2]string{"fluidsynth", "-i -n --quiet $_file"}
 }
 
 /*
