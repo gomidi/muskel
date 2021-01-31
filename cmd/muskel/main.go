@@ -12,10 +12,16 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"gitlab.com/gomidi/midi"
+	smfplayer "gitlab.com/gomidi/midi/player"
+	"gitlab.com/gomidi/midi/writer"
+	"gitlab.com/gomidi/rtmididrv"
 
 	//"github.com/gen2brain/beeep"
 	"github.com/metakeule/observe/lib/runfunc"
@@ -73,9 +79,9 @@ var (
 
 	//cmdSyncTracks = cfg.MustCommand("synctracks", "sync tracks in include files to the tracks within the given main file")
 
-	cmdPlay = cfg.MustCommand("play", "play a muskel file (currently linux only, needs timidity)")
+	cmdPlay = cfg.MustCommand("play", "play a muskel file via smfplayer (timidity,fluidsynth or audacity) or directly to midi out ports")
 	//argPlayCmd = cmdPlay.NewString("cmd", "command to execute when playing", config.Default("audacious -1 -H -p -q $_file"))
-	argPlayCmd    = cmdPlay.NewString("cmd", "command to execute when playing (fluidsynth,timidity,audacious,auto or custom (pass $_file variable))", config.Default("auto"))
+	argPlayCmd    = cmdPlay.NewString("cmd", "command to execute when playing (fluidsynth,timidity,audacious,auto or midi-ports (port:4) or custom (pass $_file variable))", config.Default("auto"))
 	argPlayServer = cmdPlay.NewBool("server", "start command server for playing and stopping")
 	cmdTemplate   = cfg.MustCommand("template", "show global template files").SkipAllBut()
 	argTemplFile  = cmdTemplate.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
@@ -85,7 +91,32 @@ var (
 	argClientPlay   = cmdPlayClient.NewBool("play", "play (true) or stop (false) playing the current file", config.Shortflag('p'))
 
 	cmdConfigDirs = cfg.MustCommand("dirs", "show configuration dirs").SkipAllBut()
+
+	cmdPorts = cfg.MustCommand("ports", "show midi out ports").SkipAllBut()
 )
+
+var portRegEx = regexp.MustCompile("port" + regexp.QuoteMeta(":") + "([0-9]+)")
+
+func printMIDIPorts() error {
+	drv, err := rtmididrv.New()
+	if err != nil {
+		return err
+	}
+
+	outs, err := drv.Outs()
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintln(os.Stdout, "MIDI outputs")
+
+	for _, out := range outs {
+		fmt.Fprintf(os.Stdout, "[%v] %s\n", out.Number(), out.String())
+	}
+
+	return nil
+}
 
 var cmdMaps = map[string][2]string{
 	"timidity":   [2]string{"timidity", "--quiet -V linear --noise-shaping=1 $_file"},
@@ -436,6 +467,78 @@ func player() {
 	}
 }
 
+var outFile string
+
+func playerSMF() {
+	//var cmd *exec.Cmd
+	var cmd *smfplayer.Player
+	//var pid int
+	//var cm string
+	//var wg sync.WaitGroup
+
+	for {
+		select {
+		case <-toggleCh:
+			if cmd != nil {
+				stopPortPlayer <- true
+				cmd = nil
+				<-stoppedPortPlayer
+				outWriter.Silence(-1, true)
+			} else {
+				var err error
+				cmd, err = smfplayer.SMF(outFile)
+				if err != nil {
+					fmt.Println("ERROR: could not create smfplayer")
+				} else {
+					go func() {
+						stoppedPortPlayer = cmd.PlayAll(portOut, stopPortPlayer)
+					}()
+				}
+			}
+		case <-stopPlayer:
+			if cmd != nil {
+				stopPortPlayer <- true
+				cmd = nil
+				<-stoppedPortPlayer
+				outWriter.Silence(-1, true)
+			}
+			playerStopped <- true
+			return
+		case <-playCh:
+			fmt.Printf("should play")
+			if cmd != nil {
+				stopPortPlayer <- true
+				cmd = nil
+				<-stoppedPortPlayer
+				outWriter.Silence(-1, true)
+			}
+			var err error
+			cmd, err = smfplayer.SMF(outFile)
+			if err != nil {
+				fmt.Println("ERROR: could not create smfplayer")
+			} else {
+				go func() {
+					stoppedPortPlayer = cmd.PlayAll(portOut, stopPortPlayer)
+				}()
+			}
+		case <-stopCh:
+			if cmd != nil {
+				stopPortPlayer <- true
+				cmd = nil
+				<-stoppedPortPlayer
+				outWriter.Silence(-1, true)
+			}
+			stoppedCh <- true
+			/*
+				case <-finishedCh:
+					fmt.Println("finished")
+					cmd = nil
+			*/
+		default:
+		}
+	}
+}
+
 //func runThePlayerCommand(cm string, cmd *exec.Cmd) int {
 func runThePlayerCommand(cmd *Process) {
 
@@ -474,6 +577,12 @@ func runThePlayerCommand(cmd *Process) {
 	return
 }
 
+var portsPlaying = false
+var stopPortPlayer = make(chan bool, 1)
+var stoppedPortPlayer chan bool
+
+//var portPlayer *smfplayer.Player
+
 func play() {
 	//func play() {
 	if argWatch.Get() {
@@ -484,8 +593,17 @@ func play() {
 	}
 	//cmd := exec.Command("/bin/sh", "e", cm)
 	// cmd := exec.Command("audacious", "-1", "-H", "-p", "-q", c.outFile)
-	cmd := newProcess(playCmdString[0], playCmdString[1])
-	runThePlayerCommand(cmd)
+	if portsPlaying {
+		pl, err := smfplayer.SMF(outFile)
+		if err != nil {
+			fmt.Println("ERROR: could not create smfplayer")
+		}
+
+		stoppedPortPlayer = pl.PlayAll(portOut, stopPortPlayer)
+	} else {
+		cmd := newProcess(playCmdString[0], playCmdString[1])
+		runThePlayerCommand(cmd)
+	}
 	//runThePlayerCommand(playCmdString, execCommand(playCmdString))
 }
 
@@ -503,6 +621,9 @@ func (c *callbackrunner) mkPlayCmdString() [2]string {
 	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", c.outFile)
 	return cmm
 }
+
+var portOut midi.Out
+var outWriter *writer.Writer
 
 func (c *callbackrunner) cmdPlay(sc *score.Score) error {
 	//fmt.Println("running play")
@@ -533,7 +654,15 @@ func (c *callbackrunner) cmdPlay(sc *score.Score) error {
 			play(cm)
 		}
 	*/
-	playCmdString = c.mkPlayCmdString()
+
+	if outFile == "" {
+		outFile = c.outFile
+	}
+
+	if !portsPlaying {
+		playCmdString = c.mkPlayCmdString()
+	}
+
 	play()
 
 	//beeep.Alert("audacious not found", err.Error(), "assets/warning.png")
@@ -814,6 +943,10 @@ func run() error {
 
 	//fmt.Println("hello")
 
+	if cfg.ActiveCommand() == cmdPorts {
+		return printMIDIPorts()
+	}
+
 	if cfg.ActiveCommand() == cmdConfigDirs {
 		return configDirs()
 	}
@@ -919,6 +1052,29 @@ func run() error {
 
 	srcdir := filepath.Dir(argFile.Get())
 
+	if cfg.ActiveCommand() == cmdPlay {
+		if portRegEx.MatchString(argPlayCmd.Get()) {
+			portsPlaying = true
+			m := portRegEx.FindSubmatch([]byte(argPlayCmd.Get()))
+			p, err := strconv.Atoi(string(m[1]))
+			if err != nil {
+				return fmt.Errorf("invalid port (not a number)")
+			}
+			fmt.Printf("out port: %v\n", p)
+			drv, err := rtmididrv.New()
+			if err != nil {
+				return fmt.Errorf("can't open midi driver")
+			}
+			portOut, err = midi.OpenOut(drv, p, "")
+			if err != nil {
+				return fmt.Errorf("can't open midi out port %v", p)
+			}
+
+			outWriter = writer.New(portOut)
+
+		}
+	}
+
 	if !argIgnoreMuskelVersion.Get() {
 		var v *config.Version
 		v, err = muskel.ReadWDVersionFile(srcdir)
@@ -967,7 +1123,11 @@ func run() error {
 
 		if cfg.ActiveCommand() == cmdPlay {
 			//fmt.Println("starting player loop")
-			go player()
+			if portsPlaying {
+				go playerSMF()
+			} else {
+				go player()
+			}
 		}
 
 		runServer()
@@ -1007,8 +1167,15 @@ func run() error {
 		<-sigchan
 		fmt.Println("\n--interrupted!")
 		if cfg.ActiveCommand() == cmdPlay {
+			/*
+				if portsPlaying {
+					stopPortPlayer <- true
+					<-stoppedPortPlayer
+				} else {
+			*/
 			stopPlayer <- true
 			<-playerStopped
+			//}
 		}
 
 		stopped.Kill()

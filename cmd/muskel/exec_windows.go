@@ -91,6 +91,8 @@ func (p *Process) Start() error {
 		g.Dispose()
 	}
 
+	return nil
+
 }
 
 func (p *Process) Run() error {
