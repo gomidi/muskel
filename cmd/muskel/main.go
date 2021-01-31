@@ -20,7 +20,6 @@ import (
 
 	"gitlab.com/gomidi/midi"
 	smfplayer "gitlab.com/gomidi/midi/player"
-	"gitlab.com/gomidi/midi/writer"
 	"gitlab.com/gomidi/rtmididrv"
 
 	//"github.com/gen2brain/beeep"
@@ -397,6 +396,7 @@ var finishedCh = make(chan bool, 1)
 var playerStopped = make(chan bool, 1)
 var gotPid = make(chan int, 1)
 var toggleCh = make(chan bool, 1)
+var stoppedPortPlayer = make(chan bool, 1)
 
 var playCmdString [2]string
 
@@ -481,9 +481,8 @@ func playerSMF() {
 		case <-toggleCh:
 			if cmd != nil {
 				stopPortPlayer <- true
-				cmd = nil
 				<-stoppedPortPlayer
-				outWriter.Silence(-1, true)
+				cmd = nil
 			} else {
 				var err error
 				cmd, err = smfplayer.SMF(outFile)
@@ -491,26 +490,24 @@ func playerSMF() {
 					fmt.Println("ERROR: could not create smfplayer")
 				} else {
 					go func() {
-						stoppedPortPlayer = cmd.PlayAll(portOut, stopPortPlayer)
+						cmd.PlayAll(portOut, stopPortPlayer, stoppedPortPlayer)
 					}()
 				}
 			}
 		case <-stopPlayer:
 			if cmd != nil {
 				stopPortPlayer <- true
-				cmd = nil
 				<-stoppedPortPlayer
-				outWriter.Silence(-1, true)
+				cmd = nil
 			}
 			playerStopped <- true
 			return
 		case <-playCh:
-			fmt.Printf("should play")
+			//fmt.Printf("should play")
 			if cmd != nil {
 				stopPortPlayer <- true
-				cmd = nil
 				<-stoppedPortPlayer
-				outWriter.Silence(-1, true)
+				cmd = nil
 			}
 			var err error
 			cmd, err = smfplayer.SMF(outFile)
@@ -518,15 +515,14 @@ func playerSMF() {
 				fmt.Println("ERROR: could not create smfplayer")
 			} else {
 				go func() {
-					stoppedPortPlayer = cmd.PlayAll(portOut, stopPortPlayer)
+					cmd.PlayAll(portOut, stopPortPlayer, stoppedPortPlayer)
 				}()
 			}
 		case <-stopCh:
 			if cmd != nil {
 				stopPortPlayer <- true
-				cmd = nil
 				<-stoppedPortPlayer
-				outWriter.Silence(-1, true)
+				cmd = nil
 			}
 			stoppedCh <- true
 			/*
@@ -579,7 +575,6 @@ func runThePlayerCommand(cmd *Process) {
 
 var portsPlaying = false
 var stopPortPlayer = make(chan bool, 1)
-var stoppedPortPlayer chan bool
 
 //var portPlayer *smfplayer.Player
 
@@ -599,7 +594,7 @@ func play() {
 			fmt.Println("ERROR: could not create smfplayer")
 		}
 
-		stoppedPortPlayer = pl.PlayAll(portOut, stopPortPlayer)
+		pl.PlayAll(portOut, stopPortPlayer, stoppedPortPlayer)
 	} else {
 		cmd := newProcess(playCmdString[0], playCmdString[1])
 		runThePlayerCommand(cmd)
@@ -623,7 +618,6 @@ func (c *callbackrunner) mkPlayCmdString() [2]string {
 }
 
 var portOut midi.Out
-var outWriter *writer.Writer
 
 func (c *callbackrunner) cmdPlay(sc *score.Score) error {
 	//fmt.Println("running play")
@@ -1070,8 +1064,6 @@ func run() error {
 				return fmt.Errorf("can't open midi out port %v", p)
 			}
 
-			outWriter = writer.New(portOut)
-
 		}
 	}
 
@@ -1173,6 +1165,7 @@ func run() error {
 					<-stoppedPortPlayer
 				} else {
 			*/
+
 			stopPlayer <- true
 			<-playerStopped
 			//}
@@ -1182,10 +1175,32 @@ func run() error {
 
 		os.Exit(0)
 		return nil
+	} else {
+		sigchan := make(chan os.Signal, 10)
+
+		// listen for ctrl+c
+		go signal.Notify(sigchan, os.Interrupt)
+
+		go func() {
+			// interrupt has happend
+			<-sigchan
+			fmt.Println("\n--interrupted!")
+			if cfg.ActiveCommand() == cmdPlay && portsPlaying {
+				stopPortPlayer <- true
+			}
+		}()
 	}
 
-	return cbr.mkcallback()(dir, filepath.Join(dir, file))
+	err = cbr.mkcallback()(dir, filepath.Join(dir, file))
 
+	if err != nil {
+		return err
+	}
+
+	if !argWatch.Get() && (cfg.ActiveCommand() == cmdPlay) && portsPlaying {
+		<-stoppedPortPlayer
+	}
+	return nil
 }
 
 func main() {

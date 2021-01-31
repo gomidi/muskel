@@ -5,6 +5,7 @@ package main
 import (
 	"os/exec"
 	"syscall"
+	"time"
 
 	"gitlab.com/metakeule/config"
 )
@@ -33,6 +34,7 @@ func (p *Process) Run() error {
 
 func (p *Process) Kill() {
 	syscall.Kill(p.PID, 9)
+	time.Sleep(time.Second)
 }
 
 func defaultPlayCmd() [2]string {
