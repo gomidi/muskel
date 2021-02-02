@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/metakeule/observe/lib/runfunc"
@@ -35,8 +34,6 @@ func watch(conv *converter, a *args) error {
 			select {
 			case e := <-errors:
 				fmt.Fprintf(os.Stderr, "error: %s\n", e)
-			default:
-				runtime.Gosched()
 			}
 		}
 	}()

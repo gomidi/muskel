@@ -48,7 +48,7 @@ func (a *args) init() {
 	a.WatchDir = a.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
 	a.OutFile = a.NewString("out", "path of the output file (SMF). If it includes the placeholder %s, that will be replaced by the File property of the corresponding track", config.Shortflag('o'))
 	a.TrackFiles = a.NewBool("trackfiles", "sets out to '%s' in order to write to the file names as given in the track properties")
-	a.SleepingTime = a.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(100)))
+	a.SleepingTime = a.NewInt32("sleep", "sleeping time between invocations (in milliseconds)", config.Default(int32(10)))
 	a.UnrollFile = a.NewString("unroll", "unroll the source to the given file name", config.Shortflag('u'))
 	a.Debug = a.NewBool("debug", "print debug messages")
 

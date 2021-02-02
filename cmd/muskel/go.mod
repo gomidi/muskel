@@ -3,7 +3,7 @@ module gitlab.com/gomidi/muskel/cmd/muskel
 go 1.14
 
 require (
-	github.com/metakeule/observe v0.0.4
+	github.com/metakeule/observe v0.0.5
 	gitlab.com/gomidi/midi v1.22.3
 	gitlab.com/gomidi/midicatdrv v0.0.2
 	gitlab.com/gomidi/muskel v1.0.0

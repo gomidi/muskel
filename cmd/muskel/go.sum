@@ -3,6 +3,8 @@ github.com/emersion/go-appdir v1.1.2 h1:3ceZKMz3b7MLy37ZB29shG2Y7Y3G/pcLbtnYP6BJ
 github.com/emersion/go-appdir v1.1.2/go.mod h1:N15s1uA0vhxhVomEsNau6w15OdELRpp0aH1Ux4BuSPE=
 github.com/metakeule/observe v0.0.4 h1:/87gpWTM5HEq8Xo3B1HN60rIbFEDlyKCMhepr+iUhG8=
 github.com/metakeule/observe v0.0.4/go.mod h1:Glid6/jlqdtVFNHa9bAJj2HPzgTc+J0VGpxGfiMNNeI=
+github.com/metakeule/observe v0.0.5 h1:JlExl1fegZEtur0GEBngRT0N4OsTMGLyPaXQmG2RgXk=
+github.com/metakeule/observe v0.0.5/go.mod h1:ycx4JuL4kq92J+G4K7m1OXAunLSMEn5bFlMSzopyDaw=
 github.com/pelletier/go-toml v1.8.1 h1:1Nf83orprkJyknT6h7zbuEGUEjcyVlCxSUGTENmNCRM=
 github.com/pelletier/go-toml v1.8.1/go.mod h1:T2/BmBdy8dvIRq1a/8aqjN41wvWlN4lrapLU/GW4pbc=
 gitlab.com/gomidi/midi v1.22.3 h1:bQuG0u7uIj/cQwHrReB+2CqLAj7j7tLiBQ3D3hf/3Iw=
