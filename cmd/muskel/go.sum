@@ -9,6 +9,8 @@ github.com/pelletier/go-toml v1.8.1 h1:1Nf83orprkJyknT6h7zbuEGUEjcyVlCxSUGTENmNC
 github.com/pelletier/go-toml v1.8.1/go.mod h1:T2/BmBdy8dvIRq1a/8aqjN41wvWlN4lrapLU/GW4pbc=
 gitlab.com/gomidi/midi v1.22.3 h1:bQuG0u7uIj/cQwHrReB+2CqLAj7j7tLiBQ3D3hf/3Iw=
 gitlab.com/gomidi/midi v1.22.3/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
+gitlab.com/gomidi/midi v1.23.0 h1:21DS9n/ZOwkc9Svfn3/FiASCuApQqLacOgATMNeQmaw=
+gitlab.com/gomidi/midi v1.23.0/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
 gitlab.com/gomidi/midicatdrv v0.0.1 h1:mGamZqWh3i5ieP83rV5BWXmZ6D/RMvEGLsicsbI8/oc=
 gitlab.com/gomidi/midicatdrv v0.0.1/go.mod h1:Ky0OEIb4WqmXoCPPJ5NOl1S/TOjsaRBL/5244iQvG7w=
 gitlab.com/gomidi/midicatdrv v0.0.2 h1:6HMH2BAbQc2cyW/+QpzoTLAwZU5UxcX6mCqOiAeUIPE=
