@@ -7,29 +7,29 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gen2brain/beeep"
+	//	"github.com/gen2brain/beeep"
 	"gitlab.com/metakeule/config"
 )
 
 func (p *Process) Start() error {
-	c := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
-	err := c.Start()
+	p.cmd = exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	err := p.cmd.Start()
 	if err != nil {
 		return err
 	}
 
-	p.PID = c.Process.Pid
+	p.PID = p.cmd.Process.Pid
 	return nil
 }
 
 func (p *Process) Run() error {
-	c := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
-	_, err := c.CombinedOutput()
+	p.cmd = exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	_, err := p.cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
 
-	p.PID = c.Process.Pid
+	p.PID = p.cmd.Process.Pid
 	return nil
 }
 
@@ -50,11 +50,11 @@ func execCommand(c string) *exec.Cmd {
 
 func alert(msg string, err error) {
 	//beeep.Beep(beeep.DefaultFreq, beeep.DefaultDuration)
-	beeep.Alert(msg, err.Error(), "assets/warning.png")
+	//beeep.Alert(msg, err.Error(), "assets/warning.png")
 }
 
 func notify(msg, details string) {
-	beeep.Notify(msg, details, "assets/information.png")
+	//beeep.Notify(msg, details, "assets/information.png")
 }
 
 func runVersionated(file string, args []string) *exec.Cmd {

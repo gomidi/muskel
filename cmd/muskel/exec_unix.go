@@ -11,24 +11,24 @@ import (
 )
 
 func (p *Process) Start() error {
-	c := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
-	err := c.Start()
+	p.cmd = exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	err := p.cmd.Start()
 	if err != nil {
 		return err
 	}
 
-	p.PID = c.Process.Pid
+	p.PID = p.cmd.Process.Pid
 	return nil
 }
 
 func (p *Process) Run() error {
-	c := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
-	_, err := c.CombinedOutput()
+	p.cmd = exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	_, err := p.cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
 
-	p.PID = c.Process.Pid
+	p.PID = p.cmd.Process.Pid
 	return nil
 }
 

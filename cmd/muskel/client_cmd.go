@@ -1,0 +1,62 @@
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+
+	"gitlab.com/metakeule/config"
+)
+
+type clientCmd struct {
+	*config.Config
+	ServerAddress config.StringGetter
+	Toggle        config.BoolGetter
+	Play          config.BoolGetter
+	Convert       config.BoolGetter
+}
+
+var CLIENT = &clientCmd{}
+
+func init() {
+	CLIENT.init()
+}
+
+func (s *clientCmd) init() {
+	s.Config = CONFIG.MustCommand("client", "client to the server. allows to send play/stop, toggle and convert commands").SkipAllBut()
+	s.ServerAddress = s.NewString("addr", "address of the server", config.Default("localhost:8800"))
+	s.Toggle = s.NewBool("toggle", "toggle between play/stop playing the current file", config.Shortflag('t'))
+	s.Play = s.NewBool("play", "play (true) or stop (false) playing the current file", config.Shortflag('p'))
+	s.Convert = s.NewBool("convert", "converts the current file to smf", config.Shortflag('c'))
+}
+
+func (c *clientCmd) run() error {
+	var r *http.Response
+	var err error
+	addr := "http://" + c.ServerAddress.Get() + "/"
+	switch {
+	case c.Play.IsSet():
+		if c.Play.Get() {
+			r, err = http.Get(addr + "play")
+		} else {
+			r, err = http.Get(addr + "stop")
+		}
+	case c.Convert.IsSet():
+		if c.Convert.Get() {
+			r, err = http.Get(addr + "convert")
+		}
+	case c.Toggle.IsSet():
+		if c.Toggle.Get() {
+			r, err = http.Get(addr + "toggle")
+		}
+	default:
+		return fmt.Errorf("pass either --play, --toogle or --convert")
+	}
+
+	if r != nil {
+		ioutil.ReadAll(r.Body)
+		r.Body.Close()
+	}
+
+	return err
+}
