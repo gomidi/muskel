@@ -15,7 +15,6 @@ import (
 
 type converter struct {
 	inFile    string
-	outFile   string
 	checksums map[string]string
 	ignore    map[string]bool
 	inFilep   string
@@ -37,28 +36,17 @@ type converter struct {
 
 func newConverter(player *Player, a *args) (r *converter) {
 	inFile := a.File.Get()
-	outFile := inFile
-	if a.OutFile.IsSet() {
-		outFile = a.OutFile.Get()
-	}
-
-	if a.TrackFiles.Get() {
-		outFile = "%s"
-	}
 
 	c := &converter{
-		player:  player,
-		inFile:  inFile,
-		outFile: outFile,
-		dir:     path.Dir(inFile),
-		file:    path.Base(inFile),
+		player: player,
+		inFile: inFile,
+		dir:    path.Dir(inFile),
+		file:   path.Base(inFile),
 	}
 	inFilep, _ := filepath.Abs(c.inFile)
 	c.inFilep = inFilep
 
 	c.setFromArgs(a)
-	c.normalizeOutFile()
-
 	return c
 }
 
@@ -135,8 +123,8 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		alert("ERROR while unrolling MuSkeL score", err)
 		return err
 	}
-	//fmt.Printf("writing smf to %q\n", c.outFile)
-	err = muskel.WriteSMFFile(sc, c.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Get())))
+
+	err = muskel.WriteSMFFile(sc, c.player.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Get())))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 		alert("ERROR while converting MuSkeL to SMF", err)
@@ -146,7 +134,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	if ARGS.Watch.Get() {
 		fmt.Fprint(os.Stdout, ".")
 	}
-	notify("OK MuSkeL converted to SMF", path.Base(c.outFile))
+	notify("OK MuSkeL converted to SMF", path.Base(c.player.outFile))
 	return nil
 }
 
@@ -157,13 +145,7 @@ func (c *converter) cmdPlay(sc *score.Score) error {
 		return err
 	}
 
-	if c.player != nil {
-		c.player.outFile = c.outFile
-
-		if !c.player.playToPort {
-			c.player.program = c.mkPlayCmdString()
-		}
-
+	if c.player.playerEnabled {
 		var stopPortPlayer = make(chan bool, 1)
 		var portPlayerStopped = make(chan bool, 1)
 
@@ -185,23 +167,7 @@ func (c *converter) cmdPlay(sc *score.Score) error {
 	return nil
 }
 
-func (c *converter) mkPlayCmdString() [2]string {
-	cm := strings.TrimSpace(PLAY.Program.Get())
-	var cmm [2]string
-	if cc, has := c.player.cmdMaps[cm]; has {
-		cmm = cc
-	} else {
-		cmm_ := strings.SplitN(cm, " ", 2)
-		cmm[0] = cmm_[0]
-		cmm[1] = cmm_[1]
-	}
-
-	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", c.outFile)
-	return cmm
-}
-
 func (r *converter) run() error {
-	//fmt.Printf("call callback with %q, %q\n", r.dir, filepath.Join(r.dir, r.file))
 	return r.mkcallback()(r.dir, filepath.Join(r.dir, r.file))
 }
 
@@ -215,26 +181,7 @@ func (c *converter) mkcallback() (callback func(dir, file string) error) {
 	return
 }
 
-func (c *converter) normalizeOutFile() {
-	if extIdx := strings.LastIndex(c.outFile, "."); extIdx > 0 && extIdx+1 < len(c.outFile) {
-		switch c.outFile[extIdx:] {
-		case ".mid", ".midi", ".MID", ".MIDI":
-		default:
-			c.outFile = c.outFile[:extIdx] + ".mid"
-		}
-	} else {
-		c.outFile = c.outFile + ".mid"
-	}
-
-	if c.player != nil {
-		c.player.outFile = c.outFile
-	}
-
-}
-
 func (c *converter) prepare(dir, file string) error {
-	//fmt.Printf("prepare(%q, %q) called with %#v file extension: %q\n", dir, file, c, muskel.FILE_EXTENSION)
-
 	if filepath.Ext(file) != muskel.FILE_EXTENSION {
 		return nil
 	}
@@ -266,8 +213,6 @@ func (c *converter) prepare(dir, file string) error {
 
 	c.checksums[filep] = newChecksum
 
-	//c.setFromArgs(ARGS)
-
 	if ARGS.WatchDir.Get() {
 		if filep != c.inFilep {
 			c.ignore[filep] = true
@@ -283,8 +228,6 @@ func (c *converter) prepare(dir, file string) error {
 		alert("ERROR:", err)
 		return err
 	}
-
-	//c.normalizeOutFile()
 
 	switch CONFIG.ActiveCommand() {
 	case SMF.Config:
@@ -324,7 +267,6 @@ func (c *converter) parseMuskel(srcFile string) (*score.Score, error) {
 }
 
 func (c *converter) fmtFile(file string, params []string, opts ...score.Option) error {
-	//fmt.Printf("fmt file: %q\n", file)
 	sc, err := muskel.ParseFile(file, params, opts...)
 
 	if err != nil {
@@ -347,7 +289,6 @@ func (c *converter) fmtFile(file string, params []string, opts ...score.Option) 
 }
 
 func (c *converter) writeUnrolled(file string, sc *score.Score) error {
-	//fmt.Printf("write unrolled to: %q\n", file)
 	err := sc.Unroll()
 
 	if err != nil {

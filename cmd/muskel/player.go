@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 
 	"gitlab.com/gomidi/midi"
@@ -29,6 +30,8 @@ type Player struct {
 	portRegEx *regexp.Regexp
 
 	outFile string
+
+	playerEnabled bool
 }
 
 func newPlayer() (p *Player, err error) {
@@ -42,9 +45,9 @@ func newPlayer() (p *Player, err error) {
 		playToPort:    false,
 
 		cmdMaps: map[string][2]string{
-			"timidity":   [2]string{"timidity", "--quiet -V linear --noise-shaping=1 $_file"},
-			"audacious":  [2]string{"audacious", "-1 -H -p -q $_file"},
-			"fluidsynth": [2]string{"fluidsynth", "-i -n $_file"},
+			"timidity":   timidityCmd(),
+			"audacious":  audaciousCmd(),
+			"fluidsynth": fluidsynthCmd(),
 			"auto":       defaultPlayCmd(),
 		},
 
@@ -55,8 +58,54 @@ func newPlayer() (p *Player, err error) {
 	return
 }
 
+func (ps *Player) mkPlayCmdString(cmd, outfile string) {
+	cm := strings.TrimSpace(cmd)
+	//fmt.Printf("cmd : %q\n", cm)
+	var cmm [2]string
+	if cc, has := ps.cmdMaps[cm]; has {
+		cmm = cc
+	} else {
+		cmm_ := strings.SplitN(cm, " ", 2)
+		cmm[0] = cmm_[0]
+		cmm[1] = cmm_[1]
+	}
+
+	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", ps.outFile)
+	ps.program = cmm
+}
+
+func (p *Player) normalizeOutFile(a *args) {
+	inFile := a.File.Get()
+	p.outFile = inFile
+	if a.OutFile.IsSet() {
+		p.outFile = a.OutFile.Get()
+	}
+
+	if a.TrackFiles.Get() {
+		p.outFile = "%s"
+	}
+
+	if extIdx := strings.LastIndex(p.outFile, "."); extIdx > 0 && extIdx+1 < len(p.outFile) {
+		switch p.outFile[extIdx:] {
+		case ".mid", ".midi", ".MID", ".MIDI":
+		default:
+			p.outFile = p.outFile[:extIdx] + ".mid"
+		}
+	} else {
+		p.outFile = p.outFile + ".mid"
+	}
+}
+
 func (ps *Player) setupProgram() error {
 	var cmd string
+
+	ps.normalizeOutFile(ARGS)
+
+	if CONFIG.ActiveCommand() != PLAY.Config && CONFIG.ActiveCommand() != SERVER.Config {
+		return nil
+	}
+
+	ps.playerEnabled = true
 
 	if CONFIG.ActiveCommand() == PLAY.Config {
 		cmd = PLAY.Program.Get()
@@ -82,7 +131,9 @@ func (ps *Player) setupProgram() error {
 		if err != nil {
 			return fmt.Errorf("can't open midi out port %v", p)
 		}
-
+	} else {
+		ps.mkPlayCmdString(cmd, ps.outFile)
+		fmt.Printf("%s %s\n", ps.program[0], ps.program[1])
 	}
 	return nil
 }
@@ -208,7 +259,6 @@ func (p *Player) playOnce(stopPortPlayer chan bool, stoppedPortPlayer chan bool)
 		pl.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
 	} else {
 		cmd := newProcess(p.program[0], p.program[1])
-		fmt.Fprintf(os.Stdout, "%s %s\n", cmd.Program, cmd.Args)
 		err := cmd.Run()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while running %s %s: %v", cmd.Program, cmd.Args, err)

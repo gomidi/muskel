@@ -45,30 +45,26 @@ func run() error {
 	case TEMPLATE.Config:
 		return TEMPLATE.run()
 	default:
-		// when using markdown files, set the file extension properly (affects includes!)
-		if filepath.Ext(ARGS.File.Get()) == ".md" {
-			muskel.FILE_EXTENSION = ".md"
+		if !ARGS.IgnoreMuskelVersion.Get() {
+			// check, if muskel_version.txt is inside the current dir
+			// If the version does not match, it delegates to the versioned muskel command (e.g. muskel_1_1_33.exe)
+			// checkMuskelVersion exits if appropriate
+			checkMuskelVersion(muskel.VERSION, muskel.MUSKEL_VERSION_FILE, ARGS)
 		}
 	}
 
-	var player *Player
-
-	if CONFIG.ActiveCommand() == PLAY.Config || CONFIG.ActiveCommand() == SERVER.Config {
-		player, err = newPlayer()
-		if err != nil {
-			return err
-		}
-	}
-
-	if !ARGS.IgnoreMuskelVersion.Get() {
-		// check, if muskel_version.txt is inside the current dir
-		// If the version does not match, it delegates to the versioned muskel command (e.g. muskel_1_1_33.exe)
-		// checkMuskelVersion exits if appropriate
-		checkMuskelVersion(muskel.VERSION, muskel.MUSKEL_VERSION_FILE, ARGS)
+	// when using markdown files, set the file extension properly (affects includes!)
+	if filepath.Ext(ARGS.File.Get()) == ".md" {
+		muskel.FILE_EXTENSION = ".md"
 	}
 
 	// listen for ctrl+c
 	go signal.Notify(SIGNAL_CHANNEL, os.Interrupt)
+
+	player, err := newPlayer()
+	if err != nil {
+		return err
+	}
 
 	conv := newConverter(player, ARGS)
 

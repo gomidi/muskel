@@ -71,7 +71,7 @@ func (p *Process) Start() error {
 		"/Command",
 		//`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
 		//`$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo; $ProcessInfo.FileName = "`+p.Program+`.exe" ; $ProcessInfo.RedirectStandardError = $true ; $ProcessInfo.RedirectStandardOutput = $true; $ProcessInfo.UseShellExecute = $false; $ProcessInfo.Arguments = "`+p.Args+`"; $Process = New-Object System.Diagnostics.Process; $Process.StartInfo = $ProcessInfo ; $Process.Start() ; echo $Process.Id `,
-		`$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo; $ProcessInfo.FileName = "`+p.Program+`.exe" ;  $ProcessInfo.UseShellExecute = $false; $ProcessInfo.Arguments = "`+p.Args+`"; $Process = New-Object System.Diagnostics.Process; $Process.StartInfo = $ProcessInfo ; $Process.Start() | Out-Null ; echo $Process.Id `,
+		`$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo; $ProcessInfo.FileName = "`+p.Program+`" ;  $ProcessInfo.UseShellExecute = $false; $ProcessInfo.Arguments = "`+p.Args+`"; $Process = New-Object System.Diagnostics.Process; $Process.StartInfo = $ProcessInfo ; $Process.Start() | Out-Null ; echo $Process.Id `,
 	)
 
 	err = p.cmd.Start()
@@ -99,7 +99,7 @@ func (p *Process) Run() error {
 	p.cmd = exec.Command("powershell.exe",
 		"/Command",
 		//`"`+p.Program+`.exe `+p.Args+`"`,
-		p.Program+`.exe `+p.Args,
+		p.Program+` `+p.Args,
 	)
 	out, err := p.cmd.CombinedOutput()
 	if err != nil {
@@ -115,10 +115,21 @@ func (p *Process) Kill() {
 	p.killer()
 }
 
+func fluidsynthCmd() [2]string {
+	return [2]string{"fluidsynth.exe", "-i -n --quiet $_file"}
+}
+
+func audaciousCmd() [2]string {
+	return [2]string{"audacious.exe", "-1 -H -p -q $_file"}
+}
+
+func timidityCmd() [2]string {
+	return [2]string{"timidity.exe", "--quiet -V linear --noise-shaping=1 $_file"}
+}
+
 func defaultPlayCmd() [2]string {
 	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
-	//return "fluidsynth.exe -i -q -n $_file"
-	return [2]string{"fluidsynth", "-i -n --quiet $_file"}
+	return fluidsynthCmd()
 }
 
 /*

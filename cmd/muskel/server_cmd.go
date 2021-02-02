@@ -121,8 +121,6 @@ func (s *serverCmd) run(cbr *converter) error {
 	if cbr.player.playToPort {
 		go cbr.player.playThroughPort()
 	} else {
-		cbr.normalizeOutFile()
-		cbr.player.program = cbr.mkPlayCmdString()
 		go cbr.player.playWithProgram()
 	}
 

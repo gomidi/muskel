@@ -38,8 +38,20 @@ func (p *Process) Kill() {
 	time.Sleep(time.Second)
 }
 
-func defaultPlayCmd() [2]string {
+func fluidsynthCmd() [2]string {
+	return [2]string{"fluidsynth", "-j -i -n $_file"}
+}
+
+func audaciousCmd() [2]string {
 	return [2]string{"audacious", "-1 -H -p -q $_file"}
+}
+
+func timidityCmd() [2]string {
+	return [2]string{"timidity", "-V linear --noise-shaping=1 $_file"}
+}
+
+func defaultPlayCmd() [2]string {
+	return audaciousCmd()
 }
 
 /*
