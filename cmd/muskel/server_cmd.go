@@ -15,6 +15,7 @@ type server struct {
 func (s *server) Play(wr http.ResponseWriter, r *http.Request) {
 	err := s.convert()
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 		wr.WriteHeader(http.StatusInternalServerError)
 		wr.Write([]byte("error: " + err.Error()))
 		return
@@ -32,6 +33,7 @@ func (s *server) Stop(wr http.ResponseWriter, r *http.Request) {
 func (s *server) Toggle(wr http.ResponseWriter, r *http.Request) {
 	err := s.convert()
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 		wr.WriteHeader(http.StatusInternalServerError)
 		wr.Write([]byte("error: " + err.Error()))
 		return
@@ -57,6 +59,7 @@ func (s *server) convert() error {
 func (s *server) Convert(wr http.ResponseWriter, r *http.Request) {
 	err := s.convert()
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
 		wr.WriteHeader(http.StatusInternalServerError)
 		wr.Write([]byte("error: " + err.Error()))
 		return
