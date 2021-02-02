@@ -454,7 +454,16 @@ func (sc *Score) Unroll() error {
 
 	sketch := sc.Sketches[sketchName]
 	if sketch == nil {
-		return fmt.Errorf("could not find main sketch %q", sc.mainSketch)
+		if sc.mainSketch == "!" {
+			sc.mainSketch = "=SCORE"
+			sketch = sc.Sketches[sc.mainSketch]
+			exclMode = false
+			if sketch == nil {
+				return fmt.Errorf("could not find main sketch %q", sc.mainSketch)
+			}
+		} else {
+			return fmt.Errorf("could not find main sketch %q", sc.mainSketch)
+		}
 	}
 
 	params, err := convertParams(sc.params)
@@ -468,8 +477,10 @@ func (sc *Score) Unroll() error {
 		col = "!"
 	}
 
-	if col == "!" {
+	if exclMode && col == "!" {
 		col = sc.findMostExclamedCol(sketch)
+	} else {
+		col = ""
 	}
 
 	//fmt.Printf("col: %q\n", col)
@@ -477,22 +488,9 @@ func (sc *Score) Unroll() error {
 	switch {
 	case col != "":
 		_col := col
-		//tr, _ := sc.GetTrack(strings.Trim(col, "!"))
 		tr, _ := sc.GetTrack(col)
 		if tr == nil {
-			//fmt.Printf("could not find track for col %q\n", col)
-			trackName := sc.findMostExclamedTrack()
-			if trackName != "" {
-				//fmt.Printf("taking most exclamed track %q\n", trackName)
-				col = trackName
-				tr = sc.Tracks[trackName]
-			} else {
-				//fmt.Printf("construct track %v\n", col)
-				trackName = col
-				tr = track.New(trackName)
-				tr.MIDIChannel = 0
-				sc.Tracks[trackName] = tr
-			}
+			return fmt.Errorf("can't find track for col %q", col)
 		}
 
 		//fmt.Printf("col is %q\n", col)
@@ -1106,6 +1104,7 @@ func (sc *Score) findMostExclamedCol(sketch *sketch.Sketch) (col string) {
 	for c := range sketch.Columns {
 		if idx := strings.Index(c, "!"); idx > 0 {
 			if len(c[idx:]) > best {
+				best = len(c[idx:])
 				col = c
 			}
 		}
@@ -1113,23 +1112,6 @@ func (sc *Score) findMostExclamedCol(sketch *sketch.Sketch) (col string) {
 
 	if best == -1 {
 		col = sketch.FirstColumn()
-	}
-
-	return
-}
-
-func (sc *Score) findMostExclamedTrack() (track string) {
-	var best int = -1
-	for tr := range sc.Tracks {
-		if best == -1 {
-			track = tr
-			best = 0
-		}
-		if idx := strings.Index(tr, "!"); idx > 0 {
-			if len(tr[idx:]) > best {
-				track = tr
-			}
-		}
 	}
 
 	return

@@ -72,8 +72,7 @@ func startServer(conv *converter) error {
 	s.converter.setFromArgs(ARGS)
 	s.converter.Config.Fmt = true
 	s.converter.Config.UnrollFile = s.converter.inFile + ".unrolled.mskl"
-	//s.conf.Flow = true // TODO: if we can make flow more tolerant, we could enable it
-	s.converter.Config.Flow = false
+	s.converter.Config.Flow = true
 	s.converter.Config.KeepEmptyLines = true
 	s.converter.Config.Debug = false
 
