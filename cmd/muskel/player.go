@@ -169,6 +169,7 @@ func (p *Player) playWithProgram() {
 				cmd = nil
 			}
 			p.playerStopped <- true
+			fmt.Println("player stopped")
 			return
 		case shouldPlay := <-p.playCh:
 			if shouldPlay {
@@ -194,6 +195,23 @@ func (p *Player) playThroughPort() {
 
 	var stopPortPlayer = make(chan bool, 1)
 	var stoppedPortPlayer = make(chan bool, 1)
+	var mx sync.Mutex
+
+	var startPlayer = func() {
+		mx.Lock()
+		stopPortPlayer = make(chan bool, 1)
+		stoppedPortPlayer = make(chan bool, 1)
+		var err error
+		cmd, err = player.SMF(p.outFile)
+		if err != nil {
+			fmt.Println("ERROR: could not create smfplayer")
+		} else {
+			go func() {
+				cmd.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
+				mx.Unlock()
+			}()
+		}
+	}
 
 	for {
 		select {
@@ -201,23 +219,20 @@ func (p *Player) playThroughPort() {
 			if cmd != nil {
 				stopPortPlayer <- true
 				<-stoppedPortPlayer
+				mx.Lock()
 				cmd = nil
+				mx.Unlock()
 			} else {
-				var err error
-				cmd, err = player.SMF(p.outFile)
-				if err != nil {
-					fmt.Println("ERROR: could not create smfplayer")
-				} else {
-					go func() {
-						cmd.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
-					}()
-				}
+				startPlayer()
 			}
 		case <-p.stopPlayer:
+			p.portOut.Close()
 			if cmd != nil {
 				stopPortPlayer <- true
 				<-stoppedPortPlayer
+				mx.Lock()
 				cmd = nil
+				mx.Unlock()
 			}
 			p.playerStopped <- true
 			return
@@ -226,22 +241,18 @@ func (p *Player) playThroughPort() {
 				if cmd != nil {
 					stopPortPlayer <- true
 					<-stoppedPortPlayer
+					mx.Lock()
 					cmd = nil
+					mx.Unlock()
 				}
-				var err error
-				cmd, err = player.SMF(p.outFile)
-				if err != nil {
-					fmt.Println("ERROR: could not create smfplayer")
-				} else {
-					go func() {
-						cmd.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
-					}()
-				}
+				startPlayer()
 			} else {
 				if cmd != nil {
 					stopPortPlayer <- true
 					<-stoppedPortPlayer
+					mx.Lock()
 					cmd = nil
+					mx.Unlock()
 				}
 				p.stoppedCh <- true
 			}
@@ -253,7 +264,7 @@ func (p *Player) playOnce(stopPortPlayer chan bool, stoppedPortPlayer chan bool)
 	if p.playToPort {
 		pl, err := player.SMF(p.outFile)
 		if err != nil {
-			fmt.Println("ERROR: could not create smfplayer")
+			fmt.Fprintln(os.Stderr, "ERROR: could not create smfplayer")
 		}
 
 		pl.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)

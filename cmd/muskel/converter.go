@@ -147,13 +147,14 @@ func (c *converter) cmdPlay(sc *score.Score) error {
 
 	if c.player.playerEnabled {
 		var stopPortPlayer = make(chan bool, 1)
-		var portPlayerStopped = make(chan bool, 1)
+		var portPlayerStopped = make(chan bool, 10)
 
 		go func() {
 			// interrupt has happend
 			<-SIGNAL_CHANNEL
 			fmt.Println("\n--interrupted!")
 			if c.player.playToPort {
+				c.player.portOut.Close()
 				stopPortPlayer <- true
 			}
 		}()
@@ -161,6 +162,7 @@ func (c *converter) cmdPlay(sc *score.Score) error {
 		c.player.playOnce(stopPortPlayer, portPlayerStopped)
 		if c.player.playToPort {
 			<-portPlayerStopped
+			c.player.portOut.Close()
 		}
 	}
 

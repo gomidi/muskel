@@ -8,8 +8,14 @@ import (
 	"time"
 
 	//	"github.com/gen2brain/beeep"
+	"gitlab.com/gomidi/midi"
+	driver "gitlab.com/gomidi/midicatdrv"
 	"gitlab.com/metakeule/config"
 )
+
+func newDriver() (midi.Driver, error) {
+	return driver.New()
+}
 
 func (p *Process) Start() error {
 	p.cmd = exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)

@@ -11,9 +11,16 @@ import (
 
 	"unsafe"
 
+	"gitlab.com/gomidi/midi"
+//	driver "gitlab.com/gomidi/rtmididrv"
+	driver "gitlab.com/gomidi/midicatdrv"
 	"gitlab.com/metakeule/config"
 	"golang.org/x/sys/windows"
 )
+
+func newDriver() (midi.Driver, error) {
+	return driver.New()
+}
 
 // see https://gist.github.com/hallazzang/76f3970bfc949831808bbebc8ca15209
 
