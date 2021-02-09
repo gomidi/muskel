@@ -25,6 +25,7 @@ type Track struct {
 	Ambitus            [2]string // notes
 	AmbitusCutOverFlow bool
 	EndPos             uint
+	SoloGroup          int // x < 0 =  never export; x = 0 = no solo group (will only be exported without solo); x > 0 = number of the solo group (only relevant in solo mode)
 }
 
 func New(name string) *Track {
@@ -187,6 +188,21 @@ func (t *Track) SetChannel(data string) error {
 		return fmt.Errorf("can't set MIDI channel for track %q to %v: MIDI channel already set to: %v", t.Name, ch, t.MIDIChannel)
 	}
 
+	return nil
+}
+
+// SetSoloGroup sets the sologroup of a track
+func (t *Track) SetSoloGroup(data string) error {
+	if len(data) == 0 {
+		t.SoloGroup = 0
+		return nil
+	}
+	sg, errC := strconv.Atoi(data)
+	if errC != nil {
+		return fmt.Errorf("%#v is not a valid MIDI channel", data)
+	}
+
+	t.SoloGroup = sg
 	return nil
 }
 

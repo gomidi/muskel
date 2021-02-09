@@ -18,39 +18,6 @@ import (
 	"gitlab.com/gomidi/muskel/tuning"
 )
 
-type Option func(s *Score)
-
-func Column(colname string) Option {
-	return func(s *Score) {
-		s.mainCol = colname
-	}
-}
-
-func Debug() Option {
-	return func(s *Score) {
-		//s.mainCol = colname
-		items.DEBUG = true
-	}
-}
-
-func Sketch(sketchname string) Option {
-	return func(s *Score) {
-		s.mainSketch = sketchname
-	}
-}
-
-func PrintBarComments() Option {
-	return func(s *Score) {
-		s.printBarComments = true
-	}
-}
-
-func NoEmptyLines() Option {
-	return func(s *Score) {
-		s.noEmptyLines = true
-	}
-}
-
 type Score struct {
 	mainFile       string
 	mainSketch     string
@@ -65,6 +32,13 @@ type Score struct {
 	noEmptyLines   bool
 
 	printBarComments bool
+
+	cutout    bool
+	fromBar   uint
+	fromPos   uint
+	toBar     uint
+	toPos     uint
+	soloGroup uint
 
 	Bars     []*items.Bar
 	Parts    map[string][2]uint
@@ -515,6 +489,16 @@ func (sc *Score) Unroll() error {
 				return fmt.Errorf("could not find track %q\n", c)
 			}
 
+			if tr.SoloGroup < 0 {
+				continue
+			}
+
+			if sc.soloGroup > 0 {
+				if uint(tr.SoloGroup) != sc.soloGroup {
+					continue
+				}
+			}
+
 			//fmt.Printf("sketch Column: %q, track: %q\n", c, tr.Name)
 			//fmt.Printf("unrolling column %q track %q of sketch %q with params %v\n", c, tr.Name, sketch.Name, params[c])
 
@@ -528,8 +512,19 @@ func (sc *Score) Unroll() error {
 			sc.Unrolled[tr.Name] = sc.replaceScalenotesForCol(tr.Name, events)
 		}
 
+		// just for imports
 		for trackname, tr := range sc.Tracks {
 			if tr != nil && tr.Import != "" {
+				if tr.SoloGroup < 0 {
+					continue
+				}
+
+				if sc.soloGroup > 0 {
+					if uint(tr.SoloGroup) != sc.soloGroup {
+						continue
+					}
+				}
+
 				events, err := sketch.Unroll(tr, tr.Import, params[trackname]...)
 				if err != nil {
 					return fmt.Errorf("error while unrolling track %q importing %q of sketch %q with params %v: %s", trackname, tr.Import, sketch.Name, params[trackname], err.Error())
@@ -558,12 +553,138 @@ func (sc *Score) Unroll() error {
 	}
 
 	lastBar := sc.Bars[len(sc.Bars)-1]
-
+	var firstBar *items.Bar
 	endPos := lastBar.Position + uint(lastBar.Length32th())
+
+	if sc.cutout {
+		if sc.toBar > 0 && sc.toBar < uint(len(sc.Bars)-1) {
+			lastBar := sc.Bars[sc.toBar]
+			sc.toPos = lastBar.Position
+			endPos = lastBar.Position
+		}
+
+		if sc.fromBar > 0 && sc.fromBar < uint(len(sc.Bars)-1) {
+			firstBar = sc.Bars[sc.fromBar]
+			sc.fromPos = firstBar.Position
+		}
+	}
+
 	for _, tr := range sc.Tracks {
 		tr.EndPos = endPos
 	}
+
+	sc.cutOutUnrolled()
+	sc.cutOutBars()
 	return nil
+}
+
+func (sc *Score) SetStartBar(b uint) {
+	//fmt.Printf("start bar called: %v\n", b)
+	if !sc.cutout || b == 0 {
+		return
+	}
+	//fmt.Printf("start bar set to: %v\n", b)
+	sc.fromBar = uint(b)
+}
+
+func (sc *Score) SetEndBar(b uint) {
+	//fmt.Printf("end bar called: %v\n", b)
+	if !sc.cutout || b == 0 || sc.toBar > 0 {
+		return
+	}
+	//fmt.Printf("end bar set to: %v\n", b)
+	sc.toBar = uint(b)
+}
+
+func (sc *Score) cutOutBars() {
+
+	if !sc.cutout || (sc.fromBar == 0 && sc.toBar == 0) {
+		return
+	}
+	var bars []*items.Bar
+
+	var no int
+
+	lastTimeSig := [2]uint8{4, 4}
+	var lastTempoChange float64 = 120.0
+	var lastScale = &items.Scale{BaseNote: 60, Mode: items.Major}
+	lastScale.Reset()
+
+	for _, bar := range sc.Bars {
+		if bar.TimeSig != lastTimeSig || bar.No == 0 {
+			lastTimeSig = bar.TimeSig
+		}
+		if (bar.TempoChange > 0 && bar.TempoChange != lastTempoChange) || bar.No == 0 {
+			if bar.TempoChange > 0 {
+				lastTempoChange = bar.TempoChange
+			}
+		}
+
+		if ((bar.Scale) != nil && bar.Scale != lastScale) || bar.No == 0 {
+			if bar.Scale != nil {
+				lastScale = bar.Scale
+			}
+		}
+
+		if sc.fromBar > 0 && bar.Position < sc.fromPos {
+			continue
+		}
+
+		if sc.toBar > 0 && bar.Position >= sc.toPos {
+			break
+		}
+
+		bar.No = no
+		if no == 0 {
+			if bar.TimeSig == [2]uint8{0, 0} {
+				bar.TimeSig = lastTimeSig
+			}
+
+			if bar.TempoChange == 0 {
+				bar.TempoChange = lastTempoChange
+			}
+
+			if bar.Scale == nil {
+				bar.Scale = lastScale
+			}
+		}
+		if sc.fromBar > 0 {
+			bar.Position = bar.Position - sc.fromPos
+		}
+		bars = append(bars, bar)
+		no++
+	}
+
+	sc.Bars = bars
+}
+
+func (sc *Score) cutOutUnrolled() {
+	if !sc.cutout || (sc.fromBar == 0 && sc.toBar == 0) {
+		return
+	}
+
+	for col, evts := range sc.Unrolled {
+		var _evts []*items.Event
+
+		for _, ev := range evts {
+			//fmt.Printf("ev position: %v from Pos: %v to pos: %v\n", ev.Position, sc.fromPos, sc.toPos)
+			if sc.fromBar > 0 && ev.Position < sc.fromPos {
+				continue
+			}
+
+			if sc.toBar > 0 && ev.Position >= sc.toPos {
+				continue
+			}
+
+			if sc.fromBar > 0 {
+				ev.Position = ev.Position - sc.fromPos
+			}
+
+			_evts = append(_evts, ev)
+		}
+
+		sc.Unrolled[col] = _evts
+	}
 }
 
 func (sc *Score) WriteUnrolled(wr io.Writer) error {

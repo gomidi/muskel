@@ -24,6 +24,8 @@ type converter struct {
 	Config    struct {
 		PrintBarComments bool
 		Flow             bool
+		CutOut           bool
+		SoloGroup        uint
 		Sketch           string
 		Debug            bool
 		Pattern          string
@@ -79,6 +81,17 @@ func (c *converter) setFromArgs(a *args) {
 	}
 
 	c.Config.Fmt = a.Fmt.Get()
+
+	if a.Solo.IsSet() {
+		sg := a.Solo.Get()
+		if sg > 0 {
+			c.Config.SoloGroup = uint(sg)
+		}
+	}
+
+	if a.CutOut.Get() {
+		c.Config.CutOut = true
+	}
 }
 
 func (c *converter) ScoreOptions() (opts []score.Option) {
@@ -106,6 +119,14 @@ func (c *converter) ScoreOptions() (opts []score.Option) {
 
 	if m.KeepEmptyLines {
 		opts = append(opts, score.NoEmptyLines())
+	}
+
+	if m.SoloGroup > 0 {
+		opts = append(opts, score.SoloGroup(m.SoloGroup))
+	}
+	
+	if m.CutOut {
+		opts = append(opts, score.CutOut())
 	}
 
 	return

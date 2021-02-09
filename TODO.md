@@ -1,10 +1,24 @@
 # TODOs
 
+### nur Ausschnitt exportieren
 
+im Flow modus werden zusätzlich zu den ! score und spalten noch start und end positionen berücksichtig (in nicht flow werden sie 
+einfach ignoriert)
 
-## nächstes
+wenn in einer Taktzeile auf die Raute # ein > folgt, so wird erst ab dieser Zeile in die MIDI-Datei exportiert. dieser Takt wird also zum startpunkt der MIDI-Datei. 
 
-1. normale Markdown-Dateien akzeptieren als input
+wenn es mehrere Zeilen gibt, bei denen auf die Raute ein > folgt, so zählt die letzte dieser Zeilen als Startpunkt
+
+folgt ein _ auf eine Raute, so endet die MIDI-Datei dort. alle noch klingenden Noten werden dort beendet.
+
+wenn es mehrere Stellen mit _ gibt, so zählt die erste Stelle mit _
+
+### nur bestimmte Spuren exportieren
+
+- es gibt eine neue Solo spalte für Tracks. wenn diese eine Zahl > null beinhaltet, so repräsentiert die Zahl die entsprechende 
+  Solo Gruppe. 
+
+- beim Aufruf kann dann als Option eine Sologruppe gewählt werden, welche dann exklusiv exportiert wird.
 
 
 ### parts/sprungmarken
@@ -97,20 +111,8 @@ nicht auch in Zeitposition 2& befinden
 
 dadurch wird =! obsolet und das ! kann für andere Zwecke verwendet werden.
 
-### export auf spalten beschränken, ab einer bestimmten position nur exportieren
 
-wenn in einer Spalte auf das | ein > folgt, so wird diese Spalte eine Solospalte. wenn es mindestens eine Solospalte gibt, wird nur diese in die MIDI-Datei
-exportiert. die anderen Tracks werden zwar in die MIDI-Datei geschrieben, aber ohne Töne (stumm)
 
-wenn in einer Zeile auf das erste | ein > folgt, so wird erst ab dieser Zeile in die MIDI-Datei exportiert. diese Stelle wird also
-zum startpunkt der MIDI-Datei. liegt diese Zeile nicht am Anfang des Taktes, so beginnt der Takt normal in der MIDI-Datei hat aber erst Töne ab der
-entsprechenden Zeitposition im Takt.
-
-wenn es mehrere Zeilen gibt, bei denen auf das erste | ein > folgt, so zählt die letzte dieser Zeilen als Startpunkt
-
-folgt ein _ auf ein |, so endet die MIDI-Datei dort. alle noch klingenden Noten werden dort beendet.
-
-wenn es mehrere Zeilen mit _ gibt, so zählt die erste Zeile mit _
 
 ### sprungmarken können mit pattern modifizierern manipuliert werden
 

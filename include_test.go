@@ -6,6 +6,7 @@ import (
 
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/items"
+	"gitlab.com/gomidi/muskel/score"
 )
 
 func TestInclude(t *testing.T) {
@@ -3403,6 +3404,47 @@ TRACK | Piano | Voc
     2&                   | c     | c   |
 `,
 		},
+		{ // 115 solo < 0
+			`
+
+| TRACK | Piano | Voc |
+| solo  |  -1   |     |
+
+| =SCORE | Piano Voc |
+| #      |           |
+| 1  |  'testdata/includes/score4=.   | 
+`,
+			`
+| =SCORE                  | Piano | Voc |
+| # 4/4 @120.00 \major^c' |       |     |
+|    1                    | e"    | e"  |
+|    2&                   | c     | c   |
+`,
+		},
+		{ // 116 solo < 0
+			`
+'drumnote.drums
+
+| TRACK | Voc | Drums | Piano |
+| solo  | -1  |       |       |
+
+| =SCORE | Voc | Drums | Piano |
+| #   |      |           |       |
+| 1  | a"  | .drums.kd    | b"    |
+| 2& | c   | .drums.sn    | d     |
+| #
+| 1  |     | .drums.ho    |       |
+`,
+			`
+| =SCORE                   | Drums   | Piano |
+| ------------------------ | ------- | ----- |
+|  # 4/4 @120.00 \major^c' |         |       |
+|     1                    | MN36::: | b"    |
+|     2&                   | MN40::: | d     |
+|  #                       |         |       |
+|     1                    | MN46::: |       |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -3463,10 +3505,11 @@ TRACK | Piano | Voc
 			}
 		*/
 
-		if i > 0 {
+		if i > 0 && i < 116 {
 			continue
 		}
-
+		/*
+		 */
 		if skip[i] {
 			continue
 		}
@@ -3513,6 +3556,222 @@ TRACK | Piano | Voc
 
 		//res := strings.Split(result, "=\n")
 		//exp := strings.Split(test.expected, "=\n")
+
+		got := "| =SCORE" + strings.Split(strings.TrimSpace(result), "=SCORE")[1]
+		wanted := strings.TrimSpace(test.expected)
+
+		if got != wanted {
+			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, got, wanted, got, wanted)
+			//      t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
+		}
+	}
+
+	items.DEBUG = false
+}
+
+func TestSolo(t *testing.T) {
+	tests := []struct {
+		sologroupID uint
+		input       string
+		expected    string
+	}{
+		{ // 0
+			1,
+			`
+'drumnote.drums
+
+| TRACK | Voc | Drums | Piano |
+| solo  | 1  |    2   |   1    |
+
+| =SCORE | Voc | Drums | Piano |
+| #   |      |           |       |
+| 1  | a"  | .drums.kd    | b"    |
+| 2& | c   | .drums.sn    | d     |
+| #
+| 1  |     | .drums.ho    |       |
+`,
+			`
+| =SCORE                   | Piano | Voc |
+| ------------------------ | ----- | --- |
+|  # 4/4 @120.00 \major^c' |       |     |
+|     1                    | b"    | a"  |
+|     2&                   | d     | c   |
+|  #                       |       |     |
+`,
+		},
+		{ // 1
+			0,
+			`
+'drumnote.drums
+
+| TRACK | Voc | Drums | Piano |
+| solo  | 1  |    2   |   1    |
+
+|=SCORE | Voc | Drums | Piano |
+|#
+|1  | a"  | .drums.kd    | b"    |
+|2& | c   | .drums.sn    | d     |
+|#
+|1  |     | .drums.ho    |       |
+`,
+			`
+| =SCORE                   | Drums   | Piano | Voc |
+| ------------------------ | ------- | ----- | --- |
+|  # 4/4 @120.00 \major^c' |         |       |     |
+|     1                    | MN36::: | b"    | a"  |
+|     2&                   | MN40::: | d     | c   |
+|  #                       |         |       |     |
+|     1                    | MN46::: |       |     |
+`,
+		},
+	}
+
+	items.DEBUG = false
+
+	skip := map[int]bool{}
+
+	for i, test := range tests {
+
+		/*
+		 */
+		if skip[i] {
+			continue
+		}
+
+		var bf strings.Builder
+
+		err := muskel.Unroll("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.SoloGroup(test.sologroupID))
+
+		if err != nil {
+			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		result := bf.String()
+
+		got := "| =SCORE" + strings.Split(strings.TrimSpace(result), "=SCORE")[1]
+		wanted := strings.TrimSpace(test.expected)
+
+		if got != wanted {
+			t.Errorf("[%v] score\n%s\n\nunrolled gives \n%s\n\nbut this was expected:\n%s\n%q\nvs\n%q\n", i, test.input, got, wanted, got, wanted)
+			//      t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
+		}
+	}
+
+	items.DEBUG = false
+}
+
+func TestStartEnd(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{ // 0
+			`
+'drumnote.drums
+
+| TRACK | Voc | Drums | Piano |
+
+| =SCORE | Voc | Drums | Piano |
+| #   |      |           |       |
+| 1  | a"  | .drums.kd    | g"    |
+| 2& | d   | .drums.sn    | d     |
+| #>   |      |           |       |
+| 1  | a"  | .drums.kd    | b"    |
+| 2& | c   | .drums.sn    | d     |
+| #
+| 1  |     | .drums.ho    |       |
+`,
+			`
+| =SCORE                    | Drums   | Piano | Voc |
+| ------------------------- | ------- | ----- | --- |
+|  #> 4/4 @120.00 \major^c' |         |       |     |
+|     1                     | MN36::: | b"    | a"  |
+|     2&                    | MN40::: | d     | c   |
+|  #                        |         |       |     |
+|     1                     | MN46::: |       |     |
+`,
+		},
+		{ // 1
+			`
+'drumnote.drums
+
+| TRACK | Voc | Drums | Piano |
+| solo  | 1  |    2   |   1    |
+
+|=SCORE | Voc | Drums | Piano |
+|#
+|1  | a"  | .drums.kd    | b"    |
+|2& | c   | .drums.sn    | d     |
+|#_ |    |               |       |
+|1  | f"  | .drums.kd    | g"    |
+|2& | c   | .drums.sn    | d     |
+|#
+|1  |     | .drums.ho    |       |
+`,
+			`
+| =SCORE                   | Drums   | Piano | Voc |
+| ------------------------ | ------- | ----- | --- |
+|  # 4/4 @120.00 \major^c' |         |       |     |
+|     1                    | MN36::: | b"    | a"  |
+|     2&                   | MN40::: | d     | c   |
+`,
+		},
+		{ // 2
+			`
+'drumnote.drums
+
+| TRACK | Voc | Drums | Piano |
+
+| =SCORE | Voc | Drums | Piano |
+| #   |      |           |       |
+| 1  | a"  | .drums.kd    | g"    |
+| 2& | d   | .drums.sn    | d     |
+| #   |      |           |       |
+| 1  | a"  | .drums.kd    | g"    |
+| 2& | d   | .drums.sn    | d     |
+| #>   |      |           |       |
+| 1  | a"  | .drums.kd    | b"    |
+| 2& | c   | .drums.sn    | d     |
+| #
+| 1  |     | .drums.ho    |       |
+`,
+			`
+| =SCORE                    | Drums   | Piano | Voc |
+| ------------------------- | ------- | ----- | --- |
+|  #> 4/4 @120.00 \major^c' |         |       |     |
+|     1                     | MN36::: | b"    | a"  |
+|     2&                    | MN40::: | d     | c   |
+|  #                        |         |       |     |
+|     1                     | MN46::: |       |     |
+`,
+		},
+	}
+
+	items.DEBUG = false
+
+	skip := map[int]bool{
+		// 2: true,
+	}
+
+	for i, test := range tests {
+
+		/*
+		 */
+		if skip[i] {
+			continue
+		}
+
+		var bf strings.Builder
+
+		err := muskel.Unroll("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.CutOut())
+
+		if err != nil {
+			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
+			continue
+		}
+
+		result := bf.String()
 
 		got := "| =SCORE" + strings.Split(strings.TrimSpace(result), "=SCORE")[1]
 		wanted := strings.TrimSpace(test.expected)

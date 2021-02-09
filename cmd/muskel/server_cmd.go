@@ -3,13 +3,77 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
+	"strconv"
+	"sync"
 
 	"gitlab.com/metakeule/config"
 )
 
 type server struct {
+	mx        sync.Mutex
 	converter *converter
+}
+
+func (s *server) setSoloGroup(vals url.Values) error {
+	s.mx.Lock()
+	defer s.mx.Unlock()
+	gr := vals.Get("solo")
+	if len(gr) == 0 {
+		s.converter.Config.SoloGroup = 0
+		return nil
+	}
+	i, err := strconv.Atoi(gr)
+	if err != nil {
+		return err
+	}
+	if i <= 0 {
+		s.converter.Config.SoloGroup = 0
+		return nil
+	}
+	s.converter.Config.SoloGroup = uint(i)
+	return nil
+}
+
+func (s *server) SoloGroup(wr http.ResponseWriter, r *http.Request) {
+	vals := r.URL.Query()
+	err := s.setSoloGroup(vals)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+		wr.WriteHeader(http.StatusInternalServerError)
+		wr.Write([]byte("error: " + err.Error()))
+		return
+	}
+	wr.Write([]byte("solo set"))
+}
+
+func (s *server) setCutout(vals url.Values) error {
+	s.mx.Lock()
+	defer s.mx.Unlock()
+	gr := vals.Get("cutout")
+	if len(gr) == 0 {
+		s.converter.Config.SoloGroup = 0
+		return nil
+	}
+	b, err := strconv.ParseBool(gr)
+	if err != nil {
+		return err
+	}
+	s.converter.Config.CutOut = b
+	return nil
+}
+
+func (s *server) CutOut(wr http.ResponseWriter, r *http.Request) {
+	vals := r.URL.Query()
+	err := s.setCutout(vals)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+		wr.WriteHeader(http.StatusInternalServerError)
+		wr.Write([]byte("error: " + err.Error()))
+		return
+	}
+	wr.Write([]byte("cutout set"))
 }
 
 func (s *server) Play(wr http.ResponseWriter, r *http.Request) {
@@ -43,6 +107,8 @@ func (s *server) Toggle(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) convert() error {
+	s.mx.Lock()
+	defer s.mx.Unlock()
 	sc, err := s.converter.parseMuskel(s.converter.inFile)
 	if err != nil {
 		alert("ERROR: ", err)
@@ -85,6 +151,8 @@ func startServer(conv *converter) error {
 	http.HandleFunc("/stop", s.Stop)
 	http.HandleFunc("/toggle", s.Toggle)
 	http.HandleFunc("/convert", s.Convert)
+	http.HandleFunc("/solo", s.SoloGroup)
+	http.HandleFunc("/cutout", s.CutOut)
 	fmt.Printf("starting server on %q\n", addr)
 	return http.ListenAndServe(addr, nil)
 }

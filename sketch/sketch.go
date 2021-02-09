@@ -300,6 +300,14 @@ func (p *Sketch) parseBarLine(data string) error {
 		return nil
 	}
 
+	if len(data) > 1 && data[1] == '>' {
+		p.Score.SetStartBar(uint(p.currentBarNo + 1))
+	}
+
+	if len(data) > 1 && data[1] == '_' {
+		p.Score.SetEndBar(uint(p.currentBarNo + 1))
+	}
+
 	if reference.IsReference(data) {
 		//fmt.Printf("is reference %q\n", data)
 		r, err := reference.Parse(data)

@@ -18,4 +18,6 @@ type Score interface {
 	FilterTrack(colName string, events []*items.Event) []*items.Event
 	Properties() map[string]interface{}
 	Lyric(part string, fromLine, toLine int) (tokens []string, err error)
+	SetStartBar(uint)
+	SetEndBar(uint)
 }
