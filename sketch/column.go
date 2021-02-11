@@ -253,7 +253,8 @@ func (c *column) Call(originalEndPos uint, syncFirst bool, params ...string) (ev
 
 	col, has := s.Columns[c.name]
 	if !has {
-		err = fmt.Errorf("has no column: %q\n", col)
+		//panic("has no column: " + c.name)
+		//err = fmt.Errorf("has no column: %q\n", col)
 		return
 	}
 

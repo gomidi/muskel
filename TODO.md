@@ -1,24 +1,16 @@
 # TODOs
 
-### nur Ausschnitt exportieren
+## wichtigste bugs, zuerst zu fixen:
+1. Gruppenspalten:
+	1. wenn ein track einer gruppenspalte im include nicht vorhanden ist, gibt es einen fehler. diese spalte sollte
+  	   stattdessen ignoriert werden
+	2. wenn auf eine gruppenspalte eine normale spalte folgt, kann diese nicht ordentlich geparst werden (panic)
+	3. gruppenspalten sollten mehr als ein Leerzeichen als trenner haben können (zusätzliche Leerzeichen sollten ignoriert werden)
+	4. gruppenspaltenbezüge funktionieren nicht innerhalb der gleichen datei mit einfach =something. stattdessen muss der 
+	   dateiname vorangestellt werden. besser wäre es, der dateiname wäre nicht nötig, wenn es sich um die gleiche Datei handelt.
+2. inkludieren von Dateien:
+	- zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden (../somthing)
 
-im Flow modus werden zusätzlich zu den ! score und spalten noch start und end positionen berücksichtig (in nicht flow werden sie 
-einfach ignoriert)
-
-wenn in einer Taktzeile auf die Raute # ein > folgt, so wird erst ab dieser Zeile in die MIDI-Datei exportiert. dieser Takt wird also zum startpunkt der MIDI-Datei. 
-
-wenn es mehrere Zeilen gibt, bei denen auf die Raute ein > folgt, so zählt die letzte dieser Zeilen als Startpunkt
-
-folgt ein _ auf eine Raute, so endet die MIDI-Datei dort. alle noch klingenden Noten werden dort beendet.
-
-wenn es mehrere Stellen mit _ gibt, so zählt die erste Stelle mit _
-
-### nur bestimmte Spuren exportieren
-
-- es gibt eine neue Solo spalte für Tracks. wenn diese eine Zahl > null beinhaltet, so repräsentiert die Zahl die entsprechende 
-  Solo Gruppe. 
-
-- beim Aufruf kann dann als Option eine Sologruppe gewählt werden, welche dann exklusiv exportiert wird.
 
 
 ### parts/sprungmarken
@@ -545,8 +537,6 @@ inhalt von main.mskl
 hier wird für den zweiten Takt der partname OUTRO verwendet, das Tempo aber dennoch auf 60 bpm geändert
 
 ### andere bugs:
-- wenn auf eine gruppenspalte eine normale spalte folgt, kann diese nicht ordentlich geparst werden (panic)
-- zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden
 
 
 - außerdem wäre es nützlich, eine option zu haben, um in einer spalte die töne durch midi notes zu ersetzen, etwa, wenn der spaltenname auf # endet
@@ -798,6 +788,27 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
 # erledigt
 
 - we need a formatting option to delete empty lines
+
+### nur Ausschnitt exportieren
+
+im Flow modus werden zusätzlich zu den ! score und spalten noch start und end positionen berücksichtig (in nicht flow werden sie 
+einfach ignoriert)
+
+wenn in einer Taktzeile auf die Raute # ein > folgt, so wird erst ab dieser Zeile in die MIDI-Datei exportiert. dieser Takt wird also zum startpunkt der MIDI-Datei. 
+
+wenn es mehrere Zeilen gibt, bei denen auf die Raute ein > folgt, so zählt die letzte dieser Zeilen als Startpunkt
+
+folgt ein _ auf eine Raute, so endet die MIDI-Datei dort. alle noch klingenden Noten werden dort beendet.
+
+wenn es mehrere Stellen mit _ gibt, so zählt die erste Stelle mit _
+
+### nur bestimmte Spuren exportieren
+
+- es gibt eine neue Solo spalte für Tracks. wenn diese eine Zahl > null beinhaltet, so repräsentiert die Zahl die entsprechende 
+  Solo Gruppe. 
+
+- beim Aufruf kann dann als Option eine Sologruppe gewählt werden, welche dann exklusiv exportiert wird.
+
 
 ### big table rewrite -> markdown tables
 - erste spalte von tabelle beginnt immer mit `|` die zweite zeile kann `|---|---|` etc enthalten. 

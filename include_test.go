@@ -3421,7 +3421,24 @@ TRACK | Piano | Voc
 |    2&                   | c     | c   |
 `,
 		},
-		{ // 116 solo < 0
+		{ // 116
+			`
+
+| TRACK | Piano | Voc | Keys |
+
+| =SCORE | Piano Voc Keys |
+| #      |           |
+| 1  |  'testdata/includes/score4=.   | 
+`,
+			`
+| =SCORE                   | Keys | Piano | Voc |
+| ------------------------ | ---- | ----- | --- |
+|  # 4/4 @120.00 \major^c' |      |       |     |
+|     1                    |      | e"    | F   |
+|     2&                   |      | c     |     |
+`,
+		},
+		{ // 117 solo < 0
 			`
 'drumnote.drums
 
