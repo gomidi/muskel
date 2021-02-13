@@ -210,7 +210,23 @@ func (t *Table) _writeFirstLine(f Formatter, skipName bool) {
 	}
 
 	for i, c := range t.cols {
-		s.WriteString(t.separator() + t.Pad(i+1, c))
+
+		if cls := strings.Split(strings.TrimSpace(c), " "); len(cls) > 1 {
+			var cls2 []string
+
+			for _, cc := range cls {
+				_cc := strings.TrimSpace(cc)
+
+				if _cc == "" {
+					continue
+				}
+
+				cls2 = append(cls2, _cc)
+			}
+			s.WriteString(t.separator() + t.Pad(i+1, strings.Join(cls2, " ")))
+		} else {
+			s.WriteString(t.separator() + t.Pad(i+1, c))
+		}
 	}
 
 	s.WriteString(t.separator())

@@ -165,6 +165,8 @@ func (s *Sketch) getBarIdxOf(pos uint) (baridx int) {
 func (s *Sketch) parseEvents(column string, syncFirst bool, data []string, origEndPos uint) (es *items.EventStream, err error) {
 	es = &items.EventStream{}
 
+	//fmt.Printf("file %q sketch %q parseEvents col %q data: %#v\n", s.File, s.Name, column, data)
+
 	var lastNoRestItem items.Item
 
 	for _, dat := range data {
@@ -983,24 +985,31 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 		return err
 	}
 
-	for i, data := range colsData {
+	//fmt.Printf("colsData: %#v colOrder: %#v\n", colsData, s.colOrder)
 
-		if i < len(s.colOrder) {
+	var igrpOffset int
 
-			//if s.
-			var cls = []string{s.colOrder[i]}
+	for j, data := range colsData {
 
-			if subs, has := s.GroupCols[i]; has {
-				cls = subs
-			}
+		i := j + igrpOffset
 
+		if j < len(s.colOrder) {
 			data = strings.TrimSpace(data)
 
-			for _, c := range cls {
-				if s.isScore() && !s.Score.HasTrack(c) {
-					return fmt.Errorf("there is no track with the name %q", c)
+			if subs, has := s.GroupCols[i]; has {
+				for _, c := range subs {
+					if s.isScore() && !s.Score.HasTrack(c) {
+						return fmt.Errorf("there is no track with the name %q", c)
+					}
+					s.Columns[c] = append(s.Columns[c], data)
 				}
-				s.Columns[c] = append(s.Columns[c], data)
+
+				igrpOffset += len(subs) - 1
+			} else {
+				if s.isScore() && !s.Score.HasTrack(s.colOrder[i]) {
+					return fmt.Errorf("there is no track with the name %q", s.colOrder[i])
+				}
+				s.Columns[s.colOrder[i]] = append(s.Columns[s.colOrder[i]], data)
 			}
 		}
 	}

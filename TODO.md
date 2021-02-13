@@ -1,16 +1,9 @@
 # TODOs
 
 ## wichtigste bugs, zuerst zu fixen:
-1. Gruppenspalten:
-	1. wenn ein track einer gruppenspalte im include nicht vorhanden ist, gibt es einen fehler. diese spalte sollte
-  	   stattdessen ignoriert werden
-	2. wenn auf eine gruppenspalte eine normale spalte folgt, kann diese nicht ordentlich geparst werden (panic)
-	3. gruppenspalten sollten mehr als ein Leerzeichen als trenner haben können (zusätzliche Leerzeichen sollten ignoriert werden)
-	4. gruppenspaltenbezüge funktionieren nicht innerhalb der gleichen datei mit einfach =something. stattdessen muss der 
-	   dateiname vorangestellt werden. besser wäre es, der dateiname wäre nicht nötig, wenn es sich um die gleiche Datei handelt.
-2. inkludieren von Dateien:
-	- zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden (../somthing)
-
+- gruppenspaltenbezüge funktionieren nicht innerhalb der gleichen datei mit einfach =something. stattdessen muss der 
+  dateiname vorangestellt werden. besser wäre es, der dateiname wäre nicht nötig, wenn es sich um die gleiche Datei handelt.
+- zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden (../somthing)
 
 
 ### parts/sprungmarken

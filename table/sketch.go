@@ -21,16 +21,21 @@ func (s *Sketch) addCols() {
 	for i, name := range s.Table.Cols() {
 		cols := strings.Split(strings.TrimSpace(name), " ")
 
-		var subCols []string
+		if len(cols) > 1 {
+			var subCols []string
 
-		for _, cl := range cols {
-			cl = strings.TrimSpace(cl)
-			subCols = append(subCols, cl)
-			s.sketch.AddColumn(cl)
-		}
+			for _, cl := range cols {
+				cl = strings.TrimSpace(cl)
+				if cl == "" {
+					continue
+				}
+				subCols = append(subCols, cl)
+				s.sketch.AddColumn(cl)
+			}
 
-		if len(subCols) > 1 {
 			s.sketch.SetGroupCol(i, subCols)
+		} else {
+			s.sketch.AddColumn(strings.TrimSpace(name))
 		}
 	}
 }

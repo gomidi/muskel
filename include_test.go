@@ -3438,7 +3438,41 @@ TRACK | Piano | Voc
 |     2&                   |      | c     |     |
 `,
 		},
-		{ // 117 solo < 0
+		{ // 117
+			`
+
+| TRACK | Piano | Voc | Keys |
+
+| =SCORE | Piano Voc                   | Keys |
+| #      |                             |      |
+| 1      | 'testdata/includes/score4=. | b':  |
+`,
+			`
+| =SCORE                   | Keys | Piano | Voc |
+| ------------------------ | ---- | ----- | --- |
+|  # 4/4 @120.00 \major^c' |      |       |     |
+|     1                    | b':  | e"    | F   |
+|     2&                   |      | c     |     |
+`,
+		},
+		{ // 118
+			`
+
+| TRACK | Piano | Voc | Keys |
+
+| =SCORE | Piano   Voc                   | Keys |
+| #      |                             |      |
+| 1      | 'testdata/includes/score4=. | b':  |
+`,
+			`
+| =SCORE                   | Keys | Piano | Voc |
+| ------------------------ | ---- | ----- | --- |
+|  # 4/4 @120.00 \major^c' |      |       |     |
+|     1                    | b':  | e"    | F   |
+|     2&                   |      | c     |     |
+`,
+		},
+		{ // 119 solo < 0
 			`
 'drumnote.drums
 

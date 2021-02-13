@@ -664,6 +664,24 @@ X     | c' | d' |
 |  # 4/4 @120 // ## | voc | bass |
 |     2             | d'  |      |
 `},
+		// 22
+		{`
+| TRACK | Piano | Voc | Keys |
+| ch | 1 | 2 | 3 |
+
+| =SCORE | Piano   Voc                 | Keys |
+| #      |                             |      |
+| 1      | 'testdata/includes/score4=. | b':  |
+`, `
+| TRACK    | Piano | Voc | Keys |
+| -------- | ----- | --- | ---- |
+|  ch      | 1     | 2   | 3    |
+
+| =SCORE   | Piano Voc                   | Keys |
+| -------- | --------------------------- | ---- |
+|  #       |                             |      |
+|     1    | 'testdata/includes/score4=. | b':  |
+`},
 	}
 
 	items.DEBUG = false
