@@ -3496,6 +3496,45 @@ TRACK | Piano | Voc
 |     1                    | MN46::: |       |
 `,
 		},
+		{ // 120
+			`
+
+| TRACK | Piano | Voc | Keys | other |
+
+| =SCORE | Keys other Piano   Voc            |
+| #      |                             |
+| 1      | 'testdata/includes/score4=. |
+`,
+			`
+| =SCORE                   | Keys | Piano | Voc | other |
+| ------------------------ | ---- | ----- | --- | ----- |
+|  # 4/4 @120.00 \major^c' |      |       |     |       |
+|     1                    |      | e"    | F   |       |
+|     2&                   |      | c     |     |       |
+`,
+		},
+		{ // 121
+			`
+
+| TRACK | Piano | Voc | Xylophon |
+
+| =SCORE | Piano  Xylophon Voc                |
+| #      |                             |
+| 1      | 'testdata/includes/score4=. |
+| #      |                             |
+| 1      | 'testdata/includes/score5=. |
+`,
+			`
+| =SCORE                   | Piano | Voc | Xylophon |
+| ------------------------ | ----- | --- | -------- |
+|  # 4/4 @120.00 \major^c' |       |     |          |
+|     1                    | e"    | F   |          |
+|     2&                   | c     |     |          |
+|  #                       |       |     |          |
+|     1                    | d"    | C   |          |
+|     2&                   | e     |     | g"       |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
