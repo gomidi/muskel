@@ -10,6 +10,12 @@ require (
 	gitlab.com/metakeule/config v1.18.9
 	golang.org/x/sys v0.0.0-20201211090839-8ad439b19e0f
 	gopkg.in/fsnotify.v1 v1.4.7 // indirect
+	gitlab.com/gomidi/muskel/csv v1.2.4
+	gitlab.com/gomidi/muskel/xlsx v1.2.4
 )
 
-replace gitlab.com/gomidi/muskel => ../../
+replace (
+    gitlab.com/gomidi/muskel => ../../
+	gitlab.com/gomidi/muskel/csv => ../../csv
+	gitlab.com/gomidi/muskel/xlsx => ../../xlsx
+)

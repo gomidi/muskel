@@ -28,6 +28,12 @@ type File struct {
 	output                  io.Writer
 }
 
+func (f *File) SetFileInfos(file *os.File, fpath string) {
+	f.file = file
+	f.dir = filepath.Dir(fpath)
+	f.name = filepath.Base(fpath)
+}
+
 func (f *File) Name() string {
 	return filepath.Join(f.dir, f.name)
 }

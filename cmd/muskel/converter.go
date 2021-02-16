@@ -33,6 +33,8 @@ type converter struct {
 		Params           []string
 		UnrollFile       string
 		Fmt              bool
+		CSV              string
+		XLSX             bool
 	}
 }
 
@@ -82,6 +84,23 @@ func (c *converter) setFromArgs(a *args) {
 
 	c.Config.Fmt = a.Fmt.Get()
 
+	if a.CSV.IsSet() {
+		csv := a.CSV.Get()
+		if len(csv) == 0 {
+			csv = ";"
+		}
+		c.Config.CSV = csv
+		// never fmt when in csv
+		c.Config.Fmt = false
+	}
+
+	if a.XLSX.Get() {
+		c.Config.XLSX = true
+		c.Config.CSV = ""
+		// never fmt when in csv
+		c.Config.Fmt = false
+	}
+
 	if a.Solo.IsSet() {
 		sg := a.Solo.Get()
 		if sg > 0 {
@@ -124,9 +143,17 @@ func (c *converter) ScoreOptions() (opts []score.Option) {
 	if m.SoloGroup > 0 {
 		opts = append(opts, score.SoloGroup(m.SoloGroup))
 	}
-	
+
 	if m.CutOut {
 		opts = append(opts, score.CutOut())
+	}
+
+	if m.CSV != "" {
+		opts = append(opts, score.CSV(rune(m.CSV[0])))
+	}
+
+	if m.XLSX {
+		opts = append(opts, score.XLSX())
 	}
 
 	return
@@ -205,7 +232,7 @@ func (c *converter) mkcallback() (callback func(dir, file string) error) {
 }
 
 func (c *converter) prepare(dir, file string) error {
-	if filepath.Ext(file) != muskel.FILE_EXTENSION {
+	if filepath.Ext(file) != muskel.FILE_EXTENSION && !ARGS.CSV.IsSet() && !ARGS.XLSX.Get() {
 		return nil
 	}
 

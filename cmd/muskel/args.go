@@ -8,6 +8,8 @@ import (
 type args struct {
 	*config.Config
 	File                config.StringGetter
+	CSV                 config.StringGetter
+	XLSX                config.BoolGetter
 	IgnoreMuskelVersion config.BoolGetter
 	Sketch              config.StringGetter
 	Flow                config.BoolGetter
@@ -39,6 +41,8 @@ func (a *args) init() {
 
 	// the main argument set
 	a.File = a.LastString("file", "path of the muskel file", config.Required)
+	a.CSV = a.NewString("csv", "reads the file in csv mode and uses the given string as seperator. If the seperator is set to the empty string, ';' is used as field seperator.")
+	a.XLSX = a.NewBool("xlsx", "reads the file as xlsx file")
 	a.IgnoreMuskelVersion = a.NewBool("current", "use the current version of the muskel command and ignore the "+muskel.MUSKEL_VERSION_FILE+" file", config.Default(false), config.Shortflag('c'))
 	a.Sketch = a.NewString("sketch", "name of the sketch table", config.Shortflag('s'), config.Default("=SCORE"))
 	a.Flow = a.NewBool("flow", "flow mode; sets sketch to ! and pattern to !", config.Default(false))

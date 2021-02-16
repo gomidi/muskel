@@ -48,3 +48,16 @@ func SoloGroup(groupID uint) Option {
 		s.soloGroup = groupID
 	}
 }
+
+func CSV(seperator rune) Option {
+	return func(s *Score) {
+		s.csv = true
+		s.csvSeperator = seperator
+	}
+}
+
+func XLSX() Option {
+	return func(s *Score) {
+		s.xlsx = true
+	}
+}
