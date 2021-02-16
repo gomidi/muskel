@@ -54,8 +54,15 @@ func run() error {
 	}
 
 	// when using markdown files, set the file extension properly (affects includes!)
-	if filepath.Ext(ARGS.File.Get()) == ".md" {
+	switch filepath.Ext(ARGS.File.Get()) {
+	case ".md":
 		muskel.FILE_EXTENSION = ".md"
+	case ".csv":
+		muskel.FILE_EXTENSION = ".csv"
+	case ".xlsx":
+		muskel.FILE_EXTENSION = ".xlsx"
+	default:
+		muskel.FILE_EXTENSION = ".mskl"
 	}
 
 	// listen for ctrl+c

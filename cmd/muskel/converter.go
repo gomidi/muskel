@@ -84,19 +84,14 @@ func (c *converter) setFromArgs(a *args) {
 
 	c.Config.Fmt = a.Fmt.Get()
 
-	if a.CSV.IsSet() {
-		csv := a.CSV.Get()
-		if len(csv) == 0 {
-			csv = ";"
-		}
-		c.Config.CSV = csv
+	if filepath.Ext(a.File.Get()) == ".csv" {
+		c.Config.CSV = a.CSVSeparator.Get()
 		// never fmt when in csv
 		c.Config.Fmt = false
 	}
 
-	if a.XLSX.Get() {
+	if filepath.Ext(a.File.Get()) == ".xlsx" {
 		c.Config.XLSX = true
-		c.Config.CSV = ""
 		// never fmt when in csv
 		c.Config.Fmt = false
 	}
@@ -232,7 +227,8 @@ func (c *converter) mkcallback() (callback func(dir, file string) error) {
 }
 
 func (c *converter) prepare(dir, file string) error {
-	if filepath.Ext(file) != muskel.FILE_EXTENSION && !ARGS.CSV.IsSet() && !ARGS.XLSX.Get() {
+
+	if filepath.Ext(file) != muskel.FILE_EXTENSION {
 		return nil
 	}
 
