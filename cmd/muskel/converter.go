@@ -260,7 +260,7 @@ func (c *converter) prepare(dir, file string) error {
 	c.checksums[filep] = newChecksum
 
 	if ARGS.WatchDir.Get() {
-		if filep != c.inFilep {
+		if filep != c.inFilep && c.Config.Fmt {
 			c.ignore[filep] = true
 			c.fmtFile(filep, c.Config.Params, c.ScoreOptions()...)
 			c.ignore[filep] = false
