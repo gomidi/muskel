@@ -15,4 +15,5 @@ gitlab.com/metakeule/config v1.18.8 h1:xs1uCsUr277bla8BwRLd7JdTHtFzKdyFhgAke5Xto
 gitlab.com/metakeule/config v1.18.8/go.mod h1:glEQ76SztqrtydnmgxvrlTtN9BBmgM0lNy7/S2eiZbw=
 gitlab.com/metakeule/fmtdate v1.2.0 h1:MCtqJiTO3j8yTn28aJvgvQy63f1DsjTj702f7TGaFOk=
 gitlab.com/metakeule/fmtdate v1.2.0/go.mod h1:uZUf21xepWGLp6PgJGBbHeBVWO+/gsKi3Gdh0Fu4lGg=
+golang.org/x/sys v0.0.0-20201211090839-8ad439b19e0f h1:QdHQnPce6K4XQewki9WNbG5KOROuDzqO3NaYjI1cXJ0=
 golang.org/x/sys v0.0.0-20201211090839-8ad439b19e0f/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
