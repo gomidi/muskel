@@ -156,7 +156,7 @@ func (c *converter) ScoreOptions() (opts []score.Option) {
 }
 
 func (c *converter) cmdSMF(sc *score.Score) error {
-	if ARGS.Fmt.Get() {
+	if c.Config.Fmt {
 		c.fmtFile(c.inFile, c.Config.Params, c.ScoreOptions()...)
 	}
 
