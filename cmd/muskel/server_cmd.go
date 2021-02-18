@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"sync"
 
+	"gitlab.com/gomidi/muskel"
 	"gitlab.com/metakeule/config"
 )
 
@@ -139,8 +140,12 @@ func startServer(conv *converter) error {
 	}
 
 	s.converter.setFromArgs(ARGS)
-	s.converter.Config.Fmt = true
-	s.converter.Config.UnrollFile = s.converter.inFile + ".unrolled.mskl"
+	if !s.converter.Config.XLSX && s.converter.Config.CSV == "" {
+		s.converter.Config.Fmt = true
+	}
+	if s.converter.Config.UnrollFile == "" {
+		s.converter.Config.UnrollFile = s.converter.inFile + ".unrolled" + muskel.FILE_EXTENSION
+	}
 	s.converter.Config.Flow = true
 	s.converter.Config.KeepEmptyLines = true
 	s.converter.Config.Debug = false

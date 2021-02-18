@@ -84,13 +84,13 @@ func (c *converter) setFromArgs(a *args) {
 
 	c.Config.Fmt = a.Fmt.Get()
 
-	if filepath.Ext(a.File.Get()) == ".csv" {
+	if muskel.FILE_EXTENSION == ".csv" {
 		c.Config.CSV = a.CSVSeparator.Get()
 		// never fmt when in csv
 		c.Config.Fmt = false
 	}
 
-	if filepath.Ext(a.File.Get()) == ".xlsx" {
+	if muskel.FILE_EXTENSION == ".xlsx" {
 		c.Config.XLSX = true
 		// never fmt when in csv
 		c.Config.Fmt = false
@@ -313,6 +313,9 @@ func (c *converter) parseMuskel(srcFile string) (*score.Score, error) {
 }
 
 func (c *converter) fmtFile(file string, params []string, opts ...score.Option) error {
+	if !c.Config.Fmt {
+		return nil
+	}
 	sc, err := muskel.ParseFile(file, params, opts...)
 
 	if err != nil {
