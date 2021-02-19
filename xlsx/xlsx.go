@@ -2,6 +2,7 @@ package xlsx
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
 	"gitlab.com/gomidi/muskel/csv"
@@ -10,6 +11,43 @@ import (
 type file struct {
 	rd     csv.Reader
 	record []string
+}
+
+func Write(path string, tracksTable string, scoreTable string) error {
+	xl := excelize.NewFile()
+	xl.SetSheetName("Sheet1", "TRACK")
+
+	trLines := strings.Split(tracksTable, "\n")
+	writeLines(xl, "TRACK", trLines)
+
+	sc := xl.NewSheet("SCORE")
+	scLines := strings.Split(scoreTable, "\n")
+	writeLines(xl, "SCORE", scLines)
+
+	xl.SetActiveSheet(sc)
+
+	return xl.SaveAs(path)
+}
+
+func writeLines(xl *excelize.File, sheet string, lines []string) {
+	rcorr := 0
+
+	for r, line := range lines {
+		if isMarkdownDashLine(line) {
+			rcorr--
+			continue
+		}
+
+		cols := strings.Split(line, "|")
+		if len(cols) > 1 {
+			for c, col := range cols[1:] {
+				xl.SetCellStr(sheet, positionToAxis(r+rcorr, c), strings.TrimSpace(col))
+			}
+		} else {
+			xl.SetCellStr(sheet, positionToAxis(r+rcorr, 0), strings.TrimSpace(line))
+		}
+	}
+
 }
 
 func Read(path string) (mskl string, err error) {

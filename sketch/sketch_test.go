@@ -459,6 +459,12 @@ func (t testScore) FilterTrack(s string, ev []*items.Event) []*items.Event {
 	return ev
 }
 
+func (t testScore) SetEndBar(uint) {
+}
+
+func (t testScore) SetStartBar(uint) {
+}
+
 func (t testScore) GetExternalSketch(filename, sketch_table string, params []string) (*Sketch, error) {
 	return nil, fmt.Errorf("external sketch %q not found in file %q", sketch_table, filename)
 }

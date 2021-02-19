@@ -7,10 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"bytes"
+
 	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/score"
+	"gitlab.com/gomidi/muskel/xlsx"
 )
 
 type converter struct {
@@ -353,9 +356,18 @@ func (c *converter) writeUnrolled(file string, sc *score.Score) error {
 		return err
 	}
 	defer uf.Close()
-	err = sc.WriteUnrolled(uf)
-	if err != nil {
-		return err
+	if filepath.Ext(file) == ".xlsx" {
+		var tracksbf, scorebf bytes.Buffer
+		err = sc.WriteUnrolled2(&tracksbf, &scorebf)
+		if err != nil {
+			return err
+		}
+		return xlsx.Write(file, tracksbf.String(), scorebf.String())
+	} else {
+		err = sc.WriteUnrolled(uf)
+		if err != nil {
+			return err
+		}
+		return nil
 	}
-	return nil
 }

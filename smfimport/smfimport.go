@@ -87,6 +87,24 @@ func (c *Importer) WriteMsklTo(wr io.Writer, opts ...Option) error {
 	return c.score.WriteUnrolled(wr)
 }
 
+func (c *Importer) WriteMsklTo2(trackswr, scorewr io.Writer, opts ...Option) error {
+	//fmt.Printf("monoTracks: %v\n", monoTracks)
+	for _, opt := range opts {
+		opt(c)
+	}
+
+	err := c.readSMF()
+	if err != nil {
+		return err
+	}
+	c.setTracks()
+	c.setBars()
+	c.setMarkers()
+	c.setTempos()
+	c.score.IsUnrolled = true
+	return c.score.WriteUnrolled2(trackswr, scorewr)
+}
+
 func (c *Importer) readSMF() error {
 	innerrd := smfreader.New(c.src)
 	err := reader.ReadSMFFrom(c.rd, innerrd)

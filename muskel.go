@@ -1,6 +1,7 @@
 package muskel
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -13,6 +14,7 @@ import (
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/smf"
 	"gitlab.com/gomidi/muskel/smfimport"
+	"gitlab.com/gomidi/muskel/xlsx"
 	"gitlab.com/metakeule/config"
 )
 
@@ -48,15 +50,25 @@ func Import(srcFile string, targetFile string, monoTracks []int, drumTracks []in
 
 	im := smfimport.New(srcFile, fh)
 
-	tg, err := os.Create(targetFile)
+	if filepath.Ext(targetFile) == ".xlsx" {
+		var tracksbf, scorebf bytes.Buffer
+		err := im.WriteMsklTo2(&tracksbf, &scorebf, smfimport.MonoTracks(monoTracks...), smfimport.DrumTracks(drumTracks...))
+		if err != nil {
+			return fmt.Errorf("can't import from %q: %s", srcFile, err.Error())
+		}
+		return xlsx.Write(targetFile, tracksbf.String(), scorebf.String())
+	} else {
 
-	if err != nil {
-		return fmt.Errorf("can't create file %q: %s", targetFile, err.Error())
+		tg, err := os.Create(targetFile)
+
+		if err != nil {
+			return fmt.Errorf("can't create file %q: %s", targetFile, err.Error())
+		}
+
+		defer tg.Close()
+
+		return im.WriteMsklTo(tg, smfimport.MonoTracks(monoTracks...), smfimport.DrumTracks(drumTracks...))
 	}
-
-	defer tg.Close()
-
-	return im.WriteMsklTo(tg, smfimport.MonoTracks(monoTracks...), smfimport.DrumTracks(drumTracks...))
 }
 
 func newFile(filename string, params []string, rd io.Reader, opts ...score.Option) *file.File {

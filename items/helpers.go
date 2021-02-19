@@ -380,7 +380,8 @@ func VelocityToDynamic(vel uint8) (dyn string) {
 	case vel >= 74:
 		return "+"
 	case vel >= 59:
-		return "="
+		//return "="
+		return ""
 	case vel >= 44:
 		return "-"
 	case vel >= 29:

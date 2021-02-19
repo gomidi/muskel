@@ -701,12 +701,7 @@ func (sc *Score) cutOutUnrolled() {
 	}
 }
 
-func (sc *Score) WriteUnrolled(wr io.Writer) error {
-	err := sc.Unroll()
-	if err != nil {
-		return err
-	}
-
+func (sc *Score) writeUnrolledTracks(wr io.Writer) error {
 	var tracks []string
 	for track := range sc.Tracks {
 		tracks = append(tracks, track)
@@ -853,10 +848,11 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 	trks.AddLine(data)
 
 	fm := &formatter{wr}
-	trks.WriteTo(fm)
+	return trks.WriteTo(fm)
+}
 
-	fmt.Fprintf(wr, "\n")
-	//fmt.Fprintf(wr, "\n\n")
+func (sc *Score) writeUnrolledScore(wr io.Writer) error {
+	fm := &formatter{wr}
 
 	sk := &table.Sketch{Table: table.NewTable("=SCORE", -1, nil)}
 	// sk := table.NewSketch("score", -1, nil)
@@ -1008,11 +1004,45 @@ func (sc *Score) WriteUnrolled(wr io.Writer) error {
 		}
 	}
 
-	err = sk.WriteTo(fm)
+	return sk.WriteTo(fm)
+}
+
+func (sc *Score) WriteUnrolled2(trackswr, scorewr io.Writer) error {
+	err := sc.Unroll()
 	if err != nil {
 		return err
 	}
 
+	err = sc.writeUnrolledTracks(trackswr)
+	if err != nil {
+		return fmt.Errorf("can't write TRACK table: %s", err.Error())
+	}
+	//fmt.Fprintf(wr, "\n\n")
+
+	err = sc.writeUnrolledScore(scorewr)
+	if err != nil {
+		return fmt.Errorf("can't write SCORE table: %s", err.Error())
+	}
+	return nil
+}
+
+func (sc *Score) WriteUnrolled(wr io.Writer) error {
+	err := sc.Unroll()
+	if err != nil {
+		return err
+	}
+
+	err = sc.writeUnrolledTracks(wr)
+	if err != nil {
+		return fmt.Errorf("can't write TRACK table: %s", err.Error())
+	}
+	fmt.Fprintf(wr, "\n")
+	//fmt.Fprintf(wr, "\n\n")
+
+	err = sc.writeUnrolledScore(wr)
+	if err != nil {
+		return fmt.Errorf("can't write SCORE table: %s", err.Error())
+	}
 	fmt.Fprintf(wr, "\n")
 	return nil
 }
