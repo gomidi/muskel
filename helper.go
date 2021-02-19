@@ -15,7 +15,7 @@ var FILE_EXTENSION = ".mskl"
 
 func findInclude(relDir string, file string) (resolved string, err error) {
 	switch filepath.Ext(file) {
-	case FILE_EXTENSION, ".md":
+	case FILE_EXTENSION, ".md", ".mskl", ".xlsx", ".csv":
 	default:
 		file = file + FILE_EXTENSION
 	}
