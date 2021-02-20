@@ -30,9 +30,7 @@ type Score struct {
 	IsUnrolled     bool
 	exclSketch     map[string]string
 	noEmptyLines   bool
-	csv            bool
 	csvSeperator   rune
-	xlsx           bool
 
 	printBarComments bool
 
@@ -271,10 +269,10 @@ func (sc *Score) parse(fname string, sco *Score) error {
 	var f *file.File
 	var err error
 
-	switch {
-	case sc.xlsx:
+	switch filepath.Ext(fname) {
+	case ".xlsx":
 		f, err = file.NewXLSX(fname, sco)
-	case sc.csv:
+	case ".csv":
 		f, err = file.NewCSV(fname, sc.csvSeperator, sco)
 	default:
 		f, err = file.New(fname, sco)

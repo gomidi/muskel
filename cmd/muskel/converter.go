@@ -150,10 +150,6 @@ func (c *converter) ScoreOptions() (opts []score.Option) {
 		opts = append(opts, score.CSV(rune(m.CSV[0])))
 	}
 
-	if m.XLSX {
-		opts = append(opts, score.XLSX())
-	}
-
 	return
 
 }
