@@ -1,6 +1,8 @@
 # TODOs
 
 ## wichtigste bugs, zuerst zu fixen:
+- wenn in einer gruppenspalte die erste spalte im include nicht vorhanden ist, werden auch alle weiteren nicht
+  inkludiert
 - gruppenspaltenbezüge funktionieren nicht innerhalb der gleichen datei mit einfach =something. stattdessen muss der 
   dateiname vorangestellt werden. besser wäre es, der dateiname wäre nicht nötig, wenn es sich um die gleiche Datei handelt.
 - zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden (../somthing)
