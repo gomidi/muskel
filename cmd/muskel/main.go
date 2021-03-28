@@ -41,7 +41,7 @@ func run() error {
 	case CLIENT.Config:
 		return CLIENT.run(ARGS)
 	case IMPORT.Config:
-		return IMPORT.run()
+		return IMPORT.run(ARGS)
 	case TEMPLATE.Config:
 		return TEMPLATE.run()
 	default:

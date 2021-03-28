@@ -1005,7 +1005,7 @@ func (sc *Score) writeUnrolledScore(wr io.Writer) error {
 	return sk.WriteTo(fm)
 }
 
-func (sc *Score) WriteUnrolled2(trackswr, scorewr io.Writer) error {
+func (sc *Score) WriteTracksAndScoreTable(trackswr, scorewr io.Writer) error {
 	err := sc.Unroll()
 	if err != nil {
 		return err

@@ -1,19 +1,24 @@
 package main
 
 import (
-	"strconv"
+	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/metakeule/observe/lib/runfunc"
 	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/smfimport"
 	"gitlab.com/metakeule/config"
 )
 
 type importCmd struct {
 	*config.Config
-	Source      config.StringGetter
-	OutFile     config.StringGetter
-	MonoTracks  config.StringGetter
-	OnsetTracks config.StringGetter
+	Source     config.StringGetter
+	OutFile    config.StringGetter
+	MonoTracks config.StringGetter
+	KeysTracks config.StringGetter
 }
 
 var IMPORT = &importCmd{}
@@ -23,38 +28,137 @@ func init() {
 }
 
 func (s *importCmd) init() {
-	s.Config = CONFIG.MustCommand("import", "convert a Standard MIDI file to a muskel file").SkipAllBut()
+	s.Config = CONFIG.MustCommand("import", "convert a Standard MIDI file to a muskel file").SkipAllBut("watch", "dir")
 	s.Source = s.LastString("midifile", "the source SMF/MIDI file.", config.Required)
 	s.OutFile = s.NewString("out", "the target muskel file.", config.Shortflag('o'), config.Required)
 	s.MonoTracks = s.NewString("mono", "tracks that are considered to be monophon (e.g. 0,4,5)", config.Shortflag('m'))
-	s.OnsetTracks = s.NewString("onset", "tracks that only have onset data (e.g. drum notes of or keyswitches) (e.g. 0,4,5)", config.Shortflag('r'))
+	s.KeysTracks = s.NewString("keys", "tracks that should keep the key numbers instead of converting to note names (for drums keys, sample keys or keyswitches) (e.g. 0,4,5)", config.Shortflag('k'))
 }
 
-func (i *importCmd) run() error {
-	var monoTracks []int
-	var onsetTracks []int
+func (i *importCmd) run(a *args) error {
+
+	if a.Watch.IsSet() {
+		return i.watch(a)
+	}
+
+	return i.runImport(i.Source.Get(), i.OutFile.Get())
+}
+
+func (i *importCmd) runImport(srcFile, outFile string) error {
+
+	var opts []smfimport.Option
 
 	if i.MonoTracks.IsSet() {
-		ms := strings.Split(i.MonoTracks.Get(), ",")
-
-		for _, m := range ms {
-			i, errI := strconv.Atoi(strings.TrimSpace(m))
-			if errI == nil {
-				monoTracks = append(monoTracks, i)
-			}
+		monoTracks := convertArgStringToInts(i.MonoTracks.Get())
+		if len(monoTracks) > 0 {
+			opts = append(opts, smfimport.MonoTracks(monoTracks...))
 		}
 	}
 
-	if i.OnsetTracks.IsSet() {
-		ms := strings.Split(i.OnsetTracks.Get(), ",")
-
-		for _, m := range ms {
-			i, errI := strconv.Atoi(strings.TrimSpace(m))
-			if errI == nil {
-				onsetTracks = append(onsetTracks, i)
-			}
+	if i.KeysTracks.IsSet() {
+		keysTracks := convertArgStringToInts(i.KeysTracks.Get())
+		if len(keysTracks) > 0 {
+			opts = append(opts, smfimport.KeysTracks(keysTracks...))
 		}
 	}
 
-	return muskel.Import(i.Source.Get(), i.OutFile.Get(), monoTracks, onsetTracks)
+	return muskel.Import(srcFile, outFile, opts...)
+}
+
+func (i *importCmd) watch(a *args) error {
+	p, _ := filepath.Abs(i.Source.Get())
+	d := p
+	if !a.WatchDir.Get() {
+		d = filepath.Dir(p)
+	}
+	targetExt := ".mskl"
+
+	var outFile string
+
+	if i.OutFile.IsSet() {
+		outFile, _ = filepath.Abs(i.OutFile.Get())
+		targetExt = filepath.Ext(targetExt)
+	}
+
+	var callback func(dir, file string) error
+	fmt.Printf("watching %q\n", i.Source.Get())
+
+	if a.WatchDir.Get() {
+		// TODO get the dir
+		callback = func(dir, file string) error {
+			ext := strings.ToLower(filepath.Ext(file))
+
+			if ext != ".mid" && ext != ".midi" {
+				return nil
+			}
+
+			dp, _ := filepath.Abs(dir)
+
+			if dp != p {
+				return nil
+			}
+
+			filep, _ := filepath.Abs(file)
+			err := i.runImport(filep, filep+targetExt)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "ERROR: %s", err.Error())
+			} else {
+				fmt.Fprintf(os.Stdout, filep+"\n")
+			}
+			return err
+		}
+
+	} else {
+
+		callback = func(dir, file string) error {
+			filep, _ := filepath.Abs(file)
+
+			if filep != p {
+				return nil
+			}
+
+			if outFile == "" {
+				outFile = filep + targetExt
+			}
+
+			err := i.runImport(filep, outFile)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "ERROR: %s", err.Error())
+			} else {
+				fmt.Fprintf(os.Stdout, filep+"\n")
+			}
+			return err
+		}
+	}
+
+	r := runfunc.New(
+		d,
+		callback,
+		runfunc.Sleep(time.Millisecond*time.Duration(int(a.SleepingTime.Get()))),
+	)
+
+	errors := make(chan error, 1)
+	stopped, err := r.Run(errors)
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		os.Exit(1)
+	}
+
+	go func() {
+		for {
+			select {
+			case e := <-errors:
+				fmt.Fprintf(os.Stderr, "error: %s\n", e)
+			}
+		}
+	}()
+
+	// ctrl+c
+	<-SIGNAL_CHANNEL
+	fmt.Println("\n--interrupted!")
+	stopped.Kill()
+
+	os.Exit(0)
+	return nil
 }

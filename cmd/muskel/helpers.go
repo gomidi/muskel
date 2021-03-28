@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func fileCheckSum(file string) string {
@@ -21,4 +23,16 @@ func fileCheckSum(file string) string {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func convertArgStringToInts(s string) (res []int) {
+	ms := strings.Split(s, ",")
+
+	for _, m := range ms {
+		i, errI := strconv.Atoi(strings.TrimSpace(m))
+		if errI == nil {
+			res = append(res, i)
+		}
+	}
+	return
 }

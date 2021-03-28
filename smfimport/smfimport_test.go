@@ -71,10 +71,10 @@ func TestImport(t *testing.T) {
 	writer.NoteOff(wr, gm.DrumKey_AcousticSnare.Key())
 	writer.EndOfTrack(wr)
 
-	im := New("testfile", &mid)
+	im := New("testfile", &mid, MonoTracks(2), KeysTracks(3))
 	var out bytes.Buffer
 
-	im.WriteMsklTo(&out, MonoTracks(2), DrumTracks(3))
+	im.WriteUnrolled(&out)
 
 	expected := `| TRACK           | drums--9                                 | piano-A--1                               | vocal-B--2                               |
 | --------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |

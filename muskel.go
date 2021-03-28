@@ -39,7 +39,7 @@ func WriteWDVersionFile(dir string) error {
 	return ioutil.WriteFile(p, []byte(VERSION), 0644)
 }
 
-func Import(srcFile string, targetFile string, monoTracks []int, drumTracks []int) error {
+func Import(srcFile string, targetFile string, opts ...smfimport.Option) error {
 	fh, err := os.Open(srcFile)
 
 	if err != nil {
@@ -48,11 +48,11 @@ func Import(srcFile string, targetFile string, monoTracks []int, drumTracks []in
 
 	defer fh.Close()
 
-	im := smfimport.New(srcFile, fh)
+	im := smfimport.New(srcFile, fh, opts...)
 
 	if filepath.Ext(targetFile) == ".xlsx" {
 		var tracksbf, scorebf bytes.Buffer
-		err := im.WriteMsklTo2(&tracksbf, &scorebf, smfimport.MonoTracks(monoTracks...), smfimport.DrumTracks(drumTracks...))
+		err := im.WriteTracksAndScoreTable(&tracksbf, &scorebf)
 		if err != nil {
 			return fmt.Errorf("can't import from %q: %s", srcFile, err.Error())
 		}
@@ -67,7 +67,7 @@ func Import(srcFile string, targetFile string, monoTracks []int, drumTracks []in
 
 		defer tg.Close()
 
-		return im.WriteMsklTo(tg, smfimport.MonoTracks(monoTracks...), smfimport.DrumTracks(drumTracks...))
+		return im.WriteUnrolled(tg)
 	}
 }
 

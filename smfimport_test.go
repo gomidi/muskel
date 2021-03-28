@@ -245,7 +245,7 @@ func TestSMFImport(t *testing.T) {
 
 		var bf bytes.Buffer
 
-		err = cv.WriteMsklTo(&bf)
+		err = cv.WriteUnrolled(&bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not write imported score: %s\n%s\n", i, err.Error(), test.midiOut)

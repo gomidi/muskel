@@ -354,7 +354,7 @@ func (c *converter) writeUnrolled(file string, sc *score.Score) error {
 	defer uf.Close()
 	if filepath.Ext(file) == ".xlsx" {
 		var tracksbf, scorebf bytes.Buffer
-		err = sc.WriteUnrolled2(&tracksbf, &scorebf)
+		err = sc.WriteTracksAndScoreTable(&tracksbf, &scorebf)
 		if err != nil {
 			return err
 		}

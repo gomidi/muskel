@@ -1,5 +1,46 @@
 # TODOs
 
+## änderungen imports:
+
+1. quantisisierungsoption
+2. option, um nicht-noten (cc etc) in extra track unterzubringen, cc kommen in extra spalte, pitchbend in extra spalte und lyrics in extra spalte
+3. bugfix für letzten Taktwechsel, der nicht ordentlich geschrieben wird (keine Route, Tempowechsel krude)
+4. verbose mode / debug mode
+
+## änderungen, um mit Excel arbeiten zu können:
+
+- prefix ' zum inkludieren muss ersetzt werden, z.B. durch <
+- pattern prefix = muss ersetzt werden, z.B. durch ~
+- was ist mit , und . ? am besten wäre es, wenn das komma in der Zeit keine spezielle bedeutung hat und daher beim 
+  excel einlesen dann durch den Punkt ersetzt werden kann, wenn es sich um eine Zahl handelt
+
+jetzt:
+
+1
+1;
+1,
+1,;
+1&
+1&;
+1&,
+1&,;
+2
+
+in Zukunft:
+
+1
+1;
+1a
+1a;
+1&
+1&;
+1&a
+1&a;
+2
+
+
+
+
 ## wichtigste bugs, zuerst zu fixen:
 - wenn in einer gruppenspalte die erste spalte im include nicht vorhanden ist, werden auch alle weiteren nicht
   inkludiert
@@ -16,7 +57,8 @@ geschrieben; solange, bis was neues kommt (neue sprungmarke oder was anderes).
 - da sprungmarken sich immer auf einen Takt beziehen, sollte es eine syntax geben, um innerhalb des Taktes an eine bestimmte Stelle zu springen, z.B.
   #MARKE:1&
   oder 
-  #MARKE:-2&  (würde bedeuten 5 Achtel vor #MARKE)
+  #MARKE:-2&     (würde bedeuten 5 Achtel vor #MARKE)
+  #MARKE:-0.625  (würde auch bedeuten 5 Achtel vor #MARKE)
 
 - auf ähnliche weise könnte man die patternwiederholung automatisch/implizit machen und .1. bedeutet dann: springe nach einem takt wieder an die stelle
   vor einem takt etc. die % zeichen hinter einem pattern fallen dann weg. ich würde dann gerne das % für die Wiederholung der Takte verwenden
@@ -357,7 +399,6 @@ sie werden von links nach rechts geschrieben
 zum nächsten ereignis. letzte Töne bleiben gleich bis zum nächsten, sprünge wiederholen, taktpositionen, standartlängen bis zur nächsten usw.
 
  
-### CSV export von OpenOffice als mögliches Eingabe-Format akzeptieren (CSV wird nur gelesen)
 
 ### pattern einbettung
 
@@ -698,13 +739,16 @@ Die Plus- und Minuszeichen werden einfach auf die darunterliegende Dynamik "aufa
 1. Die Möglichkeit, den aktuellen Ton zu hören und ändern zu können 
 Wir brauchen die Möglichkeit, einen Sinuston zu spielen, basierend auf einer Zeilen und Spaltenposition.
 Dann brauchen wir die Möglichkeit, aus einem Editor heraus einen Befehl aufzurufen und Dateiname, Zeile und Spalte anzugeben. Oder wir haben ein Sonderzeichen, dass beim Parsen zum abspielen führt (z.B. `==`)
+- Lösung erstmal: wir können per midi kabel und server von bestimmten stellen bis zu bestimmten stellen spielen und stoppen
 
 2. Die Visualisierung der Melodie
-Man könnte die Konvention haben, dass wenn ein Spaltenname auf `<` endet, die Spalte "expanded" ist, d.h. der Spaltenname beinhaltet nicht das `<`, aber die Anordnung der Töne spiegelt durch Padding den Tonhöhenverlauf wider (von links nach rechts mit minimalen Abständen).
-Oder (einfacher) mit smfimage.
+Man könnte die Konvention haben, dass wenn ein Spaltenname auf `<` endet, die Spalte "expanded" ist, d.h. der Spaltenname beinhaltet nicht das `<`, 
+aber die Anordnung der Töne spiegelt durch Padding den Tonhöhenverlauf wider (von links nach rechts mit minimalen Abständen).
+- Lösung erstmal: mit smfimage.
 
 3. Es gibt keine Möglichkeit, auf einfachem Wege Noten in Spalten "nach unten" oder "nach oben" zu schieben.
 Auch hier könnte ein besonderes Zeichen helfen, wir müssten allerdings Anfang und Ende der zu verschiebenden Noten markieren können. z.B. `^+(` für _Start verschieben nach unten_ mit Menge an Pluszeichen = Anzahl der Verschiebepositionen und analog `^-(` für _Start verschieben nach oben_ und `^)` für das _Ende der letzten Verschiebegruppe_ (kann am Ende der Spalte weggelassen werden)
+- Lösung erstmal: mit Excel/Calc editieren
 
 Letztlich können alle drei Features aber besser in einem eigens entwickelten Editor implementiert werden.
 
@@ -718,10 +762,6 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
   to set back to the main tempo, use just @. also relative tempo possible, e.g. @50%
 
 ## later
-- convert csv to muskel
-- export to csv
-- export to xls for printing
-- import from xls
 - make converter a separate package, reading from stdin and writing to stdout
 - make muskel binary read from stdin and write to stdout
 - tests reanimieren
@@ -739,7 +779,7 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
   gesetzt werden die platzhalter. wenn mehr platzhalter vorhanden sind, als werte, werden die überschüssigen parameter 
   beim aufruf gesetzt, z.B. .table.token.col(c')
   auf die gleiche Weise kann auch in Pattern tabellen gespeichert werden. Hierbei ist der key dann =pattern.col
-- diatonische verläufe mittels =, z.B.
+- diatonische verläufe mittels =, z.B. (oder mit einfachen Funktionen $up und $down)
 
  ```muskel
     =SCORE | piano |
@@ -783,6 +823,14 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
 # erledigt
 
 - we need a formatting option to delete empty lines
+- convert csv to muskel
+- export to csv
+- export to xls for printing
+- import from xls
+
+
+### CSV export von OpenOffice als mögliches Eingabe-Format akzeptieren (CSV wird nur gelesen)
+
 
 ### nur Ausschnitt exportieren
 

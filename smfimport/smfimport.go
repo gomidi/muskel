@@ -26,6 +26,7 @@ type Importer struct {
 	cols         map[colsKey][]positionedMsg // key: trackno and midi channel
 	tracknames   map[int16]string
 	trackMetaMsg map[int16][]positionedMsg
+	readerOpts   []func(*reader.Reader)
 	tempos       []positionedMsg
 	timeSigns    []positionedMsg
 	markers      []positionedMsg
@@ -33,7 +34,7 @@ type Importer struct {
 	IgnoreCC     bool
 	lastTick     uint64
 	monoTracks   map[int16]bool
-	drumTracks   map[int16]bool
+	keysTracks   map[int16]bool
 }
 
 type Option func(*Importer)
@@ -46,15 +47,21 @@ func MonoTracks(monoTracks ...int) Option {
 	}
 }
 
-func DrumTracks(drumTracks ...int) Option {
+func KeysTracks(keysTracks ...int) Option {
 	return func(i *Importer) {
-		for _, t := range drumTracks {
-			i.drumTracks[int16(t)] = true
+		for _, t := range keysTracks {
+			i.keysTracks[int16(t)] = true
 		}
 	}
 }
 
-func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
+func ReaderOptions(opts ...func(*reader.Reader)) Option {
+	return func(i *Importer) {
+		i.readerOpts = opts
+	}
+}
+
+func New(fname string, src io.Reader, opts ...Option) *Importer {
 	im := &Importer{
 		src:          src,
 		score:        score.New(fname, nil, score.NoEmptyLines()),
@@ -62,19 +69,20 @@ func New(fname string, src io.Reader, opts ...func(*reader.Reader)) *Importer {
 		tracknames:   map[int16]string{},
 		trackMetaMsg: map[int16][]positionedMsg{},
 		monoTracks:   map[int16]bool{},
-		drumTracks:   map[int16]bool{},
+		keysTracks:   map[int16]bool{},
 	}
-	opts = append(opts, reader.NoLogger(), reader.Each(im.registerMsg))
-	im.rd = reader.New(opts...)
+
+	for _, opt := range opts {
+		opt(im)
+	}
+
+	im.readerOpts = append(im.readerOpts, reader.NoLogger(), reader.Each(im.registerMsg))
+	im.rd = reader.New(im.readerOpts...)
 	return im
 }
 
-func (c *Importer) WriteMsklTo(wr io.Writer, opts ...Option) error {
+func (c *Importer) WriteUnrolled(wr io.Writer) error {
 	//fmt.Printf("monoTracks: %v\n", monoTracks)
-	for _, opt := range opts {
-		opt(c)
-	}
-
 	err := c.readSMF()
 	if err != nil {
 		return err
@@ -87,12 +95,8 @@ func (c *Importer) WriteMsklTo(wr io.Writer, opts ...Option) error {
 	return c.score.WriteUnrolled(wr)
 }
 
-func (c *Importer) WriteMsklTo2(trackswr, scorewr io.Writer, opts ...Option) error {
+func (c *Importer) WriteTracksAndScoreTable(trackswr, scorewr io.Writer) error {
 	//fmt.Printf("monoTracks: %v\n", monoTracks)
-	for _, opt := range opts {
-		opt(c)
-	}
-
 	err := c.readSMF()
 	if err != nil {
 		return err
@@ -102,7 +106,7 @@ func (c *Importer) WriteMsklTo2(trackswr, scorewr io.Writer, opts ...Option) err
 	c.setMarkers()
 	c.setTempos()
 	c.score.IsUnrolled = true
-	return c.score.WriteUnrolled2(trackswr, scorewr)
+	return c.score.WriteTracksAndScoreTable(trackswr, scorewr)
 }
 
 func (c *Importer) readSMF() error {
@@ -320,7 +324,7 @@ func (c *Importer) setTracks() {
 		c.score.AddTrack(trk)
 
 		isMono := c.monoTracks[k.trackNo]
-		isDrum := c.drumTracks[k.trackNo]
+		isDrum := c.keysTracks[k.trackNo]
 		var lastRestPos uint
 		var lastRestShift int
 		var lastRest bool
