@@ -126,7 +126,10 @@ func Quantize(opts ...func(*reader.Reader)) Option {
 func New(filename string, rd io.Reader, opts ...Option) *Importer {
 	im := &Importer{}
 
-	im.destination.noteCols = map[colsKey][]positionedMsg{} // key: trackno and midi channel
+	im.destination.noteCols = map[colsKey][]positionedMsg{}  // key: trackno and midi channel
+	im.destination.ccCols = map[colsKey][]positionedMsg{}    // key: trackno and midi channel
+	im.destination.lyricCols = map[colsKey][]positionedMsg{} // key: trackno and midi channel
+	im.destination.dataCols = map[colsKey][]positionedMsg{}  // key: trackno and midi channel
 
 	im.source.filename = filename
 	im.source.cols = map[colsKey][]positionedMsg{} // key: trackno and midi channel
