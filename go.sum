@@ -11,6 +11,8 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/stretchr/testify v1.2.3-0.20181224173747-660f15d67dbb/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 gitlab.com/gomidi/midi v1.23.0 h1:21DS9n/ZOwkc9Svfn3/FiASCuApQqLacOgATMNeQmaw=
 gitlab.com/gomidi/midi v1.23.0/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
+gitlab.com/gomidi/quantizer v0.0.1 h1:MMyKl3zVWBZ8NFPnDz1w3ZFIrI5fN0NCKkG+kTUZEaQ=
+gitlab.com/gomidi/quantizer v0.0.1/go.mod h1:p7YUXZf1XV6kISy9jpR+6as4LAoir+K4Tv7qc1Oqknk=
 gitlab.com/metakeule/config v1.18.8 h1:xs1uCsUr277bla8BwRLd7JdTHtFzKdyFhgAke5XtoVQ=
 gitlab.com/metakeule/config v1.18.8/go.mod h1:glEQ76SztqrtydnmgxvrlTtN9BBmgM0lNy7/S2eiZbw=
 gitlab.com/metakeule/fmtdate v1.2.0 h1:MCtqJiTO3j8yTn28aJvgvQy63f1DsjTj702f7TGaFOk=

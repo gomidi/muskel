@@ -19,6 +19,8 @@ type importCmd struct {
 	OutFile    config.StringGetter
 	MonoTracks config.StringGetter
 	KeysTracks config.StringGetter
+	SplitTypes config.BoolGetter
+	Quantize   config.BoolGetter
 }
 
 var IMPORT = &importCmd{}
@@ -33,6 +35,8 @@ func (s *importCmd) init() {
 	s.OutFile = s.NewString("out", "the target muskel file.", config.Shortflag('o'), config.Required)
 	s.MonoTracks = s.NewString("mono", "tracks that are considered to be monophon (e.g. 0,4,5)", config.Shortflag('m'))
 	s.KeysTracks = s.NewString("keys", "tracks that should keep the key numbers instead of converting to note names (for drums keys, sample keys or keyswitches) (e.g. 0,4,5)", config.Shortflag('k'))
+	s.SplitTypes = s.NewBool("split", "split tracks by MIDI event types", config.Default(false), config.Shortflag('s'))
+	s.Quantize = s.NewBool("quantize", "quantize, based on a dual 16th/8th tripplets grid with auto track offset detection", config.Shortflag('q'))
 }
 
 func (i *importCmd) run(a *args) error {
@@ -60,6 +64,14 @@ func (i *importCmd) runImport(srcFile, outFile string) error {
 		if len(keysTracks) > 0 {
 			opts = append(opts, smfimport.KeysTracks(keysTracks...))
 		}
+	}
+
+	if i.SplitTypes.Get() {
+		opts = append(opts, smfimport.SplitEventTypes())
+	}
+
+	if i.Quantize.Get() {
+		opts = append(opts, smfimport.Quantize())
 	}
 
 	return muskel.Import(srcFile, outFile, opts...)

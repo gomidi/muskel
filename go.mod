@@ -8,6 +8,7 @@ require (
 	gitlab.com/metakeule/config v1.18.8
 	gitlab.com/gomidi/muskel/csv v1.2.4
 	gitlab.com/gomidi/muskel/xlsx v1.2.4
+	gitlab.com/gomidi/quantizer v0.0.1
 )
 
 replace (

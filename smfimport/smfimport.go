@@ -1,6 +1,7 @@
 package smfimport
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"sort"
@@ -17,27 +18,82 @@ import (
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/track"
+	"gitlab.com/gomidi/quantizer"
 )
 
-type Importer struct {
-	score        *score.Score
-	rd           *reader.Reader
-	src          io.Reader
-	cols         map[colsKey][]positionedMsg // key: trackno and midi channel
+/*
+TODO separate this registry into its own type
+
+type Registry struct {
+   lastTick
+   tracknames
+   tempos
+   timeSigns
+   markers
+   trackMetaMsg
+   cols
+}
+
+to have a better distinction between the import and the result of transformations based on options (like e.g. splitTypes)
+*/
+
+type source struct {
+	didRead bool
+	io.Reader
+	midiReader   *reader.Reader
+	lastTick     uint64
+	filename     string
 	tracknames   map[int16]string
-	trackMetaMsg map[int16][]positionedMsg
-	readerOpts   []func(*reader.Reader)
 	tempos       []positionedMsg
 	timeSigns    []positionedMsg
 	markers      []positionedMsg
+	trackMetaMsg map[int16][]positionedMsg
+	cols         map[colsKey][]positionedMsg // key: trackno and midi channel
 	ticks4th     uint32
-	IgnoreCC     bool
-	lastTick     uint64
-	monoTracks   map[int16]bool
-	keysTracks   map[int16]bool
+}
+
+type config struct {
+	readerOpts      []func(*reader.Reader)
+	ignoreCC        bool
+	monoTracks      map[int16]bool
+	keysTracks      map[int16]bool
+	splitEventTypes bool
+	quantize        bool
+}
+
+type destination struct {
+	score     *score.Score
+	noteCols  map[colsKey][]positionedMsg // key: trackno and midi channel
+	lyricCols map[colsKey][]positionedMsg
+	ccCols    map[colsKey][]positionedMsg
+	dataCols  map[colsKey][]positionedMsg
+}
+
+type Importer struct {
+	config
+	source
+	destination
 }
 
 type Option func(*Importer)
+
+// SplitEventTypes creates separate tracks for the following types
+// Types                                   | Track-Suffix
+// midi notes, pitchbend                   |
+// lyrics                                  | lyrics
+// cc messages, aftertouch, polyaftertouch | controller
+// other                                   | data
+func SplitEventTypes() Option {
+	return func(i *Importer) {
+		i.splitEventTypes = true
+	}
+}
+
+func IgnoreCC() Option {
+	return func(i *Importer) {
+		i.ignoreCC = true
+	}
+}
 
 func MonoTracks(monoTracks ...int) Option {
 	return func(i *Importer) {
@@ -61,23 +117,39 @@ func ReaderOptions(opts ...func(*reader.Reader)) Option {
 	}
 }
 
-func New(fname string, src io.Reader, opts ...Option) *Importer {
-	im := &Importer{
-		src:          src,
-		score:        score.New(fname, nil, score.NoEmptyLines()),
-		cols:         map[colsKey][]positionedMsg{}, // key: trackno and midi channel
-		tracknames:   map[int16]string{},
-		trackMetaMsg: map[int16][]positionedMsg{},
-		monoTracks:   map[int16]bool{},
-		keysTracks:   map[int16]bool{},
+func Quantize(opts ...func(*reader.Reader)) Option {
+	return func(i *Importer) {
+		i.quantize = true
 	}
+}
+
+func New(filename string, rd io.Reader, opts ...Option) *Importer {
+	im := &Importer{}
+
+	im.destination.noteCols = map[colsKey][]positionedMsg{} // key: trackno and midi channel
+
+	im.source.filename = filename
+	im.source.cols = map[colsKey][]positionedMsg{} // key: trackno and midi channel
+	im.source.tracknames = map[int16]string{}
+	im.source.trackMetaMsg = map[int16][]positionedMsg{}
+
+	im.config.monoTracks = map[int16]bool{}
+	im.config.keysTracks = map[int16]bool{}
 
 	for _, opt := range opts {
 		opt(im)
 	}
 
-	im.readerOpts = append(im.readerOpts, reader.NoLogger(), reader.Each(im.registerMsg))
-	im.rd = reader.New(im.readerOpts...)
+	if im.quantize {
+		var bf bytes.Buffer
+		quantizer.Quantize(rd, &bf)
+		im.source.Reader = bytes.NewReader(bf.Bytes())
+	} else {
+		im.source.Reader = rd
+	}
+
+	im.config.readerOpts = append(im.config.readerOpts, reader.NoLogger(), reader.Each(im.registerMsg))
+	im.source.midiReader = reader.New(im.readerOpts...)
 	return im
 }
 
@@ -109,12 +181,45 @@ func (c *Importer) WriteTracksAndScoreTable(trackswr, scorewr io.Writer) error {
 	return c.score.WriteTracksAndScoreTable(trackswr, scorewr)
 }
 
+func (c *Importer) mapCols() {
+	if !c.config.splitEventTypes {
+		c.destination.noteCols = c.source.cols
+		return
+	}
+
+	// SplitEventTypes creates separate tracks for the following types
+	// Types                                   | Track-Suffix
+	// midi notes, pitchbend                   |
+	// lyrics                                  | lyrics
+	// cc messages, aftertouch, polyaftertouch | controller
+	// other                                   | data
+	for k, msgs := range c.source.cols {
+		for _, msg := range msgs {
+			switch msg.msg.(type) {
+			case channel.NoteOn, channel.NoteOff, channel.NoteOffVelocity, channel.Pitchbend:
+				c.destination.noteCols[k] = append(c.destination.noteCols[k], msg)
+			case meta.Lyric:
+				c.destination.lyricCols[k] = append(c.destination.lyricCols[k], msg)
+			case channel.ControlChange, channel.Aftertouch, channel.PolyAftertouch:
+				c.destination.ccCols[k] = append(c.destination.ccCols[k], msg)
+			default:
+				c.destination.dataCols[k] = append(c.destination.dataCols[k], msg)
+			}
+		}
+	}
+}
+
 func (c *Importer) readSMF() error {
-	innerrd := smfreader.New(c.src)
-	err := reader.ReadSMFFrom(c.rd, innerrd)
+	if c.didRead {
+		return nil
+	}
+	c.didRead = true
+	innerrd := smfreader.New(c.Reader)
+	err := reader.ReadSMFFrom(c.midiReader, innerrd)
 	if err != nil {
 		return fmt.Errorf("could not read smf: %v", err)
 	}
+	c.mapCols()
 	tf := innerrd.Header().TimeFormat
 	//fmt.Printf("%v\n", tf)
 
@@ -286,7 +391,7 @@ func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 		it.Value = vv.Value()
 		ev.Item = &it
 	case channel.ControlChange:
-		if c.IgnoreCC {
+		if c.ignoreCC {
 			return nil
 		}
 		var it items.MIDICC
@@ -311,9 +416,12 @@ func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 	return &ev
 }
 
-func (c *Importer) setTracks() {
-	for k, msgs := range c.cols {
-		kk := fmt.Sprintf("%s--%v", c.tracknames[k.trackNo], k.channel)
+func (c *Importer) _setTracks(prefix string, cols map[colsKey][]positionedMsg) {
+	for k, msgs := range cols {
+		if len(msgs) == 0 {
+			continue
+		}
+		kk := fmt.Sprintf(prefix+"%s--%v", c.tracknames[k.trackNo], k.channel)
 		//var trk track.Track
 		trk := track.New(kk)
 		trk.Name = kk
@@ -377,7 +485,30 @@ func (c *Importer) setTracks() {
 			c.score.Unrolled[kk] = append(c.score.Unrolled[kk], ev)
 		}
 	}
+}
 
+/*
+TODO:
+check if splitTypes works
+*/
+func (c *Importer) setTracks() {
+	c.destination.score = score.New(c.source.filename, nil, score.NoEmptyLines())
+
+	c._setTracks("", c.destination.noteCols)
+
+	if c.splitEventTypes {
+		if len(c.destination.ccCols) > 0 {
+			c._setTracks("cc-", c.destination.ccCols)
+		}
+
+		if len(c.destination.lyricCols) > 0 {
+			c._setTracks("lyrics-", c.destination.lyricCols)
+		}
+
+		if len(c.destination.dataCols) > 0 {
+			c._setTracks("data-", c.destination.dataCols)
+		}
+	}
 }
 
 func (c *Importer) registerMsg(pos *reader.Position, msg midi.Message) {
@@ -412,9 +543,9 @@ func (c *Importer) registerMsg(pos *reader.Position, msg midi.Message) {
 		}
 
 		if cm, isChannel := msg.(channel.Message); isChannel {
-			cl := c.cols[colsKey{pos.Track, cm.Channel()}]
+			cl := c.source.cols[colsKey{pos.Track, cm.Channel()}]
 			cl = append(cl, positionedMsg{pos.AbsoluteTicks, cm})
-			c.cols[colsKey{pos.Track, cm.Channel()}] = cl
+			c.source.cols[colsKey{pos.Track, cm.Channel()}] = cl
 			return
 		}
 
