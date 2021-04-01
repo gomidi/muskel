@@ -240,8 +240,13 @@ func TestSMFImport(t *testing.T) {
 			t.Errorf("[%v]\n%s\ngot midiout: \n%s\nexpected: \n%s\n", i, test.msklIn, got, expected)
 		}
 
-		cv := smfimport.New("convert-main", bytes.NewReader(midibf.Bytes()))
-		cv.IgnoreCC = !test.includeControlChange
+		var cv *smfimport.Importer
+
+		if test.includeControlChange {
+			cv = smfimport.New("convert-main", bytes.NewReader(midibf.Bytes()))
+		} else {
+			cv = smfimport.New("convert-main", bytes.NewReader(midibf.Bytes()), smfimport.IgnoreCC())
+		}
 
 		var bf bytes.Buffer
 
