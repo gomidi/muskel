@@ -2,10 +2,8 @@
 
 ## änderungen imports:
 
-1. quantisisierungsoption
-2. option, um nicht-noten (cc etc) in extra track unterzubringen, cc kommen in extra spalte, pitchbend in extra spalte und lyrics in extra spalte
-3. bugfix für letzten Taktwechsel, der nicht ordentlich geschrieben wird (keine Route, Tempowechsel krude)
-4. verbose mode / debug mode
+1. do the quantizing "by hand" for each track, rewriting the events microdelay and the track delays for each track
+2. add option to just detect the delay without quantizing
 
 ## änderungen, um mit Excel arbeiten zu können:
 
