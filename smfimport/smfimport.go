@@ -241,30 +241,27 @@ func (c *Importer) addBar(b *items.Bar) {
 }
 
 func (c *Importer) addMissingBars(until uint64, lastBar *items.Bar) (no int) {
-	//lastTick
-	//lastPos := c.ticksTo32ths(c.lastTick)
 	no = lastBar.No
 
 	pos := c.ticksTo32ths(until)
 	diff := pos - lastBar.Position
-	//	fmt.Printf("addMissingBars until: %v lastBar %v diff: %v lastbarLength: %v\n", until, lastBar.No, diff, lastBar.Length32th())
+	//fmt.Printf("addMissingBars until: %v lastBar %v diff: %v lastbarLength: %v num: %v\n", until, lastBar.No, diff, lastBar.Length32th(), diff/lastBar.Length32th())
 
-	if diff > uint(lastBar.Length32th()) {
-		num := diff / uint(lastBar.Length32th())
-		//	fmt.Printf("num: %v\n", num)
+	num := diff / uint(lastBar.Length32th())
 
-		//for n := uint(1); n < num; n++ {
-		for n := uint(1); n < num; n++ {
-			no++
-			b := items.NewBar()
-			b.No = no
-			b.TempoChange = lastBar.TempoChange
-			b.TimeSig = lastBar.TimeSig
-			b.Position = lastBar.Position + n*uint(lastBar.Length32th())
-			//		fmt.Printf("add missing bar: #%v\n", no)
-			c.addBar(b)
-		}
+	if diff%uint(lastBar.Length32th()) != 0 {
+		num++
 	}
+
+	for n := uint(1); n < num; n++ {
+		no++
+		b := items.NewBar()
+		b.No = no
+		b.TimeSig = lastBar.TimeSig
+		b.Position = lastBar.Position + n*uint(lastBar.Length32th())
+		c.addBar(b)
+	}
+
 	return
 }
 
@@ -288,9 +285,6 @@ func (c *Importer) setBars() {
 	var sorted = sortPositionedMsg(c.timeSigns)
 
 	sort.Sort(sorted)
-
-	//var currentTimeSig [2]uint8
-
 	first := sorted[0]
 
 	if first.absPos == 0 {
@@ -300,29 +294,11 @@ func (c *Importer) setBars() {
 		sorted = sorted[1:]
 	}
 
-	//fmt.Printf("add first bar; adding #%v\n", lastBar.No)
 	c.addBar(lastBar)
 
 	for _, ts := range sorted {
-		//_ = ts
 		no = c.addMissingBars(ts.absPos, lastBar)
 		pos := c.ticksTo32ths(ts.absPos)
-		/*
-			diff := pos - lastBar.Position
-			if diff > uint(lastBar.Length32th()) {
-				no++
-				num := diff / uint(lastBar.Length32th())
-
-				for n := uint(0); n < num; n++ {
-					b := sketch.NewBar()
-					b.No = no
-					b.TimeSig = lastBar.TimeSig
-					b.Position = lastBar.Position + n*uint(lastBar.Length32th())
-					c.addBar(b)
-				}
-			}
-		*/
-
 		no++
 		tts := ts.msg.(meta.TimeSig)
 		b := items.NewBar()
@@ -330,9 +306,7 @@ func (c *Importer) setBars() {
 		b.Position = pos
 		b.TimeSig = [2]uint8{tts.Numerator, tts.Denominator}
 		b.TimeSigChange = [2]uint8{tts.Numerator, tts.Denominator}
-		//b.TempoChange = lastBar.TempoChange
 		lastBar = b
-		//fmt.Printf("add time sig change bar; adding #%v\n", lastBar.No)
 		c.addBar(lastBar)
 	}
 
@@ -490,10 +464,6 @@ func (c *Importer) _setTracks(prefix string, cols map[colsKey][]positionedMsg) {
 	}
 }
 
-/*
-TODO:
-check if splitTypes works
-*/
 func (c *Importer) setTracks() {
 	c.destination.score = score.New(c.source.filename, nil, score.NoEmptyLines())
 
@@ -520,7 +490,6 @@ func (c *Importer) registerMsg(pos *reader.Position, msg midi.Message) {
 	}
 
 	if msg == meta.EndOfTrack {
-		// ignore?
 		return
 	}
 
