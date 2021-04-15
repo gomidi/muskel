@@ -5,6 +5,7 @@ import "gitlab.com/gomidi/midi"
 type positionedMsg struct {
 	absPos uint64
 	msg    midi.Message
+	shift  int8
 }
 
 type colsKey struct {
@@ -23,5 +24,9 @@ func (s sortPositionedMsg) Swap(a, b int) {
 }
 
 func (s sortPositionedMsg) Less(a, b int) bool {
+	if s[a].absPos == s[b].absPos {
+		return s[a].shift < s[b].shift
+	}
+
 	return s[a].absPos < s[b].absPos
 }

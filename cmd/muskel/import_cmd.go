@@ -71,7 +71,7 @@ func (i *importCmd) runImport(srcFile, outFile string) error {
 	}
 
 	if i.Quantize.Get() {
-		opts = append(opts, smfimport.Quantize())
+		opts = append(opts, smfimport.Quantize(), smfimport.DetectDelay())
 	}
 
 	return muskel.Import(srcFile, outFile, opts...)

@@ -4,38 +4,22 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"math"
 	"sort"
 	"strings"
 
 	"gitlab.com/gomidi/midi"
 	"gitlab.com/gomidi/midi/reader"
 
-	//"gitlab.com/gomidi/midi/writer"
 	"gitlab.com/gomidi/midi/midimessage/channel"
 	"gitlab.com/gomidi/midi/midimessage/meta"
 	"gitlab.com/gomidi/midi/smf"
-	"gitlab.com/gomidi/midi/smf/smfreader"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/track"
 	"gitlab.com/gomidi/quantizer"
 )
-
-/*
-TODO separate this registry into its own type
-
-type Registry struct {
-   lastTick
-   tracknames
-   tempos
-   timeSigns
-   markers
-   trackMetaMsg
-   cols
-}
-
-to have a better distinction between the import and the result of transformations based on options (like e.g. splitTypes)
-*/
 
 type source struct {
 	didRead bool
@@ -59,6 +43,7 @@ type config struct {
 	keysTracks      map[int16]bool
 	splitEventTypes bool
 	quantize        bool
+	detectDelay     bool
 }
 
 type destination struct {
@@ -73,6 +58,8 @@ type Importer struct {
 	config
 	source
 	destination
+	//*smfQuantizer
+	quantizer *quantizer.Quantizer
 }
 
 type Option func(*Importer)
@@ -119,7 +106,13 @@ func ReaderOptions(opts ...func(*reader.Reader)) Option {
 
 func Quantize(opts ...func(*reader.Reader)) Option {
 	return func(i *Importer) {
-		i.quantize = true
+		i.config.quantize = true
+	}
+}
+
+func DetectDelay(opts ...func(*reader.Reader)) Option {
+	return func(i *Importer) {
+		i.detectDelay = true
 	}
 }
 
@@ -143,21 +136,33 @@ func New(filename string, rd io.Reader, opts ...Option) *Importer {
 		opt(im)
 	}
 
-	if im.quantize {
-		var bf bytes.Buffer
-		quantizer.Quantize(rd, &bf)
-		im.source.Reader = bytes.NewReader(bf.Bytes())
+	if im.config.quantize {
+		bt, err := ioutil.ReadAll(rd)
+
+		if err != nil {
+			return nil
+		}
+
+		in := bytes.NewReader(bt)
+
+		var q_opts []quantizer.Option
+		if im.detectDelay {
+			q_opts = append(q_opts, quantizer.DetectDelay())
+		}
+		im.quantizer, err = quantizer.New(in, q_opts...)
+		if err != nil {
+			return nil
+		}
+		im.source.Reader = bytes.NewReader(bt)
 	} else {
 		im.source.Reader = rd
 	}
-
-	im.config.readerOpts = append(im.config.readerOpts, reader.NoLogger(), reader.Each(im.registerMsg))
+	im.config.readerOpts = append(im.config.readerOpts, reader.NoLogger(), reader.Each(im.registerMsg), reader.SMFHeader(im.onHeader))
 	im.source.midiReader = reader.New(im.readerOpts...)
 	return im
 }
 
 func (c *Importer) WriteUnrolled(wr io.Writer) error {
-	//fmt.Printf("monoTracks: %v\n", monoTracks)
 	err := c.readSMF()
 	if err != nil {
 		return err
@@ -171,7 +176,6 @@ func (c *Importer) WriteUnrolled(wr io.Writer) error {
 }
 
 func (c *Importer) WriteTracksAndScoreTable(trackswr, scorewr io.Writer) error {
-	//fmt.Printf("monoTracks: %v\n", monoTracks)
 	err := c.readSMF()
 	if err != nil {
 		return err
@@ -212,27 +216,33 @@ func (c *Importer) mapCols() {
 	}
 }
 
-func (c *Importer) readSMF() error {
-	if c.didRead {
-		return nil
-	}
-	c.didRead = true
-	innerrd := smfreader.New(c.Reader)
-	err := reader.ReadSMFFrom(c.midiReader, innerrd)
-	if err != nil {
-		return fmt.Errorf("could not read smf: %v", err)
-	}
-	c.mapCols()
-	tf := innerrd.Header().TimeFormat
+func (c *Importer) onHeader(hd smf.Header) {
+	tf := hd.TimeFormat
 	//fmt.Printf("%v\n", tf)
 
 	if ticks, isMetric := tf.(smf.MetricTicks); isMetric {
 		c.ticks4th = ticks.Ticks4th()
 		//fmt.Printf("c.ticks4th: %v\n", c.ticks4th)
+	}
+}
+
+func (c *Importer) readSMF() error {
+	if c.didRead {
 		return nil
 	}
-	return fmt.Errorf("does not support SMPTE time format at the moment")
 
+	c.didRead = true
+
+	err := reader.ReadSMF(c.midiReader, c.Reader)
+	if err != nil {
+		return fmt.Errorf("could not read smf: %v", err)
+	}
+	if c.ticks4th == 0 {
+		return fmt.Errorf("does not support SMPTE time format at the moment")
+	}
+
+	c.mapCols()
+	return nil
 }
 
 func (c *Importer) addBar(b *items.Bar) {
@@ -335,6 +345,10 @@ func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 		ev.PosShift = -3
 	}
 
+	if c.config.quantize {
+		ev.PosShift = int(m.shift)
+	}
+
 	switch vv := m.msg.(type) {
 	case channel.NoteOn:
 		if isDrumTrack {
@@ -358,6 +372,7 @@ func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 			it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
 			it.NoteOff = true
 			ev.Item = &it
+			ev.PosShift = 0
 		}
 	case channel.Aftertouch:
 		var it items.MIDIAftertouch
@@ -403,6 +418,23 @@ func (c *Importer) _setTracks(prefix string, cols map[colsKey][]positionedMsg) {
 		trk := track.New(kk)
 		trk.Name = kk
 		trk.MIDIChannel = int8(k.channel)
+
+		// get delay for tracks
+		if c.config.quantize && c.config.detectDelay {
+			delay := c.quantizer.GetDelay(k.trackNo, k.channel)
+			in128ths := c.ticksTo128ths(uint64(math.Abs(float64(delay))))
+			//_ = delay
+			_ = in128ths
+
+			if in128ths > 0 {
+				del := int(in128ths)
+				if delay < 0 {
+					del = del * (-1)
+				}
+				trk.Delay = [2]int{del, 128}
+			}
+		}
+
 		//trk.MIDIBank = -1
 		//trk.MIDIVolume = -1
 
@@ -499,24 +531,46 @@ func (c *Importer) registerMsg(pos *reader.Position, msg midi.Message) {
 	case meta.TrackSequenceName:
 		c.tracknames[pos.Track] = strings.ReplaceAll(v.Text(), " ", "-")
 	case meta.Tempo:
-		c.tempos = append(c.tempos, positionedMsg{pos.AbsoluteTicks, msg})
+		c.tempos = append(c.tempos, positionedMsg{pos.AbsoluteTicks, msg, 0})
 	case meta.TimeSig:
-		c.timeSigns = append(c.timeSigns, positionedMsg{pos.AbsoluteTicks, msg})
+		c.timeSigns = append(c.timeSigns, positionedMsg{pos.AbsoluteTicks, msg, 0})
 	case meta.Marker:
-		c.markers = append(c.markers, positionedMsg{pos.AbsoluteTicks, msg})
+		c.markers = append(c.markers, positionedMsg{pos.AbsoluteTicks, msg, 0})
 	case meta.Cuepoint:
-		c.markers = append(c.markers, positionedMsg{pos.AbsoluteTicks, msg})
+		c.markers = append(c.markers, positionedMsg{pos.AbsoluteTicks, msg, 0})
 	default:
 		if mt, isMeta := msg.(meta.Message); isMeta {
 			mmsg := c.trackMetaMsg[pos.Track]
-			mmsg = append(mmsg, positionedMsg{pos.AbsoluteTicks, mt})
+			mmsg = append(mmsg, positionedMsg{pos.AbsoluteTicks, mt, 0})
 			c.trackMetaMsg[pos.Track] = mmsg
 			return
 		}
 
 		if cm, isChannel := msg.(channel.Message); isChannel {
+			absPos := pos.AbsoluteTicks
+			var shift int8
+			if c.config.quantize && c.quantizer != nil {
+				_absPos, _ := c.quantizer.Quantize(pos.Track, cm.Channel(), absPos)
+				diff := _absPos - int64(absPos)
+				in128ths := c.ticksTo128ths(uint64(math.Abs(float64(diff))))
+				_ = in128ths
+				switch in128ths {
+				case 1, 2, 3:
+					shift = int8(in128ths)
+				default:
+					if in128ths > 3 {
+						shift = 3
+					}
+				}
+				if diff < 0 {
+					shift = shift * (-1)
+				}
+				// TODO: set the diff as <<< or >>> depending on length and minus sign
+				absPos = uint64(_absPos)
+
+			}
 			cl := c.source.cols[colsKey{pos.Track, cm.Channel()}]
-			cl = append(cl, positionedMsg{pos.AbsoluteTicks, cm})
+			cl = append(cl, positionedMsg{absPos, cm, shift})
 			c.source.cols[colsKey{pos.Track, cm.Channel()}] = cl
 			return
 		}
@@ -576,4 +630,22 @@ func (c *Importer) ticksTo32ths(ticks uint64) uint {
 
 	//fmt.Printf("ticks4th: %v ticks: %v\n", c.ticks4th, ticks)
 	return uint(ticks / uint64(c.ticks4th/8))
+}
+
+func (c *Importer) ticksTo64ths(ticks uint64) uint {
+	if ticks == 0 {
+		return 0
+	}
+
+	//fmt.Printf("ticks4th: %v ticks: %v\n", c.ticks4th, ticks)
+	return uint(ticks / uint64(c.ticks4th/16))
+}
+
+func (c *Importer) ticksTo128ths(ticks uint64) uint {
+	if ticks == 0 {
+		return 0
+	}
+
+	//fmt.Printf("ticks4th: %v ticks: %v\n", c.ticks4th, ticks)
+	return uint(ticks / uint64(c.ticks4th/32))
 }
