@@ -44,6 +44,8 @@ type config struct {
 	splitEventTypes bool
 	quantize        bool
 	detectDelay     bool
+	noMicroTiming   bool
+	noVelocity      bool
 }
 
 type destination struct {
@@ -101,6 +103,18 @@ func KeysTracks(keysTracks ...int) Option {
 func ReaderOptions(opts ...func(*reader.Reader)) Option {
 	return func(i *Importer) {
 		i.readerOpts = opts
+	}
+}
+
+func NoMicroTiming() Option {
+	return func(i *Importer) {
+		i.config.noMicroTiming = true
+	}
+}
+
+func NoVelocity() Option {
+	return func(i *Importer) {
+		i.config.noVelocity = true
 	}
 }
 
@@ -327,26 +341,29 @@ func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 	var ev items.Event
 	ev.Position = c.ticksTo32ths(m.absPos)
 	comp := ev.AbsPosTicks(c.ticks4th, 0)
-	posDiff := int64(comp) - int64(m.absPos)
-	switch {
-	case posDiff < -15 || posDiff < 15:
-		// do nothing
-	case posDiff >= 15 && posDiff < 45:
-		ev.PosShift = 1
-	case posDiff >= 45 && posDiff < 75:
-		ev.PosShift = 2
-	case posDiff >= 75 && posDiff < 105:
-		ev.PosShift = 3
-	case posDiff <= -15 && posDiff > -45:
-		ev.PosShift = -1
-	case posDiff <= -45 && posDiff > -75:
-		ev.PosShift = -2
-	case posDiff <= -75 && posDiff > -105:
-		ev.PosShift = -3
-	}
 
-	if c.config.quantize {
-		ev.PosShift = int(m.shift)
+	if !c.noMicroTiming {
+		posDiff := int64(comp) - int64(m.absPos)
+		switch {
+		case posDiff < -15 || posDiff < 15:
+			// do nothing
+		case posDiff >= 15 && posDiff < 45:
+			ev.PosShift = 1
+		case posDiff >= 45 && posDiff < 75:
+			ev.PosShift = 2
+		case posDiff >= 75 && posDiff < 105:
+			ev.PosShift = 3
+		case posDiff <= -15 && posDiff > -45:
+			ev.PosShift = -1
+		case posDiff <= -45 && posDiff > -75:
+			ev.PosShift = -2
+		case posDiff <= -75 && posDiff > -105:
+			ev.PosShift = -3
+		}
+
+		if c.config.quantize {
+			ev.PosShift = int(m.shift)
+		}
 	}
 
 	switch vv := m.msg.(type) {
@@ -355,12 +372,16 @@ func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 			var it items.MIDINote
 			it.Dotted = "::"
 			it.Note = int8(vv.Key())
-			it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			if !c.noVelocity {
+				it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			}
 			ev.Item = &it
 		} else {
 			var it items.Note
 			it.Letter, it.Augmenter, it.Octave = items.KeyToNote(vv.Key())
-			it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			if !c.noVelocity {
+				it.Dynamic = items.VelocityToDynamic(vv.Velocity())
+			}
 			it.NoteOn = true
 			ev.Item = &it
 		}
@@ -492,6 +513,10 @@ func (c *Importer) _setTracks(prefix string, cols map[colsKey][]positionedMsg) {
 			ev.PosShift = lastRestShift
 			ev.Item = items.Rest
 			c.score.Unrolled[kk] = append(c.score.Unrolled[kk], ev)
+		}
+
+		if isMono {
+			c.score.RemoveObsoletRestsFromUnrolledTrack(kk)
 		}
 	}
 }

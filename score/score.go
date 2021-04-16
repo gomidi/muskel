@@ -85,6 +85,53 @@ func New(filepath string, params []string, options ...Option) *Score {
 	return s
 }
 
+func hasNote(in []*items.Event) bool {
+	for _, ev := range in {
+		switch vv := ev.Item.(type) {
+		case *items.Note:
+			if !vv.NoteOff && !vv.NoteOn {
+				return true
+			}
+		default:
+		}
+	}
+	return false
+}
+
+func cleanNoteOffs(in []*items.Event) (out []*items.Event) {
+	hasNt := hasNote(in)
+	for _, ev := range in {
+		if ev.Item == items.Rest && hasNt {
+			continue
+		}
+		out = append(out, ev)
+	}
+	return out
+}
+
+func (sc *Score) RemoveObsoletRestsFromUnrolledTrack(tr string) {
+	evts := sc.Unrolled[tr]
+
+	var m = map[uint][]*items.Event{}
+
+	for _, ev := range evts {
+		_evts := m[ev.Position]
+		_evts = append(_evts, ev)
+		m[ev.Position] = _evts
+	}
+
+	var cleaned []*items.Event
+
+	for _, _evts := range m {
+		cleaned = append(cleaned, cleanNoteOffs(_evts)...)
+	}
+
+	seq := items.EventSequence(cleaned)
+	sort.Sort(seq)
+	sc.Unrolled[tr] = seq
+	//return seq
+}
+
 func (sc *Score) Properties() map[string]interface{} {
 	return sc.properties
 }

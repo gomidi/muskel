@@ -15,12 +15,14 @@ import (
 
 type importCmd struct {
 	*config.Config
-	Source     config.StringGetter
-	OutFile    config.StringGetter
-	MonoTracks config.StringGetter
-	KeysTracks config.StringGetter
-	SplitTypes config.BoolGetter
-	Quantize   config.BoolGetter
+	Source          config.StringGetter
+	OutFile         config.StringGetter
+	MonoTracks      config.StringGetter
+	KeysTracks      config.StringGetter
+	SplitTypes      config.BoolGetter
+	Quantize        config.BoolGetter
+	SkipVelocity    config.BoolGetter
+	SkipMicroTiming config.BoolGetter
 }
 
 var IMPORT = &importCmd{}
@@ -37,6 +39,8 @@ func (s *importCmd) init() {
 	s.KeysTracks = s.NewString("keys", "tracks that should keep the key numbers instead of converting to note names (for drums keys, sample keys or keyswitches) (e.g. 0,4,5)", config.Shortflag('k'))
 	s.SplitTypes = s.NewBool("split", "split tracks by MIDI event types", config.Default(false), config.Shortflag('s'))
 	s.Quantize = s.NewBool("quantize", "quantize, based on a dual 16th/8th tripplets grid with auto track offset detection", config.Shortflag('q'))
+	s.SkipVelocity = s.NewBool("skipvelo", "do not import velocity, use standard velocity instead")
+	s.SkipMicroTiming = s.NewBool("skipmicro", "do not track micro timing")
 }
 
 func (i *importCmd) run(a *args) error {
@@ -72,6 +76,14 @@ func (i *importCmd) runImport(srcFile, outFile string) error {
 
 	if i.Quantize.Get() {
 		opts = append(opts, smfimport.Quantize(), smfimport.DetectDelay())
+	}
+
+	if i.SkipVelocity.Get() {
+		opts = append(opts, smfimport.NoVelocity())
+	}
+
+	if i.SkipMicroTiming.Get() {
+		opts = append(opts, smfimport.NoMicroTiming())
 	}
 
 	return muskel.Import(srcFile, outFile, opts...)
