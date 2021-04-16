@@ -134,7 +134,7 @@ func (c *converter) ScoreOptions() (opts []score.Option) {
 		opts = append(opts, score.Column(m.Pattern))
 	}
 
-	if m.KeepEmptyLines {
+	if !m.KeepEmptyLines {
 		opts = append(opts, score.NoEmptyLines())
 	}
 

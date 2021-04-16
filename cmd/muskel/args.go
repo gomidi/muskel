@@ -49,7 +49,7 @@ func (a *args) init() {
 	a.Params = a.NewJSON("params", "parameters passed to the sketch. params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. [\"voc#2:c#'\",\"piano#1:D\"]", config.Shortflag('p'), config.Default("[]"))
 	a.Pattern = a.NewString("pattern", "pattern to be used exclusively", config.Shortflag('t'), config.Default(""))
 	a.Fmt = a.NewBool("fmt", "format the muskel file (overwrites the input file)")
-	a.KeepEmptyLines = a.NewBool("keepemptylines", "don't remove empty lines from the score", config.Shortflag('k'))
+	a.KeepEmptyLines = a.NewBool("keepemptylines", "don't remove empty lines from the score", config.Shortflag('k'), config.Default(true))
 	a.Watch = a.NewBool("watch", "watch for changes of the file and act on each change", config.Shortflag('w'))
 	a.WatchDir = a.NewBool("dir", "watch for changes in the current directory (not just for the input file)", config.Shortflag('d'))
 	a.OutFile = a.NewString("out", "path of the output file (SMF). If it includes the placeholder %s, that will be replaced by the File property of the corresponding track", config.Shortflag('o'))

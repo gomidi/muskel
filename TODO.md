@@ -1,9 +1,6 @@
 # TODOs
 
-## änderungen imports:
 
-1. do the quantizing "by hand" for each track, rewriting the events microdelay and the track delays for each track
-2. add option to just detect the delay without quantizing
 
 ## änderungen, um mit Excel arbeiten zu können:
 
