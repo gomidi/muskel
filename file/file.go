@@ -19,7 +19,7 @@ type File struct {
 
 	name                    string
 	dir                     string
-	file                    *os.File
+	file                    []byte
 	multiComments           map[int]*MultiLineComment
 	commentLines            map[int]string
 	currentLine             int
@@ -28,7 +28,7 @@ type File struct {
 	output                  io.Writer
 }
 
-func (f *File) SetFileInfos(file *os.File, fpath string) {
+func (f *File) SetFileInfos(file []byte, fpath string) {
 	f.file = file
 	f.dir = filepath.Dir(fpath)
 	f.name = filepath.Base(fpath)
@@ -102,7 +102,6 @@ func (f *File) Format() error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 	return f.WriteTo(fl)
 
 }
@@ -293,16 +292,7 @@ func (f *File) findPart(line string) (interface{}, error) {
 	return nil, nil
 }
 
-func (f *File) Close() {
-	if f.file != nil {
-		f.file.Close()
-		f.file = nil
-	}
-}
-
 func (f *File) Parse() (err error) {
-	defer f.Close()
-
 	for f.Input.Scan() {
 		err = f.Input.Err()
 		if err != nil {

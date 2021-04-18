@@ -2,8 +2,10 @@ package file
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -106,7 +108,14 @@ func New(fpath string, s score) (f *File, err error) {
 		return nil, err
 	}
 
-	f = FromReader(file, s)
-	f.SetFileInfos(file, fpath)
+	defer file.Close()
+
+	bt, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	f = FromReader(bytes.NewReader(bt), s)
+	f.SetFileInfos(bt, fpath)
 	return f, nil
 }
