@@ -250,13 +250,15 @@ func (c *converter) prepare(dir, file string) error {
 		}
 	}
 
-	newChecksum := fileCheckSum(filep)
+	if ARGS.Watch.Get() {
+		newChecksum := fileCheckSum(filep)
 
-	if newChecksum == c.checksums[filep] {
-		return nil
+		if newChecksum == c.checksums[filep] {
+			return nil
+		}
+
+		c.checksums[filep] = newChecksum
 	}
-
-	c.checksums[filep] = newChecksum
 
 	if ARGS.WatchDir.Get() {
 		if filep != c.inFilep && c.Config.Fmt {
