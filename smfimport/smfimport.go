@@ -590,7 +590,6 @@ func (c *Importer) registerMsg(pos *reader.Position, msg midi.Message) {
 				if diff < 0 {
 					shift = shift * (-1)
 				}
-				// TODO: set the diff as <<< or >>> depending on length and minus sign
 				absPos = uint64(_absPos)
 
 			}

@@ -20,8 +20,47 @@ func (r *patternFinder) FindPattern(includefile string, callingCol string, callN
 	  tatsächlich erste spalte genommen
 	*/
 
-	//fmt.Printf("FindPattern includefile: %q callingCol: %q callName: %q\n", includefile, callingCol, callName)
+	var sname string
+	colName, sname, err = r.normalizeName(includefile, callingCol, callName)
 
+	if err != nil {
+		return
+	}
+
+	s, err = r.findSketch(sname, colName, includefile, callingCol, callName, callArgs)
+	if err != nil {
+		return
+	}
+
+	if len(s.colOrder) == 0 {
+		err = fmt.Errorf("can't resolve pattern name %q: sketch %q has no columns", callName, s.Name)
+		return
+	}
+
+	if colName == "" {
+		for i, col := range s.colOrder {
+			if i == 0 || col[0] == '!' {
+				colName = col
+			}
+		}
+	}
+
+	if r.fromSketch.isScore() && r.fromSketch != s {
+		//r.fromSketch.cal
+		s.patternCalls[colName] = s.patternCalls[colName] + 1
+		nthCallCol := fmt.Sprintf("%s:%v", colName, s.patternCalls[colName])
+		if _, has := s.Columns[nthCallCol]; !has {
+			return
+		}
+		//fmt.Printf("did find col %q in sketch %q\n", nthCallCol, s.Name)
+		//return r.findPattern(sname, nthCallCol, includefile, callingCol, callName, callArgs)
+		return s, nthCallCol, nil
+	}
+
+	return
+}
+
+func (r *patternFinder) normalizeName(includefile string, callingCol string, callName string) (colName, sname string, err error) {
 	callName = strings.TrimSpace(callName)
 	callingCol = strings.TrimSpace(callingCol)
 
@@ -36,7 +75,7 @@ func (r *patternFinder) FindPattern(includefile string, callingCol string, callN
 	}
 
 	_x := strings.Index(callName, ".")
-	sname := callName
+	sname = callName
 	var cname string
 
 	if _x > 0 {
@@ -53,6 +92,10 @@ func (r *patternFinder) FindPattern(includefile string, callingCol string, callN
 
 	sname = strings.ReplaceAll(sname, "~", callingCol)
 	colName = strings.ReplaceAll(cname, "~", callingCol)
+	return
+}
+
+func (r *patternFinder) findSketch(sname string, colName string, includefile string, callingCol string, callName string, callArgs []string) (s *Sketch, err error) {
 
 	if includefile != "" {
 		s, err = r.fromSketch.Score.GetExternalSketch(includefile, sname, callArgs)
@@ -73,24 +116,5 @@ func (r *patternFinder) FindPattern(includefile string, callingCol string, callN
 		}
 	}
 
-	if len(s.colOrder) == 0 {
-		err = fmt.Errorf("can't resolve pattern name %q: sketch %q has no columns", callName, s.Name)
-		return
-	}
-
-	if colName == "" {
-		for i, col := range s.colOrder {
-			if i == 0 || col[0] == '!' {
-				colName = col
-			}
-		}
-	}
-
-	//fmt.Printf("FindPattern includefile: %q sname: %q colName: %q\n", includefile, sname, colName)
-	/*
-		if len(strings.Split(colName, " ")) > 1 {
-			panic(colName)
-		}
-	*/
 	return
 }

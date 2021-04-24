@@ -2,6 +2,93 @@
 
 
 
+## diverse Probleme mit zusammensetzungen von patterns
+
+1. variationen als spezialspalten, die beim n-ten Aufruf angesprungen werden (implementiert)
+   spaltennamen können einen `:n` suffix haben und beim n-ten aufruf wird versuchsweise nach diesem aufgelöst
+   und wenn dieser nicht existiert, wird nach dem pattern ohne den suffix, dann kann man recht elegant folgendes machen:
+
+```
+| =bass |     | :1 | :8  |
+| #     |     |    |     |
+| 1     | b'  |    | =,  |
+| 2     | %   |    |     |
+| 3     | %   | g' | /c" |
+| 4     | %   | a' |     |
+| #     |     |    |     |
+| 1     | _   | =. | b'  |
+| 2     |     |    | %   |
+| 3     |     |    | c"  |
+| 4     |     |    | c#" |
+```   
+
+hierbei würde der erste aufruf den auftakt bekommen (spalte :1), der achte nur den anschließenden Übergang (spalte :8)
+und alle weiteren die erste, unbezeichnete Spalte. der charm dieser variante ist, dass es beliebige verzweigungen gegeben kann,
+dass es voll transsparent ist (man gut sehen kann, wo sie sich unterscheiden), dass man sie leicht ändern kann (einfach ziffer in der spalte ändern)
+dass es keine bedingten anfänge und enden braucht etc.
+
+2. für die definition der abfolge der verschiedenen patterns "nacheinander, ohne lücke"
+wird das Fragezeichen in der Zeitposition setzen. es bedeutet:
+bringe die patterns in dieser zeile nachdem das letzte obere pattern fertig ist.
+dann sind solche platzierungen mit fixen beliebig kombinierbar.
+
+```
+| =SCORE          | bass           |
+| #INTRO 4/4 @120 |                |
+| ?               | =bass          | 1. aufruf mit auftakt (2 Takte)
+| ?               | =bass%5        | 2. aufruf: reines pattern, wird 5x wiederholt (5 Takte)
+| ?               | =bass          | 3. aufruf mit übergang (2 Takte)
+| #VERSE          |                |
+| *7              |                | // hier vergehen die Takte, während obiges gespielt wird
+| #CHORUS         |                |
+| 1               | =bass.chorus%7 |  // 1. aufruf des chorus an fester position (7 Takte)
+| ?               | =bass.chorus   |  // 2. aufruf kommt nach der 7. wiederholung des =bass.chorus (1 Takt)
+```
+
+3. interessant ist auch ein Zeitbezeichnung *, auf die keine zahl folgt, und  die so lange takte anhängt, bis keine patternwiederholungen mehr kommen 
+(... etc bleibt unberücksichtigt)
+
+
+## muskel-mini
+
+eine muskel-mini spec und implementierung,
+die nur
+- eine track tabelle
+- eine Score tabelle hat
+- keine scalentöne oder unterstützung
+- keine Platzhalter 
+- keine Funktionen
+- keine shortcuts
+- keine patterns
+
+also im Prinzip das unrolled verkörpert und leichter zu implementieren und dokumentieren ist.
+Sie soll als erstes final werden. Endung: .mskm
+
+## muskel composer
+
+ein Server, der die verschiedenen Tools zur Komposition bereitstellt:
+(wie in musikalische Grundgestaltungsmittel definiert)
+
+er beobachtet eine muskel-Datei und bezieht aus ihr den ganzen Kontext,
+die Stimmen und Noten.
+
+diese Datei wird neu geladen, wenn sie sich ändert
+
+eine konkrete Aufgabe ist, eine Unterstützung, eine Komplementierung oder ein Kontrast und bezieht sich auf
+Rhythmus, Harmonie, Melodik, Tempo, Klang. Sie hat als gegenüber eine Tonmenge, die auf Takte verteilt ist
+und Kontext, wie Taktarten, Tempo, Skalen, Harmonie. 
+
+die Aufgabe bekommt die Start und End Position und den Tracknamen der Tonmenge und holt sich ihren Kontext
+aus der geparsten muskel-Datei. Sie gibt zurück eine Tonmenge, die sie unter einem Namen abspeichert und
+optional in einer neuen Tabelle oder Datei abspeichert.
+
+sämtliche Ergebnisse dieser Aufgaben werden zwischengespeichert und können später nochmal abgerufen werden.
+optional gibt es noch einen Zieltrack, auf dem das Ergebniss abgespielt werden kann
+
+der Server hat eine eigene GUI, um die Optionen zu setzen und zwischengespeicherte Ergebnisse abzurufen.
+diese kann im Terminal sein, oder als Weboberfläche.
+ 
+
 ## änderungen, um mit Excel arbeiten zu können:
 
 - prefix ' zum inkludieren muss ersetzt werden, z.B. durch <

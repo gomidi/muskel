@@ -56,6 +56,7 @@ type Sketch struct {
 	barChangeRequired bool
 	RealColNum        int // is in the file, i.e. a group column counts as 1
 	GroupCols         map[int][]string
+	patternCalls      map[string]int
 
 	includes            []*include
 	colOrder            []string
@@ -73,10 +74,11 @@ type Sketch struct {
 
 func New(name string, sc Score) *Sketch {
 	sk := &Sketch{
-		Score:   sc,
-		Name:    name,
-		Columns: map[string][]string{},
-		Parts:   map[string][2]uint{},
+		Score:        sc,
+		Name:         name,
+		Columns:      map[string][]string{},
+		Parts:        map[string][2]uint{},
+		patternCalls: map[string]int{},
 
 		currentBarNo:        -1,
 		barChangeRequired:   true,
@@ -1018,6 +1020,7 @@ func (s *Sketch) parseEventsLine(tabs []string) error {
 }
 
 func (p *Sketch) AddColumn(name string) {
+	//fmt.Printf("try to add column %q in sketch %q\n", name, p.Name)
 	if disallowedColNames[name] {
 		panic(fmt.Sprintf("%q is not allowed as a column name of a sketch", name))
 	}
