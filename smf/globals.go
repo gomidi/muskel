@@ -15,7 +15,7 @@ const DEBUG_TEST = false
 //var DEBUG bool = false
 
 func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwriter.Option) error {
-	numTracks := uint16(2) // first track is for time signatures, second track is for tempo changes
+	numTracks := uint16(1) // first track is for time signatures and tempo changes
 
 	if items.DEBUG {
 		fmt.Printf("WriteSMFTo filegroup %v\n", filegroup)

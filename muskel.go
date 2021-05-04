@@ -11,10 +11,12 @@ import (
 
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/file"
+	"gitlab.com/gomidi/muskel/image"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/smf"
 	"gitlab.com/gomidi/muskel/smfimport"
 	"gitlab.com/gomidi/muskel/xlsx"
+	"gitlab.com/gomidi/smfimage"
 	"gitlab.com/metakeule/config"
 )
 
@@ -157,4 +159,16 @@ func Convert(mainFile string, params []string, smffile string, opts ...score.Opt
 
 func WriteSMFFile(sc *score.Score, smffile string, opts ...smfwriter.Option) error {
 	return smf.WriteFile(sc, smffile, opts...)
+}
+
+// WriteImage expects the given score to be unrolled
+func WriteImage(sc *score.Score, outfile string, opts ...smfimage.Option) error {
+	var midibf bytes.Buffer
+	err := smf.WriteSMFTo(sc, &midibf, "*")
+
+	if err != nil {
+		return err
+	}
+
+	return image.MakeImage(sc, &midibf, outfile, opts...)
 }

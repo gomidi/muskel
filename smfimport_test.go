@@ -106,7 +106,7 @@ func TestSMFImport(t *testing.T) {
 |     1      | _c      |        |         |
 |     2      |         | _d     | _d      |
 `,
-			2,
+			3,
 			false,
 			false,
 		},

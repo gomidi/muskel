@@ -9,6 +9,7 @@ require (
 	gitlab.com/gomidi/muskel/csv v1.2.4
 	gitlab.com/gomidi/muskel/xlsx v1.2.4
 	gitlab.com/gomidi/quantizer v0.0.3
+	gitlab.com/gomidi/smfimage v0.14.7
 )
 
 replace (

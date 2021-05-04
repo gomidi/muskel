@@ -53,6 +53,12 @@ func (t *Tracks) Finish() (err error) {
 					err = tr.SetFileGroup(val)
 				case "import":
 					err = tr.SetImport(val)
+				case "pos", "position":
+					err = tr.SetPosition(val)
+				case "noscore":
+					if strings.TrimSpace(val) != "" {
+						tr.SkipInScore = true
+					}
 				default:
 					err = fmt.Errorf("unknown property %q in tracks table", line[0])
 				}

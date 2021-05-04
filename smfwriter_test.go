@@ -38,7 +38,7 @@ func TestSMFWriter(t *testing.T) {
 |2      |d  |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -60,7 +60,7 @@ func TestSMFWriter(t *testing.T) {
 |2      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -84,7 +84,7 @@ func TestSMFWriter(t *testing.T) {
 |1      |c |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -103,7 +103,7 @@ func TestSMFWriter(t *testing.T) {
 |1      |{c,e,g#} |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -130,7 +130,7 @@ func TestSMFWriter(t *testing.T) {
 |2      |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -152,7 +152,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |*|
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -180,7 +180,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |*|
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -210,7 +210,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |*|
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -237,7 +237,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -263,7 +263,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -289,7 +289,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -314,7 +314,7 @@ func TestSMFWriter(t *testing.T) {
 |3  |e |
 |4  |* |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -340,7 +340,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -366,7 +366,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -391,7 +391,7 @@ func TestSMFWriter(t *testing.T) {
 |3  |e |
 |4  |* |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -420,7 +420,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -446,7 +446,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -472,7 +472,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -499,7 +499,7 @@ func TestSMFWriter(t *testing.T) {
 |1       |         |
 |2       |*        |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -527,7 +527,7 @@ func TestSMFWriter(t *testing.T) {
 |1  ||
 |2  |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -555,7 +555,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |=templ |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -585,7 +585,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |{.tt.a,.tt.b,.tt.c}|
 |2  |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -614,7 +614,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |{.dr.ta,.dr.tb,.dr.tc} |
 |2  |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -644,7 +644,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |{.dr.ta+,.dr.tb-,.dr.tc--} |
 |2  |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -668,7 +668,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |c::: |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -688,7 +688,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -712,7 +712,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |{c,e,g#} |
 |2  |a::: |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -738,7 +738,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |{c:::,e:::,g#:::} |
 |2  |a::: |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -766,7 +766,7 @@ func TestSMFWriter(t *testing.T) {
 |3  |a |
 |4 |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -797,7 +797,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |a |
 |2 |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -825,7 +825,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | d |
 
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -844,7 +844,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | d |
 
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -869,7 +869,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |e |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -894,7 +894,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |e |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -919,7 +919,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |e |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -943,7 +943,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |b' |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -968,7 +968,7 @@ func TestSMFWriter(t *testing.T) {
 |1  |b' |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -992,7 +992,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | (b' c") |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1020,7 +1020,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | (b' c") |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1048,7 +1048,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | (_b' c") |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1076,7 +1076,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |c" |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1104,7 +1104,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |c" |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1128,7 +1128,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | _b' |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1150,7 +1150,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | (_b' _c") |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1172,7 +1172,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |2  | (a' "hiho") |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1191,7 +1191,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |2  |"hiho" |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1208,7 +1208,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |c:: |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1226,7 +1226,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |c: |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1244,7 +1244,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |AT(23):: |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1262,7 +1262,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |AT(23): |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1286,7 +1286,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |=cc |
 |3  |*  |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1310,7 +1310,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |=cc> |
 |3  |*  |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1334,7 +1334,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |=cc< |
 |3  |*  |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1351,7 +1351,7 @@ func TestSMFWriter(t *testing.T) {
 |=SCORE |p|
 |#
 |1  | d+ |`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1370,7 +1370,7 @@ func TestSMFWriter(t *testing.T) {
 |=SCORE |p|
 |#
 |1  | d++ |`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1389,7 +1389,7 @@ func TestSMFWriter(t *testing.T) {
 |=SCORE |p|
 |#
 |1  | d+++ |`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1408,7 +1408,7 @@ func TestSMFWriter(t *testing.T) {
 |=SCORE |p|
 |#
 |1  | d- |`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1427,7 +1427,7 @@ func TestSMFWriter(t *testing.T) {
 |=SCORE |p|
 |#
 |1  | d-- |`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1447,7 +1447,7 @@ func TestSMFWriter(t *testing.T) {
 |=SCORE |p|
 |#
 |1  | d+ |`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1469,7 +1469,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | d++ |
 
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1490,7 +1490,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | d- |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1511,7 +1511,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | d-- |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1532,7 +1532,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | d---- |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1553,7 +1553,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | d++++ |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1574,7 +1574,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | d |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1600,7 +1600,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1       |        |      c'  |
 `,
-			3,
+			2,
 			false,
 			false,
 			`
@@ -1630,7 +1630,7 @@ func TestSMFWriter(t *testing.T) {
 |1   |        | /c   |
 |2   |        | /PB(20) |
 `,
-			3,
+			2,
 			false,
 			false,
 			`
@@ -1657,7 +1657,7 @@ func TestSMFWriter(t *testing.T) {
 |2  |d  |
 |[A]
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1687,7 +1687,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1728,7 +1728,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  |*|
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1763,7 +1763,7 @@ func TestSMFWriter(t *testing.T) {
 |2  | % |
 |3  | * |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1787,7 +1787,7 @@ func TestSMFWriter(t *testing.T) {
 |3  | % |
 |4  | * |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1812,7 +1812,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |1  | ./. |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1847,7 +1847,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | c |
 |2  | * |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1894,7 +1894,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | c |
 |2  | * |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1947,7 +1947,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | c |
 |2  | * |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -1993,7 +1993,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | .2. |
 |*5
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2047,7 +2047,7 @@ func TestSMFWriter(t *testing.T) {
 |1  | =patt.a%2 |
 |*7
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2090,7 +2090,7 @@ func TestSMFWriter(t *testing.T) {
 |[A]
 |[A]
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2124,7 +2124,7 @@ func TestSMFWriter(t *testing.T) {
 |2 |* |
 |[A]
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2164,7 +2164,7 @@ func TestSMFWriter(t *testing.T) {
 |[A]
 |[B]
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2207,7 +2207,7 @@ func TestSMFWriter(t *testing.T) {
 |1    |=temp.a|
 |*6
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2252,7 +2252,7 @@ func TestSMFWriter(t *testing.T) {
 |*3
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2297,7 +2297,7 @@ func TestSMFWriter(t *testing.T) {
 |*3
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2326,7 +2326,7 @@ func TestSMFWriter(t *testing.T) {
 |4       | _e |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2350,7 +2350,7 @@ func TestSMFWriter(t *testing.T) {
 |4       | _e |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2373,7 +2373,7 @@ func TestSMFWriter(t *testing.T) {
 |3       | * |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2396,7 +2396,7 @@ func TestSMFWriter(t *testing.T) {
 |3       | * |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2419,7 +2419,7 @@ func TestSMFWriter(t *testing.T) {
 |2      |d  |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2447,7 +2447,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |d  |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2470,7 +2470,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |d+++-  |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2494,7 +2494,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2521,7 +2521,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2551,7 +2551,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2581,7 +2581,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2615,7 +2615,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2649,7 +2649,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2692,7 +2692,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2735,7 +2735,7 @@ func TestSMFWriter(t *testing.T) {
 |3      |*        |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2778,7 +2778,7 @@ func TestSMFWriter(t *testing.T) {
 |  1    | =melody@lyr.V1 |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2813,7 +2813,7 @@ func TestSMFWriter(t *testing.T) {
 |  1    | =melody@lyr.V1 |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2841,7 +2841,7 @@ func TestSMFWriter(t *testing.T) {
 |  2    | 1^-1++     |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2864,7 +2864,7 @@ func TestSMFWriter(t *testing.T) {
 |  2    | 1^-1++     |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2887,7 +2887,7 @@ func TestSMFWriter(t *testing.T) {
 |  2    | PC(3)  |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2908,7 +2908,7 @@ func TestSMFWriter(t *testing.T) {
 |  2    | =!reset(2,3) |
 
 			`,
-			2,
+			1,
 			false,
 			true,
 			`
@@ -2947,7 +2947,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -2975,7 +2975,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3003,7 +3003,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3034,7 +3034,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3063,7 +3063,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			true,
 			`
@@ -3109,7 +3109,7 @@ func TestSMFWriter(t *testing.T) {
 |4  |* |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3154,7 +3154,7 @@ func TestSMFWriter(t *testing.T) {
 |    4&   | (d+++ f+ b++ d'+++)     |
 |    4&;  | *                             |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3205,7 +3205,7 @@ func TestSMFWriter(t *testing.T) {
 |    4&   | (d+++ f+< b++ d'+++)    |
 |    4&;  | *                        |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3251,10 +3251,11 @@ func TestSMFWriter(t *testing.T) {
 |# @130
 |  1 | e |
 			`,
-			1,
+			0,
 			true,
 			false,
 			`
+[0] meta.Copyright: ""
 [0] meta.TrackSequenceName: "BPM"
 [0] meta.Tempo BPM: 110.00
 [3840] meta.Tempo BPM: 130.00
@@ -3273,10 +3274,11 @@ func TestSMFWriter(t *testing.T) {
 |# @140
 |  1 | e |
 			`,
-			1,
+			0,
 			true,
 			false,
 			`
+[0] meta.Copyright: ""
 [0] meta.TrackSequenceName: "BPM"
 [0] meta.Tempo BPM: 110.00
 [960] meta.Tempo BPM: 130.00
@@ -3297,10 +3299,11 @@ func TestSMFWriter(t *testing.T) {
 |# @140
 |  1 | e |
 			`,
-			1,
+			0,
 			true,
 			false,
 			`
+[0] meta.Copyright: ""
 [0] meta.TrackSequenceName: "BPM"
 [0] meta.Tempo BPM: 110.00
 [960] meta.Tempo BPM: 130.00
@@ -3335,7 +3338,7 @@ func TestSMFWriter(t *testing.T) {
 |    3  | * |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3400,7 +3403,7 @@ func TestSMFWriter(t *testing.T) {
 |    3  | * |
 
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3450,7 +3453,7 @@ func TestSMFWriter(t *testing.T) {
 |  2      | eb-                    |
 |3 | * |
 			`,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3479,7 +3482,7 @@ func TestSMFWriter(t *testing.T) {
 | 1     | =test.2 |
 | *3
             `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3568,7 +3571,7 @@ func TestSMFWriter(t *testing.T) {
 |    1&   | *         |
 
             `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3691,7 +3694,7 @@ func TestSMFWriter(t *testing.T) {
 |*3
 |[A]
   `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3750,7 +3753,7 @@ func TestSMFWriter(t *testing.T) {
 |#
 |  1   | -2" |
 `,
-			2,
+			1,
 			false,
 			false,
 			`
@@ -3779,10 +3782,11 @@ func TestSMFWriter(t *testing.T) {
 |# @110~
 |# @140
 `,
-			1,
+			0,
 			true,
 			false,
 			`
+[0] meta.Copyright: ""
 [0] meta.TrackSequenceName: "BPM"
 [0] meta.Tempo BPM: 110.00
 [60] meta.Tempo BPM: 110.47
@@ -3861,10 +3865,11 @@ func TestSMFWriter(t *testing.T) {
 |# @110~~
 |# @140
 `,
-			1,
+			0,
 			true,
 			false,
 			`
+[0] meta.Copyright: ""
 [0] meta.TrackSequenceName: "BPM"
 [0] meta.Tempo BPM: 110.00
 [60] meta.Tempo BPM: 110.01

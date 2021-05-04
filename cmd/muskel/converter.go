@@ -9,6 +9,7 @@ import (
 
 	"bytes"
 
+	"gitlab.com/gomidi/lilypond"
 	"gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel"
@@ -171,6 +172,24 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 		alert("ERROR while converting MuSkeL to SMF", err)
 		return err
+	}
+
+	if SMF.ExportImage.Get() {
+		err = muskel.WriteImage(sc, c.player.outFile+".png")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR while exporting to image: %s\n", err.Error())
+			alert("ERROR while exporting to image", err)
+			return err
+		}
+	}
+
+	if SMF.ExportScore.Get() {
+		err = lilypond.MIDI2PDF(c.player.outFile, "", false)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR while exporting score to PDF: %s\n", err.Error())
+			alert("ERROR while exporting to score", err)
+			return err
+		}
 	}
 
 	if ARGS.Watch.Get() {

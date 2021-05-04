@@ -12,6 +12,7 @@ import (
 	smfpkg "gitlab.com/gomidi/midi/smf"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
+	"gitlab.com/gomidi/muskel/track"
 )
 
 type smf struct {
@@ -26,11 +27,23 @@ func newSMF(s *score.Score, filegroup string, wr *writer) *smf {
 }
 
 func (s *smf) write() error {
-	evts, err := s.meterTrack()
+	var evts events
+	meter_evts, err := s.meterTrack()
 
 	if err != nil {
 		return err
 	}
+
+	tempo_evts, err := s.tempoTrack()
+
+	if err != nil {
+		return err
+	}
+
+	evts = append(evts, meter_evts...)
+	evts = append(evts, tempo_evts...)
+
+	sort.Sort(evts)
 
 	err = s.writer.writeTrack(0, -1, evts)
 
@@ -38,30 +51,18 @@ func (s *smf) write() error {
 		return err
 	}
 
-	evts, err = s.tempoTrack()
-
-	if err != nil {
-		return err
-	}
-
-	err = s.writer.writeTrack(0, -1, evts)
-
-	if err != nil {
-		return err
-	}
-
-	var tracks []string
-	for track := range s.score.Unrolled {
-		tracks = append(tracks, track)
-	}
-
-	sort.Strings(tracks)
-
-	for _, trackName := range tracks {
-		track, err := s.score.GetTrack(trackName)
+	var tracks track.Tracks
+	for trackName := range s.score.Unrolled {
+		tr, err := s.score.GetTrack(trackName)
 		if err != nil {
 			return fmt.Errorf("can't get the track %q", trackName)
 		}
+		tracks = append(tracks, tr)
+	}
+
+	sort.Sort(tracks)
+
+	for _, track := range tracks {
 
 		if s.fileGroup != "*" && track.FileGroup != s.fileGroup {
 			continue
@@ -74,9 +75,9 @@ func (s *smf) write() error {
 
 		t := s.newTrack()
 		evts = t.trackIntroEvents(track)
-		scevts, err := t.trackScoreEvents(track, s.score.Unrolled[trackName])
+		scevts, err := t.trackScoreEvents(track, s.score.Unrolled[track.Name])
 		if err != nil && err != smfpkg.ErrFinished {
-			return fmt.Errorf("could not write track %q: %v", trackName, err)
+			return fmt.Errorf("could not write track %q: %v", track.Name, err)
 		}
 		sort.Sort(scevts)
 		evts = append(evts, scevts...)
@@ -84,7 +85,7 @@ func (s *smf) write() error {
 		err = s.writer.writeTrack(uint8(track.MIDIChannel), int(endPos), evts)
 
 		if err != nil && err != smfpkg.ErrFinished {
-			return fmt.Errorf("could not write track %q: %v", trackName, err)
+			return fmt.Errorf("could not write track %q: %v", track.Name, err)
 		}
 	}
 

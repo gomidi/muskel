@@ -25,6 +25,8 @@ type Track struct {
 	Ambitus            [2]string // notes
 	AmbitusCutOverFlow bool
 	EndPos             uint
+	SkipInScore        bool
+	Position           int
 	SoloGroup          int // x < 0 =  never export; x = 0 = no solo group (will only be exported without solo); x > 0 = number of the solo group (only relevant in solo mode)
 }
 
@@ -50,6 +52,23 @@ func (t *Track) SetImport(importFrom string) error {
 }
 
 var DefaultVeloctiyScale = [5]uint8{1, 127, 4, 15, 63}
+
+type Tracks []*Track
+
+func (t Tracks) Less(a, b int) bool {
+	if t[a].Position == t[b].Position {
+		return t[a].MIDIChannel < t[b].MIDIChannel
+	}
+	return t[a].Position < t[b].Position
+}
+
+func (t Tracks) Len() int {
+	return len(t)
+}
+
+func (t Tracks) Swap(a, b int) {
+	t[a], t[b] = t[b], t[a]
+}
 
 func (t *Track) SetAmbitus(ambString string) error {
 	if strings.TrimSpace(ambString) == "" {
@@ -188,6 +207,24 @@ func (t *Track) SetChannel(data string) error {
 		return fmt.Errorf("can't set MIDI channel for track %q to %v: MIDI channel already set to: %v", t.Name, ch, t.MIDIChannel)
 	}
 
+	return nil
+}
+
+// SetPosition sets position in the midi file
+func (t *Track) SetPosition(data string) error {
+	if len(data) == 0 {
+		t.Position = -1
+		return nil
+	}
+	pos, errC := strconv.Atoi(data)
+	if errC != nil {
+		return fmt.Errorf("%#v is not a valid position", data)
+	}
+	if pos < 1 {
+		return fmt.Errorf("%#v is not a valid position", pos)
+	}
+
+	t.Position = pos
 	return nil
 }
 

@@ -16,6 +16,7 @@ import (
 	"gitlab.com/gomidi/muskel/timbre"
 	"gitlab.com/gomidi/muskel/track"
 	"gitlab.com/gomidi/muskel/tuning"
+	"gitlab.com/gomidi/smfimage"
 )
 
 type Score struct {
@@ -468,6 +469,46 @@ func (sc *Score) SetGroupCol(int, []string) {
 	panic("don't call me")
 }
 
+func (sc *Score) GetOptionsForImage() (opts []smfimage.Option, err error) {
+	var tracks track.Tracks
+	for trackName := range sc.Unrolled {
+		tr, err := sc.GetTrack(trackName)
+		if err != nil {
+			return nil, fmt.Errorf("can't get the track %q", trackName)
+		}
+		tracks = append(tracks, tr)
+	}
+
+	sort.Sort(tracks)
+
+	var orderTracks []int
+	var skipTracks []int
+	for i, tr := range tracks {
+		if tr.MIDIChannel < 0 {
+			continue
+		}
+		if tr.SkipInScore {
+			// this would be, if the option in smfimage was to skip tracks, but it is to skip MIDI channels
+			// we need a real option to skip tracks (by number and name)
+			//skipTracks = append(skipTracks, i+1) // add 1 for the first (tempo and meter) track in the smf
+
+			// for the moment, we pass the channel
+			skipTracks = append(skipTracks, int(tr.MIDIChannel))
+			_ = i
+		} else {
+			orderTracks = append(orderTracks, int(tr.MIDIChannel))
+		}
+	}
+
+	opts = append(opts, smfimage.TrackOrder(orderTracks...))
+
+	if len(skipTracks) > 0 {
+		opts = append(opts, smfimage.SkipTracks(skipTracks...))
+	}
+
+	return
+}
+
 func (sc *Score) Unroll() error {
 	if sc.IsUnrolled {
 		return nil
@@ -661,6 +702,7 @@ func (sc *Score) cutOutBars() {
 		return
 	}
 	var bars []*items.Bar
+	//fmt.Println("cutOutBars called")
 
 	var no int
 
@@ -693,9 +735,13 @@ func (sc *Score) cutOutBars() {
 			break
 		}
 
+		// fmt.Printf("lastTimeSig: %v no: %v bar.no: %v orig time sig: %v\n", lastTimeSig, no, bar.No, bar.TimeSig)
+
 		bar.No = no
 		if no == 0 {
-			if bar.TimeSig == [2]uint8{0, 0} {
+			if bar.TimeSigChange == [2]uint8{0, 0} {
+				// fmt.Println("set time signature of cutted first bar to %v\n", lastTimeSig)
+				bar.TimeSigChange = lastTimeSig
 				bar.TimeSig = lastTimeSig
 			}
 
