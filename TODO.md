@@ -1,6 +1,25 @@
 # TODOs
 
+## smfimage integration:
 
+reihenfolge und skipping fixen:
+momentan nehmen wir die midi kanäle,
+wir wollen aber die tracks (ab besten per namen)
+dafür muss smfimage erst so umgebaut werden, dass
+es trackbasiert statt midi chanal basiert arbeiten kann.
+
+
+## zusammenfügung von tabellen
+
+den tabellen einfach den gleichen namen geben, und die spalten verschieden benennen,
+dann werden sie zu einer tabelle zusammengefügt beim formatieren.
+
+## spalten verschieben beim formatieren: durch voranstellen von < oder > vor dem namen, oder durch angabe der position in eckigen klammern vor dem namen,
+z.b [2]
+
+## taktpositionen auffüllen beim formatieren:
+
+... in der position wiederholt den vorangegangenen zeitabstand bis zum taktende
 
 ## diverse Probleme mit zusammensetzungen von patterns
 

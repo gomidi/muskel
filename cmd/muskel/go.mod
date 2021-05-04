@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/metakeule/observe v0.0.5
-	gitlab.com/gomidi/lilypond v0.0.4 // indirect
+	gitlab.com/gomidi/lilypond v0.0.5 // indirect
 	gitlab.com/gomidi/midi v1.23.0
 	gitlab.com/gomidi/midicatdrv v0.1.0
 	gitlab.com/gomidi/muskel v1.0.0

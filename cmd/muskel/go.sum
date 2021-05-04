@@ -19,6 +19,8 @@ gitlab.com/gomidi/lilypond v0.0.3 h1:G83Yh2zxZeI5SW25qLLlkZsRkNekaHGBChw/6kD564A
 gitlab.com/gomidi/lilypond v0.0.3/go.mod h1:0GbLz9zYcXMSo9uMtTiWQI6WsgUImYWi0G6TMxn1wGk=
 gitlab.com/gomidi/lilypond v0.0.4 h1:NPDB06xLolTmCqmBfCm+09D9hweK0iPtjXVGWbyVdnE=
 gitlab.com/gomidi/lilypond v0.0.4/go.mod h1:0GbLz9zYcXMSo9uMtTiWQI6WsgUImYWi0G6TMxn1wGk=
+gitlab.com/gomidi/lilypond v0.0.5 h1:QI5W5xHeeHJ9Yhw2uQ0ogx7eCkDtzQqiCq5+sAefYxc=
+gitlab.com/gomidi/lilypond v0.0.5/go.mod h1:0GbLz9zYcXMSo9uMtTiWQI6WsgUImYWi0G6TMxn1wGk=
 gitlab.com/gomidi/midi v1.15.3/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
 gitlab.com/gomidi/midi v1.23.0 h1:21DS9n/ZOwkc9Svfn3/FiASCuApQqLacOgATMNeQmaw=
 gitlab.com/gomidi/midi v1.23.0/go.mod h1:3ohtNOhqoSakkuLG/Li1OI6I3J1c2LErnJF5o/VBq1c=
