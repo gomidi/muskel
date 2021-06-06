@@ -10,6 +10,7 @@ require (
 	gitlab.com/gomidi/muskel v1.0.0
 	gitlab.com/gomidi/muskel/xlsx v1.2.4
 	gitlab.com/metakeule/config v1.21.0
+	golang.org/x/sys v0.0.0-20210514084401-e8d321eab015 // indirect
 )
 
 replace (

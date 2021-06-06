@@ -6,7 +6,7 @@ get:
 	go get ./...
 
 build:
-	cd cmd/muskel && config build -v --versiondir='../../' && config build --versiondir='../../'
+	cd cmd/muskel && config build --versiondir='../../'
 
 release:
 	config release --versiondir='.' --package='muskel'
