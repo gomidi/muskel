@@ -3,6 +3,7 @@ package reference
 import (
 	"bytes"
 	"fmt"
+	"path/filepath"
 	"strings"
 )
 
@@ -247,6 +248,24 @@ var ErrInvalidRefString = fmt.Errorf("invalid refence string")
 func parse(ref string) (*Reference, error) {
 	if ref == "" {
 		return nil, fmt.Errorf("empty string is not a reference")
+	}
+
+	if ref[0] == '\'' {
+
+		idx := strings.LastIndex(ref, "/")
+
+		if idx > 2 {
+			if len(ref) > idx {
+				r, err := parse("'" + ref[idx+1:])
+				if err != nil {
+					return nil, err
+				}
+				r.File = filepath.Join(ref[1:idx], r.File)
+				return r, nil
+			} else {
+				return nil, fmt.Errorf("invalid reference %q", ref)
+			}
+		}
 	}
 
 	var state int

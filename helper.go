@@ -45,6 +45,9 @@ func _findInclude(relDir string, file string) (resolved string, err error) {
 }
 
 func findInclude(relDir string, file string) (resolved string, err error) {
+	if file == "" {
+		panic("can't find empty file")
+	}
 	switch filepath.Ext(file) {
 	case FILE_EXTENSION, ".md", ".mskl", ".xlsx", ".csv":
 		return _findInclude(relDir, file)

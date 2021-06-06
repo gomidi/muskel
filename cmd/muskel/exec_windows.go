@@ -12,7 +12,7 @@ import (
 	"unsafe"
 
 	"gitlab.com/gomidi/midi"
-//	driver "gitlab.com/gomidi/rtmididrv"
+	//	driver "gitlab.com/gomidi/rtmididrv"
 	driver "gitlab.com/gomidi/midicatdrv"
 	"gitlab.com/metakeule/config"
 	"golang.org/x/sys/windows"
@@ -108,6 +108,9 @@ func (p *Process) Run() error {
 		//`"`+p.Program+`.exe `+p.Args+`"`,
 		p.Program+` `+p.Args,
 	)
+	p.cmd.SysProcAttr = &syscall.SysProcAttr{
+		CreationFlags: syscall.CREATE_NEW_CONSOLE,
+	}
 	out, err := p.cmd.CombinedOutput()
 	if err != nil {
 		return err

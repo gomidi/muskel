@@ -3703,6 +3703,77 @@ TRACK | Piano | Voc
 |     4                     | c#"  |
 `,
 		},
+		{ // 125
+			`
+| TRACK | Bass | Keys |
+
+| =bass |     |  :1 |  :3 |
+| #     |     |     |     |
+| 1     | b'  |     | =.  |
+| 2     | %   |     |     |
+| 3     | %   | g'  | /c" |
+| 4     | %   | a'  |     |
+| #     |     |     |     |
+| 1     | _   | =.  | b'  |
+| 2     |     |     | %   |
+| 3     |     |     | c"  |
+| 4     |     |     | c#" |
+
+| =keys |     |  :2 |  :4 |
+| #     |     |     |     |
+| 1     | c'  |     | =.  |
+| 2     | %   |     |     |
+| 3     | %   | d'  | /e" |
+| 4     | %   | f'  |     |
+| #     |     |     |     |
+| 1     | _   | =.  | c'  |
+| 2     |     |     | %   |
+| 3     |     |     | f"  |
+| 4     |     |     | f#" |
+
+
+| =SCORE | Bass    | Keys    |
+| #      |         |         |
+| ?      | =bass   | =keys%2 |
+| ?      | =bass%2 | =keys   |
+| ?      | =bass   |         |
+| *5     |         |         |
+| #      |         |         |
+| 1      |  *      | *       |
+`,
+			`
+| =SCORE                    | Bass |
+| ------------------------- | ---- |
+|  #A 4/4 @120.00 \major^c' |      |
+|     3                     | g'   |
+|     4                     | a'   |
+|  #                        |      |
+|     1                     | b'   |
+|     2                     | b'   |
+|     3                     | b'   |
+|     4                     | b'   |
+|  #B                       |      |
+|     1                     | b'   |
+|     2                     | b'   |
+|     3                     | b'   |
+|     4                     | b'   |
+|  #                        |      |
+|     1                     | b'   |
+|     2                     | b'   |
+|     3                     | b'   |
+|     4                     | b'   |
+|  #C                       |      |
+|     1                     | b'   |
+|     2                     | b'   |
+|     3                     | c"   |
+|     4                     | b'   |
+|  #                        |      |
+|     1                     | b'   |
+|     2                     | b'   |
+|     3                     | c"   |
+|     4                     | c#"  |
+`,
+		},
 
 		/*
 		    - firstsync scheint nicht richtig zu funktionieren
@@ -3751,6 +3822,7 @@ TRACK | Piano | Voc
 		//24: true,
 		//112: true,
 		114: true,
+		125: true,
 	}
 
 	for i, test := range tests {
@@ -3758,16 +3830,16 @@ TRACK | Piano | Voc
 		//fmt.Printf("############ %v ###############\n", i)
 
 		/*
-				if i != 114 {
-					continue
-				}
-
-			if i == 122 {
-				items.DEBUG = true
-			} else {
-				items.DEBUG = false
+			if i != 114 {
+				continue
 			}
+
 		*/
+		if i == 125 {
+			items.DEBUG = true
+		} else {
+			items.DEBUG = false
+		}
 
 		if i > 0 && i < 116 {
 			continue
@@ -4284,12 +4356,35 @@ func TestInclude2(t *testing.T) {
 |     1    | 'drumnote.drums.kd | 
 		`,
 		},
+		{ // 8
+			`
+'testdata/includes/score2
+
+
+|=SCORE | Voc |
+|# |
+|1  |  =sth.Voc    |
+		`,
+			`
+'testdata/includes/score2
+
+
+| =SCORE   | Voc      |
+| -------- | -------- |
+|  #       |          |
+|     1    | =sth.Voc | 
+		`,
+		},
 	}
 
-	//items.DEBUG = true
-
+	items.DEBUG = false
 	for i, test := range tests {
 
+		/*
+			if i == 8 {
+				items.DEBUG = true
+			}
+		*/
 		/*
 			if i > 3 {
 				continue
@@ -4338,6 +4433,8 @@ func TestInclude2(t *testing.T) {
 			//      t.Errorf("[%v] score\n%s\n\nunrolled gives \n%q\n\nbut this was expected:\n%q\n", i, test.input, got, wanted)
 		}
 	}
+
+	//items.DEBUG = false
 }
 
 func TestInclude3(t *testing.T) {

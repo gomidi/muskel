@@ -1,8 +1,17 @@
-TRACK | Voc | Piano | Drums |
 
-=SCORE | Voc | Piano | Drums |
-#C 3/4 @134
-1      | e"  | f"    |       |
-2&     | c   | d     |       |
-# 6/4 @100
-4&     | g'  | f     |       |
+'../tracks
+
+| =sth | Voc | Piano | Drums |
+| #C 3/4 @134
+| 1      | e"  | f"    |       |
+| 2&     | c   | d     |       |
+| # 6/4 @100
+| 4&     | g'  | f     |       |
+
+
+| =SCORE | Voc | Piano | Drums |
+| #C 3/4 @134
+| 1      | =sth.Voc  | f"    |       |
+| 2&     |    | d     |       |
+| # 6/4 @100
+| 4&     |   | f     |       |
