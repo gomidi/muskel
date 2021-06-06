@@ -829,7 +829,7 @@ func (r Reference) String() string {
 	var bf bytes.Buffer
 
 	if r.File != "" {
-		bf.WriteString("'" + r.File)
+		bf.WriteString("'" + strings.ReplaceAll(r.File, "\\", "/"))
 	}
 
 	if r.Table != "" {
