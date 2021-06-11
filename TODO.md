@@ -1,18 +1,13 @@
 # TODOs
 
+
 ## smfimage integration:
 
 reihenfolge und skipping fixen:
 momentan nehmen wir die midi kanäle,
-wir wollen aber die tracks (ab besten per namen)
+wir wollen aber die tracks (am besten per namen)
 dafür muss smfimage erst so umgebaut werden, dass
-es trackbasiert statt midi chanal basiert arbeiten kann.
-
-
-## zusammenfügung von tabellen
-
-den tabellen einfach den gleichen namen geben, und die spalten verschieden benennen,
-dann werden sie zu einer tabelle zusammengefügt beim formatieren.
+es trackbasiert statt midi channel basiert arbeiten kann.
 
 ## spalten verschieben beim formatieren: durch voranstellen von < oder > vor dem namen, oder durch angabe der position in eckigen klammern vor dem namen,
 z.b [2]
@@ -42,7 +37,7 @@ z.b [2]
 ```   
 
 hierbei würde der erste aufruf den auftakt bekommen (spalte :1), der achte nur den anschließenden Übergang (spalte :8)
-und alle weiteren die erste, unbezeichnete Spalte. der charm dieser variante ist, dass es beliebige verzweigungen gegeben kann,
+und alle weiteren die erste, unbezeichnete Spalte. der charme dieser variante ist, dass es beliebige verzweigungen gegeben kann,
 dass es voll transsparent ist (man gut sehen kann, wo sie sich unterscheiden), dass man sie leicht ändern kann (einfach ziffer in der spalte ändern)
 dass es keine bedingten anfänge und enden braucht etc.
 
@@ -130,13 +125,13 @@ jetzt:
 in Zukunft:
 
 1
-1;
+1t
 1a
-1a;
+1at
 1&
-1&;
+1&t
 1&a
-1&a;
+1&at
 2
 
 
@@ -928,6 +923,13 @@ Letztlich können alle drei Features aber besser in einem eigens entwickelten Ed
 - export to csv
 - export to xls for printing
 - import from xls
+
+
+## zusammenfügung von tabellen
+
+den tabellen einfach den gleichen namen geben, und die spalten verschieden benennen,
+dann werden sie zu einer tabelle zusammengefügt beim formatieren.
+
 
 
 ### CSV export von OpenOffice als mögliches Eingabe-Format akzeptieren (CSV wird nur gelesen)

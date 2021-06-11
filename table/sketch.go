@@ -1,7 +1,10 @@
 package table
 
 import (
+	"sort"
 	"strings"
+
+	"gitlab.com/gomidi/muskel/items"
 )
 
 type Sketch struct {
@@ -14,6 +17,172 @@ func NewSketch(name string, lineNo int, sc Score) *Sketch {
 	t := &Sketch{Table: NewTable(name, lineNo, sc)}
 	t.sketch = sc.AddSketch(name)
 	return t
+}
+
+func barLiner(data [][]string) (bars []map[string][]string) {
+	currentBar := map[string][]string{}
+
+	for _, d := range data {
+		//	fmt.Printf("data: %#v\n", d[:len(d)-1])
+		if len(d) > 0 {
+			ch := strings.TrimSpace(d[0])
+			if len(ch) > 0 && ch[0] == '#' {
+				bars = append(bars, currentBar)
+				currentBar = map[string][]string{
+					"#": d[:len(d)-1],
+				}
+				continue
+			}
+
+			if len(ch) > 0 && len(d) > 1 {
+				//bars = append(bars, currentBar)
+				currentBar[strings.TrimSpace(d[0])] = d[1 : len(d)-1]
+				continue
+			}
+		}
+	}
+
+	bars = append(bars, currentBar)
+	return
+}
+
+type barPos struct {
+	pos  float64
+	vals []string
+}
+
+func convertPos(s string) float64 {
+	_, pos, err := items.PositionTo32th(0, s)
+
+	if err != nil {
+		return 0
+	}
+
+	return float64(pos) / float64(32)
+}
+
+type barpositions []barPos
+
+func (b barpositions) Len() int {
+	return len(b)
+}
+
+func (bp barpositions) Swap(a, b int) {
+	bp[a], bp[b] = bp[b], bp[a]
+}
+
+func (bp barpositions) Less(a, b int) bool {
+	return bp[a].pos < bp[b].pos
+}
+
+func getSortedBarData(m map[string][]string) (lines [][]string) {
+	if len(m) == 0 {
+		return
+	}
+	bar := m["#"]
+
+	lines = append(lines, bar)
+
+	var bposes barpositions
+	var posName = map[float64]string{}
+
+	for k, v := range m {
+		if k == "#" {
+			continue
+		}
+
+		pos := convertPos(k)
+		posName[pos] = k
+
+		//	fmt.Printf("%q => %0.2f\n", k, pos)
+
+		bp := barPos{
+			pos:  pos,
+			vals: v,
+		}
+
+		bposes = append(bposes, bp)
+	}
+
+	sort.Sort(bposes)
+
+	for _, bp := range bposes {
+		var vl = []string{posName[bp.pos]}
+		vl = append(vl, bp.vals...)
+		lines = append(lines, vl)
+	}
+
+	return
+}
+
+func (s *Sketch) Merge(o *Sketch) {
+	l := len(s.cols)
+	for i, c := range o.cols {
+		s.cols = append(s.cols, c)
+		if o.skipCols[i+1] {
+			s.skipCols[l+i+1] = true
+		}
+	}
+
+	origBars := barLiner(s.Data)
+	otherBars := barLiner(o.Data)
+
+	if len(origBars) < len(otherBars) {
+		for _, b := range otherBars[len(origBars):] {
+
+			m := map[string][]string{
+				"#": b["#"],
+			}
+
+			origBars = append(origBars, m)
+		}
+	}
+
+	for i, m := range otherBars {
+		for k, v := range m {
+			if k == "#" {
+				continue
+			}
+
+			vn := make([]string, l+len(o.cols))
+			for ii, vv := range v {
+				//if len(v) > 1 {
+				vn[l+ii] = vv
+
+			}
+
+			//	fmt.Printf("v: %#v in bar %v, k: %q\n", v, i, k)
+			//	fmt.Printf("vn: %#v in bar %v, k: %q\n", vn, i, k)
+			if vs, has := origBars[i][k]; has {
+				// TODO make shure, vs has len(cols) (no missing cols)
+				vs = append(vs, vn[1:]...)
+				origBars[i][k] = vs
+			} else {
+				origBars[i][k] = vn
+			}
+		}
+	}
+
+	//s.Data
+	var data [][]string
+
+	for _, m := range origBars {
+		lines := getSortedBarData(m)
+
+		for _, l := range lines {
+			//fmt.Printf("dataline: %#v\n", l)
+			data = append(data, l)
+		}
+
+	}
+
+	s.Data = data
+
+	/*
+		for _, d := range o.Data {
+			d
+		}
+	*/
 }
 
 func (s *Sketch) addCols() {
@@ -88,7 +257,6 @@ func formatPosition(pos string) string {
 
 func (t *Sketch) writeDataLine(f Formatter, line []string) (err error) {
 	var s strings.Builder
-
 	if len(line[0]) > 0 && (line[0][0] == '#' || line[0][0] == '\'' || line[0][0] == '=' || line[0][0] == '[' || line[0][0] == '*') {
 		var first, last string
 		var skipCols bool

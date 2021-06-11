@@ -151,7 +151,29 @@ func (f *File) WriteTo(output io.Writer) (err error) {
 
 	}
 
+	sketches := map[string]*table.Sketch{}
+	tokens := map[string]*table.Tokens{}
+	var parts []Part
+
 	for _, part := range f.Parts {
+		//fmt.Printf("parttype: %T\n", part)
+		switch v := part.(type) {
+		case *table.Sketch:
+			if sk, has := sketches[v.Name()]; has {
+				sk.Merge(v)
+			} else {
+				sketches[v.Name()] = v
+				parts = append(parts, part)
+			}
+		case *table.Tokens:
+			tokens[v.Name()] = v
+			parts = append(parts, part)
+		default:
+			parts = append(parts, part)
+		}
+	}
+
+	for _, part := range parts {
 		err = part.WriteTo(f)
 		if err != nil {
 			return fmt.Errorf(
