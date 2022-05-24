@@ -1,5 +1,82 @@
 # TODOs
 
+## wichtigste bugs, zuerst zu fixen:
+- wenn in einer gruppenspalte die erste spalte im include nicht vorhanden ist, werden auch alle weiteren nicht
+  inkludiert
+- gruppenspaltenbezüge funktionieren nicht innerhalb der gleichen datei mit einfach =something. stattdessen muss der 
+  dateiname vorangestellt werden. besser wäre es, der dateiname wäre nicht nötig, wenn es sich um die gleiche Datei handelt.
+
+# taktnummern in score
+
+die neue syntax ist 
+#1
+#2
+
+etc (wie vorher parts)
+
+mit partnamen:
+
+#1_VERSE1
+
+#8_CHORUS2
+
+etc
+
+
+die nummern werden automatisch vom programm immer neu reingeschrieben beim formatieren
+
+## pattern parameter ersetzungsmodus
+
+wenn ein pattern parameter mit / beginnt, ersetzt er die jeweilige note.
+z.B. =patt(/d#,/e)
+ersetzt die erste note mit d# und die zweite mit e.
+man kann es auch mit platzhaltern kombinieren
+
+| =p2 |    |
+| --- | -- |
+| #   |    |
+| 1   | d  |
+| 2   | #1 |
+| 3   | e  |
+
+=p2(f,/g)
+
+ersetzt zu 
+
+
+| =p2 |    |
+| --- | -- |
+| #   |    |
+| 1   | d  |
+| 2   | f  |
+| 3   | g  |
+
+## monophonic recorder mode
+
+    muskel record --metro=<channel> --in=<port> --out=<port> <file>
+
+startet einen webserver und spielt ein metronom auf dem gegebenen metro channel (default 16) und schleust
+alle events des in ports auf den out port.
+mit
+
+    muskel client --recstart
+    
+wird die aufnahme gestartet
+und mit
+
+    muskel client --recstop
+
+beendet und in die datei geschrieben
+weitere aufnahmen werden in separate tabellen schrieben (=take1 =take2 etc.)
+
+    muskel client --tempo=<bpm>
+    
+setzt das tempo des metronoms.
+alternativ kann auch das tempo per cc gesetzt werden
+
+    muskel record --metro=<channel> --in=<port> --out=<port> --tempocc=<cc> <file>
+
+mit CRTL+C wird der server und das metronome gestoppt
 
 ## smfimage integration:
 
@@ -105,7 +182,7 @@ diese kann im Terminal sein, oder als Weboberfläche.
 
 ## änderungen, um mit Excel arbeiten zu können:
 
-- prefix ' zum inkludieren muss ersetzt werden, z.B. durch <
+- prefix ' zum inkludieren muss ersetzt werden, z.B. durch < oder ! (nach dem es vom patterneinbetten gelöst ist)
 - pattern prefix = muss ersetzt werden, z.B. durch ~
 - was ist mit , und . ? am besten wäre es, wenn das komma in der Zeit keine spezielle bedeutung hat und daher beim 
   excel einlesen dann durch den Punkt ersetzt werden kann, wenn es sich um eine Zahl handelt
@@ -135,14 +212,30 @@ in Zukunft:
 2
 
 
+### auftakte
+
+um auftakte besser schreiben zu können, 
+setzt man positionen vor dem 1. Takt mit negativem Vorzeichen
 
 
-## wichtigste bugs, zuerst zu fixen:
-- wenn in einer gruppenspalte die erste spalte im include nicht vorhanden ist, werden auch alle weiteren nicht
-  inkludiert
-- gruppenspaltenbezüge funktionieren nicht innerhalb der gleichen datei mit einfach =something. stattdessen muss der 
-  dateiname vorangestellt werden. besser wäre es, der dateiname wäre nicht nötig, wenn es sich um die gleiche Datei handelt.
-- zumindest unter windows können keine dateien von höheren verzeichnissen inkludiert werden (../somthing)
+| =mot |   |
+| -4&  | a |
+| #    |   |
+|  1   | c'|
+
+hier beginnt das motiv vor dem "1. Takt", der einbettungsposition und zwar auf 4&
+es kann nur einen auftakt geben
+
+wenn wir es einbetten
+
+z.B. 
+
+| =SCORE | Voc  |
+| # 4/4  |      |
+| 1      | =mot |
+
+wir de facto ein takt vorher schon eingefügt.
+etwaige noten oder andere laufende patterns werden ab der position der ersten note im auftakt beendet bzw. überschrieben
 
 
 ### parts/sprungmarken

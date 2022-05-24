@@ -27,7 +27,7 @@ func positionToAxis(row, col int) string {
 	colString := ""
 	col++
 	for col > 0 {
-		colString = string('A'+col%26-1) + colString
+		colString = fmt.Sprintf("A%v",col%26-1) + colString
 		col /= 26
 	}
 	return colString + rowString
