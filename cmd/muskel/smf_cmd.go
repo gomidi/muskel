@@ -17,7 +17,7 @@ func init() {
 
 func (s *smfCmd) init() {
 	s.Config = CONFIG.Command("smf", "convert a muskel file to Standard MIDI file format (SMF)")
-	s.ResolutionTicks = s.Int("ticks", "resolution of SMF file in ticks", config.Default(int32(960)))
+	s.ResolutionTicks = s.Int("ticks", "resolution of SMF file in ticks", config.Default(960))
 	s.ExportImage = s.Bool("image", "export to a PNG image (via smfimage)", config.Shortflag('i'))
 	s.ExportScore = s.Bool("score", "export the score to a PDF (via lilypond)", config.Shortflag('l'))
 }
