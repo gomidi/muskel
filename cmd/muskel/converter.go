@@ -231,7 +231,23 @@ func (c *converter) cmdPlay(sc *score.Score) error {
 }
 
 func (r *converter) run() error {
-	return r.mkcallback()(r.dir, filepath.Join(r.dir, r.file))
+	file := filepath.Join(r.dir, r.file)
+
+	st, err := os.Stat(file)
+	if err != nil {
+		return err
+	}
+
+	if st.IsDir() {
+		return fmt.Errorf("is directory: %q", file)
+	}
+
+	if filepath.Ext(file) != muskel.FILE_EXTENSION {
+		return fmt.Errorf("no muskel file: %q\n", file)
+	}
+
+	cb := r.mkcallback()
+	return cb(r.dir, filepath.Join(r.dir, r.file))
 }
 
 func (c *converter) mkcallback() (callback func(dir, file string) error) {
