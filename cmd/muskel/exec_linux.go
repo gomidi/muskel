@@ -1,3 +1,4 @@
+//go:build linux
 // +build linux
 
 package main
@@ -8,9 +9,9 @@ import (
 	"time"
 
 	//	"github.com/gen2brain/beeep"
+	"gitlab.com/golang-utils/version"
 	"gitlab.com/gomidi/midi"
 	driver "gitlab.com/gomidi/midicatdrv"
-	"gitlab.com/metakeule/config"
 )
 
 func newDriver() (midi.Driver, error) {
@@ -79,6 +80,6 @@ func runVersionated(file string, args []string) *exec.Cmd {
 	return exec.Command(file, args...)
 }
 
-func versionate(file string, v *config.Version) string {
-	return config.Versionate(file, v)
+func versionate(file string, v *version.Version) string {
+	return allVersionate(file, v)
 }

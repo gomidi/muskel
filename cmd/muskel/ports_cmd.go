@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.com/metakeule/config"
+	"gitlab.com/golang-utils/config/v2"
 )
 
 type portsCmd struct {
@@ -18,7 +18,7 @@ func init() {
 }
 
 func (s *portsCmd) init() {
-	s.Config = CONFIG.MustCommand("ports", "show midi out ports").SkipAllBut()
+	s.Config = CONFIG.Command("ports", "show midi out ports").SkipAllBut()
 }
 
 func (p *portsCmd) run() error {

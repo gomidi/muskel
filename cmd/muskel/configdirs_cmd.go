@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"gitlab.com/golang-utils/config/v2"
 	"gitlab.com/gomidi/muskel"
-	"gitlab.com/metakeule/config"
 )
 
 type configDirsCmd struct {
@@ -19,7 +19,7 @@ func init() {
 }
 
 func (s *configDirsCmd) init() {
-	s.Config = CONFIG.MustCommand("dirs", "show configuration dirs").SkipAllBut()
+	s.Config = CONFIG.Command("dirs", "show configuration dirs").SkipAllBut()
 }
 
 func (c *configDirsCmd) run() error {

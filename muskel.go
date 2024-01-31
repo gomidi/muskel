@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"gitlab.com/golang-utils/version"
 	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/image"
@@ -17,18 +18,17 @@ import (
 	"gitlab.com/gomidi/muskel/smfimport"
 	"gitlab.com/gomidi/muskel/xlsx"
 	"gitlab.com/gomidi/smfimage"
-	"gitlab.com/metakeule/config"
 )
 
 const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
-func ReadWDVersionFile(dir string) (*config.Version, error) {
+func ReadWDVersionFile(dir string) (*version.Version, error) {
 	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
 	b, err := ioutil.ReadFile(p)
 	if err != nil {
 		return nil, err
 	}
-	v, err2 := config.ParseVersion(strings.TrimSpace(string(b)))
+	v, err2 := version.Parse(strings.TrimSpace(string(b)))
 	if err2 != nil {
 		return nil, err2
 	}
@@ -38,7 +38,7 @@ func ReadWDVersionFile(dir string) (*config.Version, error) {
 
 func WriteWDVersionFile(dir string) error {
 	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
-	return ioutil.WriteFile(p, []byte(VERSION), 0644)
+	return ioutil.WriteFile(p, []byte(VERSION.String()), 0644)
 }
 
 func Import(srcFile string, targetFile string, opts ...smfimport.Option) error {

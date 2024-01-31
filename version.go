@@ -1,3 +1,7 @@
 package muskel
 
-const VERSION = "1.3.8"
+import (
+	"gitlab.com/golang-utils/version"
+)
+
+var VERSION = version.Version{Major: 1, Minor: 3, Patch: 9}

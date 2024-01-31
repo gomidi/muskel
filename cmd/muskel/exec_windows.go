@@ -14,10 +14,11 @@ import (
 
 	"unsafe"
 
+	"gitlab.com/golang-utils/version"
 	"gitlab.com/gomidi/midi"
+
 	//	driver "gitlab.com/gomidi/rtmididrv"
 	driver "gitlab.com/gomidi/midicatdrv"
-	"gitlab.com/metakeule/config"
 	"golang.org/x/sys/windows"
 )
 
@@ -168,6 +169,6 @@ func runVersionated(file string, args []string) *exec.Cmd {
 	return exec.Command(file, args...)
 }
 
-func versionate(file string, v *config.Version) string {
-	return config.Versionate(file, v) + ".exe"
+func versionate(file string, v *version.Version) string {
+	return allVersionate(file, v) + ".exe"
 }

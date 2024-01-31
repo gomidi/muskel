@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"gitlab.com/metakeule/config"
+	"gitlab.com/golang-utils/config/v2"
 )
 
 type clientCmd struct {
@@ -23,11 +23,11 @@ func init() {
 }
 
 func (s *clientCmd) init() {
-	s.Config = CONFIG.MustCommand("client", "client to the server. allows to send play/stop, toggle and convert commands").SkipAllBut("solo", "cutout")
-	s.ServerAddress = s.NewString("addr", "address of the server", config.Default("localhost:8800"))
-	s.Toggle = s.NewBool("toggle", "toggle between play/stop playing the current file", config.Shortflag('t'))
-	s.Play = s.NewBool("play", "play (true) or stop (false) playing the current file", config.Shortflag('p'))
-	s.Convert = s.NewBool("convert", "converts the current file to smf", config.Shortflag('c'))
+	s.Config = CONFIG.Command("client", "client to the server. allows to send play/stop, toggle and convert commands").SkipAllBut("solo", "cutout")
+	s.ServerAddress = s.String("addr", "address of the server", config.Default("localhost:8800"))
+	s.Toggle = s.Bool("toggle", "toggle between play/stop playing the current file", config.Shortflag('t'))
+	s.Play = s.Bool("play", "play (true) or stop (false) playing the current file", config.Shortflag('p'))
+	s.Convert = s.Bool("convert", "converts the current file to smf", config.Shortflag('c'))
 }
 
 func (c *clientCmd) run(a *args) error {

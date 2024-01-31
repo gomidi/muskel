@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/metakeule/observe/lib/runfunc"
+	"gitlab.com/golang-utils/config/v2"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/smfimport"
-	"gitlab.com/metakeule/config"
 )
 
 type importCmd struct {
@@ -32,15 +32,15 @@ func init() {
 }
 
 func (s *importCmd) init() {
-	s.Config = CONFIG.MustCommand("import", "convert a Standard MIDI file to a muskel file").SkipAllBut("watch", "dir")
-	s.Source = s.LastString("midifile", "the source SMF/MIDI file.", config.Required)
-	s.OutFile = s.NewString("out", "the target muskel file.", config.Shortflag('o'), config.Required)
-	s.MonoTracks = s.NewString("mono", "tracks that are considered to be monophon (e.g. 0,4,5)", config.Shortflag('m'))
-	s.KeysTracks = s.NewString("keys", "tracks that should keep the key numbers instead of converting to note names (for drums keys, sample keys or keyswitches) (e.g. 0,4,5)", config.Shortflag('k'))
-	s.SplitTypes = s.NewBool("split", "split tracks by MIDI event types", config.Default(false), config.Shortflag('s'))
-	s.Quantize = s.NewBool("quantize", "quantize, based on a dual 16th/8th tripplets grid with auto track offset detection", config.Shortflag('q'))
-	s.SkipVelocity = s.NewBool("skipvelo", "do not import velocity, use standard velocity instead")
-	s.SkipMicroTiming = s.NewBool("skipmicro", "do not track micro timing")
+	s.Config = CONFIG.Command("import", "convert a Standard MIDI file to a muskel file").SkipAllBut("watch", "dir")
+	s.Source = s.LastString("midifile", "the source SMF/MIDI file.", config.Required())
+	s.OutFile = s.String("out", "the target muskel file.", config.Shortflag('o'), config.Required())
+	s.MonoTracks = s.String("mono", "tracks that are considered to be monophon (e.g. 0,4,5)", config.Shortflag('m'))
+	s.KeysTracks = s.String("keys", "tracks that should keep the key numbers instead of converting to note names (for drums keys, sample keys or keyswitches) (e.g. 0,4,5)", config.Shortflag('k'))
+	s.SplitTypes = s.Bool("split", "split tracks by MIDI event types", config.Default(false), config.Shortflag('s'))
+	s.Quantize = s.Bool("quantize", "quantize, based on a dual 16th/8th tripplets grid with auto track offset detection", config.Shortflag('q'))
+	s.SkipVelocity = s.Bool("skipvelo", "do not import velocity, use standard velocity instead")
+	s.SkipMicroTiming = s.Bool("skipmicro", "do not track micro timing")
 }
 
 func (i *importCmd) run(a *args) error {

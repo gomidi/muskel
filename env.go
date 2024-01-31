@@ -9,7 +9,6 @@ import (
 	appdir "github.com/emersion/go-appdir"
 	"gitlab.com/gomidi/muskel/predefined"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/metakeule/config"
 )
 
 var USER_DIR string
@@ -21,11 +20,7 @@ func setUserDir(version string) {
 
 func init() {
 
-	v, err := config.ParseVersion(VERSION)
-	if err != nil {
-		panic("invalid VERSION: " + VERSION)
-	}
-	vs := fmt.Sprintf("v%v_%v_%v", v.Major, v.Minor, v.Patch)
+	vs := fmt.Sprintf("v%v_%v_%v", VERSION.Major, VERSION.Minor, VERSION.Patch)
 	setUserDir(vs)
 	setWorkingDir()
 	os.MkdirAll(USER_DIR, 0755)

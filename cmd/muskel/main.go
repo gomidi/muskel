@@ -6,12 +6,13 @@ import (
 	"os/signal"
 	"path/filepath"
 
+	"gitlab.com/golang-utils/config/v2"
 	"gitlab.com/gomidi/muskel"
-	"gitlab.com/metakeule/config"
 )
 
 var (
-	CONFIG         = config.MustNew("muskel", muskel.VERSION, "muskel is a musical sketch language")
+	CONFIG = config.New("muskel", muskel.VERSION.Major, muskel.VERSION.Minor, muskel.VERSION.Patch,
+		"muskel is a musical sketch language")
 	SIGNAL_CHANNEL = make(chan os.Signal, 10)
 )
 
@@ -49,7 +50,7 @@ func run() error {
 			// check, if muskel_version.txt is inside the current dir
 			// If the version does not match, it delegates to the versioned muskel command (e.g. muskel_1_1_33.exe)
 			// checkMuskelVersion exits if appropriate
-			checkMuskelVersion(muskel.VERSION, muskel.MUSKEL_VERSION_FILE, ARGS)
+			checkMuskelVersion(muskel.VERSION.String(), muskel.MUSKEL_VERSION_FILE, ARGS)
 		}
 	}
 

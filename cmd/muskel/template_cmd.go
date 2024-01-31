@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"gitlab.com/golang-utils/config/v2"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/metakeule/config"
 )
 
 type templateCmd struct {
@@ -25,7 +25,7 @@ func init() {
 }
 
 func (s *templateCmd) init() {
-	s.Config = CONFIG.MustCommand("template", "show global template files").SkipAllBut()
+	s.Config = CONFIG.Command("template", "show global template files").SkipAllBut()
 	s.File = s.LastString("templatefile", "file name of the template file that should be shown. If no file is given, the list of available files is shown.")
 }
 
