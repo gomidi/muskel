@@ -1,3 +1,4 @@
+//go:build windows
 // +build windows
 
 package main
@@ -168,5 +169,5 @@ func runVersionated(file string, args []string) *exec.Cmd {
 }
 
 func versionate(file string, v *config.Version) string {
-	return config.Versionate(file+".exe", v)
+	return config.Versionate(file, v) + ".exe"
 }

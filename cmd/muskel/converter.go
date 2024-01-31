@@ -43,8 +43,8 @@ type converter struct {
 }
 
 func newConverter(player *Player, a *args) (r *converter) {
-	inFile := a.File.Get()
 
+	inFile := filepath.ToSlash(a.File.Get())
 	c := &converter{
 		player: player,
 		inFile: inFile,
