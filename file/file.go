@@ -314,10 +314,26 @@ func (f *File) findPart(line string) (interface{}, error) {
 	return nil, nil
 }
 
+type ParseError struct {
+	File string
+	Line int
+	Err  error
+}
+
+func (p ParseError) Error() string {
+	return fmt.Sprintf("%s:%v: %v", filepath.FromSlash(filepath.ToSlash(p.File)), p.Line, p.Err)
+}
+
 func (f *File) Parse() (err error) {
+	var perr ParseError
+	//perr.File = f.Name()
+	perr.File = f.name
+
 	for f.Input.Scan() {
-		err = f.Input.Err()
-		if err != nil {
+		perr.Line = f.currentLine
+
+		perr.Err = f.Input.Err()
+		if perr.Err != nil {
 			//fmt.Printf("error while scanning: %v\n", err)
 			break
 		}
@@ -334,18 +350,15 @@ func (f *File) Parse() (err error) {
 
 		var part interface{}
 
-		part, err = f.findPart(line)
+		part, perr.Err = f.findPart(line)
 
-		if err != nil {
-			//fmt.Printf("error in line %v: %v", f.currentLine, err)
-			err = fmt.Errorf("error in line %v: %v", f.currentLine+1, err)
+		if perr.Err != nil {
+			perr.Line = perr.Line + 1
 			break
 		}
 
 		if part == nil {
-			err = fmt.Errorf("invalid / unexpected line: %q", line)
-			//fmt.Printf("error in line %v: %v", f.currentLine, err)
-			//fmt.Printf("got err: %v\n", err)
+			perr.Err = fmt.Errorf("invalid / unexpected line: %q", line)
 			break
 		}
 
@@ -354,15 +367,15 @@ func (f *File) Parse() (err error) {
 		switch v := part.(type) {
 		case EmptyLine:
 			if f.currentTable != nil {
-				err = f.currentTable.Finish()
-				if err != nil {
-					err = fmt.Errorf("ERROR while finishing table %q: %v", f.currentTable.Name(), err.Error())
-					return err
+				perr.Err = f.currentTable.Finish()
+				if perr.Err != nil {
+					perr.Err = fmt.Errorf("ERROR while finishing table %q: %v", f.currentTable.Name(), perr.Err.Error())
+					return perr
 				}
 				f.currentTable = nil
 			}
 			f.Parts = append(f.Parts, v)
-			err = v.ParseLine(line)
+			perr.Err = v.ParseLine(line)
 		case *MultiLineComment:
 			if v != f.currentMultiLineComment {
 				// fmt.Printf("appending part: %#v\n", v)
@@ -386,7 +399,7 @@ func (f *File) Parse() (err error) {
 				if strings.LastIndex(line, "|") != len(line)-1 {
 					line += "|"
 				}
-				err = v.ParseLine(line)
+				perr.Err = v.ParseLine(line)
 			}
 		case Part:
 			//fmt.Printf("appending part: %#v\n", v)
@@ -397,12 +410,11 @@ func (f *File) Parse() (err error) {
 				if strings.LastIndex(line, "|") != len(line)-1 && len(line) > 0 && line[0] != '\'' {
 					line += "|"
 				}
-				err = v.ParseLine(line)
+				perr.Err = v.ParseLine(line)
 			}
 		}
 
-		if err != nil {
-			//fmt.Printf("ERROR: %v, breaking\n", err)
+		if perr.Err != nil {
 			//panic(err.Error())
 			break
 		}
@@ -410,26 +422,30 @@ func (f *File) Parse() (err error) {
 		f.currentLine++
 	}
 
-	if err == io.EOF {
-		err = nil
+	if perr.Err == io.EOF {
+		perr.Err = nil
 	}
 
-	if err != nil {
-		return fmt.Errorf("ERROR in line %v: %s", f.currentLine, err.Error())
+	if perr.Err != nil {
+		return perr
 	}
 
 	if f.currentTable != nil {
-		err = f.currentTable.Finish()
-		if err != nil {
-			err = fmt.Errorf("ERROR while finishing table %q: %v", f.currentTable.Name(), err.Error())
-			return err
+		perr.Err = f.currentTable.Finish()
+		if perr.Err != nil {
+			perr.Err = fmt.Errorf("ERROR while finishing table %q: %v", f.currentTable.Name(), perr.Err.Error())
+			return perr
 		}
 		f.currentTable = nil
 	}
 
 	if f.currentMultiLineComment != nil {
-		err = fmt.Errorf("ERROR comment starting at line %v nevers ends", f.currentMultiLineComment.lineNo+1)
+		perr.Err = fmt.Errorf("ERROR comment starting at line %v nevers ends", f.currentMultiLineComment.lineNo+1)
 	}
 
-	return err
+	if perr.Err == nil {
+		return nil
+	}
+
+	return perr
 }

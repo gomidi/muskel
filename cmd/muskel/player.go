@@ -48,6 +48,7 @@ func newPlayer() (p *Player, err error) {
 			"timidity":   timidityCmd(),
 			"audacious":  audaciousCmd(),
 			"fluidsynth": fluidsynthCmd(),
+			"vlc":        vlcCmd(),
 			"auto":       defaultPlayCmd(),
 		},
 

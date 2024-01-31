@@ -19,7 +19,7 @@ var (
 func main() {
 	err := run()
 	if err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
+		fmt.Fprintf(os.Stdout, "%s\n", err.Error())
 		os.Exit(1)
 	}
 }

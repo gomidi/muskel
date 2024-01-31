@@ -45,6 +45,10 @@ func (p *Process) Kill() {
 	time.Sleep(time.Second)
 }
 
+func vlcCmd() [2]string {
+	return [2]string{"vlc", "--no-video --play-and-exit --no-playlist-tree --quiet -Idummy $_file"}
+}
+
 func fluidsynthCmd() [2]string {
 	return [2]string{"fluidsynth", "-j -i -n $_file"}
 }

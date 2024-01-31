@@ -327,7 +327,7 @@ func (c *converter) parseMuskel(srcFile string) (*score.Score, error) {
 	sc, err := muskel.ParseFile(srcFile, c.Config.Params, opts...)
 
 	if err != nil {
-		return nil, fmt.Errorf("ERROR while parsing MuSkeL: %s", err.Error())
+		return nil, err
 	}
 
 	if c.Config.UnrollFile != "" {

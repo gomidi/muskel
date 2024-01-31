@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	//"syscall"
+	"syscall"
 
 	"unsafe"
 
@@ -113,16 +113,23 @@ func (p *Process) Run() error {
 		p.Program+` `+p.Args,
 	)
 
-	/*
-		p.cmd.SysProcAttr = &syscall.SysProcAttr{
-			CreationFlags: syscall.CREATE_NEW_CONSOLE,
-		}
-	*/
+	p.cmd.SysProcAttr = &syscall.SysProcAttr{
+		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP, //  .CREATE_NEW_CONSOLE,
+	}
+
 	out, err := p.cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
-	p.PID, err = strconv.Atoi(strings.TrimSpace(string(out)))
+
+	outStr := strings.TrimSpace(string(out))
+
+	if outStr == "" {
+		p.PID = -1
+		return nil
+	}
+
+	p.PID, err = strconv.Atoi(outStr)
 	return err
 }
 
@@ -131,6 +138,12 @@ func (p *Process) Kill() {
 	//_, _ = cmd.CombinedOutput()
 	p.killer()
 }
+
+func vlcCmd() [2]string {
+	return [2]string{"vlc.exe", "--no-video --play-and-exit --no-playlist-tree --quiet -Idummy $_file"}
+}
+
+//vlc.exe --no-video --play-and-exit --no-playlist-tree --quiet -Idummy main.mid
 
 func fluidsynthCmd() [2]string {
 	return [2]string{"fluidsynth.exe", "-i -n --quiet $_file"}
@@ -146,7 +159,7 @@ func timidityCmd() [2]string {
 
 func defaultPlayCmd() [2]string {
 	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
-	return fluidsynthCmd()
+	return vlcCmd()
 }
 
 /*
