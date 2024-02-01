@@ -7,8 +7,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
-	"strings"
+
+	//"strconv"
+	//"strings"
 
 	"syscall"
 
@@ -122,14 +123,18 @@ func (p *Process) Run() error {
 		return err
 	}
 
-	outStr := strings.TrimSpace(string(out))
+	_ = out
 
-	if outStr == "" {
-		p.PID = -1
-		return nil
-	}
+	/*
+		outStr := strings.TrimSpace(string(out))
 
-	p.PID, err = strconv.Atoi(outStr)
+		if outStr == "" {
+			p.PID = -1
+			return nil
+		}
+	*/
+
+	//p.PID, err = strconv.Atoi(outStr)
 	return err
 }
 
