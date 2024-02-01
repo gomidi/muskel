@@ -11,8 +11,11 @@ import (
 )
 
 var (
-	CONFIG = config.New("muskel", muskel.VERSION.Major, muskel.VERSION.Minor, muskel.VERSION.Patch,
-		"muskel is a musical sketch language")
+	CONFIG = config.New("muskel",
+		muskel.VERSION.Major, muskel.VERSION.Minor, muskel.VERSION.Patch,
+		"muskel is a musical sketch language",
+		config.AsciiArt("muskel"),
+	)
 	SIGNAL_CHANNEL = make(chan os.Signal, 10)
 )
 
