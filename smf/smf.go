@@ -7,26 +7,24 @@ import (
 	"sort"
 	"strings"
 
-	"gitlab.com/gomidi/midi/midimessage/meta"
-	"gitlab.com/gomidi/midi/midimessage/meta/meter"
-	smfpkg "gitlab.com/gomidi/midi/smf"
+	"gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/track"
 )
 
-type smf struct {
+type SMF struct {
 	fileGroup string
 	score     *score.Score
-	writer    *writer
+	writer    *Writer
 	midiTrack MidiTrack
 }
 
-func newSMF(s *score.Score, filegroup string, wr *writer) *smf {
-	return &smf{score: s, fileGroup: filegroup, writer: wr}
+func New(s *score.Score, filegroup string, wr *Writer) *SMF {
+	return &SMF{score: s, fileGroup: filegroup, writer: wr}
 }
 
-func (s *smf) write() error {
+func (s *SMF) write() error {
 	var evts events
 	meter_evts, err := s.meterTrack()
 
@@ -76,7 +74,7 @@ func (s *smf) write() error {
 		t := s.newTrack()
 		evts = t.trackIntroEvents(track)
 		scevts, err := t.trackScoreEvents(track, s.score.Unrolled[track.Name])
-		if err != nil && err != smfpkg.ErrFinished {
+		if err != nil && err != smf.ErrFinished {
 			return fmt.Errorf("could not write track %q: %v", track.Name, err)
 		}
 		sort.Sort(scevts)
@@ -84,7 +82,7 @@ func (s *smf) write() error {
 		endPos := s.posToTicks(track.EndPos)
 		err = s.writer.writeTrack(uint8(track.MIDIChannel), int(endPos), evts)
 
-		if err != nil && err != smfpkg.ErrFinished {
+		if err != nil && err != smf.ErrFinished {
 			return fmt.Errorf("could not write track %q: %v", track.Name, err)
 		}
 	}
@@ -92,13 +90,13 @@ func (s *smf) write() error {
 	return nil
 }
 
-func (s *smf) newTrack() *Track {
+func (s *SMF) newTrack() *Track {
 	return &Track{
 		smf: s,
 	}
 }
 
-func (s *smf) isStartOfPart(b *items.Bar) string {
+func (s *SMF) isStartOfPart(b *items.Bar) string {
 	for k, v := range s.score.Parts {
 		if v[0] == b.Position {
 			return k
@@ -107,13 +105,13 @@ func (s *smf) isStartOfPart(b *items.Bar) string {
 	return ""
 }
 
-func (s *smf) posToTicks(pos uint) uint {
+func (s *SMF) posToTicks(pos uint) uint {
 	return (pos * uint(s.writer.ticks) / 8)
 }
 
 var regNumBarComment = regexp.MustCompile("^#[0-9]+$")
 
-func (s *smf) meterTrack() (evts []*event, err error) {
+func (s *SMF) meterTrack() (evts []*event, err error) {
 
 	var bf strings.Builder
 
@@ -126,7 +124,7 @@ func (s *smf) meterTrack() (evts []*event, err error) {
 		}
 	}
 
-	evts = append(evts, &event{message: meta.Copyright(bf.String())})
+	evts = append(evts, &event{message: smf.MetaCopyright(bf.String())})
 
 	num := uint8(4)
 	denom := uint8(4)
@@ -136,7 +134,7 @@ func (s *smf) meterTrack() (evts []*event, err error) {
 			if b.TimeSigChange[0] != num || b.TimeSigChange[1] != denom || i == 0 {
 				num = b.TimeSigChange[0]
 				denom = b.TimeSigChange[1]
-				evts = append(evts, &event{position: s.posToTicks(b.Position), message: meter.Meter(num, denom)})
+				evts = append(evts, &event{position: s.posToTicks(b.Position), message: smf.MetaMeter(num, denom)})
 			}
 		}
 
@@ -154,15 +152,15 @@ func (s *smf) meterTrack() (evts []*event, err error) {
 
 		if len(markers) > 0 {
 			marker := strings.Join(markers, " ")
-			evts = append(evts, &event{position: s.posToTicks(b.Position), message: meta.Cuepoint(marker)})
-			evts = append(evts, &event{position: s.posToTicks(b.Position), message: meta.Marker(marker)})
+			evts = append(evts, &event{position: s.posToTicks(b.Position), message: smf.MetaCuepoint(marker)})
+			evts = append(evts, &event{position: s.posToTicks(b.Position), message: smf.MetaMarker(marker)})
 		}
 	}
 	return
 }
 
-func (s *smf) tempoTrack() (evts []*event, err error) {
-	evts = append(evts, &event{position: 0, message: meta.TrackSequenceName("BPM")})
+func (s *SMF) tempoTrack() (evts []*event, err error) {
+	evts = append(evts, &event{position: 0, message: smf.MetaTrackSequenceName("BPM")})
 
 	var glissStartPos uint
 	var glissStartBPM float64
@@ -187,14 +185,14 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 							//uint(t.midiTrack.noteGlide.startPosition + uint64(t.smf.writer.ticks/16)*uint64(step)
 							//position: glissStartPos + s.posToTicks(step*2),
 							position: uint(glissStartPos + uint(s.writer.ticks/16)*uint(step)),
-							message:  meta.FractionalBPM(bpm + glissStartBPM),
+							message:  smf.MetaTempo(bpm + glissStartBPM),
 						})
 				})
 				inGliss = false
 			}
 
 			if b.TempoChange != lastTempo || i == 0 {
-				evts = append(evts, &event{position: s.posToTicks(b.Position), message: meta.FractionalBPM(b.TempoChange)})
+				evts = append(evts, &event{position: s.posToTicks(b.Position), message: smf.MetaTempo(b.TempoChange)})
 				lastTempo = b.TempoChange
 			}
 
@@ -213,7 +211,7 @@ func (s *smf) tempoTrack() (evts []*event, err error) {
 			sortedTc := sortInternalTempoChanges(b.InnerTempoChanges)
 
 			for _, tc := range sortedTc {
-				evts = append(evts, &event{position: s.posToTicks(b.Position + tc.relPos), message: meta.FractionalBPM(tc.bpm)})
+				evts = append(evts, &event{position: s.posToTicks(b.Position + tc.relPos), message: smf.MetaTempo(tc.bpm)})
 			}
 		}
 	}

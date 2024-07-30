@@ -115,6 +115,7 @@ func (pc *sketchToken) _getEventStream(start uint, endPos uint, isOverride bool)
 }
 
 func (c *sketchToken) unroll(start uint, until uint) (evt []*Event, diff uint, end uint, err error) {
+	_ = until
 	// TODO allow parameters?
 	var sc string
 	sc, err = c.getToken()

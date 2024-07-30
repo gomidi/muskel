@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/filter"
 	"gitlab.com/gomidi/muskel/items"
@@ -16,7 +17,6 @@ import (
 	"gitlab.com/gomidi/muskel/timbre"
 	"gitlab.com/gomidi/muskel/track"
 	"gitlab.com/gomidi/muskel/tuning"
-	"gitlab.com/gomidi/smfimage"
 )
 
 type Score struct {

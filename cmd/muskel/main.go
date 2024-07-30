@@ -44,8 +44,8 @@ func run() error {
 		return CONFIG_DIRS.run()
 	case CLIENT.Config:
 		return CLIENT.run(ARGS)
-	case IMPORT.Config:
-		return IMPORT.run(ARGS)
+	//case IMPORT.Config:
+	//	return IMPORT.run(ARGS)
 	case TEMPLATE.Config:
 		return TEMPLATE.run()
 	default:

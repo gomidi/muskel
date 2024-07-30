@@ -1,5 +1,6 @@
 package smfimport
 
+/*
 import "gitlab.com/gomidi/midi"
 
 type positionedMsg struct {
@@ -30,3 +31,4 @@ func (s sortPositionedMsg) Less(a, b int) bool {
 
 	return s[a].absPos < s[b].absPos
 }
+*/

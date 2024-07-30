@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"gitlab.com/golang-utils/config/v2"
+	"gitlab.com/gomidi/midi/v2"
 )
 
 type portsCmd struct {
@@ -22,16 +23,21 @@ func (s *portsCmd) init() {
 }
 
 func (p *portsCmd) run() error {
-	drv, err := newDriver()
-	if err != nil {
-		return err
-	}
+	/*
+		drv, err := newDriver()
+		if err != nil {
+			return err
+		}
+	*/
 
-	outs, err := drv.Outs()
+	outs := midi.GetOutPorts()
+	/*
+		outs, err := drv.Outs()
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
+	*/
 
 	fmt.Fprintln(os.Stdout, "MIDI outputs")
 

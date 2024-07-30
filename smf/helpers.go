@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 )
@@ -28,7 +27,8 @@ func (debugLog) Printf(format string, vals ...interface{}) {
 	fmt.Fprintf(os.Stdout, format+"\n", vals...)
 }
 
-func writeSMFToFile(s *score.Score, midifile, filegroup string, options ...smfwriter.Option) error {
+// func writeSMFToFile(s *score.Score, midifile, filegroup string, options ...smfwriter.Option) error {
+func writeSMFToFile(s *score.Score, midifile, filegroup string) error {
 	f, err := os.Create(midifile)
 	if err != nil {
 		return err

@@ -3,8 +3,8 @@ package image
 import (
 	"io"
 
+	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/score"
-	"gitlab.com/gomidi/smfimage"
 )
 
 /*

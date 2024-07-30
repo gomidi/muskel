@@ -5,7 +5,6 @@ import (
 	"io"
 	"strings"
 
-	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 )
@@ -14,7 +13,8 @@ const DEBUG_TEST = false
 
 //var DEBUG bool = false
 
-func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwriter.Option) error {
+// func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwriter.Option) error {
+func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string) error {
 	numTracks := uint16(1) // first track is for time signatures and tempo changes
 
 	if items.DEBUG {
@@ -36,17 +36,25 @@ func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, options ...smfwr
 		}
 	}
 
-	if DEBUG_TEST {
-		options = append(options, smfwriter.Debug(debugLog{}))
-	}
+	/*
+		if DEBUG_TEST {
+			options = append(options, smfwriter.Debug(debugLog{}))
+		}
+	*/
 
-	sw := newSMF(s, filegroup, newWriter(wr, numTracks, 960, options...))
+	//sw := newSMF(s, filegroup, newWriter(wr, numTracks, 960, options...))
+	wrt := NewWriter(wr, numTracks, 960)
+	if items.DEBUG || DEBUG_TEST {
+		wrt.SMF.Logger = debugLog{}
+	}
+	sw := New(s, filegroup, wrt)
 	return sw.write()
 
 }
 
 // WriteFile writes the score to the given SMF file
-func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (err error) {
+// func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (err error) {
+func WriteFile(s *score.Score, midifile string) (err error) {
 	if items.DEBUG {
 		fmt.Printf("WriteFile(%q) called\n", midifile)
 	}
@@ -61,7 +69,7 @@ func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (er
 	hasPlaceholder := strings.Index(midifile, "%s") > -1
 
 	if !hasPlaceholder {
-		return writeSMFToFile(s, midifile, "*", options...)
+		return writeSMFToFile(s, midifile, "*")
 	}
 
 	var fileGroups = map[string]string{}
@@ -76,7 +84,7 @@ func WriteFile(s *score.Score, midifile string, options ...smfwriter.Option) (er
 	var errs errors
 
 	for grp, fl := range fileGroups {
-		err := writeSMFToFile(s, fl, grp, options...)
+		err := writeSMFToFile(s, fl, grp)
 		if err != nil {
 			errs = append(errs, err)
 		}

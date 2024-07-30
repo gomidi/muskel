@@ -80,7 +80,7 @@ func (s sortedNoteOns) Len() int {
 	return len(s)
 }
 
-func (mw *MidiTrack) GlideResolution(ticks uint32) uint32 {
+func (mw *MidiTrack) GlideResolution(ticks uint16) uint16 {
 	/*
 		ticks = 1/4
 		  /2 = 1/8

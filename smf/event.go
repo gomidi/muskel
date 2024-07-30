@@ -1,17 +1,12 @@
 package smf
 
-import (
-	"fmt"
-
-	"gitlab.com/gomidi/midi"
-	"gitlab.com/gomidi/midi/midimessage/channel"
-)
+import "gitlab.com/gomidi/midi/v2/smf"
 
 type event struct {
 	position  uint
 	monitor   bool
 	stopNotes bool
-	message   midi.Message
+	message   smf.Message
 }
 
 type events []*event
@@ -41,12 +36,17 @@ var typeSortPriority = map[string]int{
 	"channel.Pitchbend":      -4,
 	"channel.NoteOn":         -10,
 	"meta.Lyric":             -15,
+	"meta.Marker":            -20,
+	"meta.Cuepoint":          -25,
 }
 
 func (e events) Less(a, b int) bool {
 	if e[a].position == e[b].position {
-		typeA := fmt.Sprintf("%T", e[a].message)
-		typeB := fmt.Sprintf("%T", e[b].message)
+		msgA := e[a].message
+		msgB := e[b].message
+
+		typeA := msgA.Type().String()
+		typeB := msgB.Type().String()
 		prioA := typeSortPriority[typeA]
 		prioB := typeSortPriority[typeB]
 
@@ -59,20 +59,15 @@ func (e events) Less(a, b int) bool {
 			return e[a].stopNotes
 		}
 
-		switch v := e[a].message.(type) {
-		case channel.NoteOn:
-			other := e[b].message.(channel.NoteOn)
-			return v.Key() < other.Key()
-		case channel.NoteOff:
-			other := e[b].message.(channel.NoteOff)
-			return v.Key() < other.Key()
-		case channel.PolyAftertouch:
-			other := e[b].message.(channel.PolyAftertouch)
-			return v.Key() < other.Key()
-		default:
-			return false
-		}
+		var keyA, keyB uint8
+		var chanA, chanB uint8
+		var velA, velB uint8
 
+		if (msgA.GetNoteOn(&chanA, &keyA, &velA) || msgA.GetNoteOff(&chanA, &keyA, &velA) || msgA.GetPolyAfterTouch(&chanA, &keyA, &velA)) &&
+			(msgB.GetNoteOn(&chanB, &keyB, &velB) || msgB.GetNoteOff(&chanB, &keyB, &velB) || msgB.GetPolyAfterTouch(&chanB, &keyB, &velB)) {
+			return keyA < keyB
+		}
+		return false
 	}
 
 	//fmt.Printf("types: %T vs %T pos: %v vs %v\n", e[a].message, e[b].message, e[a].position, e[b].position)

@@ -10,8 +10,8 @@ import (
 	"bytes"
 
 	"gitlab.com/gomidi/lilypond"
-	"gitlab.com/gomidi/midi/smf"
-	"gitlab.com/gomidi/midi/smf/smfwriter"
+	//	"gitlab.com/gomidi/midi/smf"
+	//"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/xlsx"
@@ -167,7 +167,8 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		return err
 	}
 
-	err = muskel.WriteSMFFile(sc, c.player.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Get())))
+	//	err = muskel.WriteSMFFile(sc, c.player.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Get())))
+	err = muskel.WriteSMFFile(sc, c.player.outFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 		alert("ERROR while converting MuSkeL to SMF", err)

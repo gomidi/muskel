@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/gomidi/midi/smf"
+	"gitlab.com/gomidi/midi/v2/smf"
 )
 
 var DEBUG bool = false
@@ -265,7 +265,7 @@ func FindEventThatIsNotRest(start int, evts []*Event) (found int) {
 	return FindEventThatIsNotRest(start+1, evts)
 }
 
-//func replaceParams(s string, params []interface{}) string {
+// func replaceParams(s string, params []interface{}) string {
 func ReplaceParams(s string, params []string) string {
 	/*
 		if DEBUG {
@@ -362,11 +362,11 @@ func calcAdd2(distance int64, diff float64) float64 {
 	return diff / (float64(distance) * float64(distance))
 }
 
-var DottedLengths = map[string][2]uint32{
+var DottedLengths = map[string][2]uint16{
 	//".":   [2]uint32{1, 8},
-	":":   [2]uint32{1, 16},
-	"::":  [2]uint32{1, 32},
-	":::": [2]uint32{1, 64},
+	":":   {1, 16},
+	"::":  {1, 32},
+	":::": {1, 64},
 }
 
 func VelocityToDynamic(vel uint8) (dyn string) {

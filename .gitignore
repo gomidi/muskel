@@ -11,3 +11,4 @@ todos
 cover.out
 *.mskl
 cmd/muskel/artifacts
+muskel_version.txt

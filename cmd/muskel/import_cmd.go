@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"fmt"
 	"os"
@@ -186,3 +187,4 @@ func (i *importCmd) watch(a *args) error {
 	os.Exit(0)
 	return nil
 }
+*/

@@ -8,8 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	"gitlab.com/gomidi/midi"
-	"gitlab.com/gomidi/midi/player"
+	"gitlab.com/gomidi/midi/v2"
+	"gitlab.com/gomidi/midi/v2/drivers"
+	"gitlab.com/gomidi/midi/v2/smf"
+	//"gitlab.com/gomidi/midi/player"
 )
 
 type Player struct {
@@ -23,7 +25,7 @@ type Player struct {
 	program [2]string
 
 	playToPort bool
-	portOut    midi.Out
+	portOut    drivers.Out
 
 	cmdMaps map[string][2]string
 
@@ -124,11 +126,18 @@ func (ps *Player) setupProgram() error {
 			return fmt.Errorf("invalid port (not a number)")
 		}
 		fmt.Printf("out port: %v\n", p)
-		drv, err := newDriver()
-		if err != nil {
-			return fmt.Errorf("can't open midi driver")
+		/*
+			drv, err := newDriver()
+			if err != nil {
+				return fmt.Errorf("can't open midi driver")
+			}
+		*/
+		outs := midi.GetOutPorts()
+		if len(outs)-1 < p {
+			return fmt.Errorf("can't open midi out port %v", p)
 		}
-		ps.portOut, err = midi.OpenOut(drv, p, "")
+		//ps.portOut, err = midi.OpenOut(drv, p, "")
+		ps.portOut = outs[p]
 		if err != nil {
 			return fmt.Errorf("can't open midi out port %v", p)
 		}
@@ -192,7 +201,7 @@ func (p *Player) playWithProgram() {
 }
 
 func (p *Player) playThroughPort() {
-	var cmd *player.Player
+	var cmd *smf.TracksReader
 
 	var stopPortPlayer = make(chan bool, 1)
 	var stoppedPortPlayer = make(chan bool, 1)
@@ -203,12 +212,17 @@ func (p *Player) playThroughPort() {
 		stopPortPlayer = make(chan bool, 1)
 		stoppedPortPlayer = make(chan bool, 1)
 		var err error
-		cmd, err = player.SMF(p.outFile)
+		cmd = smf.ReadTracks(p.outFile)
+		//cmd, err = player.SMF(p.outFile)
 		if err != nil {
 			fmt.Println("ERROR: could not create smfplayer")
 		} else {
 			go func() {
-				cmd.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
+				err = cmd.Play(p.portOut)
+				if err != nil {
+					fmt.Println("ERROR: could not play")
+				}
+				//cmd.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
 				mx.Unlock()
 			}()
 		}
@@ -263,12 +277,15 @@ func (p *Player) playThroughPort() {
 
 func (p *Player) playOnce(stopPortPlayer chan bool, stoppedPortPlayer chan bool) {
 	if p.playToPort {
-		pl, err := player.SMF(p.outFile)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "ERROR: could not create smfplayer")
-		}
-
-		pl.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
+		pl := smf.ReadTracks(p.outFile)
+		/*
+			pl, err := player.SMF(p.outFile)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, "ERROR: could not create smfplayer")
+			}
+		*/
+		pl.Play(p.portOut)
+		//pl.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
 	} else {
 		cmd := newProcess(p.program[0], p.program[1])
 		err := cmd.Run()

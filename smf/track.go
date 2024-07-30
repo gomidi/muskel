@@ -6,39 +6,38 @@ import (
 	"math/rand"
 	"sort"
 
-	"gitlab.com/gomidi/midi/cc"
-	"gitlab.com/gomidi/midi/midimessage/channel"
-	"gitlab.com/gomidi/midi/midimessage/meta"
-	"gitlab.com/gomidi/midi/rpn"
+	"gitlab.com/gomidi/midi/v2"
+	"gitlab.com/gomidi/midi/v2/rpn"
+	"gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/track"
 )
 
 type Track struct {
 	midiTrack MidiTrack
-	smf       *smf
+	smf       *SMF
 }
 
 func (iw *Track) trackIntroEvents(tr *track.Track) (evts events) {
-	ch := channel.Channel(uint8(tr.MIDIChannel))
+	ch := uint8(tr.MIDIChannel)
 
-	evts = append(evts, &event{message: meta.Program(tr.Name)})
-	evts = append(evts, &event{message: meta.TrackSequenceName(tr.Name)})
-	evts = append(evts, &event{message: meta.Instrument(tr.Name)})
+	evts = append(evts, &event{message: smf.MetaProgram(tr.Name)})
+	evts = append(evts, &event{message: smf.MetaTrackSequenceName(tr.Name)})
+	evts = append(evts, &event{message: smf.MetaInstrument(tr.Name)})
 
 	if tr.MIDIBank >= 0 {
 		//fmt.Printf("Bank: %v\n", iw.instr.MIDIBank)
-		evts = append(evts, &event{message: ch.ControlChange(cc.BankSelectMSB, uint8(tr.MIDIBank))})
+		evts = append(evts, &event{message: midi.ControlChange(ch, midi.BankSelectMSB, uint8(tr.MIDIBank)).Bytes()})
 	}
 
 	if tr.MIDIProgram >= 0 {
 		//fmt.Printf("ProgramChange: %v\n", iw.instr.MIDIProgram)
-		evts = append(evts, &event{message: ch.ProgramChange(uint8(tr.MIDIProgram))})
+		evts = append(evts, &event{message: midi.ProgramChange(ch, uint8(tr.MIDIProgram)).Bytes()})
 	}
 
 	if tr.MIDIVolume >= 0 {
 		//fmt.Printf("Volume: %v\n", iw.instr.MIDIVolume)
-		evts = append(evts, &event{message: ch.ControlChange(cc.VolumeMSB, uint8(tr.MIDIVolume))})
+		evts = append(evts, &event{message: midi.ControlChange(ch, midi.VolumeMSB, uint8(tr.MIDIVolume)).Bytes()})
 	}
 
 	pitchBendRange := uint8(2)
@@ -46,10 +45,10 @@ func (iw *Track) trackIntroEvents(tr *track.Track) (evts events) {
 		pitchBendRange = tr.PitchbendRange
 	}
 
-	msgs := rpn.Channel(uint8(tr.MIDIChannel)).PitchBendSensitivity(pitchBendRange, 0)
+	msgs := rpn.PitchBendSensitivity(uint8(tr.MIDIChannel), pitchBendRange, 0)
 
 	for _, msg := range msgs {
-		evts = append(evts, &event{message: msg})
+		evts = append(evts, &event{message: msg.Bytes()})
 	}
 
 	return
@@ -127,7 +126,10 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			t.midiTrack.noteGlide.glideFunc(distance, noteDiff, func(step uint, vl float64) {
 				pb = items.HalfTonesToPitchbend(vl, t.midiTrack.Track.PitchbendRange)
 
-				evts = append(evts, &event{position: uint(t.midiTrack.noteGlide.startPosition + uint64(t.smf.writer.ticks/16)*uint64(step)), message: channel.Channel(ch).Pitchbend(pb)})
+				evts = append(evts, &event{
+					position: uint(t.midiTrack.noteGlide.startPosition + uint64(t.smf.writer.ticks/16)*uint64(step)),
+					message:  midi.Pitchbend(ch, pb).Bytes(),
+				})
 			})
 
 			t.midiTrack.PrevPitchbend = pb
@@ -139,12 +141,12 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		if !t.midiTrack.noteGlide.active {
 			if t.midiTrack.noteGlide.startNote != 0 {
 				t.midiTrack.noteGlide.startNote = 0
-				evts = append(evts, &event{position: pos, message: channel.Channel(ch).Pitchbend(0)})
+				evts = append(evts, &event{position: pos, message: midi.Pitchbend(ch, 0).Bytes()})
 				t.midiTrack.PrevPitchbend = 0
 			}
 
 			if !v.NoteOff {
-				ev.message = channel.Channel(ch).NoteOn(n, vl)
+				ev.message = midi.NoteOn(ch, n, vl).Bytes()
 			}
 
 			if !v.NoteOn && !v.NoteOff {
@@ -152,11 +154,13 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 				ev.stopNotes = true
 				if v.Dotted != "" {
 					l := items.DottedLengths[v.Dotted][1]
-					evts = append(evts, &event{position: uint(uint32(pos) + (t.smf.writer.ticks * 4 / l)), message: channel.Channel(ch).NoteOff(n)})
+					evts = append(evts, &event{position: uint(uint16(pos) + (t.smf.writer.ticks * 4 / l)), message: midi.NoteOff(ch, n).Bytes()})
 				}
 
 				if t.midiTrack.noteGlide.noteOffBefore > 0 {
-					evts = append(evts, &event{position: pos, message: channel.Channel(ch).NoteOff(t.midiTrack.noteGlide.noteOffBefore)})
+					evts = append(evts, &event{
+						position: pos,
+						message:  midi.NoteOff(ch, t.midiTrack.noteGlide.noteOffBefore).Bytes()})
 					t.midiTrack.noteGlide.noteOffBefore = 0
 				}
 			}
@@ -165,7 +169,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		}
 
 		if v.NoteOff {
-			ev.message = channel.Channel(ch).NoteOff(n)
+			ev.message = midi.NoteOff(ch, n).Bytes()
 			evts = append(evts, ev)
 		}
 
@@ -173,8 +177,11 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			//  set pitchbend back to 0
 			if v.Dotted != "" {
 				l := items.DottedLengths[v.Dotted][1]
-				evts = append(evts, &event{position: pos, message: channel.Channel(ch).Pitchbend(t.midiTrack.PrevPitchbend)})
-				evts = append(evts, &event{position: uint(uint32(pos) + (t.smf.writer.ticks * 4 / l)), message: channel.Channel(ch).NoteOff(t.midiTrack.noteGlide.startNote)})
+				evts = append(evts, &event{
+					position: pos,
+					message:  midi.Pitchbend(ch, t.midiTrack.PrevPitchbend).Bytes()})
+				evts = append(evts, &event{position: uint(uint16(pos) + (t.smf.writer.ticks * 4 / l)),
+					message: midi.NoteOff(ch, t.midiTrack.noteGlide.startNote).Bytes()})
 			}
 		}
 
@@ -204,7 +211,9 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			ev.stopNotes = true
 			ev.monitor = true
 			if t.midiTrack.noteGlide.noteOffBefore > 0 {
-				evts = append(evts, &event{position: pos, message: channel.Channel(ch).NoteOff(t.midiTrack.noteGlide.noteOffBefore)})
+				evts = append(evts, &event{
+					position: pos,
+					message:  midi.NoteOff(ch, t.midiTrack.noteGlide.noteOffBefore).Bytes()})
 				t.midiTrack.noteGlide.noteOffBefore = 0
 			}
 		}
@@ -222,30 +231,34 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		n := uint8(v.Note)
 		if t.midiTrack.noteGlide.startNote != 0 {
 			t.midiTrack.noteGlide.startNote = 0
-			evts = append(evts, &event{position: pos, message: channel.Channel(ch).Pitchbend(0)})
+			evts = append(evts, &event{
+				position: pos,
+				message:  midi.Pitchbend(ch, 0).Bytes()})
 		}
 
 		if !v.NoteOff {
-			ev.message = channel.Channel(ch).NoteOn(n, vl)
+			ev.message = midi.NoteOn(ch, n, vl).Bytes()
 		}
 
 		if !v.NoteOff && !v.NoteOn {
 			if v.Dotted != "" {
 				l := items.DottedLengths[v.Dotted][1]
-				evts = append(evts, &event{position: uint(uint32(pos) + (t.smf.writer.ticks * 4 / l)), message: channel.Channel(ch).NoteOff(n)})
+				evts = append(evts, &event{
+					position: uint(uint16(pos) + (t.smf.writer.ticks * 4 / l)),
+					message:  midi.NoteOff(ch, n).Bytes()})
 			}
 		}
 
 		if v.NoteOff {
-			ev.message = channel.Channel(ch).NoteOff(n)
+			ev.message = midi.NoteOff(ch, n).Bytes()
 		}
 
 		evts = append(evts, ev)
 
 	case *items.Lyric:
-		evts = append(evts, &event{position: pos, message: meta.Lyric(v.Text)})
+		evts = append(evts, &event{position: pos, message: smf.MetaLyric(v.Text)})
 	case *items.MIDIProgramChange:
-		evts = append(evts, &event{position: pos, message: channel.Channel(ch).ProgramChange(v.Value)})
+		evts = append(evts, &event{position: pos, message: midi.ProgramChange(ch, v.Value).Bytes()})
 	case *items.MIDIAftertouch:
 		if t.midiTrack.aftertouchGlide.active {
 			distance := int64(math.Round(float64(uint64(pos)-t.midiTrack.aftertouchGlide.startPosition) / float64(t.midiTrack.GlideResolution(t.smf.writer.ticks))))
@@ -264,7 +277,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 				evts = append(evts,
 					&event{
 						position: uint(t.midiTrack.aftertouchGlide.startPosition) + uint(t.smf.writer.ticks)*step/16,
-						message:  channel.Channel(ch).Aftertouch(uint8(vll)),
+						message:  midi.AfterTouch(ch, uint8(vll)).Bytes(),
 					})
 			})
 			t.midiTrack.aftertouchGlide.active = false
@@ -273,7 +286,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		evts = append(evts,
 			&event{
 				position: pos,
-				message:  channel.Channel(ch).Aftertouch(v.Value),
+				message:  midi.AfterTouch(ch, v.Value).Bytes(),
 			})
 
 		if len(v.Tilde) > 0 {
@@ -288,7 +301,9 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 
 		if v.Dotted != "" && v.Value > 0 {
 			l := items.DottedLengths[v.Dotted][1]
-			evts = append(evts, &event{position: uint(uint32(pos) + (t.smf.writer.ticks * 4 / l)), message: channel.Channel(ch).Aftertouch(0)})
+			evts = append(evts, &event{
+				position: uint(uint16(pos) + (t.smf.writer.ticks * 4 / l)),
+				message:  midi.AfterTouch(ch, 0).Bytes()})
 		}
 	case *items.MIDICC:
 		if t.midiTrack.ccGlide.active && v.Controller == t.midiTrack.ccGlide.controller {
@@ -308,7 +323,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 				evts = append(evts,
 					&event{
 						position: uint(t.midiTrack.ccGlide.startPosition) + uint(t.smf.writer.ticks)*step/16,
-						message:  channel.Channel(ch).ControlChange(t.midiTrack.ccGlide.controller, uint8(vll)),
+						message:  midi.ControlChange(ch, t.midiTrack.ccGlide.controller, uint8(vll)).Bytes(),
 					})
 
 			})
@@ -318,7 +333,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		evts = append(evts,
 			&event{
 				position: pos,
-				message:  channel.Channel(ch).ControlChange(v.Controller, v.Value),
+				message:  midi.ControlChange(ch, v.Controller, v.Value).Bytes(),
 			})
 
 		if len(v.Tilde) > 0 {
@@ -334,7 +349,9 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 
 		if v.Dotted != "" && v.Value > 0 {
 			l := items.DottedLengths[v.Dotted][1]
-			evts = append(evts, &event{position: uint(uint32(pos) + (t.smf.writer.ticks * 4 / l)), message: channel.Channel(ch).ControlChange(v.Controller, 0)})
+			evts = append(evts, &event{
+				position: uint(uint16(pos) + (t.smf.writer.ticks * 4 / l)),
+				message:  midi.ControlChange(ch, v.Controller, 0).Bytes()})
 		}
 
 	case *items.MIDIPitchbend:
@@ -356,7 +373,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 				evts = append(evts,
 					&event{
 						position: uint(t.midiTrack.pitchbendGlide.startPosition) + uint(t.smf.writer.ticks)*step/16,
-						message:  channel.Channel(ch).Pitchbend(int16(vll)),
+						message:  midi.Pitchbend(ch, int16(vll)).Bytes(),
 					})
 
 			})
@@ -366,7 +383,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		evts = append(evts,
 			&event{
 				position: pos,
-				message:  channel.Channel(ch).Pitchbend(v.Value),
+				message:  midi.Pitchbend(ch, v.Value).Bytes(),
 			})
 
 		if len(v.Tilde) > 0 {
@@ -381,7 +398,9 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 
 		if v.Dotted != "" && v.Value != 0 {
 			l := items.DottedLengths[v.Dotted][1]
-			evts = append(evts, &event{position: uint(uint32(pos) + (t.smf.writer.ticks * 4 / l)), message: channel.Channel(ch).Pitchbend(0)})
+			evts = append(evts, &event{
+				position: uint(uint16(pos) + (t.smf.writer.ticks * 4 / l)),
+				message:  midi.Pitchbend(ch, 0).Bytes()})
 		}
 
 	case *items.MultiItem:
@@ -445,7 +464,10 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			delta += plength
 		}
 
-		evts = append(evts, &event{position: pos + length, message: meta.Undefined{0, nil}, stopNotes: true})
+		evts = append(evts, &event{
+			position: pos + length,
+			//message:  meta.Undefined{0, nil}, stopNotes: true})
+			message: smf.MetaUndefined(0, nil), stopNotes: true})
 
 	case *items.GlideStart:
 		t.midiTrack.noteGlide.startNote = t.midiTrack.PrevKey
@@ -453,7 +475,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			&event{
 				position: pos,
 				//stopNotes: true,
-				message: channel.Channel(ch).Pitchbend(0),
+				message: midi.Pitchbend(ch, 0).Bytes(),
 			})
 
 		t.midiTrack.noteGlide.startPosition = uint64(pos)
@@ -483,7 +505,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 				evts = append(evts,
 					&event{
 						position: uint(t.midiTrack.polyaftertouchGlide.startPosition) + uint(t.smf.writer.ticks)*step/16,
-						message:  channel.Channel(ch).PolyAftertouch(t.midiTrack.polyaftertouchGlide.key, uint8(vll)),
+						message:  midi.PolyAfterTouch(ch, t.midiTrack.polyaftertouchGlide.key, uint8(vll)).Bytes(),
 					})
 			})
 			t.midiTrack.polyaftertouchGlide.active = false
@@ -492,7 +514,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		evts = append(evts,
 			&event{
 				position: pos,
-				message:  channel.Channel(ch).PolyAftertouch(ki, v.Value),
+				message:  midi.PolyAfterTouch(ch, ki, v.Value).Bytes(),
 			})
 
 		if len(v.Tilde) > 0 {
@@ -508,7 +530,9 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 
 		if v.Dotted != "" && v.Value != 0 {
 			l := items.DottedLengths[v.Dotted][1]
-			evts = append(evts, &event{position: uint(uint32(pos) + (t.smf.writer.ticks * 4 / l)), message: channel.Channel(ch).PolyAftertouch(ki, 0)})
+			evts = append(evts, &event{
+				position: uint(uint16(pos) + (t.smf.writer.ticks * 4 / l)),
+				message:  midi.PolyAfterTouch(ch, ki, 0).Bytes()})
 		}
 	default:
 		err = fmt.Errorf("sketch event of type %T is not supported in smf package", sketchEvent.Item)

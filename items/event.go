@@ -212,7 +212,7 @@ func (e *Event) Dup() *Event {
 }
 
 // AbsPosTicks returns the absolute Position in ticks
-func (e *Event) AbsPosTicks(ticks4th uint32, trackDelay int) uint {
+func (e *Event) AbsPosTicks(ticks4th uint16, trackDelay int) uint {
 	pos := uint(ticks4th) / 8 * e.Position
 	if e.PosShift == 0 {
 		res := int(pos) + trackDelay

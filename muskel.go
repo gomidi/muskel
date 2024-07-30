@@ -5,19 +5,16 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"gitlab.com/golang-utils/version"
-	"gitlab.com/gomidi/midi/smf/smfwriter"
+	//	"gitlab.com/gomidi/midi/smf/smfwriter"
+	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/image"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/smf"
-	"gitlab.com/gomidi/muskel/smfimport"
-	"gitlab.com/gomidi/muskel/xlsx"
-	"gitlab.com/gomidi/smfimage"
 )
 
 const MUSKEL_VERSION_FILE = "muskel_version.txt"
@@ -41,6 +38,7 @@ func WriteWDVersionFile(dir string) error {
 	return ioutil.WriteFile(p, []byte(VERSION.String()), 0644)
 }
 
+/*
 func Import(srcFile string, targetFile string, opts ...smfimport.Option) error {
 	fh, err := os.Open(srcFile)
 
@@ -72,6 +70,7 @@ func Import(srcFile string, targetFile string, opts ...smfimport.Option) error {
 		return im.WriteUnrolled(tg)
 	}
 }
+*/
 
 func newFile(filename string, params []string, rd io.Reader, opts ...score.Option) *file.File {
 	sc := score.New(filename, params, opts...)
@@ -157,8 +156,9 @@ func Convert(mainFile string, params []string, smffile string, opts ...score.Opt
 	return smf.WriteFile(sc, smffile)
 }
 
-func WriteSMFFile(sc *score.Score, smffile string, opts ...smfwriter.Option) error {
-	return smf.WriteFile(sc, smffile, opts...)
+// func WriteSMFFile(sc *score.Score, smffile string, opts ...smfwriter.Option) error {
+func WriteSMFFile(sc *score.Score, smffile string) error {
+	return smf.WriteFile(sc, smffile)
 }
 
 // WriteImage expects the given score to be unrolled

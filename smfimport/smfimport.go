@@ -1,5 +1,6 @@
 package smfimport
 
+/*
 import (
 	"bytes"
 	"fmt"
@@ -18,7 +19,7 @@ import (
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/track"
-	"gitlab.com/gomidi/quantizer"
+	"gitlab.com/gomidi/quantizer/lib/quantizer"
 )
 
 type source struct {
@@ -340,7 +341,7 @@ func (c *Importer) setBars() {
 func (c *Importer) msgToEvent(m positionedMsg, isDrumTrack bool) *items.Event {
 	var ev items.Event
 	ev.Position = c.ticksTo32ths(m.absPos)
-	comp := ev.AbsPosTicks(c.ticks4th, 0)
+	comp := ev.AbsPosTicks(uint16(c.ticks4th), 0)
 
 	if !c.noMicroTiming {
 		posDiff := int64(comp) - int64(m.absPos)
@@ -467,11 +468,11 @@ func (c *Importer) _setTracks(prefix string, cols map[colsKey][]positionedMsg) {
 		var lastRestShift int
 		var lastRest bool
 
-		/*
-			if isMono {
-				fmt.Println("isMono: " + kk)
-			}
-		*/
+
+		//	if isMono {
+		//		fmt.Println("isMono: " + kk)
+		//	}
+
 
 		for _, m := range msgs {
 			ev := c.msgToEvent(m, isDrum)
@@ -673,3 +674,4 @@ func (c *Importer) ticksTo128ths(ticks uint64) uint {
 	//fmt.Printf("ticks4th: %v ticks: %v\n", c.ticks4th, ticks)
 	return uint(ticks / uint64(c.ticks4th/32))
 }
+*/
