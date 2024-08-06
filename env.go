@@ -2,7 +2,6 @@ package muskel
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -32,11 +31,11 @@ func writePredefinedTemplates() {
 	for name, templ := range predefined.SketchesAndTokens {
 		p := filepath.Join(USER_DIR, name+".mskl")
 		if !score.FileExists(p) {
-			ioutil.WriteFile(p, []byte(templ), 0644)
+			os.WriteFile(p, []byte(templ), 0644)
 		}
 		p = filepath.Join(USER_DIR, name+".md")
 		if !score.FileExists(p) {
-			ioutil.WriteFile(p, []byte(templ), 0644)
+			os.WriteFile(p, []byte(templ), 0644)
 		}
 	}
 
