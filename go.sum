@@ -87,8 +87,8 @@ gitlab.com/golang-utils/updatechecker v0.0.10 h1:80wDVUSRrcDCH44hqLHOG1htXbsMEb2
 gitlab.com/golang-utils/updatechecker v0.0.10/go.mod h1:CbyPaKEgUueIf1LUE56XLu+4wdJ+NAJ2vx+fTLz0U10=
 gitlab.com/golang-utils/version v1.0.4 h1:OVHH+/XctQJ+VAV+Cwt0bG81rUS0et0I7ZXOri/Q3hc=
 gitlab.com/golang-utils/version v1.0.4/go.mod h1:RIr8fzkwzJ9CUH1Ejgqnp3XPhCmGAwk4XgGlHTSrAdg=
-gitlab.com/gomidi/lilypond v0.1.0 h1:Wn8CFlynxoYMt16ceaJP2MeZqWO/ErDrI9gMgEoQ+iw=
-gitlab.com/gomidi/lilypond v0.1.0/go.mod h1:pzu8vyANwnIe3gZ6D2F7RhK61vnl59D3IlPpkAa00mU=
+gitlab.com/gomidi/lilypond v0.1.1 h1:Ijb6Tg0mxHT7lxokmF+1AjrT5qiZBsvLXRSVmbZEgZo=
+gitlab.com/gomidi/lilypond v0.1.1/go.mod h1:pzu8vyANwnIe3gZ6D2F7RhK61vnl59D3IlPpkAa00mU=
 gitlab.com/gomidi/midi/tools/smfimage v0.20.0 h1:a/pAwk2atqKQR1OcYnTvkJ/HjmToA/Fc7lsbAL0ra+g=
 gitlab.com/gomidi/midi/tools/smfimage v0.20.0/go.mod h1:q7wUvjC0rxZLZJdeZaKJoaVAbpg57w8OyksrLJF0WT8=
 gitlab.com/gomidi/midi/tools/smftrack v0.8.1 h1:QqbK8mu74Qv7wA0Uf666tRXWBYGpyL8WN5eCLZRBQFs=
