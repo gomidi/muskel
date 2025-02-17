@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/reference"
 	"gitlab.com/gomidi/muskel/table"
 )
@@ -68,7 +69,7 @@ func (e EmptyLine) WriteTo(f table.Formatter) error {
 	return f.WriteLine("")
 }
 
-//var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$$") + "include")
+// var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("$$") + "include")
 var includeRegExp = regexp.MustCompile("^" + regexp.QuoteMeta("'"))
 
 type Include struct {
@@ -98,7 +99,7 @@ func (i *Include) ParseLine(line string) error {
 	i.part = r.Table
 
 	i.score.AddInclude(i.include.file, i.include.part, nil)
-	return i.score.Include(i.include.file, i.include.part, nil)
+	return i.score.Include(path.MustLocal(i.include.file), i.include.part, nil)
 }
 
 func (i *Include) WriteTo(f table.Formatter) error {

@@ -4,22 +4,22 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/golang-utils/version"
 	"gitlab.com/gomidi/muskel"
 )
 
 func checkMuskelVersion(version string, versionFile string, a *args) {
-	srcdir := filepath.Dir(a.File.Get())
+	srcdir := a.InFile.Get().Dir()
 	v, err := muskel.ReadWDVersionFile(srcdir)
 	if err == nil {
 		if v.String() != version {
 			name := versionate("muskel", v)
-			fmt.Fprintf(os.Stderr, "This is version "+version+" of muskel and your "+versionFile+
+			fmt.Fprint(os.Stderr, "This is version "+version+" of muskel and your "+versionFile+
 				" points to version "+v.String()+
 				".\nTo preserve compatibility with your musical notation, the binary \""+name+"\" will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
-				"\nremove the file \""+filepath.Join(srcdir, versionFile)+"\"\nor pass the \"--current\" option to let your file be parsed anyway.\n\n")
+				"\nremove the file \""+srcdir.Join(versionFile).String()+"\"\nor pass the \"--current\" option to let your file be parsed anyway.\n\n")
 
 			cmd := runVersionated(name, os.Args[1:])
 			cmd.Dir, _ = os.Getwd()
@@ -38,7 +38,7 @@ func checkMuskelVersion(version string, versionFile string, a *args) {
 			os.Exit(0)
 		}
 	}
-	muskel.WriteWDVersionFile(srcdir)
+	muskel.WriteWDVersionFile(path.ToSystem(srcdir))
 }
 
 func allVersionate(file string, v *version.Version) string {

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	appdir "github.com/emersion/go-appdir"
+	"gitlab.com/golang-utils/version"
 	"gitlab.com/gomidi/muskel/predefined"
 	"gitlab.com/gomidi/muskel/score"
 )
@@ -18,8 +19,8 @@ func setUserDir(version string) {
 }
 
 func init() {
-
-	vs := fmt.Sprintf("v%v_%v_%v", VERSION.Major, VERSION.Minor, VERSION.Patch)
+	v := version.BuildVersion()
+	vs := fmt.Sprintf("v%v_%v_%v", v.Major, v.Minor, v.Patch)
 	setUserDir(vs)
 	setWorkingDir()
 	os.MkdirAll(USER_DIR, 0755)

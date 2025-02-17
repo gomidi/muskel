@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"path"
+
+	//"path"
 	"path/filepath"
 	"strings"
+
+	"gitlab.com/golang-utils/fs/path"
 
 	"bytes"
 
@@ -18,12 +21,11 @@ import (
 )
 
 type converter struct {
-	inFile    string
+	inFile    path.Local
 	checksums map[string]string
 	ignore    map[string]bool
-	inFilep   string
 	player    *Player
-	dir       string
+	dir       path.Local
 	file      string
 	Config    struct {
 		PrintBarComments bool
@@ -35,7 +37,7 @@ type converter struct {
 		Pattern          string
 		KeepEmptyLines   bool
 		Params           []string
-		UnrollFile       string
+		UnrollFile       path.Local
 		Fmt              bool
 		CSV              string
 		XLSX             bool
@@ -44,15 +46,25 @@ type converter struct {
 
 func newConverter(player *Player, a *args) (r *converter) {
 
-	inFile := filepath.ToSlash(a.File.Get())
+	/*
+		fsys, err := rootfs.New()
+
+		if err != nil {
+			panic(err.Error())
+		}
+	*/
+
+	inFile := a.InFile.Get()
+
+	//	rFile := rootfs.Normalize(inFile)
+
 	c := &converter{
+		//fsys:   fsys,
 		player: player,
 		inFile: inFile,
-		dir:    path.Dir(inFile),
+		dir:    inFile.Dir(),
 		file:   path.Base(inFile),
 	}
-	inFilep, _ := filepath.Abs(c.inFile)
-	c.inFilep = inFilep
 
 	c.setFromArgs(a)
 	return c
@@ -168,7 +180,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	}
 
 	//	err = muskel.WriteSMFFile(sc, c.player.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Get())))
-	err = muskel.WriteSMFFile(sc, c.player.outFile)
+	err = muskel.WriteSMFFile(sc, path.ToSystem(c.player.outFile))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 		alert("ERROR while converting MuSkeL to SMF", err)
@@ -176,7 +188,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	}
 
 	if SMF.ExportImage.Get() {
-		err = muskel.WriteImage(sc, c.player.outFile+".png")
+		err = muskel.WriteImage(sc, path.ToSystem(path.MustLocal(c.player.outFile.String()+".png")))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while exporting to image: %s\n", err.Error())
 			alert("ERROR while exporting to image", err)
@@ -185,7 +197,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	}
 
 	if SMF.ExportScore.Get() {
-		err = lilypond.MIDI2PDF(c.player.outFile, "", false)
+		err = lilypond.MIDI2PDF(path.ToSystem(c.player.outFile), "", false)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while exporting score to PDF: %s\n", err.Error())
 			alert("ERROR while exporting to score", err)
@@ -232,23 +244,18 @@ func (c *converter) cmdPlay(sc *score.Score) error {
 }
 
 func (r *converter) run() error {
-	file := filepath.Join(r.dir, r.file)
+	file := r.dir.Join(r.file)
 
-	st, err := os.Stat(file)
-	if err != nil {
-		return err
-	}
-
-	if st.IsDir() {
+	if path.IsDir(file) {
 		return fmt.Errorf("is directory: %q", file)
 	}
 
-	if filepath.Ext(file) != muskel.FILE_EXTENSION {
+	if path.Ext(file) != muskel.FILE_EXTENSION {
 		return fmt.Errorf("no muskel file: %q\n", file)
 	}
 
 	cb := r.mkcallback()
-	return cb(r.dir, filepath.Join(r.dir, r.file))
+	return cb(r.dir.String(), r.dir.Join(r.file).String())
 }
 
 func (c *converter) mkcallback() (callback func(dir, file string) error) {
@@ -281,7 +288,7 @@ func (c *converter) prepare(dir, file string) error {
 	}
 
 	if !ARGS.WatchDir.Get() {
-		if filep != c.inFilep {
+		if filep != c.inFile.String() {
 			return nil
 		}
 	}
@@ -297,9 +304,9 @@ func (c *converter) prepare(dir, file string) error {
 	}
 
 	if ARGS.WatchDir.Get() {
-		if filep != c.inFilep && c.Config.Fmt {
+		if filep != c.inFile.String() && c.Config.Fmt {
 			c.ignore[filep] = true
-			c.fmtFile(filep, c.Config.Params, c.ScoreOptions()...)
+			c.fmtFile(c.inFile, c.Config.Params, c.ScoreOptions()...)
 			c.ignore[filep] = false
 		}
 	}
@@ -307,7 +314,7 @@ func (c *converter) prepare(dir, file string) error {
 	sc, err := c.parseMuskel(c.inFile)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error()+"\n")
+		fmt.Fprint(os.Stderr, err.Error()+"\n")
 		alert("ERROR:", err)
 		return err
 	}
@@ -322,7 +329,7 @@ func (c *converter) prepare(dir, file string) error {
 	}
 }
 
-func (c *converter) parseMuskel(srcFile string) (*score.Score, error) {
+func (c *converter) parseMuskel(srcFile path.Local) (*score.Score, error) {
 	var opts = c.ScoreOptions()
 
 	sc, err := muskel.ParseFile(srcFile, c.Config.Params, opts...)
@@ -331,7 +338,7 @@ func (c *converter) parseMuskel(srcFile string) (*score.Score, error) {
 		return nil, err
 	}
 
-	if c.Config.UnrollFile != "" {
+	if c.Config.UnrollFile.Relative().String() != "" {
 		err = c.writeUnrolled(c.Config.UnrollFile, sc)
 		if err != nil {
 			return sc, fmt.Errorf("ERROR while unrolling MuSkeL: %s", err.Error())
@@ -349,7 +356,7 @@ func (c *converter) parseMuskel(srcFile string) (*score.Score, error) {
 
 }
 
-func (c *converter) fmtFile(file string, params []string, opts ...score.Option) error {
+func (c *converter) fmtFile(file path.Local, params []string, opts ...score.Option) error {
 	if !c.Config.Fmt {
 		return nil
 	}
@@ -374,7 +381,7 @@ func (c *converter) fmtFile(file string, params []string, opts ...score.Option) 
 	return nil
 }
 
-func (c *converter) writeUnrolled(file string, sc *score.Score) error {
+func (c *converter) writeUnrolled(file path.Local, sc *score.Score) error {
 	err := sc.Unroll()
 
 	if err != nil {
@@ -383,20 +390,20 @@ func (c *converter) writeUnrolled(file string, sc *score.Score) error {
 
 	var uf *os.File
 
-	os.Remove(file)
+	os.Remove(file.String())
 
-	uf, err = os.Create(file)
+	uf, err = os.Create(file.String())
 	if err != nil {
 		return err
 	}
 	defer uf.Close()
-	if filepath.Ext(file) == ".xlsx" {
+	if filepath.Ext(file.String()) == ".xlsx" {
 		var tracksbf, scorebf bytes.Buffer
 		err = sc.WriteTracksAndScoreTable(&tracksbf, &scorebf)
 		if err != nil {
 			return err
 		}
-		return xlsx.Write(file, tracksbf.String(), scorebf.String())
+		return xlsx.Write(file.String(), tracksbf.String(), scorebf.String())
 	} else {
 		err = sc.WriteUnrolled(uf)
 		if err != nil {

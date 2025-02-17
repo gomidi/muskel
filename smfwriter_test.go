@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"gitlab.com/golang-utils/fs/path"
 	smfmidi "gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/items"
@@ -4079,7 +4080,7 @@ func TestSMFWriter(t *testing.T) {
 
 		//fmt.Printf("--        test-%v  -----\n", i)
 
-		sc := score.New(fmt.Sprintf("test-%v", i), nil)
+		sc := score.New(path.MustLocal(fmt.Sprintf("test-%v", i)), nil)
 		f := file.FromReader(strings.NewReader(test.input), sc)
 
 		sc.Files[fmt.Sprintf("test-%v", i)] = f
@@ -4097,9 +4098,9 @@ func TestSMFWriter(t *testing.T) {
 		}
 
 		var lg logger
-		lg.wantedTrack = test.track
-		lg.includeMeta = test.includeMeta
-		lg.includeControlChange = test.includeControlChange
+		//lg.wantedTrack = test.track
+		//lg.includeMeta = test.includeMeta
+		//lg.includeControlChange = test.includeControlChange
 		//err = smf.WriteSMFTo(sc, ioutil.Discard, "*", smfwriter.Debug(&lg))
 		err = smf.WriteSMFTo(sc, ioutil.Discard, "*")
 

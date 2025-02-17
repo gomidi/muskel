@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/items"
 )
@@ -18,7 +19,7 @@ type tabler interface {
 }
 
 func _newFile(s string) *file.File {
-	return newFile("test", nil, strings.NewReader(s))
+	return newFile(path.MustWD().Join("test"), nil, strings.NewReader(s))
 }
 
 func TestFormatSimple(t *testing.T) {

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/midi/v2/drivers"
 	"gitlab.com/gomidi/midi/v2/smf"
@@ -31,7 +32,7 @@ type Player struct {
 
 	portRegEx *regexp.Regexp
 
-	outFile string
+	outFile path.Local
 
 	playerEnabled bool
 }
@@ -61,7 +62,7 @@ func newPlayer() (p *Player, err error) {
 	return
 }
 
-func (ps *Player) mkPlayCmdString(cmd, outfile string) {
+func (ps *Player) mkPlayCmdString(cmd string, outfile path.Local) {
 	cm := strings.TrimSpace(cmd)
 	//fmt.Printf("cmd : %q\n", cm)
 	var cmm [2]string
@@ -73,29 +74,29 @@ func (ps *Player) mkPlayCmdString(cmd, outfile string) {
 		cmm[1] = cmm_[1]
 	}
 
-	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", ps.outFile)
+	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", ps.outFile.String())
 	ps.program = cmm
 }
 
 func (p *Player) normalizeOutFile(a *args) {
-	inFile := a.File.Get()
+	inFile := a.InFile.Get()
 	p.outFile = inFile
 	if a.OutFile.IsSet() {
 		p.outFile = a.OutFile.Get()
 	}
 
 	if a.TrackFiles.Get() {
-		p.outFile = "%s"
+		p.outFile = a.OutFile.Get().Dir().Join("%s")
 	}
 
-	if extIdx := strings.LastIndex(p.outFile, "."); extIdx > 0 && extIdx+1 < len(p.outFile) {
-		switch p.outFile[extIdx:] {
+	if extIdx := strings.LastIndex(p.outFile.String(), "."); extIdx > 0 && extIdx+1 < len(p.outFile.String()) {
+		switch p.outFile.String()[extIdx:] {
 		case ".mid", ".midi", ".MID", ".MIDI":
 		default:
-			p.outFile = p.outFile[:extIdx] + ".mid"
+			p.outFile = path.MustLocal(p.outFile.String()[:extIdx] + ".mid")
 		}
 	} else {
-		p.outFile = p.outFile + ".mid"
+		p.outFile = path.MustLocal(p.outFile.String() + ".mid")
 	}
 }
 
@@ -211,21 +212,19 @@ func (p *Player) playThroughPort() {
 		mx.Lock()
 		stopPortPlayer = make(chan bool, 1)
 		stoppedPortPlayer = make(chan bool, 1)
-		var err error
-		cmd = smf.ReadTracks(p.outFile)
+
+		cmd = smf.ReadTracks(path.ToSystem(p.outFile))
 		//cmd, err = player.SMF(p.outFile)
-		if err != nil {
-			fmt.Println("ERROR: could not create smfplayer")
-		} else {
-			go func() {
-				err = cmd.Play(p.portOut)
-				if err != nil {
-					fmt.Println("ERROR: could not play")
-				}
-				//cmd.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
-				mx.Unlock()
-			}()
-		}
+
+		go func() {
+			err := cmd.Play(p.portOut)
+			if err != nil {
+				fmt.Println("ERROR: could not play")
+			}
+			//cmd.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
+			mx.Unlock()
+		}()
+
 	}
 
 	for {
@@ -277,7 +276,7 @@ func (p *Player) playThroughPort() {
 
 func (p *Player) playOnce(stopPortPlayer chan bool, stoppedPortPlayer chan bool) {
 	if p.playToPort {
-		pl := smf.ReadTracks(p.outFile)
+		pl := smf.ReadTracks(path.ToSystem(p.outFile))
 		/*
 			pl, err := player.SMF(p.outFile)
 			if err != nil {

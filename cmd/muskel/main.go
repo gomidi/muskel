@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path/filepath"
+	"path"
 
 	"gitlab.com/golang-utils/config/v2"
+	"gitlab.com/golang-utils/version"
 	"gitlab.com/gomidi/muskel"
 )
 
 var (
 	CONFIG = config.New("muskel",
-		muskel.VERSION.Major, muskel.VERSION.Minor, muskel.VERSION.Patch,
 		"muskel is a musical sketch language",
 		config.AsciiArt("muskel"),
 	)
@@ -53,12 +53,13 @@ func run() error {
 			// check, if muskel_version.txt is inside the current dir
 			// If the version does not match, it delegates to the versioned muskel command (e.g. muskel_1_1_33.exe)
 			// checkMuskelVersion exits if appropriate
-			checkMuskelVersion(muskel.VERSION.String(), muskel.MUSKEL_VERSION_FILE, ARGS)
+			v := version.BuildVersion()
+			checkMuskelVersion(v.String(), muskel.MUSKEL_VERSION_FILE, ARGS)
 		}
 	}
 
 	// when using markdown files, set the file extension properly (affects includes!)
-	switch filepath.Ext(ARGS.File.Get()) {
+	switch path.Ext(ARGS.InFile.Get().String()) {
 	case ".md":
 		muskel.FILE_EXTENSION = ".md"
 	case ".csv":

@@ -1,8 +1,60 @@
 package items
 
 import (
+	"strings"
 	"testing"
 )
+
+func TestToLilyPondElement(t *testing.T) {
+	tests := []struct {
+		muskelNote   string
+		lilypondNote string
+	}{
+		{"a#'", `ais'`},
+		{"a", `a`},
+		{"a'", `a'`},
+		{"a''", `a''`},
+		{"A", `a,`},
+		{"A'", `a,,`},
+		{"b", `b`},
+		{"bb", `bes`},
+		{"c", `c`},
+		{"d", `d`},
+		{"e", `e`},
+		{"f", `f`},
+		{"g", `g`},
+		{"g+", `g\mf`},
+		{"g++", `g\f`},
+		{"g+++", `g\ff`},
+		{"g++++", `g\fff`},
+		{"g+++++", `g\ffff`},
+		{"g++++++", `g\fffff`},
+		{"g-", `g\mp`},
+		{"g--", `g\p`},
+		{"g---", `g\pp`},
+		{"g----", `g\ppp`},
+		{"g-----", `g\pppp`},
+		{"g------", `g\ppppp`},
+		{"g~", `g\glissando`},
+	}
+
+	for i, test := range tests {
+		nt, err := ParseNote(test.muskelNote)
+
+		if err != nil {
+			t.Errorf("[%v] could not parse note %q: %s", i, test.muskelNote, err.Error())
+		}
+
+		lynt := nt.ToLilyPondElement()
+
+		got := strings.TrimSpace(lynt.String())
+		exp := test.lilypondNote
+
+		if got != exp {
+			t.Errorf("[%v] %q.ToLilyPondElement() = %q // expected: %q", i, test.muskelNote, got, exp)
+		}
+	}
+}
 
 func TestScaleNote(t *testing.T) {
 	tests := []string{

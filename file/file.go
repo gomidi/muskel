@@ -311,7 +311,7 @@ func (f *File) findPart(line string) (interface{}, error) {
 	//return &ShortCut{lineNo: f.currentLine, name: name, score: f.Score, value: rest}
 	//}
 
-	return nil, nil
+	//return nil, nil
 }
 
 type ParseError struct {

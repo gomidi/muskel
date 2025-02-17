@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"gitlab.com/gomidi/lilypond"
 )
 
 type Note struct {
@@ -24,6 +26,96 @@ type Note struct {
 }
 
 var _ Item = &Note{}
+
+func (note Note) ToLilyPondElement() lilypond.Element {
+	var lynote *lilypond.Note
+
+	var oct int
+	if note.Octave > 0 {
+		oct = note.Octave - 1
+	}
+
+	if note.Octave < 0 {
+		oct = note.Octave
+	}
+
+	switch strings.ToLower(note.Letter) {
+	case "c":
+		lynote = lilypond.C(oct)
+	case "d":
+		lynote = lilypond.D(oct)
+	case "e":
+		lynote = lilypond.E(oct)
+	case "f":
+		lynote = lilypond.F(oct)
+	case "g":
+		lynote = lilypond.G(oct)
+	case "a":
+		lynote = lilypond.A(oct)
+	case "b":
+		lynote = lilypond.B(oct)
+	}
+
+	switch note.Augmenter {
+	case "":
+	case "#":
+		lynote.Is()
+	case "b":
+		lynote.Es()
+	}
+
+	if note.GlissandoStart {
+		lynote.Glissando()
+	}
+
+	/*
+		PPPPP
+		PPPP
+		PPP
+		PP
+		P
+		MP
+		MF
+		F
+		FF
+		FFF
+		FFFF
+		FFFFF
+	*/
+
+	vel := DynamicToVelocity(note.String(), 1, 13, 0, 1, 7)
+
+	switch vel {
+	case 1:
+		lynote.PPPPP()
+	case 2:
+		lynote.PPPP()
+	case 3:
+		lynote.PPP()
+	case 4:
+		lynote.PP()
+	case 5:
+		lynote.P()
+	case 6:
+		lynote.MP()
+	case 7:
+		// do nothing
+	case 8:
+		lynote.MF()
+	case 9:
+		lynote.F()
+	case 10:
+		lynote.FF()
+	case 11:
+		lynote.FFF()
+	case 12:
+		lynote.FFFF()
+	case 13:
+		lynote.FFFFF()
+	}
+
+	return lynote
+}
 
 func (note Note) ToMIDI() (midinote_ uint8) {
 	midinote := 48 // c

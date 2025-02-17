@@ -6,17 +6,18 @@ import (
 	"time"
 
 	"github.com/metakeule/observe/lib/runfunc"
+	"gitlab.com/golang-utils/fs/path"
 )
 
 func watch(conv *converter, a *args) error {
 	if a.WatchDir.Get() {
 		fmt.Printf("watching %q\n", conv.dir)
 	} else {
-		fmt.Printf("watching %q\n", a.File.Get())
+		fmt.Printf("watching %q\n", a.InFile.Get())
 	}
 
 	r := runfunc.New(
-		conv.dir,
+		path.ToSystem(conv.dir),
 		conv.mkcallback(),
 		runfunc.Sleep(time.Millisecond*time.Duration(int(a.SleepingTime.Get()))),
 	)

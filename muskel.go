@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
+	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/filesystems/rootfs"
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/golang-utils/version"
+
 	//	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/file"
@@ -19,9 +23,15 @@ import (
 
 const MUSKEL_VERSION_FILE = "muskel_version.txt"
 
-func ReadWDVersionFile(dir string) (*version.Version, error) {
-	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
-	b, err := ioutil.ReadFile(p)
+func ReadWDVersionFile(dir path.Local) (*version.Version, error) {
+	fsys, err := rootfs.New()
+
+	if err != nil {
+		return nil, err
+	}
+
+	p := dir.RootRelative().Join(MUSKEL_VERSION_FILE)
+	b, err := fs.ReadFile(fsys, p)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +45,8 @@ func ReadWDVersionFile(dir string) (*version.Version, error) {
 
 func WriteWDVersionFile(dir string) error {
 	p := filepath.Join(dir, MUSKEL_VERSION_FILE)
-	return ioutil.WriteFile(p, []byte(VERSION.String()), 0644)
+	v := version.BuildVersion()
+	return os.WriteFile(p, []byte(v.String()), 0644)
 }
 
 /*
@@ -72,12 +83,12 @@ func Import(srcFile string, targetFile string, opts ...smfimport.Option) error {
 }
 */
 
-func newFile(filename string, params []string, rd io.Reader, opts ...score.Option) *file.File {
+func newFile(filename path.Local, params []string, rd io.Reader, opts ...score.Option) *file.File {
 	sc := score.New(filename, params, opts...)
 	return file.FromReader(rd, sc)
 }
 
-func Format(filename string, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
+func Format(filename path.Local, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
 	var f = newFile(filename, params, rd, opts...)
 	err := f.Parse()
 
@@ -88,7 +99,7 @@ func Format(filename string, params []string, rd io.Reader, wr io.Writer, opts .
 	return f.WriteTo(wr)
 }
 
-func Unroll(mainFile string, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
+func Unroll(mainFile path.Local, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
 	sc := score.New(mainFile, params, opts...)
 	f := file.FromReader(rd, sc)
 
@@ -106,7 +117,7 @@ func Unroll(mainFile string, params []string, rd io.Reader, wr io.Writer, opts .
 	return nil
 }
 
-func WriteSMF(filename string, params []string, rd io.Reader, fmtwr io.Writer, midwr io.Writer, opts ...score.Option) error {
+func WriteSMF(filename path.Local, params []string, rd io.Reader, fmtwr io.Writer, midwr io.Writer, opts ...score.Option) error {
 	var f = newFile(filename, params, rd, opts...)
 	err := f.Parse()
 
@@ -132,13 +143,13 @@ func WriteSMF(filename string, params []string, rd io.Reader, fmtwr io.Writer, m
 	return smf.WriteSMFTo(sc, midwr, "*")
 }
 
-func ParseFile(mainFile string, params []string, opts ...score.Option) (sc *score.Score, err error) {
+func ParseFile(mainFile path.Local, params []string, opts ...score.Option) (sc *score.Score, err error) {
 	sc = score.New(mainFile, params, opts...)
 	err = sc.Parse()
 	return
 }
 
-func Convert(mainFile string, params []string, smffile string, opts ...score.Option) error {
+func Convert(mainFile path.Local, params []string, smffile string, opts ...score.Option) error {
 	sc := score.New(mainFile, params, opts...)
 	err := sc.Parse()
 	if err != nil {

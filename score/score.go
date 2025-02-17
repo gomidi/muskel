@@ -8,6 +8,9 @@ import (
 	"sort"
 	"strings"
 
+	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/filesystems/rootfs"
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/filter"
@@ -20,7 +23,8 @@ import (
 )
 
 type Score struct {
-	mainFile       string
+	FS             fs.FS
+	mainFile       path.Local
 	mainSketch     string
 	mainCol        string
 	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
@@ -59,7 +63,14 @@ func (s *Score) FilterTrack(colName string, events []*items.Event) []*items.Even
 	return events
 }
 
-func New(filepath string, params []string, options ...Option) *Score {
+func New(filepath path.Local, params []string, options ...Option) *Score {
+
+	fsys, err := rootfs.New()
+
+	if err != nil {
+		panic(err.Error())
+	}
+
 	s := &Score{
 		Tracks:         map[string]*track.Track{},
 		Tunings:        map[string]*tuning.Tuning{},
@@ -74,6 +85,7 @@ func New(filepath string, params []string, options ...Option) *Score {
 		tokens:         map[string]string{},
 		includedScores: map[string]*Score{},
 		lyrics:         map[string][]string{},
+		FS:             fsys,
 		mainFile:       filepath,
 		mainSketch:     "=SCORE",
 		params:         params,
@@ -201,7 +213,7 @@ func (sc *Score) AddInclude(filepath string, tableName string, params []string) 
 		if !isToken {
 			inc = tableName
 		}
-		err := sc.Include(fname, inc, params)
+		err := sc.Include(path.MustLocal(fname), inc, params)
 		if err != nil {
 			return fmt.Errorf("can't include %q, reason: %s", filepath, err.Error())
 		}
@@ -279,7 +291,7 @@ func (sc *Score) GetToken(name string) (string, error) {
 	return tk, nil
 }
 
-func (sc *Score) GetExternalToken(file, name string) (string, error) {
+func (sc *Score) GetExternalToken(file path.Local, name string) (string, error) {
 	s, err := sc.External(file, nil)
 	if err != nil {
 		return "", fmt.Errorf("can't parse external file %q for token %q: %s", file, name, err.Error())
@@ -337,7 +349,7 @@ func (sc *Score) parse(fname string, sco *Score) error {
 }
 
 func (sc *Score) Parse() error {
-	return sc.parse(sc.mainFile, sc)
+	return sc.parse(sc.mainFile.String(), sc)
 }
 
 func (sc *Score) Delay(trackName string) (del [2]int) {
@@ -372,10 +384,10 @@ func (sc *Score) FileGroup(trackName string) (fg string) {
 }
 
 func (sc *Score) findInclude(filename string) (fname string, err error) {
-	return FindInclude(filepath.Dir(sc.mainFile), filename)
+	return FindInclude(sc.mainFile.Dir().String(), filename)
 }
 
-func (sc *Score) GetExternalSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
+func (sc *Score) GetExternalSketch(filename path.Local, sketch_table string, params []string) (*sketch.Sketch, error) {
 	//fmt.Printf("GetExternalSketch called for %q in %q\n", sketch_table, filename)
 	if sketch_table == "" {
 		sketch_table = "=SCORE"
@@ -409,7 +421,7 @@ func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []strin
 
 	sco, has := sc.includedScores[fname]
 	if !has {
-		err := sc.Include(fname, sketch_table, params)
+		err := sc.Include(path.MustLocal(fname), sketch_table, params)
 		if err != nil {
 			return nil, fmt.Errorf("can't include %q, reason: %s\n", fname, err.Error())
 		}
@@ -1339,7 +1351,7 @@ func (sc *Score) AddSketch(name string) interface {
 		sc.exclSketch[excl] = name
 	}
 	sk := sketch.New(name, sc)
-	sk.File = sc.mainFile
+	sk.File = sc.mainFile.String()
 	sc.Sketches[name] = sk
 	return sk
 }
@@ -1385,7 +1397,7 @@ func (sc *Score) GetSketch(name string) (*sketch.Sketch, error) {
 		return nil, fmt.Errorf("can't find sketch %q\n", name)
 	}
 
-	s.File = sc.mainFile
+	s.File = sc.mainFile.String()
 	//fmt.Printf("returning sketch %q from file %q\n", name, s.File)
 	return s, nil
 }
@@ -1444,8 +1456,8 @@ func (sc *Score) NoEmptyLines() bool {
 	return sc.noEmptyLines
 }
 
-func (sc *Score) Include(filename string, sketch string, params []string) error {
-	fname, err := sc.findInclude(filename)
+func (sc *Score) Include(filename path.Local, sketch string, params []string) error {
+	fname, err := sc.findInclude(filename.String())
 	if err != nil {
 		return err
 	}
@@ -1468,8 +1480,8 @@ func (sc *Score) Include(filename string, sketch string, params []string) error 
 	return nil
 }
 
-func (sc *Score) External(filename string, params []string) (*Score, error) {
-	fname, err := sc.findInclude(filename)
+func (sc *Score) External(filename path.Local, params []string) (*Score, error) {
+	fname, err := sc.findInclude(filename.String())
 	if err != nil {
 		return nil, err
 	}

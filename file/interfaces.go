@@ -1,6 +1,9 @@
 package file
 
-import "gitlab.com/gomidi/muskel/table"
+import (
+	"gitlab.com/golang-utils/fs/path"
+	"gitlab.com/gomidi/muskel/table"
+)
 
 type tabler interface {
 	Part
@@ -17,7 +20,7 @@ type Part interface {
 
 type score interface {
 	table.Score
-	Include(file string, sketch string, params []string) error
+	Include(file path.Local, sketch string, params []string) error
 	Embed(patterns ...string) error
 	HasTrack(name string) bool
 	Properties() map[string]interface{}

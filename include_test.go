@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
@@ -3881,7 +3882,7 @@ TRACK | Piano | Voc
 
 		var bf strings.Builder
 
-		err := muskel.Unroll("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
@@ -3978,7 +3979,7 @@ func TestSolo(t *testing.T) {
 
 		var bf strings.Builder
 
-		err := muskel.Unroll("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.SoloGroup(test.sologroupID))
+		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.SoloGroup(test.sologroupID))
 
 		if err != nil {
 			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
@@ -4102,7 +4103,7 @@ func TestStartEnd(t *testing.T) {
 
 		var bf strings.Builder
 
-		err := muskel.Unroll("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.CutOut())
+		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.CutOut())
 
 		if err != nil {
 			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
@@ -4411,7 +4412,7 @@ func TestInclude2(t *testing.T) {
 		*/
 		var bf strings.Builder
 
-		err := muskel.Format("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+		err := muskel.Format(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format score YYY: %s\n%s\n", i, err.Error(), test.input)
@@ -4484,7 +4485,7 @@ func TestInclude3(t *testing.T) {
 
 		var bf strings.Builder
 
-		err := muskel.Unroll("include-main", nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
