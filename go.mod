@@ -6,7 +6,7 @@ require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/emersion/go-appdir v1.1.2
 	github.com/metakeule/observe v0.0.5
-	gitlab.com/golang-utils/config/v2 v2.11.0
+	gitlab.com/golang-utils/config/v2 v2.12.0
 	gitlab.com/golang-utils/fs v0.20.1
 	gitlab.com/golang-utils/version v1.0.4
 	gitlab.com/gomidi/lilypond v0.1.1

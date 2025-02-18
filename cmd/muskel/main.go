@@ -14,7 +14,6 @@ import (
 var (
 	CONFIG = config.New("muskel",
 		"muskel is a musical sketch language",
-		config.AsciiArt("muskel"),
 	)
 	SIGNAL_CHANNEL = make(chan os.Signal, 10)
 )
