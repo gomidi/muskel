@@ -8,7 +8,6 @@ require (
 	github.com/metakeule/observe v0.0.5
 	gitlab.com/golang-utils/config/v2 v2.15.9
 	gitlab.com/golang-utils/fs v0.22.2
-	gitlab.com/golang-utils/version v1.0.4
 	gitlab.com/golang-utils/version/v2 v2.0.1
 	gitlab.com/gomidi/lilypond v0.1.1
 	gitlab.com/gomidi/midi/tools/smfimage v0.20.0

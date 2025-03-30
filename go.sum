@@ -102,8 +102,6 @@ gitlab.com/golang-utils/spectest v0.0.5 h1:oR6rHIgKI/gMWpCyDbHApwskPKxl8vFFWXB1k
 gitlab.com/golang-utils/spectest v0.0.5/go.mod h1:duj8q8L5kwulDdZon48q/kMY52/8RVv8k7kh9cpOmsU=
 gitlab.com/golang-utils/updatechecker v0.1.4 h1:v1BE2awzPN3N8vqU/y2J8+IwFwM71+zgGNZlmko8jBk=
 gitlab.com/golang-utils/updatechecker v0.1.4/go.mod h1:GZlYgJf/soXfPxHcrthIsrPTaukV9gA12C9dVZy+SZo=
-gitlab.com/golang-utils/version v1.0.4 h1:OVHH+/XctQJ+VAV+Cwt0bG81rUS0et0I7ZXOri/Q3hc=
-gitlab.com/golang-utils/version v1.0.4/go.mod h1:RIr8fzkwzJ9CUH1Ejgqnp3XPhCmGAwk4XgGlHTSrAdg=
 gitlab.com/golang-utils/version/v2 v2.0.1 h1:jNnc2rzYNJ5Hq540yojZyP7parT4Mq12bev70CKxLtw=
 gitlab.com/golang-utils/version/v2 v2.0.1/go.mod h1:tzLbutrNtG7ZNWyO372//jG6hiS4Lw692KfPmom0Xcw=
 gitlab.com/gomidi/lilypond v0.1.1 h1:Ijb6Tg0mxHT7lxokmF+1AjrT5qiZBsvLXRSVmbZEgZo=
