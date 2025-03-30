@@ -15,7 +15,7 @@ import (
 
 	"unsafe"
 
-	"gitlab.com/golang-utils/version"
+	"gitlab.com/golang-utils/version/v2"
 	//	"gitlab.com/gomidi/midi"
 
 	//	driver "gitlab.com/gomidi/rtmididrv"

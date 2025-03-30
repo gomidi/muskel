@@ -11,7 +11,7 @@ import (
 	"gitlab.com/golang-utils/fs"
 	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
-	"gitlab.com/golang-utils/version"
+	"gitlab.com/golang-utils/version/v2"
 
 	//	"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/midi/tools/smfimage"

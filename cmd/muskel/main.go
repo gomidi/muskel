@@ -7,7 +7,7 @@ import (
 	"path"
 
 	"gitlab.com/golang-utils/config/v2"
-	"gitlab.com/golang-utils/version"
+	"gitlab.com/golang-utils/version/v2"
 	"gitlab.com/gomidi/muskel"
 )
 

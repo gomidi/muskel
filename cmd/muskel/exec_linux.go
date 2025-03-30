@@ -9,7 +9,7 @@ import (
 	"time"
 
 	//	"github.com/gen2brain/beeep"
-	"gitlab.com/golang-utils/version"
+	"gitlab.com/golang-utils/version/v2"
 	_ "gitlab.com/gomidi/midi/v2/drivers/midicatdrv"
 	// driver "gitlab.com/gomidi/midicatdrv"
 )

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	appdir "github.com/emersion/go-appdir"
-	"gitlab.com/golang-utils/version"
+	"gitlab.com/golang-utils/version/v2"
 	"gitlab.com/gomidi/muskel/predefined"
 	"gitlab.com/gomidi/muskel/score"
 )

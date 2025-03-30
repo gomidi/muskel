@@ -6,7 +6,7 @@ import (
 	"os/exec"
 
 	"gitlab.com/golang-utils/fs/path"
-	"gitlab.com/golang-utils/version"
+	"gitlab.com/golang-utils/version/v2"
 	"gitlab.com/gomidi/muskel"
 )
 
