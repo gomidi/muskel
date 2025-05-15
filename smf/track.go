@@ -7,7 +7,7 @@ import (
 	"sort"
 
 	"gitlab.com/gomidi/midi/v2"
-	"gitlab.com/gomidi/midi/v2/rpn"
+	"gitlab.com/gomidi/midi/v2/rpn_nrpn"
 	"gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/track"
@@ -45,7 +45,7 @@ func (iw *Track) trackIntroEvents(tr *track.Track) (evts events) {
 		pitchBendRange = tr.PitchbendRange
 	}
 
-	msgs := rpn.PitchBendSensitivity(uint8(tr.MIDIChannel), pitchBendRange, 0)
+	msgs := rpn_nrpn.PitchBendSensitivity(uint8(tr.MIDIChannel), pitchBendRange, 0)
 
 	for _, msg := range msgs {
 		evts = append(evts, &event{message: msg.Bytes()})
@@ -469,6 +469,22 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			//message:  meta.Undefined{0, nil}, stopNotes: true})
 			message: smf.MetaUndefined(0, nil), stopNotes: true})
 
+	case *items.MidiSample:
+		//length := v.LengthTicks
+		err = v.Fetch(t.smf.score.FS, items.MIDI_SAMPLES_DIR, t.smf.writer.ticks)
+		if err != nil {
+			return
+		}
+
+		addDelta := pos - uint(v.NegativeOffset)
+
+		for _, tev := range v.Track {
+			evts = append(evts, &event{
+				position: uint(tev.Delta) + addDelta,
+				message:  tev.Message,
+			})
+		}
+
 	case *items.GlideStart:
 		t.midiTrack.noteGlide.startNote = t.midiTrack.PrevKey
 		evts = append(evts,
@@ -591,6 +607,29 @@ func (iw *Track) trackScoreEvents(tr *track.Track, sketchEvents []*items.Event) 
 				ntp.LengthTicks = nextPos - pos
 				ev.Item = ntp
 			}
+
+			if msp, is := ev.Item.(*items.MidiSample); is {
+				var nextPos uint
+				if i < len(sketchEvents)+1 {
+					nextPos = iw.findNextNonEmptyPos(sketchEvents[i+1:])
+					//fmt.Printf("found findNextNonEmptyPos: %v\n", nextPos)
+					if nextPos == 0 {
+						nextPos = iw.smf.posToTicks(tr.EndPos)
+					}
+				} else {
+					nextPos = iw.smf.posToTicks(tr.EndPos)
+				}
+				_nextPos := int(nextPos) + trackDelay
+				if _nextPos < 0 {
+					_nextPos = 0
+				}
+				nextPos = uint(_nextPos)
+				//fmt.Printf("nextPos %v - pos %v\n", nextPos, pos)
+
+				msp.LengthTicks = nextPos - pos
+				ev.Item = msp
+			}
+
 		}
 
 		var evnew events

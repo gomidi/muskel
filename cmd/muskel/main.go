@@ -37,6 +37,8 @@ func run() error {
 
 	// handle commands that do not make use of neither the converter nor the player
 	switch CONFIG.ActiveCommand() {
+	case SMF_JSON.Config:
+		return SMF_JSON.run()
 	case PORTS.Config:
 		return PORTS.run()
 	case CONFIG_DIRS.Config:

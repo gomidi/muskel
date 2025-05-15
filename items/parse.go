@@ -43,6 +43,8 @@ func getMIDIItem(data string) Item {
 
 func getItem(data string) Item {
 	switch data[0] {
+	case '>':
+		return &MidiSample{}
 	case '\'':
 		return &CellReference{}
 	case '[':
