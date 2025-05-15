@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 
 	"gitlab.com/golang-utils/config/v2"
 	"gitlab.com/golang-utils/fs/filesystems/rootfs"
@@ -53,6 +54,8 @@ func (p *smfJSONCmd) run() error {
 		targetFile = p.OutFile.Get()
 	} else {
 		fname := path.Name(p.File.Get())
+		fname = strings.Replace(fname, ".mid", "", 1)
+		fname = fname + ".json"
 		targetFile = path.MustWD().Join(items.MIDI_SAMPLES_DIR.String(), fname)
 	}
 
