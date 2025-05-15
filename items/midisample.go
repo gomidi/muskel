@@ -32,7 +32,7 @@ func (m *MidiSample) Fetch(fsys fs.ReadOnly, dir path.Relative, ticksPerQuarterN
 	if m.Placeholders == nil {
 		m.Placeholders = map[string]any{}
 	}
-	bt, err := fs.ReadFile(fsys, dir.Join(m.FileName+".mid"))
+	bt, err := fs.ReadFile(fsys, dir.Join(m.FileName+".json"))
 	if err != nil {
 		return err
 	}
