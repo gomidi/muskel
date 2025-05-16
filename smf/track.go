@@ -479,24 +479,24 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 
 		fmt.Printf("pos: %v NegativeOffset: %v\n", pos, v.NegativeOffset)
 
-		addDelta := pos - uint(v.NegativeOffset)
+		var totalPosition uint
 
-		var addAgain uint
+		addDelta := pos - uint(v.NegativeOffset)
 
 		for _, tev := range v.Track {
 
 			if tev.Message.IsMeta() {
-				addAgain += uint(tev.Delta) + addDelta
+				totalPosition += uint(tev.Delta) + addDelta
 				continue
 			}
 
-			fmt.Printf("adding %s orig delta %v add delta: %v addagain: %v\n", tev.Message.String(), tev.Delta, addDelta, addAgain)
+			//fmt.Printf("adding %s orig delta %v add delta: %v addagain: %v\n", tev.Message.String(), tev.Delta, addDelta, addAgain)
+			totalPosition += uint(tev.Delta) + addDelta
 
 			evts = append(evts, &event{
-				position: uint(tev.Delta) + addDelta + addAgain,
+				position: totalPosition,
 				message:  tev.Message,
 			})
-			addAgain = 0
 		}
 
 	case *items.GlideStart:
