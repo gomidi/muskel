@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel/midisampler"
@@ -32,7 +33,10 @@ func (m *MidiSample) Fetch(fsys fs.ReadOnly, dir path.Relative, ticksPerQuarterN
 	if m.Placeholders == nil {
 		m.Placeholders = map[string]any{}
 	}
-	bt, err := fs.ReadFile(fsys, dir.Join(m.FileName+".json"))
+
+	bt, err := rootfs.ReadFile(path.MustWD().Join(dir.String(), m.FileName+".json"))
+
+	//bt, err := fs.ReadFile(fsys, dir.Join(m.FileName+".json"))
 	if err != nil {
 		return err
 	}
