@@ -487,6 +487,8 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 				continue
 			}
 
+			fmt.Printf("adding %s @ %v\n", tev.Message.String(), uint(tev.Delta)+addDelta+addAgain)
+
 			evts = append(evts, &event{
 				position: uint(tev.Delta) + addDelta + addAgain,
 				message:  tev.Message,
