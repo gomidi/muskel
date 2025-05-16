@@ -477,6 +477,8 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			return
 		}
 
+		fmt.Printf("pos: %v NegativeOffset: %v\n", pos, v.NegativeOffset)
+
 		addDelta := pos - uint(v.NegativeOffset)
 
 		var addAgain uint
@@ -488,7 +490,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 				continue
 			}
 
-			fmt.Printf("adding %s @ %v\n", tev.Message.String(), uint(tev.Delta)+addDelta+addAgain)
+			fmt.Printf("adding %s orig delta %v add delta: %v addagain: %v\n", tev.Message.String(), tev.Delta, addDelta, addAgain)
 
 			evts = append(evts, &event{
 				position: uint(tev.Delta) + addDelta + addAgain,
