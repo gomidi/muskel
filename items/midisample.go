@@ -81,7 +81,7 @@ func (m *MidiSample) Parse(data string, posIn32th uint) (err error) {
 	}
 
 	m.FileName = fname[:fidx]
-	no := fname[fidx:]
+	no := fname[fidx+1:]
 
 	n, err := strconv.Atoi(no)
 	if err != nil {
