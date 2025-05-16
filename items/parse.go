@@ -133,7 +133,7 @@ func Parse(data string, posIn32th uint) (it Item, err error) {
 
 	err = it.Parse(data, posIn32th)
 	if err != nil {
-		return nil, fmt.Errorf("invalid item %T: %q", it, data)
+		return nil, fmt.Errorf("invalid item %T: %q, message: %s", it, data, err.Error())
 	}
 
 	if cmd, is := it.(*Command); is && cmd.IsInclude() {
