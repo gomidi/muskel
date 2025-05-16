@@ -110,7 +110,7 @@ var expectedAutoStop = strings.TrimSpace(strings.ReplaceAll(`
 `, "\t", "  "))
 
 func TestRunJSONTemplate(t *testing.T) {
-	tr, offset, err := RunJSONTemplate(testStr, 960, 4000, map[string]any{"key": 65})
+	tr, offset, err := RunJSONTemplate(testStr, 960, 0, 4000, map[string]any{"key": 65})
 
 	if err != nil {
 		t.Fatalf("error: %s\n", err.Error())
@@ -142,7 +142,7 @@ func TestRunJSONTemplate(t *testing.T) {
 }
 
 func TestRunJSONTemplateAutoStop(t *testing.T) {
-	tr, offset, err := RunJSONTemplate(testStr, 960, 40, map[string]any{"key": 65})
+	tr, offset, err := RunJSONTemplate(testStr, 960, 0, 40, map[string]any{"key": 65})
 
 	if err != nil {
 		t.Fatalf("error: %s\n", err.Error())

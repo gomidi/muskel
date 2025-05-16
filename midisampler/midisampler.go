@@ -51,7 +51,7 @@ func (l *logger) Printf(format string, args ...any) {
 // RunJSONTemplate replaces the placeholders in the midi template, returns the first track, where the ticks have been
 // converted to the target ticksPerQuarterNote the negative offset has been calculated by the position of the zero.
 // the track stops at the position of lenTicks after zero any playing notes will get a noteoff there
-func RunJSONTemplate(jsonStr string, ticksPerQuarterNote uint16, lenTicks uint64, placeholderMap map[string]any) (track smf.Track, negOffset uint64, err error) {
+func RunJSONTemplate(jsonStr string, ticksPerQuarterNote uint16, trackno int, lenTicks uint64, placeholderMap map[string]any) (track smf.Track, negOffset uint64, err error) {
 	var t *template.Template
 	t, err = template.New("json-template").Funcs(fnMap).Parse(jsonStr)
 
@@ -78,8 +78,8 @@ func RunJSONTemplate(jsonStr string, ticksPerQuarterNote uint16, lenTicks uint64
 		return
 	}
 
-	if len(sm.Tracks) < 1 {
-		err = fmt.Errorf("no tracks found")
+	if len(sm.Tracks) <= trackno {
+		err = fmt.Errorf("track %v not found", trackno)
 		return
 	}
 
@@ -96,7 +96,7 @@ func RunJSONTemplate(jsonStr string, ticksPerQuarterNote uint16, lenTicks uint64
 		return (tpq * uint32(ticksPerQuarterNote) / uint32(resTicksPerQuarternote))
 	}
 
-	srcTrack := sm.Tracks[0]
+	srcTrack := sm.Tracks[trackno]
 
 	var deltaAdd uint32
 	var foundZero bool

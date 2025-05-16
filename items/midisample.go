@@ -3,6 +3,7 @@ package items
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"gitlab.com/golang-utils/fs"
@@ -18,6 +19,7 @@ var _ Item = &MidiSample{}
 
 type MidiSample struct {
 	FileName       string
+	TrackNo        int
 	Placeholders   map[string]any
 	LengthTicks    uint
 	NegativeOffset uint64
@@ -41,7 +43,7 @@ func (m *MidiSample) Fetch(fsys fs.ReadOnly, dir path.Relative, ticksPerQuarterN
 		return err
 	}
 
-	m.Track, m.NegativeOffset, err = midisampler.RunJSONTemplate(string(bt), ticksPerQuarterNote, uint64(m.LengthTicks), m.Placeholders)
+	m.Track, m.NegativeOffset, err = midisampler.RunJSONTemplate(string(bt), ticksPerQuarterNote, m.TrackNo, uint64(m.LengthTicks), m.Placeholders)
 	return err
 }
 
@@ -55,8 +57,10 @@ func (m *MidiSample) Parse(data string, posIn32th uint) (err error) {
 
 	data = data[1:]
 
+	var fname string
+
 	if idx := strings.Index(data, "("); idx > 0 {
-		m.FileName = data[:idx]
+		fname = data[:idx]
 		lidx := strings.LastIndex(data, ")")
 		params := strings.TrimSpace(data[idx+1 : lidx])
 		ps := splitParams(params)
@@ -67,8 +71,24 @@ func (m *MidiSample) Parse(data string, posIn32th uint) (err error) {
 			}
 		}
 	} else {
-		m.FileName = data
+		fname = data
 	}
+
+	fidx := strings.Index(data, "#")
+
+	if fidx <= 0 {
+		return fmt.Errorf("no tracknumber defined for midisample %q", fname)
+	}
+
+	m.FileName = fname[:fidx]
+	no := fname[fidx:]
+
+	n, err := strconv.Atoi(no)
+	if err != nil {
+		return fmt.Errorf("not a number %q in midisample %q", no, fname)
+	}
+
+	m.TrackNo = n
 	return nil
 }
 
