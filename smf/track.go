@@ -473,6 +473,7 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 		//length := v.LengthTicks
 		err = v.Fetch(t.smf.score.FS, items.MIDI_SAMPLES_DIR, t.smf.writer.ticks)
 		if err != nil {
+			fmt.Printf("error: %s\n", err.Error())
 			return
 		}
 
