@@ -43,9 +43,16 @@ func (iw *Track) trackIntroEvents(tr *track.Track) (evts events) {
 	pitchBendRange := uint8(2)
 	if tr.PitchbendRange > 0 {
 		pitchBendRange = tr.PitchbendRange
+
 	}
 
 	msgs := rpn_nrpn.PitchBendSensitivity(uint8(tr.MIDIChannel), pitchBendRange, 0)
+
+	for _, msg := range msgs {
+		evts = append(evts, &event{message: msg.Bytes()})
+	}
+
+	msgs = rpn_nrpn.RPNReset(uint8(tr.MIDIChannel))
 
 	for _, msg := range msgs {
 		evts = append(evts, &event{message: msg.Bytes()})
@@ -477,26 +484,69 @@ func (t *Track) convertSketchEvent(ch uint8, sketchEvent *items.Event, trackDela
 			return
 		}
 
-		fmt.Printf("pos: %v NegativeOffset: %v\n", pos, v.NegativeOffset)
-
-		var totalPosition uint
+		// var totalPosition uint
+		var additional uint
 
 		addDelta := pos - uint(v.NegativeOffset)
 
-		for _, tev := range v.Track {
+		abs := addDelta
 
-			if tev.Message.IsMeta() {
-				totalPosition += uint(tev.Delta) + addDelta
+		var firstNote = true
+
+		for i, tev := range v.Track {
+
+			//		fmt.Printf("additional: %v\n", additional)
+
+			// we change the channel everywhere to the track channel (ch)
+			// therefor we scan the original channel to _ch, but ignore it
+			var _ch, byte1, byte2 uint8
+			var pbrel int16
+			var pbabs uint16
+
+			var msg smf.Message
+			var ev = &event{}
+
+			switch {
+
+			case tev.Message.GetAfterTouch(&_ch, &byte1):
+				msg = smf.Message(midi.AfterTouch(ch, byte1))
+
+			case tev.Message.GetControlChange(&_ch, &byte1, &byte2):
+				msg = smf.Message(midi.ControlChange(ch, byte1, byte2))
+
+			case tev.Message.GetNoteStart(&_ch, &byte1, &byte2):
+				if firstNote {
+					ev.stopNotes = true
+				}
+				firstNote = false
+				if i == len(v.Track)-1 {
+					ev.monitor = true
+				}
+				msg = smf.Message(midi.NoteOn(ch, byte1, byte2))
+
+			case tev.Message.GetNoteEnd(&_ch, &byte1):
+				msg = smf.Message(midi.NoteOff(ch, byte1))
+
+			case tev.Message.GetPolyAfterTouch(&_ch, &byte1, &byte2):
+				msg = smf.Message(midi.PolyAfterTouch(ch, byte1, byte2))
+
+			case tev.Message.GetPitchBend(&_ch, &pbrel, &pbabs):
+				msg = smf.Message(midi.Pitchbend(ch, pbrel))
+
+			case tev.Message.GetProgramChange(&_ch, &byte1):
+				// ignore program changes
+				additional += uint(tev.Delta)
+				continue
+			default:
+				additional += uint(tev.Delta)
 				continue
 			}
 
-			//fmt.Printf("adding %s orig delta %v add delta: %v addagain: %v\n", tev.Message.String(), tev.Delta, addDelta, addAgain)
-			totalPosition += uint(tev.Delta) + addDelta
-
-			evts = append(evts, &event{
-				position: totalPosition,
-				message:  tev.Message,
-			})
+			abs += uint(tev.Delta) + additional
+			ev.position = abs
+			ev.message = msg
+			evts = append(evts, ev)
+			additional = 0
 		}
 
 	case *items.GlideStart:

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/filesystems/dirfs"
 	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/golang-utils/version/v2"
@@ -84,7 +85,15 @@ func Import(srcFile string, targetFile string, opts ...smfimport.Option) error {
 */
 
 func newFile(filename path.Local, params []string, rd io.Reader, opts ...score.Option) *file.File {
-	sc := score.New(filename, params, opts...)
+	fsys, err := dirfs.New(filename.Dir())
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	opts = append(opts, score.FS(fsys))
+
+	sc := score.New(path.Relative(path.Name(filename)), params, opts...)
 	return file.FromReader(rd, sc)
 }
 
@@ -100,10 +109,18 @@ func Format(filename path.Local, params []string, rd io.Reader, wr io.Writer, op
 }
 
 func Unroll(mainFile path.Local, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
-	sc := score.New(mainFile, params, opts...)
+	fsys, err := dirfs.New(mainFile.Dir())
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	opts = append(opts, score.FS(fsys))
+
+	sc := score.New(path.Relative(path.Name(mainFile)), params, opts...)
 	f := file.FromReader(rd, sc)
 
-	err := f.Parse()
+	err = f.Parse()
 	if err != nil {
 		return fmt.Errorf("parsing error: %s", err)
 	}
@@ -144,14 +161,30 @@ func WriteSMF(filename path.Local, params []string, rd io.Reader, fmtwr io.Write
 }
 
 func ParseFile(mainFile path.Local, params []string, opts ...score.Option) (sc *score.Score, err error) {
-	sc = score.New(mainFile, params, opts...)
+	fsys, err := dirfs.New(mainFile.Dir())
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	opts = append(opts, score.FS(fsys))
+
+	sc = score.New(path.Relative(path.Name(mainFile)), params, opts...)
 	err = sc.Parse()
 	return
 }
 
 func Convert(mainFile path.Local, params []string, smffile string, opts ...score.Option) error {
-	sc := score.New(mainFile, params, opts...)
-	err := sc.Parse()
+	fsys, err := dirfs.New(mainFile.Dir())
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	opts = append(opts, score.FS(fsys))
+
+	sc := score.New(path.Relative(path.Name(mainFile)), params, opts...)
+	err = sc.Parse()
 	if err != nil {
 		return err
 	}

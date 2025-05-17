@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"gitlab.com/golang-utils/fs"
-	"gitlab.com/golang-utils/fs/filesystems/rootfs"
+	"gitlab.com/golang-utils/fs/filesystems/dirfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/file"
@@ -24,7 +24,7 @@ import (
 
 type Score struct {
 	FS             fs.FS
-	mainFile       path.Local
+	mainFile       path.Relative
 	mainSketch     string
 	mainCol        string
 	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
@@ -63,14 +63,7 @@ func (s *Score) FilterTrack(colName string, events []*items.Event) []*items.Even
 	return events
 }
 
-func New(filepath path.Local, params []string, options ...Option) *Score {
-
-	fsys, err := rootfs.New()
-
-	if err != nil {
-		panic(err.Error())
-	}
-
+func New(filepath path.Relative, params []string, options ...Option) *Score {
 	s := &Score{
 		Tracks:         map[string]*track.Track{},
 		Tunings:        map[string]*tuning.Tuning{},
@@ -85,7 +78,6 @@ func New(filepath path.Local, params []string, options ...Option) *Score {
 		tokens:         map[string]string{},
 		includedScores: map[string]*Score{},
 		lyrics:         map[string][]string{},
-		FS:             fsys,
 		mainFile:       filepath,
 		mainSketch:     "=SCORE",
 		params:         params,
@@ -95,6 +87,16 @@ func New(filepath path.Local, params []string, options ...Option) *Score {
 	for _, opt := range options {
 		opt(s)
 	}
+
+	if s.FS == nil {
+		fsys, err := dirfs.New(path.MustWD())
+		if err != nil {
+			panic(err.Error())
+		}
+
+		s.FS = fsys
+	}
+
 	return s
 }
 
@@ -213,7 +215,8 @@ func (sc *Score) AddInclude(filepath string, tableName string, params []string) 
 		if !isToken {
 			inc = tableName
 		}
-		err := sc.Include(path.MustLocal(fname), inc, params)
+		//	err := sc.Include(path.MustLocal(fname), inc, params)
+		err := sc.Include(path.Relative(fname), inc, params)
 		if err != nil {
 			return fmt.Errorf("can't include %q, reason: %s", filepath, err.Error())
 		}
@@ -291,7 +294,7 @@ func (sc *Score) GetToken(name string) (string, error) {
 	return tk, nil
 }
 
-func (sc *Score) GetExternalToken(file path.Local, name string) (string, error) {
+func (sc *Score) GetExternalToken(file path.Relative, name string) (string, error) {
 	s, err := sc.External(file, nil)
 	if err != nil {
 		return "", fmt.Errorf("can't parse external file %q for token %q: %s", file, name, err.Error())
@@ -387,7 +390,7 @@ func (sc *Score) findInclude(filename string) (fname string, err error) {
 	return FindInclude(sc.mainFile.Dir().String(), filename)
 }
 
-func (sc *Score) GetExternalSketch(filename path.Local, sketch_table string, params []string) (*sketch.Sketch, error) {
+func (sc *Score) GetExternalSketch(filename path.Relative, sketch_table string, params []string) (*sketch.Sketch, error) {
 	//fmt.Printf("GetExternalSketch called for %q in %q\n", sketch_table, filename)
 	if sketch_table == "" {
 		sketch_table = "=SCORE"
@@ -421,7 +424,7 @@ func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []strin
 
 	sco, has := sc.includedScores[fname]
 	if !has {
-		err := sc.Include(path.MustLocal(fname), sketch_table, params)
+		err := sc.Include(path.Relative(fname), sketch_table, params)
 		if err != nil {
 			return nil, fmt.Errorf("can't include %q, reason: %s\n", fname, err.Error())
 		}
@@ -1456,7 +1459,7 @@ func (sc *Score) NoEmptyLines() bool {
 	return sc.noEmptyLines
 }
 
-func (sc *Score) Include(filename path.Local, sketch string, params []string) error {
+func (sc *Score) Include(filename path.Relative, sketch string, params []string) error {
 	fname, err := sc.findInclude(filename.String())
 	if err != nil {
 		return err
@@ -1480,7 +1483,7 @@ func (sc *Score) Include(filename path.Local, sketch string, params []string) er
 	return nil
 }
 
-func (sc *Score) External(filename path.Local, params []string) (*Score, error) {
+func (sc *Score) External(filename path.Relative, params []string) (*Score, error) {
 	fname, err := sc.findInclude(filename.String())
 	if err != nil {
 		return nil, err

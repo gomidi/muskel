@@ -1,10 +1,18 @@
 package score
 
 import (
+	"gitlab.com/golang-utils/fs"
+
 	"gitlab.com/gomidi/muskel/items"
 )
 
 type Option func(s *Score)
+
+func FS(fsys fs.FS) Option {
+	return func(s *Score) {
+		s.FS = fsys
+	}
+}
 
 func Column(colname string) Option {
 	return func(s *Score) {

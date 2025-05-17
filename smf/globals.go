@@ -13,7 +13,7 @@ const DEBUG_TEST = false
 
 //var DEBUG bool = false
 
-func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string) error {
+func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, opts ...Option) error {
 	numTracks := uint16(1) // first track is for time signatures and tempo changes
 
 	if items.DEBUG {
@@ -32,7 +32,7 @@ func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string) error {
 		}
 	}
 
-	wrt := NewWriter(wr, numTracks, 960)
+	wrt := NewWriter(wr, numTracks, 960, opts...)
 	if items.DEBUG || DEBUG_TEST {
 		wrt.SMF.Logger = debugLog{}
 	}

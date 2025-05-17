@@ -88,7 +88,7 @@ func (c *column) GetToken(file string, origName string, params []string) (val st
 	}
 
 	if file != "" {
-		val, err = c.sketch.Score.GetExternalToken(path.MustLocal(file), token)
+		val, err = c.sketch.Score.GetExternalToken(path.Relative(file), token)
 	} else {
 		val, err = c.sketch.Score.GetToken(token)
 	}

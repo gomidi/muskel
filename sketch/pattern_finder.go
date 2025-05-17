@@ -100,7 +100,7 @@ func (r *patternFinder) normalizeName(includefile string, callingCol string, cal
 func (r *patternFinder) findSketch(sname string, colName string, includefile string, callingCol string, callName string, callArgs []string) (s *Sketch, err error) {
 
 	if includefile != "" {
-		s, err = r.fromSketch.Score.GetExternalSketch(path.MustLocal(includefile), sname, callArgs)
+		s, err = r.fromSketch.Score.GetExternalSketch(path.Relative(includefile), sname, callArgs)
 		if err != nil {
 			return
 		}

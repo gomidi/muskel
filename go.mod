@@ -11,7 +11,7 @@ require (
 	gitlab.com/golang-utils/version/v2 v2.0.1
 	gitlab.com/gomidi/lilypond v0.1.2
 	gitlab.com/gomidi/midi/tools/smfimage v0.20.0
-	gitlab.com/gomidi/midi/v2 v2.3.11
+	gitlab.com/gomidi/midi/v2 v2.3.13
 	golang.org/x/sys v0.31.0
 )
 

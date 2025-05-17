@@ -45,7 +45,7 @@ type logger struct {
 }
 
 func (l *logger) Printf(format string, args ...any) {
-	fmt.Fprintf(&l.Buffer, format, args...)
+	fmt.Fprintf(&l.Buffer, "MIDISAMPLE reader: "+format, args...)
 }
 
 // RunJSONTemplate replaces the placeholders in the midi template, returns the first track, where the ticks have been
@@ -105,6 +105,8 @@ func RunJSONTemplate(jsonStr string, ticksPerQuarterNote uint16, trackno int, le
 
 	defer track.Close(0)
 
+	var channel uint8 = 100 // means: not yet found, we want all channel messages to be of the same channel, otherwise it is an error
+
 	for _, ev := range srcTrack {
 		delta := convertTicks(ev.Delta) + deltaAdd
 		deltaAdd = 0
@@ -144,6 +146,17 @@ func RunJSONTemplate(jsonStr string, ticksPerQuarterNote uint16, trackno int, le
 		}
 
 		var ch, key, vel uint8
+
+		if ev.Message.GetChannel(&ch) {
+			if channel == 100 { // not yet set
+				channel = ch
+			}
+
+			if channel != ch {
+				err = fmt.Errorf("can't have channel messages of more than one channel in midisample file: found channel %v and %v", channel+1, ch+1)
+				return
+			}
+		}
 
 		switch {
 

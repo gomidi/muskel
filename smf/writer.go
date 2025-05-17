@@ -16,9 +16,19 @@ type Writer struct {
 	currentTrack uint16
 	channel      uint8
 	SMF          *smf.SMF
+	targetWR     io.Writer
+	logger       smf.Logger
 
 	// bool value indicates, if it is a monitored ("stoppable"), otherwise, it is still a noteOn, but just an unstoppable
 	noteOns map[uint8]bool
+}
+
+type Option func(*Writer)
+
+func WithLogger(smf.Logger) Option {
+	return func(wr *Writer) {
+		wr.logger = nil
+	}
 }
 
 type logger struct {
@@ -28,17 +38,24 @@ func (l logger) Printf(s string, other ...any) {
 	fmt.Printf(s, other...)
 }
 
-func NewWriter(wr io.Writer, numTracks uint16, ticks uint16) *Writer {
+func NewWriter(wr io.Writer, numTracks uint16, ticks uint16, opts ...Option) *Writer {
+	w := &Writer{}
+	w.logger = logger{}
+
+	for _, opt := range opts {
+		opt(w)
+	}
+
 	s := smf.NewSMF1()
 	s.TimeFormat = smf.MetricTicks(ticks)
-	s.Logger = logger{}
+	s.Logger = w.logger
 
-	return &Writer{
-		SMF:       s,
-		noteOns:   map[uint8]bool{},
-		numTracks: numTracks,
-		ticks:     ticks,
-	}
+	w.SMF = s
+	w.noteOns = map[uint8]bool{}
+	w.numTracks = numTracks
+	w.ticks = ticks
+	w.targetWR = wr
+	return w
 }
 
 func (wr *Writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
@@ -70,7 +87,7 @@ func (wr *Writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 
 		if ev.stopNotes {
 			var didStop bool
-			didStop, err = wr.stopNotes(tr, false)
+			didStop, err = wr.stopNotes(&tr, false)
 			if err != nil {
 				return fmt.Errorf("error at tick %v: %s", ev.position, err)
 			}
@@ -133,7 +150,7 @@ func (wr *Writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 		wr.delta = 0
 	}
 
-	_, err = wr.stopNotes(tr, true)
+	_, err = wr.stopNotes(&tr, true)
 	if err != nil {
 		return err
 	}
@@ -149,7 +166,7 @@ func (wr *Writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 	return err
 }
 
-func (wr *Writer) stopNotes(tr smf.Track, all bool) (didStop bool, err error) {
+func (wr *Writer) stopNotes(tr *smf.Track, all bool) (didStop bool, err error) {
 	var stoppable []int
 
 	for nt, on := range wr.noteOns {

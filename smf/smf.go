@@ -87,7 +87,8 @@ func (s *SMF) write() error {
 		}
 	}
 
-	return nil
+	_, err = s.writer.SMF.WriteTo(s.writer.targetWR)
+	return err
 }
 
 func (s *SMF) newTrack() *Track {

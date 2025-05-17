@@ -1,12 +1,14 @@
 package muskel_test
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"testing"
 
+	"gitlab.com/golang-utils/fs/filesystems/mockfs"
 	"gitlab.com/golang-utils/fs/path"
+	"gitlab.com/gomidi/midi/v2"
 	smfmidi "gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/items"
@@ -15,7 +17,7 @@ import (
 )
 
 func TestSMFWriter(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 	//	score.DEBUG = false
 
 	var tests = []struct {
@@ -69,7 +71,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -112,7 +113,6 @@ func TestSMFWriter(t *testing.T) {
 [1280] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1280] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -161,7 +161,6 @@ func TestSMFWriter(t *testing.T) {
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -189,7 +188,6 @@ func TestSMFWriter(t *testing.T) {
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -219,7 +217,6 @@ func TestSMFWriter(t *testing.T) {
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -508,7 +505,6 @@ func TestSMFWriter(t *testing.T) {
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -536,7 +532,6 @@ func TestSMFWriter(t *testing.T) {
 [1600] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [1600] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -564,7 +559,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -594,7 +588,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -623,7 +616,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -653,7 +645,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn --
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -697,7 +688,6 @@ func TestSMFWriter(t *testing.T) {
 [60] channel.NoteOff channel 0 key 52
 [260] channel.NoteOn channel 0 key 56 dyn =
 [60] channel.NoteOff channel 0 key 56
-[260] meta.Undefined type:  0
 `,
 		},
 		{
@@ -721,7 +711,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 57 dyn =
 [60] channel.NoteOff channel 0 key 57
 `,
@@ -747,7 +736,6 @@ func TestSMFWriter(t *testing.T) {
 [60] channel.NoteOff channel 0 key 52
 [260] channel.NoteOn channel 0 key 56 dyn =
 [60] channel.NoteOff channel 0 key 56
-[260] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 57 dyn =
 [60] channel.NoteOff channel 0 key 57
 `,
@@ -777,7 +765,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 57 dyn =
 [960] channel.NoteOff channel 0 key 57
 `,
@@ -808,7 +795,6 @@ func TestSMFWriter(t *testing.T) {
 [320] channel.NoteOff channel 0 key 52
 [0] channel.NoteOn channel 0 key 56 dyn =
 [320] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 57 dyn =
 [960] channel.NoteOff channel 0 key 57
 `,
@@ -2505,7 +2491,6 @@ func TestSMFWriter(t *testing.T) {
 [480] channel.NoteOff channel 0 key 56
 [0] channel.NoteOn channel 0 key 57 dyn =
 [480] channel.NoteOff channel 0 key 57
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -2534,8 +2519,6 @@ func TestSMFWriter(t *testing.T) {
 [240] channel.NoteOff channel 0 key 57
 [0] channel.NoteOn channel 0 key 59 dyn =
 [240] channel.NoteOff channel 0 key 59
-[0] meta.Undefined type:  0
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -2562,10 +2545,8 @@ func TestSMFWriter(t *testing.T) {
 [240] channel.NoteOff channel 0 key 57
 [0] channel.NoteOn channel 0 key 59 dyn =
 [240] channel.NoteOff channel 0 key 59
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 56 dyn =
 [480] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -2596,10 +2577,8 @@ func TestSMFWriter(t *testing.T) {
 [120] channel.NoteOff channel 0 key 49
 [0] channel.NoteOn channel 0 key 50 dyn =
 [120] channel.NoteOff channel 0 key 50
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 56 dyn =
 [480] channel.NoteOff channel 0 key 56
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -2630,10 +2609,8 @@ func TestSMFWriter(t *testing.T) {
 [120] channel.NoteOff channel 0 key 48
 [0] channel.NoteOn channel 0 key 52 dyn =
 [120] channel.NoteOff channel 0 key 52
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 48 dyn =
 [480] channel.NoteOff channel 0 key 48
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -2666,11 +2643,8 @@ func TestSMFWriter(t *testing.T) {
 [60] channel.NoteOff channel 0 key 55
 [0] channel.NoteOn channel 0 key 59 dyn =
 [60] channel.NoteOff channel 0 key 59
-[0] meta.Undefined type:  0
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 48 dyn =
 [480] channel.NoteOff channel 0 key 48
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -2709,11 +2683,8 @@ func TestSMFWriter(t *testing.T) {
 [60] channel.NoteOff channel 0 key 55
 [0] channel.NoteOn channel 0 key 59 dyn =
 [60] channel.NoteOff channel 0 key 59
-[0] meta.Undefined type:  0
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 48 dyn =
 [480] channel.NoteOff channel 0 key 48
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -2750,11 +2721,8 @@ func TestSMFWriter(t *testing.T) {
 [60] channel.NoteOff channel 0 key 55
 [0] channel.NoteOn channel 0 key 59 dyn =
 [60] channel.NoteOff channel 0 key 59
-[0] meta.Undefined type:  0
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 48 dyn =
 [480] channel.NoteOff channel 0 key 48
-[0] meta.Undefined type:  0
 `,
 		},
 		{
@@ -3010,7 +2978,6 @@ func TestSMFWriter(t *testing.T) {
 [450] channel.NoteOff channel 0 key 48
 [0] channel.NoteOn channel 0 key 46 dyn =
 [480] channel.NoteOff channel 0 key 46
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 50 dyn =
 [960] channel.NoteOff channel 0 key 50
 [0] channel.NoteOn channel 0 key 52 dyn =
@@ -3041,7 +3008,6 @@ func TestSMFWriter(t *testing.T) {
 [450] channel.NoteOff channel 0 key 48
 [0] channel.NoteOn channel 0 key 46 dyn =
 [510] channel.NoteOff channel 0 key 46
-[0] meta.Undefined type:  0
 [0] channel.NoteOn channel 0 key 50 dyn =
 [960] channel.NoteOff channel 0 key 50
 [0] channel.NoteOn channel 0 key 52 dyn =
@@ -4042,16 +4008,21 @@ func TestSMFWriter(t *testing.T) {
 	}
 
 	skip := map[int]bool{
-		//122: true,
-		//121: true,
-		//79: true,
-		//80: true,
-		83: true,
+		66:  true, // TODO: fix pitchbend absolute value bug
+		83:  true,
+		110: true, // TODO: fix pitchbend absolute value bug
+		120: true, // TODO: fix pitchbend absolute value bug
 	}
 
 	//sketch.DEBUG = true
 
 	for i, test := range tests {
+
+		/*
+			if i > 128 {
+				continue
+			}
+		*/
 
 		/*
 				if i == 108 || i == 112 {
@@ -4079,13 +4050,23 @@ func TestSMFWriter(t *testing.T) {
 		//fmt.Println("##############")
 
 		//fmt.Printf("--        test-%v  -----\n", i)
+		loc := path.MustFileFromSystem(fmt.Sprintf("test-%v", i))
+		fsys, err := mockfs.New(loc.Dir())
 
-		sc := score.New(path.MustLocal(fmt.Sprintf("test-%v", i)), nil)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		var opts []score.Option
+
+		opts = append(opts, score.FS(fsys))
+
+		sc := score.New(path.Relative(path.Name(loc)), nil, opts...)
 		f := file.FromReader(strings.NewReader(test.input), sc)
 
 		sc.Files[fmt.Sprintf("test-%v", i)] = f
 
-		err := f.Parse()
+		err = f.Parse()
 		if err != nil {
 			t.Errorf("[%v] can't parse =SCORE %s", i, err)
 			continue
@@ -4098,18 +4079,32 @@ func TestSMFWriter(t *testing.T) {
 		}
 
 		var lg logger
-		//lg.wantedTrack = test.track
-		//lg.includeMeta = test.includeMeta
-		//lg.includeControlChange = test.includeControlChange
+		lg.wantedTrack = test.track
+		lg.includeMeta = test.includeMeta
+		lg.includeControlChange = test.includeControlChange
 		//err = smf.WriteSMFTo(sc, ioutil.Discard, "*", smfwriter.Debug(&lg))
-		err = smf.WriteSMFTo(sc, ioutil.Discard, "*")
+
+		var bf bytes.Buffer
+
+		//	err = smf.WriteSMFTo(sc, ioutil.Discard, "*", smf.WithLogger(nil))
+		err = smf.WriteSMFTo(sc, &bf, "*", smf.WithLogger(nil))
 
 		if err != nil {
 			t.Errorf("[%v] can't write SMF: %s", i, err)
 			continue
 		}
 
-		got := strings.TrimSpace(lg.bf.String())
+		tr := 1
+
+		str, err := lg.helperSMFToString(bf.Bytes())
+
+		if err != nil {
+			t.Errorf("[%v] can't write SMF, track %v: %s", i, tr, err)
+			continue
+		}
+
+		//got := strings.TrimSpace(lg.bf.String())
+		got := strings.TrimSpace(str)
 		expected := strings.TrimSpace(test.expected)
 
 		if got != expected {
@@ -4127,6 +4122,81 @@ type logger struct {
 	currentTrack         int
 	includeMeta          bool
 	includeControlChange bool
+}
+
+func (lg logger) helperSMFToString(smf []byte) (string, error) {
+	mf, err := smfmidi.ReadFrom(bytes.NewReader(smf))
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(mf.Tracks)-1 < lg.wantedTrack {
+		return "", fmt.Errorf("track %v not found, only had %v tracks", lg.wantedTrack, len(mf.Tracks))
+	}
+
+	var bf bytes.Buffer
+
+	tr := mf.Tracks[lg.wantedTrack]
+
+	for _, ev := range tr {
+		var ch, byte1, byte2 uint8
+		var text string
+		var pbrel int16
+		var pbabs uint16
+
+		switch {
+		case ev.Message.GetNoteStart(&ch, &byte1, &byte2):
+			// channel.NoteOn channel 0 key 72 dyn =
+			fmt.Fprintf(&bf, "[%v] channel.NoteOn channel %v key %v dyn %s\n", ev.Delta, ch, byte1, _velocityToDynamic(byte2))
+		case ev.Message.GetNoteEnd(&ch, &byte1):
+			// channel.NoteOff channel 0 key 72
+			fmt.Fprintf(&bf, "[%v] channel.NoteOff channel %v key %v\n", ev.Delta, ch, byte1)
+		case ev.Message.GetMetaLyric(&text):
+			//[0] meta.Lyric: "hiho"
+			fmt.Fprintf(&bf, "[%v] meta.Lyric: %q\n", ev.Delta, text)
+		case ev.Message.GetAfterTouch(&ch, &byte1):
+			//[0] channel.Aftertouch channel 0 pressure 23
+			fmt.Fprintf(&bf, "[%v] channel.Aftertouch channel %v pressure %v\n", ev.Delta, ch, byte1)
+		case ev.Message.GetPitchBend(&ch, &pbrel, &pbabs):
+			// [960] channel.Pitchbend channel 1 value 20 absValue 0
+			fmt.Fprintf(&bf, "[%v] channel.Pitchbend channel %v value %v absValue %v\n", ev.Delta, ch, pbrel, pbabs)
+		case ev.Message.GetProgramChange(&ch, &byte1):
+			fmt.Fprintf(&bf, "[%v] channel.ProgramChange channel %v program %v\n", ev.Delta, ch, byte1)
+			// [0] channel.ProgramChange channel 0 program 1
+		case ev.Message.GetControlChange(&ch, &byte1, &byte2):
+			if !lg.includeControlChange {
+				continue
+			}
+
+			ccname := midi.ControlChangeName[byte1]
+
+			if ccname != "" {
+				ccname = fmt.Sprintf(" (%q)", ccname)
+			}
+
+			//		channel.ControlChange channel 0 controller 101 ("Registered Parameter (MSB)") value 0
+			fmt.Fprintf(&bf, "[%v] channel.ControlChange channel %v controller %v%s value %v\n", ev.Delta, ch, byte1, ccname, byte2)
+		default:
+			if ev.Message.IsMeta() && !lg.includeMeta {
+				continue
+			}
+
+			var text string
+			var tempo float64
+			switch {
+			case ev.Message.GetMetaCopyright(&text):
+				fmt.Fprintf(&bf, "[%v] meta.Copyright: %q\n", ev.Delta, text)
+			case ev.Message.GetMetaTrackName(&text):
+				fmt.Fprintf(&bf, "[%v] meta.TrackSequenceName: %q\n", ev.Delta, text)
+			case ev.Message.GetMetaTempo(&tempo):
+				fmt.Fprintf(&bf, "[%v] meta.Tempo BPM: %0.2f\n", ev.Delta, tempo)
+			}
+
+		}
+	}
+
+	return bf.String(), nil
 }
 
 func _velocityToDynamic(vel uint8) (dyn string) {

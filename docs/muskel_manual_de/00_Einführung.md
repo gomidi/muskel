@@ -9,7 +9,7 @@ musikalischer Ideen und Kompositionen.
 Es wurde besonderen Wert darauf gelegt, das `MuSkel` nur minimale technische Voraussetzungen erfordert 
 und so neutral wie möglich ist.
 
-Daher kann man diese Spezifikation auch als eine Art *Stenografie für Musik* zu benutzen - mit Stift und Papier.
+Daher kann man diese Spezifikation auch als eine Art *Stenografie für Musik* benutzen - mit Stift und Papier.
 
 Schon bei dieser Verwendung bietet sie gegenüber etwa der `westlichen Standardnotation` diverse Vorteile, z.B. 
 - die Unabhängigkeit von Notenpapier (keine Notenlinien)

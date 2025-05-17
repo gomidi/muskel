@@ -28,7 +28,7 @@ func (debugLog) Printf(format string, vals ...interface{}) {
 }
 
 // func writeSMFToFile(s *score.Score, midifile, filegroup string, options ...smfwriter.Option) error {
-func writeSMFToFile(s *score.Score, midifile, filegroup string) error {
+func writeSMFToFile(s *score.Score, midifile, filegroup string, opts ...Option) error {
 	f, err := os.Create(midifile)
 	if err != nil {
 		return err
@@ -39,5 +39,5 @@ func writeSMFToFile(s *score.Score, midifile, filegroup string) error {
 	}
 
 	defer f.Close()
-	return WriteSMFTo(s, f, filegroup)
+	return WriteSMFTo(s, f, filegroup, opts...)
 }

@@ -99,7 +99,7 @@ func (i *Include) ParseLine(line string) error {
 	i.part = r.Table
 
 	i.score.AddInclude(i.include.file, i.include.part, nil)
-	return i.score.Include(path.MustLocal(i.include.file), i.include.part, nil)
+	return i.score.Include(path.Relative(i.include.file), i.include.part, nil)
 }
 
 func (i *Include) WriteTo(f table.Formatter) error {

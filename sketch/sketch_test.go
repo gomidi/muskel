@@ -466,7 +466,7 @@ func (t testScore) SetEndBar(uint) {
 func (t testScore) SetStartBar(uint) {
 }
 
-func (t testScore) GetExternalSketch(filename path.Local, sketch_table string, params []string) (*Sketch, error) {
+func (t testScore) GetExternalSketch(filename path.Relative, sketch_table string, params []string) (*Sketch, error) {
 	return nil, fmt.Errorf("external sketch %q not found in file %q", sketch_table, filename)
 }
 
@@ -477,7 +477,7 @@ func (t testScore) GetIncludedSketch(a, b string, params []string) (*Sketch, err
 	return nil, fmt.Errorf("included sketch %q not found in file %q", b, a)
 }
 
-func (t testScore) GetExternalToken(file path.Local, name string) (string, error) {
+func (t testScore) GetExternalToken(file path.Relative, name string) (string, error) {
 	return "", fmt.Errorf("external token %q not found in file %q", name, file)
 }
 

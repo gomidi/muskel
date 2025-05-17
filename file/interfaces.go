@@ -20,7 +20,7 @@ type Part interface {
 
 type score interface {
 	table.Score
-	Include(file path.Local, sketch string, params []string) error
+	Include(file path.Relative, sketch string, params []string) error
 	Embed(patterns ...string) error
 	HasTrack(name string) bool
 	Properties() map[string]interface{}
