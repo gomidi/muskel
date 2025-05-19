@@ -1469,6 +1469,7 @@ func (sc *Score) Include(filename path.Relative, sketch string, params []string)
 		if sketch != "" {
 			opts = append(opts, Sketch(sketch))
 		}
+		opts = append(opts, FS(sc.FS))
 		sco = New(filename, params, opts...)
 		sco.Parent = sc
 		err := sc.parse(path.Relative(fname), sco)
@@ -1493,7 +1494,10 @@ func (sc *Score) External(filename path.Relative, params []string) (*Score, erro
 		return sco, nil
 	}
 
-	sco = New(filename, params)
+	var opts []Option
+	opts = append(opts, FS(sc.FS))
+
+	sco = New(filename, params, opts...)
 	err = sc.parse(path.Relative(fname), sco)
 	if err != nil {
 		return nil, err
