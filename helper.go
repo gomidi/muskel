@@ -2,10 +2,10 @@ package muskel
 
 import (
 	"fmt"
-	"path"
-	"path/filepath"
-	"strings"
 
+	"gitlab.com/golang-utils/fs"
+
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/score"
 )
 
@@ -15,57 +15,36 @@ func init() {
 
 var FILE_EXTENSION = ".mskl"
 
-func absNormalized(file string) (string, error) {
-	s, err := filepath.Abs(file)
-	if err != nil {
-		return "", err
+func _findInclude(fsys fs.FS, relDir path.Relative, file string) (resolved path.Relative, err error) {
+	if fsys.Exists(path.Relative(file)) {
+		return path.Relative(file), nil
 	}
 
-	return strings.ReplaceAll(s, "\\", "/"), nil
-}
-
-func _findInclude(relDir string, file string) (resolved string, err error) {
-	if filepath.IsAbs(file) {
-		if score.FileExists(file) {
-			return absNormalized(file)
-		}
-		return "", fmt.Errorf("file not found: %q (abs path)", file)
+	try0 := relDir.Join(file)
+	if fsys.Exists(try0) {
+		return try0, nil
 	}
 
-	relDir = strings.ReplaceAll(relDir, "\\", "/")
-	file = strings.ReplaceAll(file, "\\", "/")
-
-	try0 := path.Join(relDir, file)
-	try0 = strings.ReplaceAll(try0, "\\", "/")
-	if score.FileExists(try0) {
-		//fmt.Printf("found: %q\n", try0)
-		return absNormalized(try0)
+	try1 := WORKING_DIR.RootRelative().Join(file)
+	if fsys.Exists(try1) {
+		return try1, nil
 	}
 
-	try1 := path.Join(WORKING_DIR, file)
-	try1 = strings.ReplaceAll(try1, "\\", "/")
-	if score.FileExists(try1) {
-		//fmt.Printf("found: %q\n", try1)
-		return absNormalized(try1)
-	}
-
-	try2 := path.Join(USER_DIR, file)
-	try2 = strings.ReplaceAll(try2, "\\", "/")
-	if score.FileExists(try2) {
-		//fmt.Printf("found: %q\n", try2)
-		return absNormalized(try2)
+	try2 := USER_DIR.RootRelative().Join(file)
+	if fsys.Exists(try2) {
+		return try2, nil
 	}
 
 	return "", fmt.Errorf("file not found: %q", file)
 }
 
-func findInclude(relDir string, file string) (resolved string, err error) {
+func findInclude(fsys fs.FS, relDir path.Relative, file string) (resolved path.Relative, err error) {
 	if file == "" {
 		panic("can't find empty file")
 	}
-	switch path.Ext(file) {
+	switch path.Ext(path.Relative(file)) {
 	case FILE_EXTENSION, ".md", ".mskl", ".xlsx", ".csv":
-		return _findInclude(relDir, file)
+		return _findInclude(fsys, relDir, file)
 	default:
 		fallbacks := []string{FILE_EXTENSION}
 		switch FILE_EXTENSION {
@@ -79,7 +58,7 @@ func findInclude(relDir string, file string) (resolved string, err error) {
 		}
 
 		for _, ext := range fallbacks {
-			resolved, err = _findInclude(relDir, file+ext)
+			resolved, err = _findInclude(fsys, relDir, file+ext)
 			if err == nil {
 				//fmt.Printf("found: %q\n", resolved)
 				return

@@ -3,14 +3,13 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
-	"path/filepath"
 	"time"
 
 	"gitlab.com/golang-utils/config/v2"
+	"gitlab.com/golang-utils/fs/filesystems/rootfs"
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel"
-	"gitlab.com/gomidi/muskel/score"
 )
 
 type templateCmd struct {
@@ -31,18 +30,18 @@ func (s *templateCmd) init() {
 
 func (t *templateCmd) run() error {
 	if t.File.IsSet() && t.File.Get() != "" {
-		return t.printFile(filepath.Join(muskel.USER_DIR, t.File.Get()+muskel.FILE_EXTENSION))
+		return t.printFile(muskel.USER_DIR.Join(t.File.Get() + muskel.FILE_EXTENSION))
 	} else {
 		return t.printDir(muskel.USER_DIR)
 	}
 }
 
-func (t *templateCmd) printFile(p string) error {
-	if !score.FileExists(p) {
+func (t *templateCmd) printFile(p path.Local) error {
+	if !rootfs.Exists(p) {
 		return fmt.Errorf("no such template: %q", p)
 	}
 
-	fl, err := os.Open(p)
+	fl, err := rootfs.OpenReader(p)
 
 	if err != nil {
 		return fmt.Errorf("can't open template %q: %s", p, err.Error())
@@ -53,8 +52,8 @@ func (t *templateCmd) printFile(p string) error {
 	return nil
 }
 
-func (t *templateCmd) printDir(dir string) error {
-	fls, err := ioutil.ReadDir(muskel.USER_DIR)
+func (t *templateCmd) printDir(dir path.Local) error {
+	fls, err := rootfs.ReadDirPaths(dir)
 	if err != nil {
 		return fmt.Errorf("can't read user directory %q: %s", dir, err.Error())
 	}
@@ -67,7 +66,13 @@ func (t *templateCmd) printDir(dir string) error {
 	fmt.Fprintf(os.Stdout, "The following template files are stored inside %s:\n\n", dir)
 
 	for _, fl := range fls {
-		fmt.Fprintf(os.Stdout, "%-24v (modified: %s)\n", fl.Name(), fl.ModTime().Format(time.RFC822))
+		name := fl.String()
+		var tistr string
+		ti, err := rootfs.ModTime(fl)
+		if err == nil {
+			tistr = fmt.Sprintf("(modified: %s)", ti.Format(time.RFC822))
+		}
+		fmt.Fprintf(os.Stdout, "%-24v %s\n", name, tistr)
 	}
 	return nil
 }

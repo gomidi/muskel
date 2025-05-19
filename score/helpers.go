@@ -3,20 +3,11 @@ package score
 import (
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
 
 	"gitlab.com/gomidi/muskel/items"
 )
-
-func FileExists(file string) bool {
-	info, err := os.Stat(file)
-	if err != nil {
-		return false
-	}
-	return !info.IsDir()
-}
 
 type internalScaleChange struct {
 	relPos uint

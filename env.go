@@ -3,7 +3,6 @@ package muskel
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	appdir "github.com/emersion/go-appdir"
 	"gitlab.com/golang-utils/fs"
@@ -13,11 +12,11 @@ import (
 	"gitlab.com/gomidi/muskel/predefined"
 )
 
-var USER_DIR string
-var WORKING_DIR string
+var USER_DIR path.Local
+var WORKING_DIR = path.MustWD()
 
 func setUserDir(version string) {
-	USER_DIR = filepath.Join(appdir.New("muskel").UserConfig(), version)
+	USER_DIR = path.MustLocal(appdir.New("muskel").UserConfig() + "/").Join(version + "/")
 }
 
 func init() {
@@ -27,8 +26,7 @@ func init() {
 		vs = fmt.Sprintf("v%v_%v_%v", v.Major, v.Minor, v.Patch)
 	}
 	setUserDir(vs)
-	setWorkingDir()
-	os.MkdirAll(USER_DIR, 0755)
+	rootfs.MkDirAll(USER_DIR)
 	err := writePredefinedTemplates()
 
 	if err != nil {
@@ -47,7 +45,7 @@ func writePredefinedTemplates() error {
 }
 
 func WritePredefinedTemplates(fsys fs.FS) error {
-	dir := path.MustDirFromSystem(USER_DIR).RootRelative()
+	dir := USER_DIR.RootRelative()
 
 	if !path.IsDir(dir) {
 		return fs.ErrExpectedDir.Params(dir.String())

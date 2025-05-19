@@ -27,7 +27,7 @@ type Score struct {
 	mainSketch     string
 	mainCol        string
 	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
-	includedScores map[string]*Score
+	includedScores map[path.Relative]*Score
 	lyrics         map[string][]string
 	properties     map[string]interface{}
 	tokens         map[string]string
@@ -75,7 +75,7 @@ func New(filepath path.Relative, params []string, options ...Option) *Score {
 		Unrolled:       map[string][]*items.Event{},
 		Parts:          map[string][2]uint{},
 		tokens:         map[string]string{},
-		includedScores: map[string]*Score{},
+		includedScores: map[path.Relative]*Score{},
 		lyrics:         map[string][]string{},
 		mainFile:       filepath,
 		mainSketch:     "=SCORE",
@@ -385,8 +385,8 @@ func (sc *Score) FileGroup(trackName string) (fg string) {
 	return sc.Tracks[trackName].FileGroup
 }
 
-func (sc *Score) findInclude(filename string) (fname string, err error) {
-	return FindInclude(sc.mainFile.Dir().String(), filename)
+func (sc *Score) findInclude(filename string) (fname path.Relative, err error) {
+	return FindInclude(sc.FS, sc.mainFile.Dir(), filename)
 }
 
 func (sc *Score) GetExternalSketch(filename path.Relative, sketch_table string, params []string) (*sketch.Sketch, error) {

@@ -1,6 +1,11 @@
 package score
 
-var FindInclude func(relDir string, file string) (resolved string, err error) = nil
+import (
+	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/path"
+)
+
+var FindInclude func(fsys fs.FS, relDir path.Relative, file string) (resolved path.Relative, err error) = nil
 
 var reservedNames = map[string]bool{
 	"MN": true,
