@@ -16,23 +16,25 @@ func init() {
 var FILE_EXTENSION = ".mskl"
 
 func _findInclude(fsys fs.FS, relDir path.Relative, file string) (resolved path.Relative, err error) {
-	if fsys.Exists(path.Relative(file)) {
-		return path.Relative(file), nil
+
+	places := []path.Relative{
+		// fs root
+		path.Relative(file).Clean(),
+
+		// related to current score dir
+		relDir.Join(file).Clean(),
+
+		// related to working directory (=project directory)
+		WORKING_DIR.RootRelative().Join(file),
+
+		// related to user directory
+		USER_DIR.RootRelative().Join(file),
 	}
 
-	try0 := relDir.Join(file)
-	if fsys.Exists(try0) {
-		return try0, nil
-	}
-
-	try1 := WORKING_DIR.RootRelative().Join(file)
-	if fsys.Exists(try1) {
-		return try1, nil
-	}
-
-	try2 := USER_DIR.RootRelative().Join(file)
-	if fsys.Exists(try2) {
-		return try2, nil
+	for _, fl := range places {
+		if fsys.Exists(fl) {
+			return fl, nil
+		}
 	}
 
 	return "", fmt.Errorf("file not found: %q", file)

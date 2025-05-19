@@ -415,7 +415,7 @@ func (f *File) Parse() (err error) {
 		}
 
 		if perr.Err != nil {
-			//panic(err.Error())
+			//	panic(perr.Err.Error())
 			break
 		}
 

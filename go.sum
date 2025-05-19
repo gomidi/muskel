@@ -94,8 +94,8 @@ gitlab.com/golang-utils/errors v0.0.3 h1:EXlmR0WbyVj/WZKi0q8+/r+w6VadFF241+Zsvcz
 gitlab.com/golang-utils/errors v0.0.3/go.mod h1:odzi5ci8jLKKYdk6vscuSqNxWjFFq70LDTzCeRomEOg=
 gitlab.com/golang-utils/fmtdate v1.0.2 h1:nhvKuSuFJvgUcos/zkMD4G3k1wObsThZ5NpVjih/ZOw=
 gitlab.com/golang-utils/fmtdate v1.0.2/go.mod h1:m2dG0UJPcES/+hFET++A9G7DrGKSia/M4Q/YfXqSYUM=
-gitlab.com/golang-utils/fs v0.23.0 h1:T65a21so5pytJlzziRTioeZF1z7t6Rz0EW4HWdkdsxo=
-gitlab.com/golang-utils/fs v0.23.0/go.mod h1:YxaYa55MDE6ciK1kq/eC/KwJx6YqPY4WTpIvGhvOyW0=
+gitlab.com/golang-utils/fs v0.24.1 h1:Njk136kxwTZEmRSwDXad/0NqUoPMOHLHQSWYC2gBq2g=
+gitlab.com/golang-utils/fs v0.24.1/go.mod h1:YxaYa55MDE6ciK1kq/eC/KwJx6YqPY4WTpIvGhvOyW0=
 gitlab.com/golang-utils/fsutils v0.20.5 h1:nvsiVVPPurlQmg+23HIvi0UpXFqvan5U5Y8yE9qJ4h8=
 gitlab.com/golang-utils/fsutils v0.20.5/go.mod h1:CuGEU+H+wAjwcK2s87NU5UOF2NCauGPdWU0Sa+bsVFQ=
 gitlab.com/golang-utils/scaffold v1.19.7 h1:jc3KWSM6kmeIImQwsBBAAYrFeKKUtMTJN2Y5mkmpEWI=

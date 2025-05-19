@@ -98,7 +98,10 @@ func (i *Include) ParseLine(line string) error {
 	i.file = r.File
 	i.part = r.Table
 
-	i.score.AddInclude(i.include.file, i.include.part, nil)
+	err = i.score.AddInclude(i.include.file, i.include.part, nil)
+	if err != nil {
+		return fmt.Errorf("could not add include: file: %q part: %v, reason: %s\n", i.include.file, i.include.part, err.Error())
+	}
 	return i.score.Include(path.Relative(i.include.file), i.include.part, nil)
 }
 

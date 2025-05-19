@@ -109,10 +109,25 @@ func Format(filename path.Local, params []string, rd io.Reader, wr io.Writer, op
 	return f.WriteTo(wr)
 }
 
+func FormatFS(fsys fs.FS, filename path.Relative, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
+	opts = append(opts, score.FS(fsys))
+
+	sc := score.New(path.Relative(path.Name(filename)), params, opts...)
+	f := file.FromReader(rd, sc)
+
+	err := f.Parse()
+
+	if err != nil {
+		return err
+	}
+
+	return f.WriteTo(wr)
+}
+
 func UnrollFS(fsys fs.FS, mainFile path.Relative, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
 	opts = append(opts, score.FS(fsys))
 
-	sc := score.New(path.Relative(path.Name(mainFile)), params, opts...)
+	sc := score.New(mainFile, params, opts...)
 	f := file.FromReader(rd, sc)
 
 	err := f.Parse()

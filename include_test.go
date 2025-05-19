@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"gitlab.com/golang-utils/fs"
 	"gitlab.com/golang-utils/fs/filesystems/mockfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel"
@@ -3202,7 +3203,7 @@ TRACK    | piano |
 		},
 		{ // 103
 			`
-'drumnote.drums
+'drumnote
 
 TRACK | Voc | Drums | Piano |
 
@@ -3476,7 +3477,7 @@ TRACK | Piano | Voc
 		},
 		{ // 119 solo < 0
 			`
-'drumnote.drums
+'drumnote
 
 | TRACK | Voc | Drums | Piano |
 | solo  | -1  |       |       |
@@ -3883,21 +3884,11 @@ TRACK | Piano | Voc
 
 		var bf strings.Builder
 
-		fsys, err := mockfs.New(path.MustLocal("/test/"))
-
-		if err != nil {
-			panic(err.Error())
-		}
-
-		err = muskel.WritePredefinedTemplates(fsys)
-
-		if err != nil {
-			panic(err.Error())
-		}
+		fsys := makeTestFS()
 
 		//sc := score.New(path.Relative(path.Name(loc)), nil, opts...)
 
-		err = muskel.UnrollFS(fsys, path.Relative("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+		err := muskel.UnrollFS(fsys, path.Relative("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
@@ -3923,6 +3914,139 @@ TRACK | Piano | Voc
 	items.DEBUG = false
 }
 
+const score4Data = `
+| TRACK | Voc | Piano | Drums |
+
+| =SCORE | Piano | Voc  | Drums |
+| #      |       |      |       |
+| 1      | e"    |   F  |       |
+| 2&     | c     |      |       |
+
+`
+const score3Data = `
+| TRACK | Voc | Piano |
+
+| =template | drums |
+| #
+| 1        |#1 |
+| 2        |#2 |
+
+| =something | Voc | Piano |
+| #
+| 1 | 1 | 2 |
+
+| =something2 | Voc | Piano |
+| # \major^g
+| 1 | 1 | 2 |
+
+| =SCORE | Voc | Piano |
+| #A @140 \major^g
+| 1      | e"  | f"    | 
+| #
+| 1      | F   | G    |     
+| #B 2/4 @130 \minor^a
+| 2      | g'  | f     |       
+| [A]
+| # 2/4
+| 1      | b   | *     |
+`
+
+const score2Data = `
+
+'../tracks
+
+| =sth | Voc | Piano | Drums |
+| #C 3/4 @134
+| 1      | e"  | f"    |       |
+| 2&     | c   | d     |       |
+| # 6/4 @100
+| 4&     | g'  | f     |       |
+
+
+| =SCORE | Voc | Piano | Drums |
+| #C 3/4 @134
+| 1      | =sth.Voc  | f"    |       |
+| 2&     |    | d     |       |
+| # 6/4 @100
+| 4&     |   | f     |       |
+
+`
+
+const scoreData = `
+|TRACK | Voc | Piano | Drums |
+
+|=SCORE | Voc | Piano | Drums |
+|#
+|1      | e"  | f"    |       |
+|2&     | c   | d     |       |
+
+`
+
+const score5Data = `
+| TRACK | Voc | Piano | Xylophon |
+
+| =SCORE | Piano | Voc  | Xylophon |
+| #      |       |      |      |
+| 1      | d"    |   C  |      |
+| 2&     | e     |      |  g"  |
+
+`
+
+const lyricsData = `
+@lyrics |
+Hi-ho   | Verse
+`
+
+const headerData = `
+.drums
+kd   | e"
+sn   | f"
+`
+
+const tracksData = `
+
+| TRACK | Voc | Piano | Drums |
+
+`
+
+func makeTestFS() fs.FS {
+	fsys, err := mockfs.New(path.MustLocal("/test/"))
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	err = muskel.WritePredefinedTemplates(fsys)
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var files = map[path.Relative]string{
+		"testdata/includes/score4.md": score4Data,
+		"testdata/includes/score5.md": score5Data,
+		"testdata/includes/score3.md": score3Data,
+		"testdata/includes/score2.md": score2Data,
+		"testdata/includes/score.md":  scoreData,
+		"testdata/includes/lyrics.md": lyricsData,
+		"testdata/includes/header.md": headerData,
+		"testdata/tracks.md":          tracksData,
+	}
+
+	for file, data := range files {
+
+		err = fs.WriteFile(fsys, file, []byte(data), true)
+
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
+	// testdata/includes/score4.md
+
+	return fsys
+}
+
 func TestSolo(t *testing.T) {
 	tests := []struct {
 		sologroupID uint
@@ -3932,7 +4056,7 @@ func TestSolo(t *testing.T) {
 		{ // 0
 			1,
 			`
-'drumnote.drums
+'drumnote
 
 | TRACK | Voc | Drums | Piano |
 | solo  | 1  |    2   |   1    |
@@ -3956,7 +4080,7 @@ func TestSolo(t *testing.T) {
 		{ // 1
 			0,
 			`
-'drumnote.drums
+'drumnote
 
 | TRACK | Voc | Drums | Piano |
 | solo  | 1  |    2   |   1    |
@@ -3994,7 +4118,9 @@ func TestSolo(t *testing.T) {
 
 		var bf strings.Builder
 
-		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.SoloGroup(test.sologroupID))
+		fsys := makeTestFS()
+
+		err := muskel.UnrollFS(fsys, path.Relative("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.SoloGroup(test.sologroupID))
 
 		if err != nil {
 			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
@@ -4022,7 +4148,7 @@ func TestStartEnd(t *testing.T) {
 	}{
 		{ // 0
 			`
-'drumnote.drums
+'drumnote
 
 | TRACK | Voc | Drums | Piano |
 
@@ -4048,7 +4174,7 @@ func TestStartEnd(t *testing.T) {
 		},
 		{ // 1
 			`
-'drumnote.drums
+'drumnote
 
 | TRACK | Voc | Drums | Piano |
 | solo  | 1  |    2   |   1    |
@@ -4073,7 +4199,7 @@ func TestStartEnd(t *testing.T) {
 		},
 		{ // 2
 			`
-'drumnote.drums
+'drumnote
 
 | TRACK | Voc | Drums | Piano |
 
@@ -4118,7 +4244,9 @@ func TestStartEnd(t *testing.T) {
 
 		var bf strings.Builder
 
-		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.CutOut())
+		fsys := makeTestFS()
+
+		err := muskel.UnrollFS(fsys, path.Relative("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf, score.CutOut())
 
 		if err != nil {
 			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
@@ -4276,7 +4404,7 @@ func TestInclude2(t *testing.T) {
 		},
 		{ // 4
 			`
-'drumnote.drums
+'drumnote
 
 |TRACK | Voc | Drums | Piano |
 
@@ -4288,7 +4416,7 @@ func TestInclude2(t *testing.T) {
 |1      |     | .drums.ho    |       |
 `,
 			`
-'drumnote.drums
+'drumnote
 
 | TRACK    | Voc | Drums | Piano |
 | -------- | --- | ----- | ----- |
@@ -4306,7 +4434,7 @@ func TestInclude2(t *testing.T) {
 		{ // 5
 			`
 'testdata/includes/score3=template
-'drumnote.drums
+'drumnote
 
 |TRACK | Voc | Drums | Piano |
 
@@ -4319,7 +4447,7 @@ func TestInclude2(t *testing.T) {
 `,
 			`
 'testdata/includes/score3=template
-'drumnote.drums
+'drumnote
 
 | TRACK    | Voc | Drums | Piano |
 | -------- | --- | ----- | ----- |
@@ -4427,7 +4555,9 @@ func TestInclude2(t *testing.T) {
 		*/
 		var bf strings.Builder
 
-		err := muskel.Format(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+		fsys := makeTestFS()
+
+		err := muskel.FormatFS(fsys, path.Relative("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not format score YYY: %s\n%s\n", i, err.Error(), test.input)
@@ -4500,7 +4630,9 @@ func TestInclude3(t *testing.T) {
 
 		var bf strings.Builder
 
-		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+		fsys := makeTestFS()
+
+		err := muskel.UnrollFS(fsys, path.Relative("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
 
 		if err != nil {
 			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
