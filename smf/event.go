@@ -2,24 +2,42 @@ package smf
 
 import "gitlab.com/gomidi/midi/v2/smf"
 
-type event struct {
-	position  uint
-	monitor   bool
-	stopNotes bool
-	message   smf.Message
+type TicksAbsPos uint
+
+func (t TicksAbsPos) Uint() uint {
+	return uint(t)
 }
 
-type events []*event
+func (t TicksAbsPos) Int() int {
+	return int(t)
+}
 
-func (e events) Swap(a, b int) {
+func (t TicksAbsPos) Int64() int64 {
+	return int64(t)
+}
+
+func (t TicksAbsPos) Uint64() uint64 {
+	return uint64(t)
+}
+
+type Event struct {
+	Position  TicksAbsPos
+	Monitor   bool
+	StopNotes bool
+	Message   smf.Message
+}
+
+type Events []*Event
+
+func (e Events) Swap(a, b int) {
 	e[a], e[b] = e[b], e[a]
 }
 
-func (e *events) add(ev *event) {
+func (e *Events) add(ev *Event) {
 	*e = append(*e, ev)
 }
 
-func (e events) Len() int {
+func (e Events) Len() int {
 	return len(e)
 }
 
@@ -40,10 +58,10 @@ var typeSortPriority = map[string]int{
 	"meta.Cuepoint":          -25,
 }
 
-func (e events) Less(a, b int) bool {
-	if e[a].position == e[b].position {
-		msgA := e[a].message
-		msgB := e[b].message
+func (e Events) Less(a, b int) bool {
+	if e[a].Position == e[b].Position {
+		msgA := e[a].Message
+		msgB := e[b].Message
 
 		typeA := msgA.Type().String()
 		typeB := msgB.Type().String()
@@ -55,8 +73,8 @@ func (e events) Less(a, b int) bool {
 			return prioA > prioB
 		}
 
-		if e[a].stopNotes != e[b].stopNotes {
-			return e[a].stopNotes
+		if e[a].StopNotes != e[b].StopNotes {
+			return e[a].StopNotes
 		}
 
 		var keyA, keyB uint8
@@ -71,5 +89,5 @@ func (e events) Less(a, b int) bool {
 	}
 
 	//fmt.Printf("types: %T vs %T pos: %v vs %v\n", e[a].message, e[b].message, e[a].position, e[b].position)
-	return e[a].position < e[b].position
+	return e[a].Position < e[b].Position
 }

@@ -2,6 +2,7 @@ package xlsx
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/360EntSecGroup-Skylar/excelize"
@@ -50,9 +51,8 @@ func writeLines(xl *excelize.File, sheet string, lines []string) {
 
 }
 
-func Read(path string) (mskl string, err error) {
-
-	wb, err := excelize.OpenFile(path)
+func ReadFrom(rd io.Reader) (mskl string, err error) {
+	wb, err := excelize.OpenReader(rd)
 
 	if err != nil {
 		return "", err

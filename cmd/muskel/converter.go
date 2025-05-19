@@ -180,7 +180,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	}
 
 	//	err = muskel.WriteSMFFile(sc, c.player.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Get())))
-	err = muskel.WriteSMFFile(sc, path.ToSystem(c.player.outFile))
+	err = muskel.WriteSMFFile(sc, c.player.outFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
 		alert("ERROR while converting MuSkeL to SMF", err)
@@ -188,7 +188,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	}
 
 	if SMF.ExportImage.Get() {
-		err = muskel.WriteImage(sc, path.ToSystem(path.MustLocal(c.player.outFile.String()+".png")))
+		err = muskel.WriteImage(sc, path.MustLocal(c.player.outFile.String()+".png"))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while exporting to image: %s\n", err.Error())
 			alert("ERROR while exporting to image", err)

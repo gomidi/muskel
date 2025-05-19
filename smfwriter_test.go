@@ -10,6 +10,7 @@ import (
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/v2"
 	smfmidi "gitlab.com/gomidi/midi/v2/smf"
+	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
@@ -4052,6 +4053,12 @@ func TestSMFWriter(t *testing.T) {
 		//fmt.Printf("--        test-%v  -----\n", i)
 		loc := path.MustFileFromSystem(fmt.Sprintf("test-%v", i))
 		fsys, err := mockfs.New(loc.Dir())
+
+		if err != nil {
+			panic(err.Error())
+		}
+
+		err = muskel.WritePredefinedTemplates(fsys)
 
 		if err != nil {
 			panic(err.Error())

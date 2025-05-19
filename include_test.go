@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"gitlab.com/golang-utils/fs/filesystems/mockfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/items"
@@ -3882,10 +3883,24 @@ TRACK | Piano | Voc
 
 		var bf strings.Builder
 
-		err := muskel.Unroll(path.MustWD().Join("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+		fsys, err := mockfs.New(path.MustLocal("/test/"))
 
 		if err != nil {
-			t.Errorf("[%v] could not format score: %s\n%s\n", i, err.Error(), test.input)
+			panic(err.Error())
+		}
+
+		err = muskel.WritePredefinedTemplates(fsys)
+
+		if err != nil {
+			panic(err.Error())
+		}
+
+		//sc := score.New(path.Relative(path.Name(loc)), nil, opts...)
+
+		err = muskel.UnrollFS(fsys, path.Relative("include-main"), nil, strings.NewReader(strings.TrimSpace(test.input)), &bf)
+
+		if err != nil {
+			t.Errorf("[%v] could not unroll score: %s\n%s\n", i, err.Error(), test.input)
 			continue
 		}
 

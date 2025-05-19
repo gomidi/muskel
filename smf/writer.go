@@ -58,44 +58,45 @@ func NewWriter(wr io.Writer, numTracks uint16, ticks uint16, opts ...Option) *Wr
 	return w
 }
 
-func (wr *Writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
+func (wr *Writer) writeTrack(ch uint8, endPos int, evts Events) (tr smf.Track, err error) {
 	wr.noteOns = map[uint8]bool{}
 	wr.delta = 0
 	wr.channel = ch
-	var lastPosition uint
+	var lastPosition TicksAbsPos
 
 	if wr.currentTrack > wr.numTracks {
-		return fmt.Errorf("can't write track: all %v tracks written", wr.numTracks)
+		err = fmt.Errorf("can't write track: all %v tracks written", wr.numTracks)
+		return
 	}
-
-	var tr smf.Track
 
 	for _, ev := range evts {
 
-		if ev == nil || (!ev.stopNotes && ev.message == nil) {
+		if ev == nil || (!ev.StopNotes && ev.Message == nil) {
 			continue
 		}
 
 		var ch uint8
-		if ev.message.GetChannel(&ch) {
+		if ev.Message.GetChannel(&ch) {
 			if ch != wr.channel {
-				return fmt.Errorf("track channel is %v, but got message for channel %v: %v at tick %v", wr.channel, ch, ev.message, ev.position)
+				err = fmt.Errorf("track channel is %v, but got message for channel %v: %v at tick %v", wr.channel, ch, ev.Message, ev.Position)
+				return
 			}
 		}
 
-		wr.delta = uint32(ev.position - lastPosition)
+		wr.delta = uint32(ev.Position - lastPosition)
 
-		if ev.stopNotes {
+		if ev.StopNotes {
 			var didStop bool
 			didStop, err = wr.stopNotes(&tr, false)
 			if err != nil {
-				return fmt.Errorf("error at tick %v: %s", ev.position, err)
+				err = fmt.Errorf("error at tick %v: %s", ev.Position, err)
+				return
 			}
 
 			// is a rest
-			if ev.message == nil {
+			if ev.Message == nil {
 				if didStop {
-					lastPosition = ev.position
+					lastPosition = ev.Position
 				}
 				continue
 			}
@@ -107,63 +108,57 @@ func (wr *Writer) writeTrack(ch uint8, endPos int, evts events) (err error) {
 
 		switch {
 
-		case ev.message.GetNoteStart(&channel, &key, &velocity):
+		case ev.Message.GetNoteStart(&channel, &key, &velocity):
 			if _, has := wr.noteOns[key]; has {
 				tr.Add(wr.delta, midi.NoteOff(wr.channel, key).Bytes())
 				if err != nil {
-					return fmt.Errorf("could not stop repeating note %v: %s at tick %v", key, err, ev.position)
+					err = fmt.Errorf("could not stop repeating note %v: %s at tick %v", key, err, ev.Position)
+					return
 				}
 				wr.delta = 0
 			} else {
 				writeLastPos = true
 			}
-			wr.noteOns[key] = ev.monitor
-			tr.Add(wr.delta, ev.message.Bytes())
+			wr.noteOns[key] = ev.Monitor
+			tr.Add(wr.delta, ev.Message.Bytes())
 
-		case ev.message.GetNoteEnd(&channel, &key):
+		case ev.Message.GetNoteEnd(&channel, &key):
 			if _, has := wr.noteOns[key]; has {
 				delete(wr.noteOns, key)
-				tr.Add(wr.delta, ev.message.Bytes())
+				tr.Add(wr.delta, ev.Message.Bytes())
 				writeLastPos = true
 			}
 
 		default:
-			tr.Add(wr.delta, ev.message.Bytes())
+			tr.Add(wr.delta, ev.Message.Bytes())
 			writeLastPos = true
 		}
 
 		if writeLastPos {
-			lastPosition = ev.position
+			lastPosition = ev.Position
 		}
 	}
 
-	if uint(endPos) < lastPosition {
-		if lastPosition-uint(endPos) > 3000000 {
+	if TicksAbsPos(endPos) < lastPosition {
+		if lastPosition-TicksAbsPos(endPos) > 3000000 {
 			panic("must not happend endPos less than lastPosition")
 		}
 		endPos = int(lastPosition)
 	}
 
 	if endPos > 0 {
-		wr.delta = uint32(uint(endPos) - lastPosition)
+		wr.delta = uint32(TicksAbsPos(endPos) - lastPosition)
 	} else {
 		wr.delta = 0
 	}
 
 	_, err = wr.stopNotes(&tr, true)
 	if err != nil {
-		return err
+		return
 	}
 
 	tr.Close(wr.delta)
-
-	err = wr.SMF.Add(tr)
-	if err == smf.ErrFinished {
-		return nil
-	}
-	wr.currentTrack++
-
-	return err
+	return
 }
 
 func (wr *Writer) stopNotes(tr *smf.Track, all bool) (didStop bool, err error) {

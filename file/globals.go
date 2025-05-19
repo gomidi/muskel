@@ -3,13 +3,11 @@ package file
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
 
+	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/csv"
 	"gitlab.com/gomidi/muskel/xlsx"
 )
@@ -30,92 +28,60 @@ func FromReader(rd io.Reader, s score) (f *File) {
 	return f
 }
 
-func NewCSV(fpath string, seperator rune, s score) (f *File, err error) {
-	fpath, err = filepath.Abs(fpath)
+func NewCSV(fsys fs.FS, file path.Relative, seperator rune, s score) (f *File, err error) {
+	if path.IsDir(file) {
+		return nil, fs.ErrExpectedFile.Params(file.String())
+	}
+
+	fl, err := fs.OpenReader(fsys, file)
+
 	if err != nil {
 		return nil, err
 	}
 
-	fi, err := os.Stat(fpath)
-	if err != nil {
-		return nil, err
-	}
-
-	if fi.IsDir() {
-		return nil, fmt.Errorf("%q is a directory", fpath)
-	}
-
-	file, err := os.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	muskel_string, err := csv.Read(file, seperator)
+	muskel_string, err := csv.Read(fl, seperator)
 	f = FromReader(strings.NewReader(muskel_string), s)
-	f.SetFileInfos(nil, fpath)
-	return f, nil
+	f.SetFileInfos(nil, file.String())
+	err = fl.Close()
+	return f, err
 }
 
-func NewXLSX(fpath string, s score) (f *File, err error) {
-	fpath, err = filepath.Abs(fpath)
+func NewXLSX(fsys fs.FS, file path.Relative, s score) (f *File, err error) {
+	if path.IsDir(file) {
+		return nil, fs.ErrExpectedFile.Params(file.String())
+	}
+
+	fl, err := fs.OpenReader(fsys, file)
+
 	if err != nil {
 		return nil, err
 	}
 
-	fi, err := os.Stat(fpath)
-	if err != nil {
-		return nil, err
-	}
-
-	if fi.IsDir() {
-		return nil, fmt.Errorf("%q is a directory", fpath)
-	}
-
-	/*
-		file, err := os.Open(fpath)
-		if err != nil {
-			return nil, err
-		}
-
-		defer file.Close()
-	*/
-
-	muskel_string, err := xlsx.Read(fpath)
+	muskel_string, err := xlsx.ReadFrom(fl)
 	f = FromReader(strings.NewReader(muskel_string), s)
-	f.SetFileInfos(nil, fpath)
-	return f, nil
+	f.SetFileInfos(nil, file.String())
+	err = fl.Close()
+	return f, err
 }
 
-func New(fpath string, s score) (f *File, err error) {
-	fpath, err = filepath.Abs(fpath)
+func New(fsys fs.FS, file path.Relative, s score) (f *File, err error) {
+	if path.IsDir(file) {
+		return nil, fs.ErrExpectedFile.Params(file.String())
+	}
+
+	fl, err := fs.OpenReader(fsys, file)
+
 	if err != nil {
 		return nil, err
 	}
 
-	fi, err := os.Stat(fpath)
-	if err != nil {
-		return nil, err
-	}
-
-	if fi.IsDir() {
-		return nil, fmt.Errorf("%q is a directory", fpath)
-	}
-
-	file, err := os.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	bt, err := ioutil.ReadAll(file)
+	bt, err := io.ReadAll(fl)
 	if err != nil {
 		return nil, err
 	}
 
 	f = FromReader(bytes.NewReader(bt), s)
-	f.SetFileInfos(bt, fpath)
-	return f, nil
+	f.SetFileInfos(bt, file.String())
+	err = fl.Close()
+	return f, err
 }

@@ -18,6 +18,7 @@ import (
 	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/file"
 	"gitlab.com/gomidi/muskel/image"
+	"gitlab.com/gomidi/muskel/lilypond"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/smf"
 )
@@ -108,6 +109,26 @@ func Format(filename path.Local, params []string, rd io.Reader, wr io.Writer, op
 	return f.WriteTo(wr)
 }
 
+func UnrollFS(fsys fs.FS, mainFile path.Relative, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
+	opts = append(opts, score.FS(fsys))
+
+	sc := score.New(path.Relative(path.Name(mainFile)), params, opts...)
+	f := file.FromReader(rd, sc)
+
+	err := f.Parse()
+	if err != nil {
+		return fmt.Errorf("parsing error: %s", err)
+	}
+
+	err = sc.Unroll()
+	if err != nil {
+		return err
+	}
+
+	sc.WriteUnrolled(wr)
+	return nil
+}
+
 func Unroll(mainFile path.Local, params []string, rd io.Reader, wr io.Writer, opts ...score.Option) error {
 	fsys, err := dirfs.New(mainFile.Dir())
 
@@ -174,7 +195,61 @@ func ParseFile(mainFile path.Local, params []string, opts ...score.Option) (sc *
 	return
 }
 
-func Convert(mainFile path.Local, params []string, smffile string, opts ...score.Option) error {
+func PDFScore(mainFile path.Local, params []string, pdffile path.Local, opts ...score.Option) error {
+	fsys, err := dirfs.New(mainFile.Dir())
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	opts = append(opts, score.FS(fsys))
+
+	sc := score.New(path.Relative(path.Name(mainFile)), params, opts...)
+	err = sc.Parse()
+	if err != nil {
+		return err
+	}
+	err = sc.Format()
+	if err != nil {
+		return err
+	}
+
+	err = sc.Unroll()
+	if err != nil {
+		return err
+	}
+
+	return lilypond.WriteFile(sc, pdffile)
+}
+
+func LilypondScore(mainFile path.Local, params []string, opts ...score.Option) (string, error) {
+	fsys, err := dirfs.New(mainFile.Dir())
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	opts = append(opts, score.FS(fsys))
+
+	sc := score.New(path.Relative(path.Name(mainFile)), params, opts...)
+	err = sc.Parse()
+	if err != nil {
+		return "", err
+	}
+	err = sc.Format()
+	if err != nil {
+		return "", err
+	}
+
+	err = sc.Unroll()
+	if err != nil {
+		return "", err
+	}
+
+	return lilypond.Create(sc, "*")
+}
+
+func Convert(mainFile path.Local, params []string, smffile path.Local, opts ...score.Option) error {
 	fsys, err := dirfs.New(mainFile.Dir())
 
 	if err != nil {
@@ -201,12 +276,16 @@ func Convert(mainFile path.Local, params []string, smffile string, opts ...score
 }
 
 // func WriteSMFFile(sc *score.Score, smffile string, opts ...smfwriter.Option) error {
-func WriteSMFFile(sc *score.Score, smffile string) error {
-	return smf.WriteFile(sc, smffile)
+func WriteSMFFile(sc *score.Score, smffile path.Local) error {
+	fsys, err := rootfs.New()
+	if err != nil {
+		return err
+	}
+	return smf.WriteFileFS(sc, fsys, smffile.RootRelative())
 }
 
 // WriteImage expects the given score to be unrolled
-func WriteImage(sc *score.Score, outfile string, opts ...smfimage.Option) error {
+func WriteImage(sc *score.Score, outfile path.Local, opts ...smfimage.Option) error {
 	var midibf bytes.Buffer
 	err := smf.WriteSMFTo(sc, &midibf, "*")
 
@@ -214,5 +293,5 @@ func WriteImage(sc *score.Score, outfile string, opts ...smfimage.Option) error 
 		return err
 	}
 
-	return image.MakeImage(sc, &midibf, outfile, opts...)
+	return image.MakeImage(sc, &midibf, outfile.ToSystem(), opts...)
 }

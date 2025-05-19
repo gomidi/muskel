@@ -94,8 +94,8 @@ gitlab.com/golang-utils/errors v0.0.3 h1:EXlmR0WbyVj/WZKi0q8+/r+w6VadFF241+Zsvcz
 gitlab.com/golang-utils/errors v0.0.3/go.mod h1:odzi5ci8jLKKYdk6vscuSqNxWjFFq70LDTzCeRomEOg=
 gitlab.com/golang-utils/fmtdate v1.0.2 h1:nhvKuSuFJvgUcos/zkMD4G3k1wObsThZ5NpVjih/ZOw=
 gitlab.com/golang-utils/fmtdate v1.0.2/go.mod h1:m2dG0UJPcES/+hFET++A9G7DrGKSia/M4Q/YfXqSYUM=
-gitlab.com/golang-utils/fs v0.22.5 h1:PgyiH7SXf8Sa+oaPsiPLCdg49YSGAGLTp02C+DXwgv4=
-gitlab.com/golang-utils/fs v0.22.5/go.mod h1:YxaYa55MDE6ciK1kq/eC/KwJx6YqPY4WTpIvGhvOyW0=
+gitlab.com/golang-utils/fs v0.23.0 h1:T65a21so5pytJlzziRTioeZF1z7t6Rz0EW4HWdkdsxo=
+gitlab.com/golang-utils/fs v0.23.0/go.mod h1:YxaYa55MDE6ciK1kq/eC/KwJx6YqPY4WTpIvGhvOyW0=
 gitlab.com/golang-utils/fsutils v0.20.5 h1:nvsiVVPPurlQmg+23HIvi0UpXFqvan5U5Y8yE9qJ4h8=
 gitlab.com/golang-utils/fsutils v0.20.5/go.mod h1:CuGEU+H+wAjwcK2s87NU5UOF2NCauGPdWU0Sa+bsVFQ=
 gitlab.com/golang-utils/scaffold v1.19.7 h1:jc3KWSM6kmeIImQwsBBAAYrFeKKUtMTJN2Y5mkmpEWI=
@@ -106,8 +106,8 @@ gitlab.com/golang-utils/updatechecker v0.1.12 h1:+QIfYW2dj6jpOndxtw0G9U0Qt5Rgng0
 gitlab.com/golang-utils/updatechecker v0.1.12/go.mod h1:s0RWsK1yOGl1MilzXotKFbyJSYbRqdPQhfS9EAL5e5U=
 gitlab.com/golang-utils/version/v2 v2.0.1 h1:jNnc2rzYNJ5Hq540yojZyP7parT4Mq12bev70CKxLtw=
 gitlab.com/golang-utils/version/v2 v2.0.1/go.mod h1:tzLbutrNtG7ZNWyO372//jG6hiS4Lw692KfPmom0Xcw=
-gitlab.com/gomidi/lilypond v0.1.3 h1:onJlwgoVUCKkEVULKd/XzUypcsVqXNPdmRjmHQSjJFM=
-gitlab.com/gomidi/lilypond v0.1.3/go.mod h1:zjcT6fTAUXpaVs/XeMGSPrOlVQuf6MBItFQ81AN5D0o=
+gitlab.com/gomidi/lilypond v0.1.6 h1:rUUU60sxvDtJ3s6fvZiX9gNWkEvEb7/cyWL391Z4IuU=
+gitlab.com/gomidi/lilypond v0.1.6/go.mod h1:zjcT6fTAUXpaVs/XeMGSPrOlVQuf6MBItFQ81AN5D0o=
 gitlab.com/gomidi/midi/tools/smfimage v0.20.0 h1:a/pAwk2atqKQR1OcYnTvkJ/HjmToA/Fc7lsbAL0ra+g=
 gitlab.com/gomidi/midi/tools/smfimage v0.20.0/go.mod h1:q7wUvjC0rxZLZJdeZaKJoaVAbpg57w8OyksrLJF0WT8=
 gitlab.com/gomidi/midi/tools/smftrack v0.8.1 h1:QqbK8mu74Qv7wA0Uf666tRXWBYGpyL8WN5eCLZRBQFs=

@@ -5,6 +5,10 @@ import (
 	"io"
 	"strings"
 
+	"gitlab.com/golang-utils/fs"
+
+	"gitlab.com/golang-utils/fs/filesystems/rootfs"
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 )
@@ -41,8 +45,20 @@ func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, opts ...Option) 
 
 }
 
+func WriteFile(s *score.Score, midifile path.Local) (err error) {
+	fsys, err := rootfs.New()
+	if err != nil {
+		return err
+	}
+
+	return WriteFileFS(s, fsys, midifile.RootRelative())
+}
+
+// pdffile is a string that is a relative path, but might have and %s placeholder
+//func WriteFileFS(s *score.Score, fsys fs.FS, pdffile path.Relative) (err error) {
+
 // WriteFile writes the score to the given SMF file
-func WriteFile(s *score.Score, midifile string) (err error) {
+func WriteFileFS(s *score.Score, fsys fs.FS, midifile path.Relative) (err error) {
 	if items.DEBUG {
 		fmt.Printf("WriteFile(%q) called\n", midifile)
 	}
@@ -54,15 +70,15 @@ func WriteFile(s *score.Score, midifile string) (err error) {
 		}
 	}()
 
-	hasPlaceholder := strings.Index(midifile, "%s") > -1
+	hasPlaceholder := strings.Index(midifile.String(), "%s") > -1
 
 	if !hasPlaceholder {
-		return writeSMFToFile(s, midifile, "*")
+		return writeSMFToFile(s, fsys, midifile, "*")
 	}
 
 	var fileGroups = map[string]string{}
 	for _, track := range s.Tracks {
-		fileGroups[track.FileGroup] = fmt.Sprintf(midifile, track.FileGroup)
+		fileGroups[track.FileGroup] = fmt.Sprintf(midifile.String(), track.FileGroup)
 	}
 
 	if items.DEBUG {
@@ -72,7 +88,7 @@ func WriteFile(s *score.Score, midifile string) (err error) {
 	var errs errors
 
 	for grp, fl := range fileGroups {
-		err := writeSMFToFile(s, fl, grp)
+		err := writeSMFToFile(s, fsys, path.Relative(fl), grp)
 		if err != nil {
 			errs = append(errs, err)
 		}

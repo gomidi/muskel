@@ -3,7 +3,6 @@ package score
 import (
 	"fmt"
 	"io"
-	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
@@ -324,21 +323,21 @@ func (sc *Score) GetTrack(track string) (*track.Track, error) {
 	return tr, nil
 }
 
-func (sc *Score) parse(fname string, sco *Score) error {
-	if _, has := sc.Files[fname]; has {
+func (sc *Score) parse(fl path.Relative, sco *Score) error {
+	if _, has := sc.Files[fl.String()]; has {
 		return nil
 	}
 
 	var f *file.File
 	var err error
 
-	switch filepath.Ext(fname) {
+	switch path.Ext(fl) {
 	case ".xlsx":
-		f, err = file.NewXLSX(fname, sco)
+		f, err = file.NewXLSX(sc.FS, fl, sco)
 	case ".csv":
-		f, err = file.NewCSV(fname, sc.csvSeperator, sco)
+		f, err = file.NewCSV(sc.FS, fl, sc.csvSeperator, sco)
 	default:
-		f, err = file.New(fname, sco)
+		f, err = file.New(sc.FS, fl, sco)
 	}
 
 	if err != nil {
@@ -346,13 +345,13 @@ func (sc *Score) parse(fname string, sco *Score) error {
 	}
 	err = f.Parse()
 	if err == nil {
-		sc.Files[fname] = f
+		sc.Files[fl.String()] = f
 	}
 	return err
 }
 
 func (sc *Score) Parse() error {
-	return sc.parse(sc.mainFile.String(), sc)
+	return sc.parse(sc.mainFile, sc)
 }
 
 func (sc *Score) Delay(trackName string) (del [2]int) {
@@ -1472,7 +1471,7 @@ func (sc *Score) Include(filename path.Relative, sketch string, params []string)
 		}
 		sco = New(filename, params, opts...)
 		sco.Parent = sc
-		err := sc.parse(fname, sco)
+		err := sc.parse(path.Relative(fname), sco)
 		if err != nil {
 			return err
 		}
@@ -1495,7 +1494,7 @@ func (sc *Score) External(filename path.Relative, params []string) (*Score, erro
 	}
 
 	sco = New(filename, params)
-	err = sc.parse(fname, sco)
+	err = sc.parse(path.Relative(fname), sco)
 	if err != nil {
 		return nil, err
 	}

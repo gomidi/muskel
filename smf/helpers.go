@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 )
@@ -28,16 +30,22 @@ func (debugLog) Printf(format string, vals ...interface{}) {
 }
 
 // func writeSMFToFile(s *score.Score, midifile, filegroup string, options ...smfwriter.Option) error {
-func writeSMFToFile(s *score.Score, midifile, filegroup string, opts ...Option) error {
-	f, err := os.Create(midifile)
+func writeSMFToFile(s *score.Score, fsys fs.FS, midifile path.Relative, filegroup string, opts ...Option) error {
+	f, err := fs.OpenWriter(fsys, midifile)
+
 	if err != nil {
 		return err
 	}
 
 	if items.DEBUG {
-		fmt.Printf("writing to %q\n", midifile)
+		fmt.Printf("writing to %q\n", midifile.ToSystem())
 	}
 
-	defer f.Close()
-	return WriteSMFTo(s, f, filegroup, opts...)
+	err = WriteSMFTo(s, f, filegroup, opts...)
+	if err != nil {
+		f.Close()
+		return err
+	}
+
+	return f.Close()
 }

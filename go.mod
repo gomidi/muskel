@@ -7,9 +7,9 @@ require (
 	github.com/emersion/go-appdir v1.1.2
 	github.com/metakeule/observe v0.0.5
 	gitlab.com/golang-utils/config/v2 v2.16.4
-	gitlab.com/golang-utils/fs v0.22.5
+	gitlab.com/golang-utils/fs v0.23.0
 	gitlab.com/golang-utils/version/v2 v2.0.1
-	gitlab.com/gomidi/lilypond v0.1.3
+	gitlab.com/gomidi/lilypond v0.1.6
 	gitlab.com/gomidi/midi/tools/smfimage v0.20.0
 	gitlab.com/gomidi/midi/v2 v2.3.13
 	golang.org/x/sys v0.31.0

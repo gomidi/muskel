@@ -1,0 +1,185 @@
+{
+  "format": 1,
+  "timeformat": {
+    "metricticks": 960
+  },
+  "tracks": [
+    [
+      {
+        "data": "midi_export",
+        "delta": 0,
+        "type": "trackname"
+      },
+      {
+        "data": {
+          "clockspertick": 24,
+          "demisemiquaverperquarter": 8,
+          "denom": 4,
+          "num": 4
+        },
+        "delta": 0,
+        "type": "timesignature"
+      },
+      {
+        "data": 120,
+        "delta": 0,
+        "type": "tempo"
+      }
+    ],
+    [
+      {
+        "data": {
+          "channel": 10,
+          "key": 48,
+          "keyname": "C4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 48,
+          "keyname": "C4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 51,
+          "keyname": "Eb4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 51,
+          "keyname": "Eb4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      },
+      {{ zero 0 }}
+      {
+        "data": {
+          "channel": 10,
+          "key": 50,
+          "keyname": "D4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 50,
+          "keyname": "D4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 53,
+          "keyname": "F4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 53,
+          "keyname": "F4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 52,
+          "keyname": "E4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 52,
+          "keyname": "E4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 55,
+          "keyname": "G4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 55,
+          "keyname": "G4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 53,
+          "keyname": "F4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 53,
+          "keyname": "F4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 56,
+          "keyname": "Ab4",
+          "velocity": 96
+        },
+        "delta": 0,
+        "type": "noteon"
+      },
+      {
+        "data": {
+          "channel": 10,
+          "key": 56,
+          "keyname": "Ab4"
+        },
+        "delta": 960,
+        "type": "noteoff"
+      }
+    ]
+  ]
+}
