@@ -10,16 +10,16 @@ import (
 )
 
 func watch(conv *converter, a *args) error {
-	if a.WatchDir.Get() {
+	if a.WatchDir.Val {
 		fmt.Printf("watching %q\n", conv.dir)
 	} else {
-		fmt.Printf("watching %q\n", a.InFile.Get())
+		fmt.Printf("watching %q\n", a.InFile.Val.ToSystem())
 	}
 
 	r := runfunc.New(
 		path.ToSystem(conv.dir),
 		conv.mkcallback(),
-		runfunc.Sleep(time.Millisecond*time.Duration(int(a.SleepingTime.Get()))),
+		runfunc.Sleep(time.Millisecond*time.Duration(int(a.SleepingTime.Val))),
 	)
 
 	errors := make(chan error, 1)

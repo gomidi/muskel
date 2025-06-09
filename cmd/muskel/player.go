@@ -79,14 +79,14 @@ func (ps *Player) mkPlayCmdString(cmd string, outfile path.Local) {
 }
 
 func (p *Player) normalizeOutFile(a *args) {
-	inFile := a.InFile.Get()
+	inFile := a.InFile.Val
 	p.outFile = inFile
 	if a.OutFile.IsSet() {
-		p.outFile = a.OutFile.Get()
+		p.outFile = a.OutFile.Val
 	}
 
-	if a.TrackFiles.Get() {
-		p.outFile = a.OutFile.Get().Dir().Join("%s")
+	if a.TrackFiles.Val {
+		p.outFile = a.OutFile.Val.Dir().Join("%s")
 	}
 
 	if extIdx := strings.LastIndex(p.outFile.String(), "."); extIdx > 0 && extIdx+1 < len(p.outFile.String()) {
@@ -105,18 +105,18 @@ func (ps *Player) setupProgram() error {
 
 	ps.normalizeOutFile(ARGS)
 
-	if CONFIG.ActiveCommand() != PLAY.Config && CONFIG.ActiveCommand() != SERVER.Config {
+	if ARGS.App.SelectedCommand() != ARGS.play.command && ARGS.App.SelectedCommand() != ARGS.server.command {
 		return nil
 	}
 
 	ps.playerEnabled = true
 
-	if CONFIG.ActiveCommand() == PLAY.Config {
-		cmd = PLAY.Program.Get()
+	if ARGS.App.SelectedCommand() == ARGS.play.command {
+		cmd = ARGS.play.Program.Val
 	}
 
-	if CONFIG.ActiveCommand() == SERVER.Config {
-		cmd = SERVER.PlayProgram.Get()
+	if ARGS.App.SelectedCommand() == ARGS.server.command {
+		cmd = ARGS.server.PlayProgram.Val
 	}
 
 	if ps.portRegEx.MatchString(cmd) {

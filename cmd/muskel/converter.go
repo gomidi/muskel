@@ -54,7 +54,7 @@ func newConverter(player *Player, a *args) (r *converter) {
 		}
 	*/
 
-	inFile := a.InFile.Get()
+	inFile := a.InFile.Val
 
 	//	rFile := rootfs.Normalize(inFile)
 
@@ -72,36 +72,35 @@ func newConverter(player *Player, a *args) (r *converter) {
 
 func (c *converter) setFromArgs(a *args) {
 	c.Config.PrintBarComments = true
-	c.Config.Flow = a.Flow.Get()
-	if a.Sketch.IsSet() && a.Sketch.Get() != "=SCORE" {
-		c.Config.Sketch = a.Sketch.Get()
+	c.Config.Flow = a.Flow.Val
+	if a.Sketch.IsSet() && a.Sketch.Val != "=SCORE" {
+		c.Config.Sketch = a.Sketch.Val
 	} else {
 		c.Config.Sketch = ""
 	}
 
-	c.Config.Debug = a.Debug.Get()
+	c.Config.Debug = a.Debug.Val
 
 	if a.Pattern.IsSet() {
-		c.Config.Pattern = a.Pattern.Get()
+		c.Config.Pattern = a.Pattern.Val
 	} else {
 		c.Config.Pattern = ""
 	}
-	c.Config.KeepEmptyLines = a.KeepEmptyLines.Get()
+	c.Config.KeepEmptyLines = a.KeepEmptyLines.Val
 	if a.Params.IsSet() {
-		c.Config.Params = []string{}
-		a.Params.Get(&c.Config.Params)
+		c.Config.Params = a.Params.Val
 	} else {
 		c.Config.Params = nil
 	}
 
 	if a.UnrollFile.IsSet() {
-		c.Config.UnrollFile = a.UnrollFile.Get()
+		c.Config.UnrollFile = a.UnrollFile.Val
 	}
 
-	c.Config.Fmt = a.Fmt.Get()
+	c.Config.Fmt = a.Fmt.Val
 
 	if muskel.FILE_EXTENSION == ".csv" {
-		c.Config.CSV = a.CSVSeparator.Get()
+		c.Config.CSV = a.CSVSeparator.Val
 		// never fmt when in csv
 		c.Config.Fmt = false
 	}
@@ -113,13 +112,13 @@ func (c *converter) setFromArgs(a *args) {
 	}
 
 	if a.Solo.IsSet() {
-		sg := a.Solo.Get()
+		sg := a.Solo.Val
 		if sg > 0 {
 			c.Config.SoloGroup = uint(sg)
 		}
 	}
 
-	if a.CutOut.Get() {
+	if a.CutOut.Val {
 		c.Config.CutOut = true
 	}
 }
@@ -179,7 +178,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		return err
 	}
 
-	//	err = muskel.WriteSMFFile(sc, c.player.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Get())))
+	//	err = muskel.WriteSMFFile(sc, c.player.outFile, smfwriter.TimeFormat(smf.MetricTicks(SMF.ResolutionTicks.Val)))
 	err = muskel.WriteSMFFile(sc, c.player.outFile)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ERROR while converting MuSkeL to SMF: %s\n", err.Error())
@@ -187,7 +186,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		return err
 	}
 
-	if SMF.ExportImage.Get() {
+	if ARGS.smf.ExportImage.Val {
 		err = muskel.WriteImage(sc, path.MustLocal(c.player.outFile.String()+".png"))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while exporting to image: %s\n", err.Error())
@@ -196,7 +195,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		}
 	}
 
-	if SMF.ExportScore.Get() {
+	if ARGS.smf.ExportScore.Val {
 		err = lilypond.MIDI2PDF(path.ToSystem(c.player.outFile), "", false)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while exporting score to PDF: %s\n", err.Error())
@@ -205,7 +204,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		}
 	}
 
-	if ARGS.Watch.Get() {
+	if ARGS.Watch.Val {
 		fmt.Fprint(os.Stdout, ".")
 	}
 	notify("OK MuSkeL converted to SMF", path.Base(c.player.outFile))
@@ -287,13 +286,13 @@ func (c *converter) prepare(dir, file string) error {
 		return nil
 	}
 
-	if !ARGS.WatchDir.Get() {
+	if !ARGS.WatchDir.Val {
 		if filep != c.inFile.String() {
 			return nil
 		}
 	}
 
-	if ARGS.Watch.Get() {
+	if ARGS.Watch.Val {
 		newChecksum := fileCheckSum(filep)
 
 		if newChecksum == c.checksums[filep] {
@@ -303,7 +302,7 @@ func (c *converter) prepare(dir, file string) error {
 		c.checksums[filep] = newChecksum
 	}
 
-	if ARGS.WatchDir.Get() {
+	if ARGS.WatchDir.Val {
 		if filep != c.inFile.String() && c.Config.Fmt {
 			c.ignore[filep] = true
 			c.fmtFile(c.inFile, c.Config.Params, c.ScoreOptions()...)
@@ -319,10 +318,10 @@ func (c *converter) prepare(dir, file string) error {
 		return err
 	}
 
-	switch CONFIG.ActiveCommand() {
-	case SMF.Config:
+	switch ARGS.App.SelectedCommand() {
+	case ARGS.smf.command:
 		return c.cmdSMF(sc)
-	case PLAY.Config:
+	case ARGS.play.command:
 		return c.cmdPlay(sc)
 	default:
 		return nil
@@ -375,7 +374,7 @@ func (c *converter) fmtFile(file path.Local, params []string, opts ...score.Opti
 		return err
 	}
 
-	if ARGS.Watch.Get() {
+	if ARGS.Watch.Val {
 		fmt.Printf(".")
 	}
 	return nil

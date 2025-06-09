@@ -11,7 +11,7 @@ import (
 )
 
 func checkMuskelVersion(version string, versionFile string, a *args) {
-	srcdir := a.InFile.Get().Dir()
+	srcdir := a.InFile.Val.Dir()
 	v, err := muskel.ReadWDVersionFile(srcdir)
 	if err == nil {
 		if v.String() != version {

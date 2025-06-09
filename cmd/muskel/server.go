@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"sync"
 
-	"gitlab.com/golang-utils/config/v2"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel"
 )
@@ -151,7 +150,7 @@ func startServer(conv *converter) error {
 	s.converter.Config.KeepEmptyLines = true
 	s.converter.Config.Debug = false
 
-	addr := SERVER.Address.Get()
+	addr := ARGS.server.Address.Val
 
 	http.HandleFunc("/play", s.Play)
 	http.HandleFunc("/stop", s.Stop)
@@ -161,57 +160,4 @@ func startServer(conv *converter) error {
 	http.HandleFunc("/cutout", s.CutOut)
 	fmt.Printf("starting server on %q\n", addr)
 	return http.ListenAndServe(addr, nil)
-}
-
-type serverCmd struct {
-	*config.Config
-	Address      config.StringGetter
-	PlayProgram  config.StringGetter
-	playershared *Player
-}
-
-var SERVER = serverCmd{}
-
-func init() {
-	SERVER.init()
-}
-
-func (s *serverCmd) init() {
-	s.Config = CONFIG.Command("server", "start command server").Skip("watch").Skip("dir")
-	s.Address = s.String("addr", "address of the server", config.Default("localhost:8800"))
-	s.PlayProgram = s.String("cmd", "command to execute when playing (fluidsynth,timidity,audacious,auto or midi-ports (port:4) or custom (pass $_file variable))", config.Default("auto"))
-}
-
-func (s *serverCmd) run(cbr *converter) error {
-	if cbr.player == nil {
-		return fmt.Errorf("player must not be nil")
-	}
-
-	var stopFunc = func() {
-		cbr.player.stopPlayer <- true
-		<-cbr.player.playerStopped
-	}
-
-	if cbr.player.playToPort {
-		go cbr.player.playThroughPort()
-	} else {
-		go cbr.player.playWithProgram()
-	}
-
-	go func() {
-		err := startServer(cbr)
-		if err != nil {
-			fmt.Printf("ERROR: can't start server: %s\n", err.Error())
-			stopFunc()
-			os.Exit(1)
-		}
-	}()
-
-	// ctrl+c
-	<-SIGNAL_CHANNEL
-	fmt.Println("\n--interrupted!")
-	stopFunc()
-	os.Exit(0)
-
-	return nil
 }
