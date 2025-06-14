@@ -365,6 +365,7 @@ func (a *args) init() {
 	pdf.AddFlag("experiment", &a.pdf.Experimental).WithHelp("use the experimental work in progress lilypond support").WithShortFlag('x')
 
 	a.smf.command = a.App.AddCommand("smf", a.run).WithHelp("convert a muskel file to Standard MIDI file format (SMF)")
+	a.smf.command.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
 	a.smf.command.AddFlag("ticks", &a.smf.ResolutionTicks).WithHelp("resolution of SMF file in ticks").WithDefault("960")
 	a.smf.command.AddFlag("image", &a.smf.ExportImage).WithHelp("export to a PNG image (via smfimage)").WithShortFlag('i')
 	a.smf.command.AddFlag("score", &a.smf.ExportScore).WithHelp("export the score to a PDF (via lilypond)").WithShortFlag('l')
@@ -382,12 +383,14 @@ func (a *args) init() {
 		WithHelp("play a muskel file via smfplayer (timidity,fluidsynth or audacity) or directly to midi out ports").
 		Skip(watchFlag).Skip(dirFlag).Skip(sleepFlag)
 
+	a.play.command.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
 	a.play.Program = config.NewSelectWithNew[string]("fluidsynth", "timidity", "audacious", "auto")
 	a.play.command.AddFlag("cmd", &a.play.Program).
 		WithHelp("command to execute when playing (fluidsynth,timidity,audacious,auto or midi-ports (port:4) or custom (pass $_file variable))").
 		WithDefault("auto")
 
 	a.server.command = a.App.AddCommand("server", a.run).WithHelp("start command server").Skip(watchFlag).Skip(dirFlag)
+	a.server.command.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
 	a.server.command.AddFlag("addr", &a.server.Address).WithHelp("address of the server").WithDefault("localhost:8800")
 	a.server.command.AddFlag("cmd", &a.server.PlayProgram).
 		WithHelp("command to execute when playing (fluidsynth,timidity,audacious,auto or midi-ports (port:4) or custom (pass $_file variable))").
