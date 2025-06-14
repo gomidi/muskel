@@ -38,7 +38,7 @@ func WriteSMFTo(s *score.Score, wr io.Writer, filegroup string, opts ...Option) 
 
 	wrt := NewWriter(wr, numTracks, 960, opts...)
 	if items.DEBUG || DEBUG_TEST {
-		wrt.SMF.Logger = debugLog{}
+		//	wrt.SMF.Logger = debugLog{}
 	}
 	sw := New(s, filegroup, wrt)
 	return sw.write()
