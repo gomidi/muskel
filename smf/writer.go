@@ -40,7 +40,7 @@ func (l logger) Printf(s string, other ...any) {
 
 func NewWriter(wr io.Writer, numTracks uint16, ticks uint16, opts ...Option) *Writer {
 	w := &Writer{}
-	w.logger = logger{}
+	//w.logger = logger{}
 
 	for _, opt := range opts {
 		opt(w)
