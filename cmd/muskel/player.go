@@ -74,7 +74,7 @@ func (ps *Player) mkPlayCmdString(cmd string, outfile path.Local) {
 		cmm[1] = cmm_[1]
 	}
 
-	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", ps.outFile.String())
+	cmm[1] = strings.ReplaceAll(cmm[1], "$_file", ps.outFile.ToSystem())
 	ps.program = cmm
 }
 
