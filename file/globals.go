@@ -41,7 +41,7 @@ func NewCSV(fsys fs.FS, file path.Relative, seperator rune, s score) (f *File, e
 
 	muskel_string, err := csv.Read(fl, seperator)
 	f = FromReader(strings.NewReader(muskel_string), s)
-	f.SetFileInfos(nil, file.String())
+	f.SetFileInfos(nil, file)
 	err = fl.Close()
 	return f, err
 }
@@ -59,7 +59,7 @@ func NewXLSX(fsys fs.FS, file path.Relative, s score) (f *File, err error) {
 
 	muskel_string, err := xlsx.ReadFrom(fl)
 	f = FromReader(strings.NewReader(muskel_string), s)
-	f.SetFileInfos(nil, file.String())
+	f.SetFileInfos(nil, file)
 	err = fl.Close()
 	return f, err
 }
@@ -81,7 +81,7 @@ func New(fsys fs.FS, file path.Relative, s score) (f *File, err error) {
 	}
 
 	f = FromReader(bytes.NewReader(bt), s)
-	f.SetFileInfos(bt, file.String())
+	f.SetFileInfos(bt, file)
 	err = fl.Close()
 	return f, err
 }

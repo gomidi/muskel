@@ -45,7 +45,7 @@ type args struct {
 	OutFile             config.FileLocal
 	TrackFiles          config.Bool
 	SleepingTime        config.Int
-	UnrollFile          config.FileLocal
+	UnrollFile          config.String
 	Debug               config.Bool
 
 	pdf struct {

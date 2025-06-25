@@ -1458,6 +1458,10 @@ func (sc *Score) NoEmptyLines() bool {
 	return sc.noEmptyLines
 }
 
+func (sc *Score) GetFS() fs.FS {
+	return sc.FS
+}
+
 func (sc *Score) Include(filename path.Relative, sketch string, params []string) error {
 	fname, err := sc.findInclude(filename.String())
 	if err != nil {

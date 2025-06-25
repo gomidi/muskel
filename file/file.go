@@ -4,11 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
+	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/table"
 )
 
@@ -18,7 +19,7 @@ type File struct {
 	Parts []Part
 
 	name                    string
-	dir                     string
+	dir                     path.Relative
 	file                    []byte
 	multiComments           map[int]*MultiLineComment
 	commentLines            map[int]string
@@ -28,14 +29,14 @@ type File struct {
 	output                  io.Writer
 }
 
-func (f *File) SetFileInfos(file []byte, fpath string) {
+func (f *File) SetFileInfos(file []byte, fpath path.Relative) {
 	f.file = file
-	f.dir = filepath.Dir(fpath)
-	f.name = filepath.Base(fpath)
+	f.dir = fpath.Dir()
+	f.name = path.Base(fpath)
 }
 
 func (f *File) Name() string {
-	return filepath.Join(f.dir, f.name)
+	return f.dir.Join(f.name).String()
 }
 
 func (f *File) writeComment() (bool, error) {
@@ -95,13 +96,18 @@ func (f *File) println(line string, count bool) error {
 }
 
 func (f *File) Format() error {
-	fpath := filepath.Join(f.dir, f.name)
-	os.Remove(fpath)
+	fpath := f.dir.Join(f.name)
+	fsys := f.Score.GetFS()
+	fsys.Delete(fpath, false)
 
-	fl, err := os.Create(fpath)
+	fl, err := fs.OpenWriter(fsys, fpath)
+
 	if err != nil {
 		return err
 	}
+
+	defer fl.Close()
+
 	return f.WriteTo(fl)
 
 }

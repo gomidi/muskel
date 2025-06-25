@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"gitlab.com/golang-utils/fs"
 	"gitlab.com/golang-utils/fs/path"
 
 	"bytes"
@@ -37,7 +38,7 @@ type converter struct {
 		Pattern          string
 		KeepEmptyLines   bool
 		Params           []string
-		UnrollFile       path.Local
+		UnrollFile       path.Relative
 		Fmt              bool
 		CSV              string
 		XLSX             bool
@@ -94,7 +95,7 @@ func (c *converter) setFromArgs(a *args) {
 	}
 
 	if a.UnrollFile.IsSet() {
-		c.Config.UnrollFile = a.UnrollFile.Val
+		c.Config.UnrollFile = path.Relative(a.UnrollFile.Val)
 	}
 
 	c.Config.Fmt = a.Fmt.Val
@@ -277,7 +278,14 @@ func (c *converter) prepare(dir, file string) error {
 		return nil
 	}
 
-	filep, _ := filepath.Abs(file)
+	loc, err := path.ParseFileFromSystem(file)
+
+	if err != nil {
+		return err
+	}
+
+	filep := loc.String()
+
 	if strings.Contains(filep, "muskel-fmt") {
 		return nil
 	}
@@ -380,29 +388,27 @@ func (c *converter) fmtFile(file path.Local, params []string, opts ...score.Opti
 	return nil
 }
 
-func (c *converter) writeUnrolled(file path.Local, sc *score.Score) error {
+func (c *converter) writeUnrolled(file path.Relative, sc *score.Score) error {
 	err := sc.Unroll()
 
 	if err != nil {
 		return err
 	}
 
-	var uf *os.File
+	sc.FS.Delete(file, false)
+	uf, err := fs.OpenWriter(sc.FS, file)
 
-	os.Remove(file.String())
-
-	uf, err = os.Create(file.String())
 	if err != nil {
 		return err
 	}
 	defer uf.Close()
-	if filepath.Ext(file.String()) == ".xlsx" {
+	if path.Ext(file) == ".xlsx" {
 		var tracksbf, scorebf bytes.Buffer
 		err = sc.WriteTracksAndScoreTable(&tracksbf, &scorebf)
 		if err != nil {
 			return err
 		}
-		return xlsx.Write(file.String(), tracksbf.String(), scorebf.String())
+		return xlsx.Write(path.ToSystem(sc.FS.Abs(file)), tracksbf.String(), scorebf.String())
 	} else {
 		err = sc.WriteUnrolled(uf)
 		if err != nil {

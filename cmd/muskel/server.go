@@ -144,7 +144,7 @@ func startServer(conv *converter) error {
 		s.converter.Config.Fmt = true
 	}
 	if s.converter.Config.UnrollFile.Relative().String() == "" {
-		s.converter.Config.UnrollFile = path.MustLocal(s.converter.inFile.String() + ".unrolled" + muskel.FILE_EXTENSION)
+		s.converter.Config.UnrollFile = path.Relative(s.converter.inFile.String() + ".unrolled" + muskel.FILE_EXTENSION)
 	}
 	s.converter.Config.Flow = true
 	s.converter.Config.KeepEmptyLines = true
