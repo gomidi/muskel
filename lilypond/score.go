@@ -226,7 +226,7 @@ func (s *Score) scanTempoChanges() error {
 }
 
 func (s *Score) WritePDF(file path.Local) error {
-	if !path.IsDir(file) {
+	if path.IsDir(file) {
 		return fs.ErrExpectedFile.Params(file.String())
 	}
 
