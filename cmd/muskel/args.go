@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"time"
 
@@ -338,6 +339,10 @@ func (a *args) runPDF(app config.Application) error {
 
 func (a *args) init() {
 	a.App = APP
+
+	a.InFile.RegExp = regexp.MustCompile(`\.(md|MD|mskl|MSKL)$`)
+	a.OutFile.RegExp = regexp.MustCompile(`\.(mid|MID|midi|MIDI)$`)
+	a.pdf.PDFfile.RegExp = regexp.MustCompile(`\.(pdf|PDF)$`)
 
 	// the main argument set
 	a.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
