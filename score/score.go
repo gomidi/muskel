@@ -29,7 +29,7 @@ type Score struct {
 	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
 	includedScores map[path.Relative]*Score
 	lyrics         map[string][]string
-	properties     map[string]interface{}
+	properties     map[string]string
 	tokens         map[string]string
 	IsUnrolled     bool
 	exclSketch     map[string]string
@@ -71,7 +71,7 @@ func New(filepath path.Relative, params []string, options ...Option) *Score {
 		Filters:        map[string]*filter.Filter{},
 		Sketches:       map[string]*sketch.Sketch{},
 		Files:          map[string]*file.File{},
-		properties:     map[string]interface{}{},
+		properties:     map[string]string{},
 		Unrolled:       map[string][]*items.Event{},
 		Parts:          map[string][2]uint{},
 		tokens:         map[string]string{},
@@ -146,7 +146,7 @@ func (sc *Score) RemoveObsoletRestsFromUnrolledTrack(tr string) {
 	//return seq
 }
 
-func (sc *Score) Properties() map[string]interface{} {
+func (sc *Score) Properties() map[string]string {
 	return sc.properties
 }
 

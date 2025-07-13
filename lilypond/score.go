@@ -32,13 +32,28 @@ type Score struct {
 	bars                  []bar
 	endPos                smf.TicksAbsPos
 	tracks                []*Track
+	copyright             string
+	title                 string
+	composer              string
+	poet                  string
 }
 
 func newScore(s *score.Score, filegroup string) *Score {
 	wrt := smf.NewWriter(nil, 1000, 960)
 	sw := smf.New(s, filegroup, wrt)
 	//	fmt.Println("after init")
-	return &Score{score: s, fileGroup: filegroup, smf: sw, startingTimeSignature: [2]uint8{4, 4}}
+	props := s.Properties()
+
+	newsc := &Score{score: s, fileGroup: filegroup, smf: sw, startingTimeSignature: [2]uint8{4, 4}}
+
+	if len(props) > 0 {
+		newsc.composer = props["composer"]
+		newsc.title = props["title"]
+		newsc.copyright = props["copyright"]
+		newsc.poet = props["poet"]
+	}
+
+	return newsc
 }
 
 func (s *Score) TicksTo32th(ticks uint) uint {
@@ -347,7 +362,27 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 		g.Add(tr.staff)
 	}
 
-	return lilypond.NewBook(g), nil
+	bk := lilypond.NewBook(g)
+
+	bk.Header.SetTaglineOff()
+
+	if s.composer != "" {
+		bk.Header.SetComposer(s.composer)
+	}
+
+	if s.title != "" {
+		bk.Header.SetTitle(s.title)
+	}
+
+	if s.copyright != "" {
+		bk.Header.SetCopyright(s.copyright)
+	}
+
+	if s.poet != "" {
+		bk.Header.SetPoet(s.poet)
+	}
+
+	return bk, nil
 }
 
 /*

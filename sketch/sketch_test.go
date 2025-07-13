@@ -501,7 +501,7 @@ func (t *testScore) HasTrack(name string) bool {
 	return false
 }
 
-func (t *testScore) Properties() map[string]interface{} {
+func (t *testScore) Properties() map[string]string {
 	return nil
 }
 

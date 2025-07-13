@@ -17,7 +17,7 @@ type Score interface {
 	Embed(patterns ...string) error
 	GetMode(name string) items.Mode
 	FilterTrack(colName string, events []*items.Event) []*items.Event
-	Properties() map[string]interface{}
+	Properties() map[string]string
 	Lyric(part string, fromLine, toLine int) (tokens []string, err error)
 	SetStartBar(uint)
 	SetEndBar(uint)
