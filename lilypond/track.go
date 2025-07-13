@@ -6,12 +6,73 @@ import (
 )
 
 type Track struct {
-	voices []*voice
-	staff  *lilypond.Staff
-	name   string
-	lyrics map[uint]string // barnumber to lyrics
-	texts  map[smf.TicksAbsPos]string
+	voices      []*voice
+	staff       *lilypond.Staff
+	name        string
+	lyrics      map[uint]string // barnumber to lyrics
+	texts       map[smf.TicksAbsPos]string
+	clef        string
+	midichannel int8
 }
+
+/*
+func ClefTreble(transpose int) clef {
+	return clefN("treble", transpose)
+}
+
+func ClefFrench(transpose int) clef {
+	return clefN("french", transpose)
+}
+
+func ClefSoprano(transpose int) clef {
+	return clefN("soprano", transpose)
+}
+
+func ClefMezzoSoprano(transpose int) clef {
+	return clefN("mezzosoprano", transpose)
+}
+
+func ClefAlto(transpose int) clef {
+	return clefN("alto", transpose)
+}
+
+func ClefTenor(transpose int) clef {
+	return clefN("tenor", transpose)
+}
+
+func ClefBass(transpose int) clef {
+	return clefN("bass", transpose)
+}
+
+func ClefBaritone(transpose int) clef {
+	return clefN("baritone", transpose)
+}
+
+func ClefVarBaritone(transpose int) clef {
+	return clefN("varbaritone", transpose)
+}
+
+func ClefSubBass(transpose int) clef {
+	return clefN("subbass", transpose)
+}
+
+func ClefPercussion(transpose int) clef {
+	return clefN("percussion", transpose)
+}
+
+func Clef_C(transpose int) clef {
+	return clefN("C", transpose)
+}
+
+func Clef_G(transpose int) clef {
+	return clefN("G", transpose)
+}
+
+func Clef_F(transpose int) clef {
+	return clefN("F", transpose)
+}
+s
+*/
 
 func (t *Track) addVoice() (v *voice) {
 	v = &voice{}
@@ -19,6 +80,14 @@ func (t *Track) addVoice() (v *voice) {
 	v.no = len(t.voices)
 	v.Voice = t.staff.NewVoice()
 	v.notes = map[uint][]note{}
+	if t.clef != "" {
+		v.Voice.Add(lilypond.Clef(t.clef))
+	}
+
+	if t.midichannel == 9 {
+		v.SetDrumVoice()
+	}
+
 	t.voices = append(t.voices, v)
 	return
 }

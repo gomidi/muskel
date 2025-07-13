@@ -52,8 +52,8 @@ gitlab.com/golang-utils/value v0.0.17 h1:O5kHC0+YFLnQO+V0cBroVUIKTHqmU7t5UHxF/Vw
 gitlab.com/golang-utils/value v0.0.17/go.mod h1:3lvSfnAyheVMnUgIo7s5BWMvDXg8ehI30Vd5Iqve23M=
 gitlab.com/golang-utils/version/v2 v2.0.1 h1:jNnc2rzYNJ5Hq540yojZyP7parT4Mq12bev70CKxLtw=
 gitlab.com/golang-utils/version/v2 v2.0.1/go.mod h1:tzLbutrNtG7ZNWyO372//jG6hiS4Lw692KfPmom0Xcw=
-gitlab.com/gomidi/lilypond v0.1.7 h1:Xp/Ulr64KvggWMm2Y+LYNd2rOzdJCKwXNB5OEJig/5o=
-gitlab.com/gomidi/lilypond v0.1.7/go.mod h1:FQErzj8Ww5vleNqB5VKwWDJnSfE0tedy++UXdA+VZmo=
+gitlab.com/gomidi/lilypond v0.1.9 h1:h7gH/ZUjxeDrhQcPaT130Sh9x0SN2W6JnbvHqLnYsmM=
+gitlab.com/gomidi/lilypond v0.1.9/go.mod h1:bYKROFrUpNWGQWquGtGqPzyeM9Qx4lZykifLDwI56ow=
 gitlab.com/gomidi/midi/tools/smfimage v0.20.0 h1:a/pAwk2atqKQR1OcYnTvkJ/HjmToA/Fc7lsbAL0ra+g=
 gitlab.com/gomidi/midi/tools/smfimage v0.20.0/go.mod h1:q7wUvjC0rxZLZJdeZaKJoaVAbpg57w8OyksrLJF0WT8=
 gitlab.com/gomidi/midi/tools/smftrack v0.8.1 h1:QqbK8mu74Qv7wA0Uf666tRXWBYGpyL8WN5eCLZRBQFs=

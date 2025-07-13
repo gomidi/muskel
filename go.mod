@@ -9,7 +9,7 @@ require (
 	gitlab.com/golang-utils/config/v3 v3.0.20
 	gitlab.com/golang-utils/fs v0.24.12
 	gitlab.com/golang-utils/version/v2 v2.0.1
-	gitlab.com/gomidi/lilypond v0.1.7
+	gitlab.com/gomidi/lilypond v0.1.9
 	gitlab.com/gomidi/midi/tools/smfimage v0.20.0
 	gitlab.com/gomidi/midi/v2 v2.3.13
 	golang.org/x/sys v0.33.0

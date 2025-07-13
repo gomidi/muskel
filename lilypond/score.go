@@ -64,12 +64,14 @@ func (s *Score) TicksTo32th(ticks uint) uint {
 	return (ticks * s.ticksPerQN) / 8
 }
 
-func (s *Score) newTrack(name string) *Track {
+func (s *Score) newTrack(name string, midichannel int8, clef string) *Track {
 	var tr = &Track{}
 	tr.lyrics = map[uint]string{} // barnumber to lyrics
 	tr.texts = map[smf.TicksAbsPos]string{}
 	tr.name = name
 	tr.staff = new(lilypond.Staff).SetName(name).With(lilypond.InstrumentName(name))
+	tr.clef = clef
+	tr.midichannel = midichannel
 	tr.addVoice()
 	return tr
 }
@@ -314,7 +316,7 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 		}
 
 		smfTracks = append(smfTracks, smfTrack)
-		tr := s.newTrack(track.Name)
+		tr := s.newTrack(track.Name, track.MIDIChannel, track.LilyPondClef)
 		s.tracks = append(s.tracks, tr)
 	}
 

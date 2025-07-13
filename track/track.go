@@ -28,6 +28,8 @@ type Track struct {
 	SkipInScore        bool
 	Position           int
 	SoloGroup          int // x < 0 =  never export; x = 0 = no solo group (will only be exported without solo); x > 0 = number of the solo group (only relevant in solo mode)
+
+	LilyPondClef string
 }
 
 func New(name string) *Track {
@@ -44,6 +46,11 @@ func New(name string) *Track {
 	tr.Import = ""
 	tr.Name = name
 	return tr
+}
+
+func (t *Track) SetLilyPondClef(clef string) error {
+	t.LilyPondClef = clef
+	return nil
 }
 
 func (t *Track) SetImport(importFrom string) error {
