@@ -364,8 +364,6 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 
 	bk := lilypond.NewBook(g)
 
-	bk.Header.SetTaglineOff()
-
 	if s.composer != "" {
 		bk.Header.SetComposer(s.composer)
 	}
@@ -375,7 +373,9 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 	}
 
 	if s.copyright != "" {
-		bk.Header.SetCopyright(s.copyright)
+		bk.Header.SetTagline(s.copyright)
+	} else {
+		bk.Header.SetTaglineOff()
 	}
 
 	if s.poet != "" {
