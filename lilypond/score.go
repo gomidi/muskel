@@ -38,6 +38,7 @@ type Score struct {
 	composer              string
 	poet                  string
 	arranger              string
+	lastOpenedNote        uint8
 }
 
 func newScore(s *score.Score, filegroup string) *Score {
@@ -78,10 +79,26 @@ func (s *Score) newTrack(name string, midichannel int8, clef string) *Track {
 	return tr
 }
 
+func (s *Score) closeNote(track *Track, key uint8) {
+	v := track.closeOpenedNote(key)
+	startPos := v.notePositions[key]
+	length := uint(s.lastEvTick - startPos)
+	b := s.barOfPos(startPos)
+	//	fmt.Printf("in track %v bar of note %v is %v\n", track.name, midi.Note(key).String(), b.no)
+	var n note
+	n.start32thOfBar = uint((startPos-b.position)*8) / s.ticksPerQN
+	n.length32 = (length * 8) / s.ticksPerQN
+	n.key = key
+	n.velocity = v.noteVelocities[key]
+	n.barNo = b.no
+	v.notes[b.no] = append(v.notes[b.no], n)
+}
+
 // 1. we need to calculate the bar, therefor we need all the time-signatures and their bar positions
 // 2. we need to calculate the beat/whatever position from the tick (and also round it somehow)
 // 3. we should also calculate the key, but this is more complicated and we do it later
 func (s *Score) addEventToTrack(track *Track, ev midismf.Event) {
+
 	s.lastEvTick = s.lastEvTick + smf.TicksAbsPos(ev.Delta)
 
 	var ch, key, vel uint8
@@ -93,22 +110,17 @@ func (s *Score) addEventToTrack(track *Track, ev midismf.Event) {
 	case ev.Message.GetMetaText(&text):
 		track.texts[s.lastEvTick] = text
 	case ev.Message.GetNoteStart(&ch, &key, &vel):
+		if track.isPercussion() && s.lastOpenedNote != 0 {
+			s.closeNote(track, s.lastOpenedNote)
+			s.lastOpenedNote = key
+		}
+
 		v := track.openNote(key, vel, s.lastEvTick)
 		_ = v
 	case ev.Message.GetNoteEnd(&ch, &key):
-		v := track.closeOpenedNote(key)
-		startPos := v.notePositions[key]
-		length := uint(s.lastEvTick - startPos)
-		b := s.barOfPos(startPos)
-		//	fmt.Printf("in track %v bar of note %v is %v\n", track.name, midi.Note(key).String(), b.no)
-		var n note
-		n.start32thOfBar = uint((startPos-b.position)*8) / s.ticksPerQN
-		n.length32 = (length * 8) / s.ticksPerQN
-		n.key = key
-		n.velocity = v.noteVelocities[key]
-		n.barNo = b.no
-		v.notes[b.no] = append(v.notes[b.no], n)
-
+		if !track.isPercussion() {
+			s.closeNote(track, key)
+		}
 	}
 }
 
@@ -354,11 +366,17 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 
 	for i, smftrack := range smfTracks {
 		s.lastEvTick = 0
+		s.lastOpenedNote = 0
 
 		tr := s.tracks[i]
 
 		for _, ev := range smftrack {
 			s.addEventToTrack(tr, ev)
+		}
+
+		if tr.isPercussion() && s.lastOpenedNote != 0 {
+			s.closeNote(tr, s.lastOpenedNote)
+			s.lastOpenedNote = 0
 		}
 
 	}

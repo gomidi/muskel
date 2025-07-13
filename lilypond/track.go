@@ -14,6 +14,10 @@ type Track struct {
 	clef   string
 }
 
+func (t Track) isPercussion() bool {
+	return t.clef == "percussion"
+}
+
 /*
 func ClefTreble(transpose int) clef {
 	return clefN("treble", transpose)
