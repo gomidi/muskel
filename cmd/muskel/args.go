@@ -362,9 +362,9 @@ func (a *args) init() {
 	a.AddFlag("trackfiles", &a.TrackFiles).WithHelp(`sets out to '%%s' in order to write to the file names as given in the track properties`)
 	sleepFlag := a.AddFlag("sleep", &a.SleepingTime).WithHelp("sleeping time between invocations (in milliseconds)").WithDefault("10")
 	a.AddFlag("unroll", &a.UnrollFile).WithHelp("unroll the source to the given file name").WithShortFlag('u')
-	a.AddFlag("debug", &a.Debug).WithHelp("print debug messages")
+	debug := a.AddFlag("debug", &a.Debug).WithHelp("print debug messages")
 
-	pdf := a.App.AddCommand("pdf", a.runPDF).WithHelp("convert a muskel file to pdf via lilypond").SkipAllBut()
+	pdf := a.App.AddCommand("pdf", a.runPDF).WithHelp("convert a muskel file to pdf via lilypond").SkipAllBut(debug)
 	pdf.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
 	pdf.AddFlag("pdf", &a.pdf.PDFfile).WithHelp("pdf file to export to").WithRequired()
 	pdf.AddFlag("experiment", &a.pdf.Experimental).WithHelp("use the experimental work in progress lilypond support").WithShortFlag('x')
