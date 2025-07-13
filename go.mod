@@ -6,8 +6,8 @@ require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/emersion/go-appdir v1.1.2
 	github.com/metakeule/observe v0.0.5
-	gitlab.com/golang-utils/config/v3 v3.0.19
-	gitlab.com/golang-utils/fs v0.24.6
+	gitlab.com/golang-utils/config/v3 v3.0.20
+	gitlab.com/golang-utils/fs v0.24.12
 	gitlab.com/golang-utils/version/v2 v2.0.1
 	gitlab.com/gomidi/lilypond v0.1.7
 	gitlab.com/gomidi/midi/tools/smfimage v0.20.0
@@ -27,7 +27,7 @@ require (
 	github.com/zs5460/art v0.3.0 // indirect
 	gitlab.com/golang-utils/errors v0.0.3 // indirect
 	gitlab.com/golang-utils/fmtdate v1.0.3 // indirect
-	gitlab.com/golang-utils/fsutils v0.24.8 // indirect
+	gitlab.com/golang-utils/fsutils v0.24.12 // indirect
 	gitlab.com/golang-utils/pad v0.0.2 // indirect
 	gitlab.com/golang-utils/value v0.0.17 // indirect
 	gitlab.com/gomidi/midi/tools/smftrack v0.8.1 // indirect
