@@ -34,6 +34,7 @@ type Score struct {
 	tracks                []*Track
 	copyright             string
 	title                 string
+	subtitle              string
 	composer              string
 	poet                  string
 	arranger              string
@@ -53,6 +54,7 @@ func newScore(s *score.Score, filegroup string) *Score {
 		newsc.copyright = props["copyright"]
 		newsc.poet = props["poet"]
 		newsc.arranger = props["arranger"]
+		newsc.subtitle = props["subtitle"]
 	}
 
 	return newsc
@@ -387,6 +389,10 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 
 	if s.arranger != "" {
 		bk.Header.SetArranger(s.arranger)
+	}
+
+	if s.subtitle != "" {
+		bk.Header.SetSubTitle(s.subtitle)
 	}
 
 	return bk, nil
