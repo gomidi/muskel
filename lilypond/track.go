@@ -6,13 +6,12 @@ import (
 )
 
 type Track struct {
-	voices      []*voice
-	staff       *lilypond.Staff
-	name        string
-	lyrics      map[uint]string // barnumber to lyrics
-	texts       map[smf.TicksAbsPos]string
-	clef        string
-	midichannel int8
+	voices []*voice
+	staff  *lilypond.Staff
+	name   string
+	lyrics map[uint]string // barnumber to lyrics
+	texts  map[smf.TicksAbsPos]string
+	clef   string
 }
 
 /*
@@ -80,12 +79,9 @@ func (t *Track) addVoice() (v *voice) {
 	v.no = len(t.voices)
 	v.Voice = t.staff.NewVoice()
 	v.notes = map[uint][]note{}
+
 	if t.clef != "" {
 		v.Voice.Add(lilypond.Clef(t.clef))
-	}
-
-	if t.midichannel == 9 {
-		v.SetDrumVoice()
 	}
 
 	t.voices = append(t.voices, v)

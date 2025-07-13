@@ -71,7 +71,9 @@ func (s *Score) newTrack(name string, midichannel int8, clef string) *Track {
 	tr.name = name
 	tr.staff = new(lilypond.Staff).SetName(name).With(lilypond.InstrumentName(name))
 	tr.clef = clef
-	tr.midichannel = midichannel
+	if tr.clef == "" && midichannel == 9 {
+		tr.clef = "percussion"
+	}
 	tr.addVoice()
 	return tr
 }
