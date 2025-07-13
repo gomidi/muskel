@@ -13,6 +13,7 @@ type note struct {
 	barNo          uint
 	length32       uint
 	velocity       uint8
+	accent         bool
 }
 
 func (n note) dup() note {
@@ -20,6 +21,9 @@ func (n note) dup() note {
 }
 
 func (n note) getVelocity(nt *lilypond.Note) *lilypond.Note {
+	if n.accent {
+		return nt
+	}
 	/*
 		12 stufen + nix = 13 stufen
 		wenn wir 3 zu den 127 hinzuaddieren, sind wir bei 130.
@@ -61,6 +65,10 @@ func (n note) getVelocity(nt *lilypond.Note) *lilypond.Note {
 }
 
 func (n note) addtoVoice(nt *lilypond.Note, length32 uint, hasRest bool, v *lilypond.Voice) {
+
+	if n.accent {
+		nt = nt.Accent()
+	}
 
 	//	fmt.Printf("len 32: %v\n", length32)
 	var rest uint

@@ -54,6 +54,7 @@ func (v *voice) registerAllMyNotes(s *Score) {
 				remainingNote.start32thOfBar = 0
 				remainingNote.barNo = b.no + 1
 				remainingNote.velocity = 64
+				remainingNote.accent = false
 				continue
 			}
 		}
@@ -96,6 +97,7 @@ func (v *voice) registerAllMyNotes(s *Score) {
 				remainingNote.start32thOfBar = 0
 				remainingNote.barNo = b.no + 1
 				remainingNote.velocity = 64
+				remainingNote.accent = false
 				break
 			}
 

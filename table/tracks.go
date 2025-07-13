@@ -29,6 +29,8 @@ func (t *Tracks) Finish() (err error) {
 			if len(line) > i+1 {
 				val := line[i+1]
 				switch strings.ToLower(line[0]) {
+				case "dyn", "dynamics":
+					err = tr.SetLilyPondDynamics(val)
 				case "clef":
 					err = tr.SetLilyPondClef(val)
 				case "del", "delay":

@@ -3,15 +3,17 @@ package lilypond
 import (
 	"gitlab.com/gomidi/lilypond"
 	"gitlab.com/gomidi/muskel/smf"
+	"gitlab.com/gomidi/muskel/track"
 )
 
 type Track struct {
-	voices []*voice
-	staff  *lilypond.Staff
-	name   string
-	lyrics map[uint]string // barnumber to lyrics
-	texts  map[smf.TicksAbsPos]string
-	clef   string
+	voices      []*voice
+	staff       *lilypond.Staff
+	name        string
+	lyrics      map[uint]string // barnumber to lyrics
+	texts       map[smf.TicksAbsPos]string
+	clef        string
+	dynhandling track.LilyPondDynamics
 }
 
 func (t Track) isPercussion() bool {

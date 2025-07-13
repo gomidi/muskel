@@ -65,7 +65,7 @@ func (s *Score) TicksTo32th(ticks uint) uint {
 	return (ticks * s.ticksPerQN) / 8
 }
 
-func (s *Score) newTrack(name string, midichannel int8, clef string) *Track {
+func (s *Score) newTrack(name string, midichannel int8, clef string, dynhandling track.LilyPondDynamics) *Track {
 	var tr = &Track{}
 	tr.lyrics = map[uint]string{} // barnumber to lyrics
 	tr.texts = map[smf.TicksAbsPos]string{}
@@ -75,23 +75,38 @@ func (s *Score) newTrack(name string, midichannel int8, clef string) *Track {
 	if tr.clef == "" && midichannel == 9 {
 		tr.clef = "percussion"
 	}
+	tr.dynhandling = dynhandling
 	tr.addVoice()
 	return tr
 }
 
-func (s *Score) closeNote(track *Track, key uint8) {
-	v := track.closeOpenedNote(key)
+func (s *Score) closeNote(tr *Track, key uint8) {
+	v := tr.closeOpenedNote(key)
 	startPos := v.notePositions[key]
 	length := uint(s.lastEvTick - startPos)
 	b := s.barOfPos(startPos)
-	//	fmt.Printf("in track %v bar of note %v is %v\n", track.name, midi.Note(key).String(), b.no)
+
 	var n note
 	n.start32thOfBar = uint((startPos-b.position)*8) / s.ticksPerQN
 	n.length32 = (length * 8) / s.ticksPerQN
 	n.key = key
-	n.velocity = v.noteVelocities[key]
+
+	switch {
+	case tr.dynhandling == track.LilyPondDynHide:
+		n.velocity = 64
+	case tr.isPercussion() || tr.dynhandling == track.LilyPondDynAccents:
+		n.velocity = 64
+		if v.noteVelocities[key] > 100 {
+			n.accent = true
+		}
+	default:
+		n.velocity = v.noteVelocities[key]
+	}
+
 	n.barNo = b.no
 	v.notes[b.no] = append(v.notes[b.no], n)
+
+	//fmt.Printf("in track %v bar %v note %v start: %v length32 %v voice: %v\n", track.name, b.no, midi.Note(key).String(), n.start32thOfBar, n.length32, v.no)
 }
 
 // 1. we need to calculate the bar, therefor we need all the time-signatures and their bar positions
@@ -112,10 +127,10 @@ func (s *Score) addEventToTrack(track *Track, ev midismf.Event) {
 	case ev.Message.GetNoteStart(&ch, &key, &vel):
 		if track.isPercussion() && s.lastOpenedNote != 0 {
 			s.closeNote(track, s.lastOpenedNote)
-			s.lastOpenedNote = key
 		}
 
 		v := track.openNote(key, vel, s.lastEvTick)
+		s.lastOpenedNote = key
 		_ = v
 	case ev.Message.GetNoteEnd(&ch, &key):
 		if !track.isPercussion() {
@@ -330,7 +345,7 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 		}
 
 		smfTracks = append(smfTracks, smfTrack)
-		tr := s.newTrack(track.Name, track.MIDIChannel, track.LilyPondClef)
+		tr := s.newTrack(track.Name, track.MIDIChannel, track.LilyPondClef, track.LilyPondDynamics)
 		s.tracks = append(s.tracks, tr)
 	}
 

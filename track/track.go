@@ -29,7 +29,8 @@ type Track struct {
 	Position           int
 	SoloGroup          int // x < 0 =  never export; x = 0 = no solo group (will only be exported without solo); x > 0 = number of the solo group (only relevant in solo mode)
 
-	LilyPondClef string
+	LilyPondClef     string
+	LilyPondDynamics LilyPondDynamics
 }
 
 func New(name string) *Track {
@@ -46,6 +47,28 @@ func New(name string) *Track {
 	tr.Import = ""
 	tr.Name = name
 	return tr
+}
+
+type LilyPondDynamics string
+
+const (
+	LilyPondDynShow    = LilyPondDynamics("")
+	LilyPondDynHide    = LilyPondDynamics("hide")
+	LilyPondDynAccents = LilyPondDynamics("accents")
+)
+
+// valid options are: show(default)|accents|hide in the future there could also be a map
+func (t *Track) SetLilyPondDynamics(dyn string) error {
+	dyn = strings.ToLower(strings.TrimSpace(dyn))
+	switch dyn {
+	case "show":
+		t.LilyPondDynamics = LilyPondDynShow
+	case "", "hide", "accents":
+		t.LilyPondDynamics = LilyPondDynamics(dyn)
+	default:
+		return fmt.Errorf("invalid value for Dynamics: %q", dyn)
+	}
+	return nil
 }
 
 func (t *Track) SetLilyPondClef(clef string) error {
