@@ -373,7 +373,8 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 	}
 
 	if s.copyright != "" {
-		bk.Header.SetTagline(s.copyright)
+		//bk.Header.SetTagline(s.copyright)
+		bk.Header.SetCopyright(s.copyright)
 	} else {
 		bk.Header.SetTaglineOff()
 	}
