@@ -36,6 +36,7 @@ type Score struct {
 	title                 string
 	composer              string
 	poet                  string
+	arranger              string
 }
 
 func newScore(s *score.Score, filegroup string) *Score {
@@ -51,6 +52,7 @@ func newScore(s *score.Score, filegroup string) *Score {
 		newsc.title = props["title"]
 		newsc.copyright = props["copyright"]
 		newsc.poet = props["poet"]
+		newsc.arranger = props["arranger"]
 	}
 
 	return newsc
@@ -381,6 +383,10 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 
 	if s.poet != "" {
 		bk.Header.SetPoet(s.poet)
+	}
+
+	if s.arranger != "" {
+		bk.Header.SetArranger(s.arranger)
 	}
 
 	return bk, nil
