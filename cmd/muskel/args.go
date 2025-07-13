@@ -20,6 +20,7 @@ import (
 	"gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/items"
+	"gitlab.com/gomidi/muskel/score"
 )
 
 var (
@@ -314,8 +315,14 @@ func (a *args) run(app config.Application) error {
 }
 
 func (a *args) runPDF(app config.Application) error {
+	var opts []score.Option
+
+	if a.Debug.Val {
+		opts = append(opts, score.Debug())
+	}
+
 	if a.pdf.Experimental.Val {
-		return muskel.PDFScore(a.InFile.Val, nil, a.pdf.PDFfile.Val)
+		return muskel.PDFScore(a.InFile.Val, nil, a.pdf.PDFfile.Val, opts...)
 	}
 
 	dir, err := rootfs.MkDirTmp("muskel-pdf*")
@@ -328,13 +335,13 @@ func (a *args) runPDF(app config.Application) error {
 
 	defer rootfs.Delete(dir, true)
 
-	err = muskel.Convert(a.InFile.Val, nil, file)
+	err = muskel.Convert(a.InFile.Val, nil, file, opts...)
 
 	if err != nil {
 		return err
 	}
 
-	return lilypond.MIDI2PDF(file.ToSystem(), a.pdf.PDFfile.Val.ToSystem(), true)
+	return lilypond.MIDI2PDF(file.ToSystem(), a.pdf.PDFfile.Val.ToSystem(), a.Debug.Val)
 }
 
 func (a *args) init() {
