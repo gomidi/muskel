@@ -15,7 +15,9 @@ import (
 
 	"unsafe"
 
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/golang-utils/version/v2"
+
 	//	"gitlab.com/gomidi/midi"
 
 	//	driver "gitlab.com/gomidi/rtmididrv"
@@ -192,4 +194,9 @@ func runVersionated(file string, args []string) *exec.Cmd {
 
 func versionate(file string, v *version.Version) string {
 	return allVersionate(file, v) + ".exe"
+}
+
+func openInDefaultProgram(file path.Local) error {
+	cmd := exec.Command("cmd.exe", "start", fmt.Sprintf(`"%s"`, file.ToSystem()))
+	return cmd.Run()
 }

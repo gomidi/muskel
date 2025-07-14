@@ -167,6 +167,16 @@ func (c *converter) ScoreOptions() (opts []score.Option) {
 
 }
 
+func open(file path.Local, async bool) {
+	if async {
+		go func() {
+			openInDefaultProgram(file)
+		}()
+		return
+	}
+	openInDefaultProgram(file)
+}
+
 func (c *converter) cmdSMF(sc *score.Score) error {
 	if c.Config.Fmt {
 		c.fmtFile(c.inFile, c.Config.Params, c.ScoreOptions()...)
@@ -187,8 +197,11 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		return err
 	}
 
+	var locImgFile path.Local
+
 	if ARGS.smf.ExportImage.Val {
-		err = muskel.WriteImage(sc, path.MustLocal(c.player.outFile.String()+".png"))
+		locImgFile = path.MustLocal(c.player.outFile.String() + ".png")
+		err = muskel.WriteImage(sc, locImgFile)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while exporting to image: %s\n", err.Error())
 			alert("ERROR while exporting to image", err)
@@ -208,7 +221,38 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	if ARGS.Watch.Val {
 		fmt.Fprint(os.Stdout, ".")
 	}
+
 	notify("OK MuSkeL converted to SMF", path.Base(c.player.outFile))
+
+	if ARGS.smf.Open.Val {
+
+		// open possibly all exported files
+		if ARGS.Watch.Val {
+			open(c.player.outFile, true)
+			if ARGS.smf.ExportImage.Val {
+				open(locImgFile, true)
+			}
+
+			if ARGS.smf.ExportScore.Val {
+				open(ARGS.smf.PDFfile.Val, true)
+			}
+			return nil
+		}
+
+		// just open one of them
+		switch {
+		case ARGS.smf.ExportScore.Val:
+			// open the score pdf
+			open(ARGS.smf.PDFfile.Val, false)
+		case ARGS.smf.ExportImage.Val:
+			// open the image
+			open(locImgFile, false)
+		default:
+			// open the smf
+			open(c.player.outFile, false)
+		}
+	}
+
 	return nil
 }
 

@@ -4,11 +4,14 @@
 package main
 
 import (
+	"fmt"
 	"os/exec"
 	"syscall"
 	"time"
 
 	//	"github.com/gen2brain/beeep"
+
+	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/golang-utils/version/v2"
 	_ "gitlab.com/gomidi/midi/v2/drivers/midicatdrv"
 	// driver "gitlab.com/gomidi/midicatdrv"
@@ -88,4 +91,9 @@ func runVersionated(file string, args []string) *exec.Cmd {
 
 func versionate(file string, v *version.Version) string {
 	return allVersionate(file, v)
+}
+
+func openInDefaultProgram(file path.Local) error {
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("exec xdg-open '%s' 2>/dev/null", file.ToSystem()))
+	return cmd.Run()
 }

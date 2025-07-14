@@ -54,6 +54,7 @@ type args struct {
 		ExportImage     config.Bool
 		ExportScore     config.Bool
 		PDFfile         config.FileLocal
+		Open            config.Bool
 	}
 
 	ports struct {
@@ -341,6 +342,7 @@ func (a *args) init() {
 	a.smf.command.AddFlag("image", &a.smf.ExportImage).WithHelp("export to a PNG image (via smfimage)").WithShortFlag('i')
 	a.smf.command.AddFlag("score", &a.smf.ExportScore).WithHelp("export the score to a PDF (via lilypond)").WithShortFlag('l')
 	a.smf.command.AddFlag("pdf-file", &a.smf.PDFfile).WithHelp("pdf file to export the score to").WithDefault("score.pdf")
+	a.smf.command.AddFlag("open", &a.smf.Open).WithHelp("open the output file with default program")
 
 	a.App.AddCommand("ports", a.runPorts).WithHelp("show midi out ports").SkipAllBut()
 
