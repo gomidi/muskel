@@ -8,6 +8,7 @@ type bar struct {
 	num, denom          uint8
 	timeSignatureChange bool
 	ticksPerQN          uint
+	marker              string
 }
 
 func (b bar) dup() bar {

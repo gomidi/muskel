@@ -15,7 +15,7 @@ type voice struct {
 	notes          map[uint][]note // map bar numbers to notes
 }
 
-func (v *voice) registerAllMyNotes(s *Score) {
+func (v *voice) registerAllMyNotes(s *Score, includeSectionLabels bool) {
 	//fmt.Printf("===================TRACK %v VOICE: %v===================\n", v.track.name, v.no)
 	/*
 		sopranos.NewVoice().SetName("sopranos").Add(ClefTreble(0), global,
@@ -32,6 +32,13 @@ func (v *voice) registerAllMyNotes(s *Score) {
 
 		var remainingInBar int = int(b.Length32())
 		//	fmt.Printf("bar: %v\n remaining: %v\n", b.no, remainingInBar)
+
+		if includeSectionLabels && b.marker != "" {
+			//v.Voice.Add(lilypond.SectionLabelRoundedBox(b.marker))
+			//v.Voice.Add(lilypond.SectionLabel(b.marker))
+			v.Voice.Add(lilypond.SectionLabelBox(b.marker))
+			//v.Voice.Add(lilypond.Mark(b.marker))
+		}
 
 		if b.no > 0 {
 			v.Voice.Add(lilypond.BarChange)

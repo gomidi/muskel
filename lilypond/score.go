@@ -3,11 +3,13 @@ package lilypond
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"gitlab.com/golang-utils/fs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/lilypond"
 	midismf "gitlab.com/gomidi/midi/v2/smf"
+	"gitlab.com/gomidi/muskel/items"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/smf"
 	"gitlab.com/gomidi/muskel/track"
@@ -39,6 +41,7 @@ type Score struct {
 	poet                  string
 	arranger              string
 	lastOpenedNote        uint8
+	markers               map[uint]string // absticks => text
 }
 
 func newScore(s *score.Score, filegroup string) *Score {
@@ -48,7 +51,7 @@ func newScore(s *score.Score, filegroup string) *Score {
 	props := s.Properties()
 
 	newsc := &Score{score: s, fileGroup: filegroup, smf: sw, startingTimeSignature: [2]uint8{4, 4}}
-
+	newsc.markers = map[uint]string{}
 	if len(props) > 0 {
 		newsc.composer = props["composer"]
 		newsc.title = props["title"]
@@ -156,6 +159,17 @@ func (s *Score) addBar(b bar) {
 	s.bars = append(s.bars, b)
 }
 
+func (s *Score) setMarkesToBars() {
+	for i, bar := range s.bars {
+		text, has := s.markers[bar.position.Uint()]
+
+		if has {
+			bar.marker = text
+			s.bars[i] = bar
+		}
+	}
+}
+
 func (s *Score) setBars() error {
 
 	var num, denom uint8
@@ -240,14 +254,28 @@ func (s *Score) scanMeterChanges() error {
 	}
 
 	for _, ev := range evts {
+		var text string
 		var num, denom uint8
-		if ev.Message.GetMetaMeter(&num, &denom) {
+
+		switch {
+		case ev.Message.GetMetaMarker(&text):
+			if !strings.HasPrefix(text, "//") {
+				//	fmt.Printf("got marker: %q\n", text)
+				s.markers[ev.Position.Uint()] = text
+			}
+			//		case ev.Message.GetMetaCuepoint(&text):
+			//		if !strings.HasPrefix(text, "//") {
+			//			fmt.Printf("got cuepoint: %q\n", text)
+			//			s.markers[ev.Position.Uint()] = text
+			//		}
+		case ev.Message.GetMetaMeter(&num, &denom):
 			//	fmt.Printf("got meter change: %v/%v\n", num, denom)
 			if ev.Position == 0 {
 				s.startingTimeSignature = [2]uint8{num, denom}
 			}
 			s.timeSignatureChanges = append(s.timeSignatureChanges, [3]uint{ev.Position.Uint(), uint(num), uint(denom)})
 		}
+
 	}
 
 	return nil
@@ -284,7 +312,7 @@ func (s *Score) WritePDF(file path.Local) error {
 	if err != nil {
 		return err
 	}
-	return bk.ToPDF(file)
+	return bk.ToPDF(file, items.DEBUG)
 }
 
 func (s *Score) String() (string, error) {
@@ -377,6 +405,8 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 		return nil, err
 	}
 
+	s.setMarkesToBars()
+
 	//	fmt.Println("now adding events")
 
 	for i, smftrack := range smfTracks {
@@ -398,12 +428,48 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 
 	g := new(lilypond.StaffGroup).Loose()
 
-	for _, tr := range s.tracks {
-		tr.registerAllMyNotes(s)
+	for i, tr := range s.tracks {
+		tr.registerAllMyNotes(s, i == 0)
 		g.Add(tr.staff)
 	}
 
 	bk := lilypond.NewBook(g)
+
+	bk.Paper.Add(lilypond.Line(`
+      #(set-paper-size "a4")
+  		system-system-spacing =
+   			#'((basic-distance . 16)
+     			(minimum-distance . 8)
+    			(padding . 1.5)
+    			(stretchability . 60)) % defaults: 16, 8, 1.8, 60
+	`))
+
+	bk.Score.Layout.Add(lilypond.Line(` 
+		#(layout-set-staff-size 12)
+    %% \magnifyStaff #(magstep -4)
+    
+    \context {
+      \Staff
+      %%% Für 2.19.80:
+      %% \magnifyStaff #(magstep -4)
+      %% fontSize = -4
+      %% \override StaffSymbol.staff-space = #(magstep -4)
+      %% \override StaffSymbol.thickness = #(magstep -4)
+      %% \override VerticalAxisGroup.default-staff-staff-spacing.basic-distance = #4
+    }
+		`))
+
+	/*
+			 \context {
+		    \Staff
+		    %%% Für 2.19.80:
+		    % \magnifyStaff #(magstep -3)
+		    %%% Für 2.18.2:
+		    fontSize = -3
+		    \override StaffSymbol.staff-space = #(magstep -3)
+		    \override StaffSymbol.thickness = #(magstep -3)
+		  }
+	*/
 
 	if s.composer != "" {
 		bk.Header.SetComposer(s.composer)

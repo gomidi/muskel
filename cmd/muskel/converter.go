@@ -13,10 +13,10 @@ import (
 
 	"bytes"
 
-	"gitlab.com/gomidi/lilypond"
 	//	"gitlab.com/gomidi/midi/smf"
 	//"gitlab.com/gomidi/midi/smf/smfwriter"
 	"gitlab.com/gomidi/muskel"
+	"gitlab.com/gomidi/muskel/lilypond"
 	"gitlab.com/gomidi/muskel/score"
 	"gitlab.com/gomidi/muskel/xlsx"
 )
@@ -197,7 +197,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 	}
 
 	if ARGS.smf.ExportScore.Val {
-		err = lilypond.MIDI2PDF(path.ToSystem(c.player.outFile), "", false)
+		err = lilypond.WriteFile(sc, ARGS.smf.PDFfile.Val)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR while exporting score to PDF: %s\n", err.Error())
 			alert("ERROR while exporting to score", err)

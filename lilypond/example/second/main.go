@@ -57,7 +57,7 @@ func run() error {
 }
 
 func writeLilyPondPDF(bk *lpond.Book, file path.Local) error {
-	return bk.ToPDF(file)
+	return bk.ToPDF(file, true)
 }
 
 func writeLilyPondScore(s string, file path.Local) error {

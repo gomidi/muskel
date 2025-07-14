@@ -15,12 +15,10 @@ import (
 	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/golang-utils/version/v2"
-	"gitlab.com/gomidi/lilypond"
 	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/midi/v2/smf"
 	"gitlab.com/gomidi/muskel"
 	"gitlab.com/gomidi/muskel/items"
-	"gitlab.com/gomidi/muskel/score"
 )
 
 var (
@@ -50,16 +48,12 @@ type args struct {
 	UnrollFile          config.String
 	Debug               config.Bool
 
-	pdf struct {
-		PDFfile      config.FileLocal
-		Experimental config.Bool
-	}
-
 	smf struct {
 		command         *config.Command
 		ResolutionTicks config.Int
 		ExportImage     config.Bool
 		ExportScore     config.Bool
+		PDFfile         config.FileLocal
 	}
 
 	ports struct {
@@ -314,42 +308,12 @@ func (a *args) run(app config.Application) error {
 	return conv.run()
 }
 
-func (a *args) runPDF(app config.Application) error {
-	var opts []score.Option
-
-	if a.Debug.Val {
-		opts = append(opts, score.Debug())
-	}
-
-	if a.pdf.Experimental.Val {
-		return muskel.PDFScore(a.InFile.Val, nil, a.pdf.PDFfile.Val, opts...)
-	}
-
-	dir, err := rootfs.MkDirTmp("muskel-pdf*")
-
-	if err != nil {
-		return err
-	}
-
-	file := dir.Join("muskel-lilypond.mid")
-
-	defer rootfs.Delete(dir, true)
-
-	err = muskel.Convert(a.InFile.Val, nil, file, opts...)
-
-	if err != nil {
-		return err
-	}
-
-	return lilypond.MIDI2PDF(file.ToSystem(), a.pdf.PDFfile.Val.ToSystem(), a.Debug.Val)
-}
-
 func (a *args) init() {
 	a.App = APP
 
 	a.InFile.RegExp = regexp.MustCompile(`\.(md|MD|mskl|MSKL)$`)
 	a.OutFile.RegExp = regexp.MustCompile(`\.(mid|MID|midi|MIDI)$`)
-	a.pdf.PDFfile.RegExp = regexp.MustCompile(`\.(pdf|PDF)$`)
+	a.smf.PDFfile.RegExp = regexp.MustCompile(`\.(pdf|PDF)$`)
 
 	// the main argument set
 	a.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
@@ -369,18 +333,14 @@ func (a *args) init() {
 	a.AddFlag("trackfiles", &a.TrackFiles).WithHelp(`sets out to '%%s' in order to write to the file names as given in the track properties`)
 	sleepFlag := a.AddFlag("sleep", &a.SleepingTime).WithHelp("sleeping time between invocations (in milliseconds)").WithDefault("10")
 	a.AddFlag("unroll", &a.UnrollFile).WithHelp("unroll the source to the given file name").WithShortFlag('u')
-	debug := a.AddFlag("debug", &a.Debug).WithHelp("print debug messages")
-
-	pdf := a.App.AddCommand("pdf", a.runPDF).WithHelp("convert a muskel file to pdf via lilypond").SkipAllBut(debug)
-	pdf.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
-	pdf.AddFlag("pdf", &a.pdf.PDFfile).WithHelp("pdf file to export to").WithRequired()
-	pdf.AddFlag("experiment", &a.pdf.Experimental).WithHelp("use the experimental work in progress lilypond support").WithShortFlag('x')
+	a.AddFlag("debug", &a.Debug).WithHelp("print debug messages")
 
 	a.smf.command = a.App.AddCommand("smf", a.run).WithHelp("convert a muskel file to Standard MIDI file format (SMF)")
 	a.smf.command.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired()
 	a.smf.command.AddFlag("ticks", &a.smf.ResolutionTicks).WithHelp("resolution of SMF file in ticks").WithDefault("960")
 	a.smf.command.AddFlag("image", &a.smf.ExportImage).WithHelp("export to a PNG image (via smfimage)").WithShortFlag('i')
 	a.smf.command.AddFlag("score", &a.smf.ExportScore).WithHelp("export the score to a PDF (via lilypond)").WithShortFlag('l')
+	a.smf.command.AddFlag("pdf-file", &a.smf.PDFfile).WithHelp("pdf file to export the score to").WithDefault("score.pdf")
 
 	a.App.AddCommand("ports", a.runPorts).WithHelp("show midi out ports").SkipAllBut()
 

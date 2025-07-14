@@ -100,20 +100,22 @@ func (s str) String() string {
 	return string(s)
 }
 
-func (t *Track) registerAllMyNotes(s *Score) {
+func (t *Track) registerAllMyNotes(s *Score, includeSectionLabels bool) {
 	haslyrics := len(t.lyrics) > 0
 
 	if haslyrics {
 		// TODO: find the bars and add the barchanges
 		//fmt.Printf("adding lyrics")
-		ly := t.voices[0].NewLyrics()
+		//	ly := t.voices[0].NewLyrics()
 
 		var elms []lilypond.Element
 
 		for _, b := range s.bars {
-			if b.timeSignatureChange {
-				elms = append(elms, lilypond.TimeSignature{uint(b.num), uint(b.denom)})
-			}
+			/*
+				if b.timeSignatureChange {
+					elms = append(elms, lilypond.TimeSignature{uint(b.num), uint(b.denom)})
+				}
+			*/
 
 			if t.lyrics[b.no] != "" {
 				elms = append(elms, lilypond.String(t.lyrics[b.no]))
@@ -121,11 +123,13 @@ func (t *Track) registerAllMyNotes(s *Score) {
 			elms = append(elms, lilypond.BarChange)
 		}
 
-		ly.Add(lilypond.ElementGroup(elms...))
+		//ly.Add(lilypond.ElementGroup(elms...))
+		//t.staff.With(lilypond.ElementGroup(elms...))
+		t.staff.Addlyrics(elms...)
 	}
 
 	for _, v := range t.voices {
-		v.registerAllMyNotes(s)
+		v.registerAllMyNotes(s, includeSectionLabels)
 	}
 
 }
