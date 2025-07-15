@@ -34,8 +34,10 @@ github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOf
 github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/zs5460/art v0.3.0 h1:GP7oX5lfPTU1AlhA9sxvuISArs7ID1sJ1Xe/5pI9/oA=
 github.com/zs5460/art v0.3.0/go.mod h1:rSm0CidXKfYg8Il0bFFBd5y8bnsEfteZd8VWI2u6CoQ=
-gitlab.com/golang-utils/config/v3 v3.0.24 h1:GZaZL8D/PKFLY/RS2DQZXlPZESFMno8wECvyXLDb52Q=
-gitlab.com/golang-utils/config/v3 v3.0.24/go.mod h1:CeEaRz21vMw5/Jlxa9K6RquKXNyDoOKHMAQci7+cTL8=
+gitlab.com/golang-utils/bash_completion v0.0.3 h1:CpmnH9ygMtE4TRmPgXwpHV7qST2Y0nfe1DeEleLrHHs=
+gitlab.com/golang-utils/bash_completion v0.0.3/go.mod h1:GHe/x0zzLah2As3CxZ+Am48/mAgW45iBX/tg4LEwjnQ=
+gitlab.com/golang-utils/config/v3 v3.0.25 h1:U+mx2kXlMwclcKrI/5ZfyiyzclsLi2WwkncCT4fN1uU=
+gitlab.com/golang-utils/config/v3 v3.0.25/go.mod h1:CapXcGKlg09TLP3kB8tt+F3vzhudERPikglkHxBgsS4=
 gitlab.com/golang-utils/errors v0.0.3 h1:EXlmR0WbyVj/WZKi0q8+/r+w6VadFF241+Zsvcz5zBM=
 gitlab.com/golang-utils/errors v0.0.3/go.mod h1:odzi5ci8jLKKYdk6vscuSqNxWjFFq70LDTzCeRomEOg=
 gitlab.com/golang-utils/fmtdate v1.0.3 h1:lDPDyIcsZPCPg4dBvIjAZROZhIgitAGdj6VkWK011Io=
