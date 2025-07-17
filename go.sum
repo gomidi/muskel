@@ -60,8 +60,8 @@ gitlab.com/gomidi/midi/tools/smfimage v0.20.0 h1:a/pAwk2atqKQR1OcYnTvkJ/HjmToA/F
 gitlab.com/gomidi/midi/tools/smfimage v0.20.0/go.mod h1:q7wUvjC0rxZLZJdeZaKJoaVAbpg57w8OyksrLJF0WT8=
 gitlab.com/gomidi/midi/tools/smftrack v0.8.1 h1:QqbK8mu74Qv7wA0Uf666tRXWBYGpyL8WN5eCLZRBQFs=
 gitlab.com/gomidi/midi/tools/smftrack v0.8.1/go.mod h1:Dwyj9HekJacot2L9I0/r3UnHBdw6747Ra0vdYy7bUyg=
-gitlab.com/gomidi/midi/v2 v2.3.13 h1:DDEoViIzbAAJ5r//SCbA0FQu6wwb3B/ad4RG9pMdnYA=
-gitlab.com/gomidi/midi/v2 v2.3.13/go.mod h1:jDpP4O4skYi+7iVwt6Zyp18bd2M4hkjtMuw2cmgKgfw=
+gitlab.com/gomidi/midi/v2 v2.3.14 h1:BbTDExFlg0zm90AtyGDdO87jdKjn+eYqeSlSGGpFPzQ=
+gitlab.com/gomidi/midi/v2 v2.3.14/go.mod h1:jDpP4O4skYi+7iVwt6Zyp18bd2M4hkjtMuw2cmgKgfw=
 gitlab.com/metakeule/config v1.18.9/go.mod h1:glEQ76SztqrtydnmgxvrlTtN9BBmgM0lNy7/S2eiZbw=
 gitlab.com/metakeule/fmtdate v1.2.0/go.mod h1:uZUf21xepWGLp6PgJGBbHeBVWO+/gsKi3Gdh0Fu4lGg=
 golang.org/x/image v0.0.0-20180708004352-c73c2afc3b81 h1:00VmoueYNlNz/aHIilyyQz/MHSqGoWJzpFv/HW8xpzI=
