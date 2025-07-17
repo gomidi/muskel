@@ -1,7 +1,11 @@
 package lilypond
 
 import (
+	"fmt"
+	"strings"
+
 	"gitlab.com/gomidi/lilypond"
+	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/muskel/smf"
 )
 
@@ -27,8 +31,13 @@ func (v *voice) registerAllMyNotes(s *Score, includeSectionLabels bool) {
 
 	var remainingFromNote uint
 	var remainingNote note
+	var currentBarFlatKey bool = false
 
 	for _, b := range s.bars {
+
+		if b.key != nil {
+			currentBarFlatKey = b.key.IsFlat
+		}
 
 		var remainingInBar int = int(b.Length32())
 		//	fmt.Printf("bar: %v\n remaining: %v\n", b.no, remainingInBar)
@@ -46,13 +55,92 @@ func (v *voice) registerAllMyNotes(s *Score, includeSectionLabels bool) {
 
 		var currentPosInBar uint
 
+		if b.key != nil {
+			var key lilypond.Element
+
+			nt := midi.Note(b.key.Key).Name()
+			var lynt *lilypond.Note
+
+			switch strings.ToLower(nt) {
+			case "c":
+				lynt = lilypond.C(0)
+			case "cb":
+				if b.key.IsFlat {
+					lynt = lilypond.C(0).Es()
+				} else {
+					lynt = lilypond.B(0).Is()
+				}
+			case "d":
+				lynt = lilypond.D(0)
+			case "db":
+				if b.key.IsFlat {
+					lynt = lilypond.D(0).Es()
+				} else {
+					lynt = lilypond.C(0).Is()
+				}
+			case "e":
+				lynt = lilypond.E(0)
+			case "eb":
+				if b.key.IsFlat {
+					lynt = lilypond.E(0).Es()
+				} else {
+					lynt = lilypond.D(0).Is()
+				}
+			case "f":
+				lynt = lilypond.F(0)
+			case "g":
+				lynt = lilypond.G(0)
+			case "gb":
+				if b.key.IsFlat {
+					lynt = lilypond.G(0).Es()
+				} else {
+					lynt = lilypond.F(0).Is()
+				}
+			case "a":
+				lynt = lilypond.A(0)
+			case "ab":
+				if b.key.IsFlat {
+					lynt = lilypond.A(0).Es()
+				} else {
+					lynt = lilypond.G(0).Is()
+				}
+			case "b":
+				lynt = lilypond.B(0)
+			case "bb":
+				if b.key.IsFlat {
+					lynt = lilypond.B(0).Es()
+				} else {
+					lynt = lilypond.A(0).Is()
+				}
+			default:
+				panic(fmt.Sprintf("unknown note: %q", strings.ToLower(nt)))
+			}
+
+			switch {
+			case b.key.IsMajor:
+				key = lilypond.KeyMajor(lynt)
+			case !b.key.IsMajor:
+				key = lilypond.KeyMinor(lynt)
+			default:
+				panic("unreachable")
+			}
+
+			//		b.key.String()
+
+			//fmt.Printf("key: major: %v flat: %v note: %q lilypond: %q\n", b.key.IsMajor, b.key.IsFlat, nt, key.String())
+
+			v.Voice.Add(key)
+
+			//	lilypond.KeyMajor()
+		}
+
 		if b.timeSignatureChange {
 			//	fmt.Printf("bar %v: %v/%v\n", b.no, b.num, b.denom)
 			v.Voice.Add(lilypond.TimeSignature{uint(b.num), uint(b.denom)})
 		}
 
 		if remainingFromNote > 0 {
-			remainingFromNote = remainingNote.writeToVoice(uint(remainingInBar), v.Voice)
+			remainingFromNote = remainingNote.writeToVoice(uint(remainingInBar), v.Voice, currentBarFlatKey)
 			currentPosInBar = remainingNote.length32
 			remainingInBar -= int(remainingNote.length32)
 			if remainingFromNote > 0 {
@@ -85,7 +173,7 @@ func (v *voice) registerAllMyNotes(s *Score, includeSectionLabels bool) {
 			//	fmt.Printf("currentPosInBar B: %v\n", currentPosInBar)
 			//		fmt.Printf("remaining B: %v\n", remainingInBar)
 
-			remainingFromNote = n.writeToVoice(uint(remainingInBar), v.Voice)
+			remainingFromNote = n.writeToVoice(uint(remainingInBar), v.Voice, currentBarFlatKey)
 			remainingInBar -= int(n.length32)
 
 			if remainingInBar < 0 {

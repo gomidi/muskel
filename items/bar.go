@@ -44,8 +44,8 @@ func (b *Bar) String() string {
 	s := fmt.Sprintf("#%s [%v] %v/%v (<-%v/%v) @%v", b.Part, b.Position, b.TimeSig[0], b.TimeSig[1], b.TimeSigChange[0], b.TimeSigChange[1], b.TempoChange)
 
 	if b.Scale != nil {
-		var nt Note
-		nt.Letter, nt.Augmenter, nt.Octave = KeyToNote(b.Scale.BaseNote)
+		//var nt Note
+		//nt.Letter, nt.Augmenter, nt.Octave = KeyToNote(b.Scale.BaseNote)
 		s += b.Scale.String()
 	}
 

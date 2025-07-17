@@ -136,7 +136,7 @@ func (n note) addtoVoice(nt *lilypond.Note, length32 uint, hasRest bool, v *lily
 
 }
 
-func (n note) getLilyNote() *lilypond.Note {
+func (n note) getLilyNote(flat bool) *lilypond.Note {
 	nt := midi.Note(n.key)
 
 	oct := int(nt.Octave()) - 3
@@ -148,25 +148,45 @@ func (n note) getLilyNote() *lilypond.Note {
 	case "C":
 		return lilypond.C(oct)
 	case "Db":
-		return lilypond.D(oct).Es()
+		if flat {
+			return lilypond.D(oct).Es()
+		} else {
+			return lilypond.C(oct).Is()
+		}
 	case "D":
 		return lilypond.D(oct)
 	case "Eb":
-		return lilypond.E(oct).Es()
+		if flat {
+			return lilypond.E(oct).Es()
+		} else {
+			return lilypond.D(oct).Is()
+		}
 	case "E":
 		return lilypond.E(oct)
 	case "F":
 		return lilypond.F(oct)
 	case "Gb":
-		return lilypond.G(oct).Es()
+		if flat {
+			return lilypond.G(oct).Es()
+		} else {
+			return lilypond.F(oct).Is()
+		}
 	case "G":
 		return lilypond.G(oct)
 	case "Ab":
-		return lilypond.A(oct).Es()
+		if flat {
+			return lilypond.A(oct).Es()
+		} else {
+			return lilypond.G(oct).Is()
+		}
 	case "A":
 		return lilypond.A(oct)
 	case "Bb":
-		return lilypond.B(oct).Es()
+		if flat {
+			return lilypond.B(oct).Es()
+		} else {
+			return lilypond.A(oct).Is()
+		}
 	case "B":
 		return lilypond.B(oct)
 	default:
@@ -175,8 +195,8 @@ func (n note) getLilyNote() *lilypond.Note {
 
 }
 
-func (n note) writeToVoice(remaining32thInBar uint, v *lilypond.Voice) (remainingLength32 uint) {
-	nt := n.getLilyNote()
+func (n note) writeToVoice(remaining32thInBar uint, v *lilypond.Voice, flat bool) (remainingLength32 uint) {
+	nt := n.getLilyNote(flat)
 	nt = n.getVelocity(nt)
 	diff := int(n.length32) - int(remaining32thInBar)
 	if diff <= 0 {

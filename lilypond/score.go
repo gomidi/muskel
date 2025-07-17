@@ -28,6 +28,7 @@ type Score struct {
 	currentTempo          float64
 	timeSignatureChanges  [][3]uint                     // 0 = tick 1 num 2 denom
 	tempoChanges          []map[smf.TicksAbsPos]float64 // tick => value
+	keyChanges            map[uint]midismf.Key          // tick => val
 	startingTimeSignature [2]uint8
 	ticksPerQN            uint
 	startingTempo         float64
@@ -52,6 +53,7 @@ func newScore(s *score.Score, filegroup string) *Score {
 
 	newsc := &Score{score: s, fileGroup: filegroup, smf: sw, startingTimeSignature: [2]uint8{4, 4}}
 	newsc.markers = map[uint]string{}
+	newsc.keyChanges = map[uint]midismf.Key{}
 	if len(props) > 0 {
 		newsc.composer = props["composer"]
 		newsc.title = props["title"]
@@ -159,12 +161,19 @@ func (s *Score) addBar(b bar) {
 	s.bars = append(s.bars, b)
 }
 
-func (s *Score) setMarkesToBars() {
+func (s *Score) setMarkesAndKeyChangesToBars() {
 	for i, bar := range s.bars {
 		text, has := s.markers[bar.position.Uint()]
 
 		if has {
 			bar.marker = text
+			s.bars[i] = bar
+		}
+
+		key, hasKey := s.keyChanges[bar.position.Uint()]
+
+		if hasKey {
+			bar.key = &key
 			s.bars[i] = bar
 		}
 	}
@@ -207,9 +216,13 @@ func (s *Score) setBars() error {
 		bnew.ticksPerQN = s.ticksPerQN
 		bnew.timeSignatureChange = true
 
-		diffTicks := uint(bnew.position - b.End())
+		var diffTicks uint
+		var missingBars uint
 
-		missingBars := diffTicks / b.Length()
+		if b.End() < bnew.position {
+			diffTicks = uint(bnew.position - b.End())
+			missingBars = diffTicks / b.Length()
+		}
 
 		for i := 0; i < int(missingBars); i++ {
 			bx := b.dup()
@@ -229,8 +242,13 @@ func (s *Score) setBars() error {
 
 	//	fmt.Printf("s.endPos: %v b.End(): %v\n", s.endPos, b.End())
 
-	diffTicks := uint(s.endPos - b.End())
-	missingBars := diffTicks / b.Length()
+	var diffTicks uint
+	var missingBars uint
+
+	if b.End() < s.endPos {
+		diffTicks = uint(s.endPos - b.End())
+		missingBars = diffTicks / b.Length()
+	}
 
 	for i := 0; i < int(missingBars); i++ {
 		bx := b.dup()
@@ -245,7 +263,7 @@ func (s *Score) setBars() error {
 	return nil
 }
 
-func (s *Score) scanMeterChanges() error {
+func (s *Score) scanMeterAndKeyChanges() error {
 	// s.currentTrackEndPos
 	evts, err := s.smf.MeterTrack()
 
@@ -256,8 +274,12 @@ func (s *Score) scanMeterChanges() error {
 	for _, ev := range evts {
 		var text string
 		var num, denom uint8
+		var key midismf.Key
 
 		switch {
+		case ev.Message.GetMetaKey(&key):
+			s.keyChanges[ev.Position.Uint()] = key
+		//	fmt.Printf("got key change: %s\n", key.String())
 		case ev.Message.GetMetaMarker(&text):
 			if !strings.HasPrefix(text, "//") {
 				//	fmt.Printf("got marker: %q\n", text)
@@ -385,7 +407,7 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 
 	// s.currentTrackEndPos = endpos
 
-	err := s.scanMeterChanges()
+	err := s.scanMeterAndKeyChanges()
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +427,7 @@ func (s *Score) makeBook() (*lilypond.Book, error) {
 		return nil, err
 	}
 
-	s.setMarkesToBars()
+	s.setMarkesAndKeyChangesToBars()
 
 	//	fmt.Println("now adding events")
 

@@ -184,7 +184,89 @@ func (s *SMF) MeterTrack() (evts []*Event, err error) {
 	num := uint8(4)
 	denom := uint8(4)
 
+	scale := `major_c`
+
 	for i, b := range s.score.Bars {
+
+		nt, aug, _ := items.KeyToNote(b.Scale.BaseNote)
+		_scale := fmt.Sprintf("%s_%s%s", b.Scale.Name, nt, aug)
+
+		if _scale != scale {
+			evts = append(evts, &Event{Position: s.posToTicks(b.Position), Message: smf.MetaMeter(num, denom)})
+
+			var key smf.Message
+			var setKey = true
+
+			switch b.Scale.Name {
+			case "major":
+				switch nt + aug {
+				case "c":
+					key = smf.CMaj()
+				case "c#", "db":
+					key = smf.DbMaj()
+				case "d":
+					key = smf.DMaj()
+				case "d#", "eb":
+					key = smf.EbMaj()
+				case "e":
+					key = smf.EMaj()
+				case "f":
+					key = smf.FMaj()
+				case "f#":
+					key = smf.FsharpMaj()
+				case "gb":
+					key = smf.GbMaj()
+				case "g":
+					key = smf.GMaj()
+				case "g#", "ab":
+					key = smf.AbMaj()
+				case "a":
+					key = smf.AMaj()
+				case "a#", "bb":
+					key = smf.AbMaj()
+				default:
+					setKey = false
+				}
+			case "minor":
+				switch nt + aug {
+				case "c":
+					key = smf.CMin()
+				case "c#", "db":
+					key = smf.CsharpMin()
+				case "d":
+					key = smf.DMin()
+				case "d#":
+					key = smf.DsharpMin()
+				case "eb":
+					key = smf.EbMin()
+				case "e":
+					key = smf.EMin()
+				case "f":
+					key = smf.FMin()
+				case "f#", "gb":
+					key = smf.FsharpMin()
+				case "g":
+					key = smf.GMin()
+				case "g#", "ab":
+					key = smf.GsharpMin()
+				case "a":
+					key = smf.AMin()
+				case "a#", "bb":
+					key = smf.BbMin()
+				default:
+					setKey = false
+				}
+			default:
+				setKey = false
+			}
+
+			if setKey {
+				evts = append(evts, &Event{Position: s.posToTicks(b.Position), Message: key})
+			}
+
+			scale = _scale
+		}
+
 		if b.TimeSigChange[0] > 0 {
 			if b.TimeSigChange[0] != num || b.TimeSigChange[1] != denom || i == 0 {
 				num = b.TimeSigChange[0]

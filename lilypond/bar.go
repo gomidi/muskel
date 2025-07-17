@@ -1,6 +1,9 @@
 package lilypond
 
-import "gitlab.com/gomidi/muskel/smf"
+import (
+	midismf "gitlab.com/gomidi/midi/v2/smf"
+	"gitlab.com/gomidi/muskel/smf"
+)
 
 type bar struct {
 	position            smf.TicksAbsPos
@@ -9,6 +12,7 @@ type bar struct {
 	timeSignatureChange bool
 	ticksPerQN          uint
 	marker              string
+	key                 *midismf.Key
 }
 
 func (b bar) dup() bar {
