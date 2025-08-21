@@ -783,7 +783,7 @@ func TestProperty(t *testing.T) {
 	//	t.Skip()
 	tests := []struct {
 		input    string
-		expected map[string]interface{}
+		expected map[string]string
 	}{
 		{
 			`
@@ -794,7 +794,7 @@ func TestProperty(t *testing.T) {
 |c        | d     |
 
 `,
-			map[string]interface{}{"a": "b", "c": "d"},
+			map[string]string{"a": "b", "c": "d"},
 		},
 		{
 			`
@@ -805,7 +805,7 @@ func TestProperty(t *testing.T) {
 |a        | d     |
 
 `,
-			map[string]interface{}{"a": "d"},
+			map[string]string{"a": "d"},
 		},
 	}
 

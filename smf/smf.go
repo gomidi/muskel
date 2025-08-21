@@ -184,20 +184,40 @@ func (s *SMF) MeterTrack() (evts []*Event, err error) {
 	num := uint8(4)
 	denom := uint8(4)
 
-	scale := `major_c`
+	__scale := `major_c`
+
+	scale := &items.Scale{}
+	scale.Reset()
+	scale.BaseNote = 60
+	scale.Mode = items.Major
 
 	for i, b := range s.score.Bars {
+		var timeChangeSet = false
 
-		nt, aug, _ := items.KeyToNote(b.Scale.BaseNote)
-		_scale := fmt.Sprintf("%s_%s%s", b.Scale.Name, nt, aug)
+		if b.TimeSigChange[0] > 0 {
+			if b.TimeSigChange[0] != num || b.TimeSigChange[1] != denom || i == 0 {
+				num = b.TimeSigChange[0]
+				denom = b.TimeSigChange[1]
+				evts = append(evts, &Event{Position: s.posToTicks(b.Position), Message: smf.MetaMeter(num, denom)})
+				timeChangeSet = true
+			}
+		}
 
-		if _scale != scale {
-			evts = append(evts, &Event{Position: s.posToTicks(b.Position), Message: smf.MetaMeter(num, denom)})
+		if b.Scale != nil {
+			scale = b.Scale
+		}
+		nt, aug, _ := items.KeyToNote(scale.BaseNote)
+		_scale := fmt.Sprintf("%s_%s%s", scale.Name, nt, aug)
+
+		if _scale != __scale {
+			if !timeChangeSet {
+				evts = append(evts, &Event{Position: s.posToTicks(b.Position), Message: smf.MetaMeter(num, denom)})
+			}
 
 			var key smf.Message
 			var setKey = true
 
-			switch b.Scale.Name {
+			switch scale.Name {
 			case "major":
 				switch nt + aug {
 				case "c":
@@ -264,15 +284,7 @@ func (s *SMF) MeterTrack() (evts []*Event, err error) {
 				evts = append(evts, &Event{Position: s.posToTicks(b.Position), Message: key})
 			}
 
-			scale = _scale
-		}
-
-		if b.TimeSigChange[0] > 0 {
-			if b.TimeSigChange[0] != num || b.TimeSigChange[1] != denom || i == 0 {
-				num = b.TimeSigChange[0]
-				denom = b.TimeSigChange[1]
-				evts = append(evts, &Event{Position: s.posToTicks(b.Position), Message: smf.MetaMeter(num, denom)})
-			}
+			__scale = _scale
 		}
 
 		var markers []string
