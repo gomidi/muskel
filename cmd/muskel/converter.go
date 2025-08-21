@@ -38,7 +38,7 @@ type converter struct {
 		Pattern          string
 		KeepEmptyLines   bool
 		Params           []string
-		UnrollFile       path.Relative
+		UnrollFile       string
 		Fmt              bool
 		CSV              string
 		XLSX             bool
@@ -95,7 +95,7 @@ func (c *converter) setFromArgs(a *args) {
 	}
 
 	if a.UnrollFile.IsSet() {
-		c.Config.UnrollFile = path.Relative(a.UnrollFile.Val)
+		c.Config.UnrollFile = a.UnrollFile.Val
 	}
 
 	c.Config.Fmt = a.Fmt.Val
@@ -389,7 +389,7 @@ func (c *converter) parseMuskel(srcFile path.Local) (*score.Score, error) {
 		return nil, err
 	}
 
-	if c.Config.UnrollFile.Relative().String() != "" {
+	if c.Config.UnrollFile != "" {
 		err = c.writeUnrolled(c.Config.UnrollFile, sc)
 		if err != nil {
 			return sc, fmt.Errorf("ERROR while unrolling MuSkeL: %s", err.Error())
@@ -432,27 +432,29 @@ func (c *converter) fmtFile(file path.Local, params []string, opts ...score.Opti
 	return nil
 }
 
-func (c *converter) writeUnrolled(file path.Relative, sc *score.Score) error {
+func (c *converter) writeUnrolled(file string, sc *score.Score) error {
 	err := sc.Unroll()
 
 	if err != nil {
 		return err
 	}
 
-	sc.FS.Delete(file, false)
-	uf, err := fs.OpenWriter(sc.FS, file)
+	fileRel := score.ProjectPath(file).Relative(sc.ProjectDir)
+
+	sc.FS.Delete(fileRel, false)
+	uf, err := fs.OpenWriter(sc.FS, fileRel)
 
 	if err != nil {
 		return err
 	}
 	defer uf.Close()
-	if path.Ext(file) == ".xlsx" {
+	if path.Ext(fileRel) == ".xlsx" {
 		var tracksbf, scorebf bytes.Buffer
 		err = sc.WriteTracksAndScoreTable(&tracksbf, &scorebf)
 		if err != nil {
 			return err
 		}
-		return xlsx.Write(path.ToSystem(sc.FS.Abs(file)), tracksbf.String(), scorebf.String())
+		return xlsx.Write(path.ToSystem(sc.FS.Abs(fileRel)), tracksbf.String(), scorebf.String())
 	} else {
 		err = sc.WriteUnrolled(uf)
 		if err != nil {

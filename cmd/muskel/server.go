@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"sync"
 
-	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel"
 )
 
@@ -143,8 +142,8 @@ func startServer(conv *converter) error {
 	if !s.converter.Config.XLSX && s.converter.Config.CSV == "" {
 		s.converter.Config.Fmt = true
 	}
-	if s.converter.Config.UnrollFile.Relative().String() == "" {
-		s.converter.Config.UnrollFile = path.Relative(s.converter.inFile.String() + ".unrolled" + muskel.FILE_EXTENSION)
+	if s.converter.Config.UnrollFile == "" {
+		s.converter.Config.UnrollFile = s.converter.inFile.String() + ".unrolled" + muskel.FILE_EXTENSION
 	}
 	s.converter.Config.Flow = true
 	s.converter.Config.KeepEmptyLines = true

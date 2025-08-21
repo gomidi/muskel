@@ -32,20 +32,20 @@ import (
 	6. so we introduce projectPath for relative paths related to the project directory
 */
 
-type projectPath string
+type ProjectPath string
 
-func (p projectPath) String() string {
+func (p ProjectPath) String() string {
 	return string(p)
 }
 
-func (p projectPath) Relative(projectDir path.Relative) path.Relative {
+func (p ProjectPath) Relative(projectDir path.Relative) path.Relative {
 	return projectDir.Join(string(p))
 }
 
 type Score struct {
 	FS             fs.FS
-	projectDir     path.Relative
-	mainFile       projectPath
+	ProjectDir     path.Relative
+	mainFile       ProjectPath
 	mainSketch     string
 	mainCol        string
 	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
@@ -99,8 +99,8 @@ func New(filepath path.Relative, params []string, options ...Option) *Score {
 		tokens:         map[string]string{},
 		includedScores: map[path.Relative]*Score{},
 		lyrics:         map[string][]string{},
-		mainFile:       projectPath(path.Name(filepath)),
-		projectDir:     filepath.Dir(),
+		mainFile:       ProjectPath(path.Name(filepath)),
+		ProjectDir:     filepath.Dir(),
 		mainSketch:     "=SCORE",
 		params:         params,
 		exclSketch:     map[string]string{},
@@ -374,7 +374,7 @@ func (sc *Score) parse(fl path.Relative, sco *Score) error {
 }
 
 func (sc *Score) Parse() error {
-	return sc.parse(sc.mainFile.Relative(sc.projectDir), sc)
+	return sc.parse(sc.mainFile.Relative(sc.ProjectDir), sc)
 }
 
 func (sc *Score) Delay(trackName string) (del [2]int) {
@@ -409,7 +409,7 @@ func (sc *Score) FileGroup(trackName string) (fg string) {
 }
 
 func (sc *Score) findInclude(file string) (fname path.Relative, err error) {
-	return FindInclude(sc.FS, sc.projectDir, file)
+	return FindInclude(sc.FS, sc.ProjectDir, file)
 }
 
 func (sc *Score) GetExternalSketch(filename string, sketch_table string, params []string) (*sketch.Sketch, error) {
