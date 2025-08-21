@@ -4071,7 +4071,7 @@ func TestSMFWriter(t *testing.T) {
 		sc := score.New(path.Relative(path.Name(loc)), nil, opts...)
 		f := file.FromReader(strings.NewReader(test.input), sc)
 
-		sc.Files[fmt.Sprintf("test-%v", i)] = f
+		sc.Files[path.Relative(fmt.Sprintf("test-%v", i))] = f
 
 		err = f.Parse()
 		if err != nil {

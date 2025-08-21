@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"gitlab.com/golang-utils/fs"
-	"gitlab.com/golang-utils/fs/filesystems/dirfs"
+	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/tools/smfimage"
 	"gitlab.com/gomidi/muskel/file"
@@ -21,9 +21,31 @@ import (
 	"gitlab.com/gomidi/muskel/tuning"
 )
 
+/*
+	the tricky part is:
+
+	1. fs most of the time (apart from testing) is just a rootfs
+	2. all project files are relative to the main directory
+	3. other includes (presets) are also relative, but root relative
+	4. we need to be able to distinguish between the two
+	5. we have situations, where we just have a string and need to findout, if it is root relative or directory relative
+	6. so we introduce projectPath for relative paths related to the project directory
+*/
+
+type projectPath string
+
+func (p projectPath) String() string {
+	return string(p)
+}
+
+func (p projectPath) Relative(projectDir path.Relative) path.Relative {
+	return projectDir.Join(string(p))
+}
+
 type Score struct {
 	FS             fs.FS
-	mainFile       path.Relative
+	projectDir     path.Relative
+	mainFile       projectPath
 	mainSketch     string
 	mainCol        string
 	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
@@ -54,7 +76,7 @@ type Score struct {
 	Filters  map[string]*filter.Filter
 	Sketches map[string]*sketch.Sketch
 	Unrolled map[string][]*items.Event
-	Files    map[string]*file.File
+	Files    map[path.Relative]*file.File
 	Parent   *Score
 }
 
@@ -70,14 +92,15 @@ func New(filepath path.Relative, params []string, options ...Option) *Score {
 		Scales:         map[string]items.Mode{},
 		Filters:        map[string]*filter.Filter{},
 		Sketches:       map[string]*sketch.Sketch{},
-		Files:          map[string]*file.File{},
+		Files:          map[path.Relative]*file.File{},
 		properties:     map[string]string{},
 		Unrolled:       map[string][]*items.Event{},
 		Parts:          map[string][2]uint{},
 		tokens:         map[string]string{},
 		includedScores: map[path.Relative]*Score{},
 		lyrics:         map[string][]string{},
-		mainFile:       filepath,
+		mainFile:       projectPath(path.Name(filepath)),
+		projectDir:     filepath.Dir(),
 		mainSketch:     "=SCORE",
 		params:         params,
 		exclSketch:     map[string]string{},
@@ -88,7 +111,7 @@ func New(filepath path.Relative, params []string, options ...Option) *Score {
 	}
 
 	if s.FS == nil {
-		fsys, err := dirfs.New(path.MustWD())
+		fsys, err := rootfs.New()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -215,7 +238,7 @@ func (sc *Score) AddInclude(filepath string, tableName string, params []string) 
 			inc = tableName
 		}
 		//	err := sc.Include(path.MustLocal(fname), inc, params)
-		err := sc.Include(path.Relative(fname), inc, params)
+		err := sc.Include(filepath, inc, params)
 		if err != nil {
 			return fmt.Errorf("can't include %q, reason: %s", filepath, err.Error())
 		}
@@ -293,7 +316,7 @@ func (sc *Score) GetToken(name string) (string, error) {
 	return tk, nil
 }
 
-func (sc *Score) GetExternalToken(file path.Relative, name string) (string, error) {
+func (sc *Score) GetExternalToken(file string, name string) (string, error) {
 	s, err := sc.External(file, nil)
 	if err != nil {
 		return "", fmt.Errorf("can't parse external file %q for token %q: %s", file, name, err.Error())
@@ -324,7 +347,7 @@ func (sc *Score) GetTrack(track string) (*track.Track, error) {
 }
 
 func (sc *Score) parse(fl path.Relative, sco *Score) error {
-	if _, has := sc.Files[fl.String()]; has {
+	if _, has := sc.Files[fl]; has {
 		return nil
 	}
 
@@ -345,13 +368,13 @@ func (sc *Score) parse(fl path.Relative, sco *Score) error {
 	}
 	err = f.Parse()
 	if err == nil {
-		sc.Files[fl.String()] = f
+		sc.Files[fl] = f
 	}
 	return err
 }
 
 func (sc *Score) Parse() error {
-	return sc.parse(sc.mainFile, sc)
+	return sc.parse(sc.mainFile.Relative(sc.projectDir), sc)
 }
 
 func (sc *Score) Delay(trackName string) (del [2]int) {
@@ -385,11 +408,11 @@ func (sc *Score) FileGroup(trackName string) (fg string) {
 	return sc.Tracks[trackName].FileGroup
 }
 
-func (sc *Score) findInclude(filename string) (fname path.Relative, err error) {
-	return FindInclude(sc.FS, sc.mainFile.Dir(), filename)
+func (sc *Score) findInclude(file string) (fname path.Relative, err error) {
+	return FindInclude(sc.FS, sc.projectDir, file)
 }
 
-func (sc *Score) GetExternalSketch(filename path.Relative, sketch_table string, params []string) (*sketch.Sketch, error) {
+func (sc *Score) GetExternalSketch(filename string, sketch_table string, params []string) (*sketch.Sketch, error) {
 	//fmt.Printf("GetExternalSketch called for %q in %q\n", sketch_table, filename)
 	if sketch_table == "" {
 		sketch_table = "=SCORE"
@@ -413,7 +436,7 @@ func (sc *Score) SetRealColNum(n int) {
 	panic("don't call me")
 }
 
-func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []string) (*sketch.Sketch, error) {
+func (sc *Score) GetIncludedSketch(filename string, sketch_table string, params []string) (*sketch.Sketch, error) {
 
 	//fmt.Printf("GetIncludedSketch(%q,%q)\n", filename, sketch_table)
 	fname, err := sc.findInclude(filename)
@@ -423,7 +446,7 @@ func (sc *Score) GetIncludedSketch(filename, sketch_table string, params []strin
 
 	sco, has := sc.includedScores[fname]
 	if !has {
-		err := sc.Include(path.Relative(fname), sketch_table, params)
+		err := sc.Include(filename, sketch_table, params)
 		if err != nil {
 			return nil, fmt.Errorf("can't include %q, reason: %s\n", fname, err.Error())
 		}
@@ -1462,8 +1485,8 @@ func (sc *Score) GetFS() fs.FS {
 	return sc.FS
 }
 
-func (sc *Score) Include(filename path.Relative, sketch string, params []string) error {
-	fname, err := sc.findInclude(filename.String())
+func (sc *Score) Include(filename string, sketch string, params []string) error {
+	fname, err := sc.findInclude(filename)
 	if err != nil {
 		return err
 	}
@@ -1474,9 +1497,9 @@ func (sc *Score) Include(filename path.Relative, sketch string, params []string)
 			opts = append(opts, Sketch(sketch))
 		}
 		opts = append(opts, FS(sc.FS))
-		sco = New(filename, params, opts...)
+		sco = New(fname, params, opts...)
 		sco.Parent = sc
-		err := sc.parse(path.Relative(fname), sco)
+		err := sc.parse(fname, sco)
 		if err != nil {
 			return err
 		}
@@ -1487,8 +1510,8 @@ func (sc *Score) Include(filename path.Relative, sketch string, params []string)
 	return nil
 }
 
-func (sc *Score) External(filename path.Relative, params []string) (*Score, error) {
-	fname, err := sc.findInclude(filename.String())
+func (sc *Score) External(filename string, params []string) (*Score, error) {
+	fname, err := sc.findInclude(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -1501,8 +1524,8 @@ func (sc *Score) External(filename path.Relative, params []string) (*Score, erro
 	var opts []Option
 	opts = append(opts, FS(sc.FS))
 
-	sco = New(filename, params, opts...)
-	err = sc.parse(path.Relative(fname), sco)
+	sco = New(fname, params, opts...)
+	err = sc.parse(fname, sco)
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,6 @@ package file
 
 import (
 	"gitlab.com/golang-utils/fs"
-	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/muskel/table"
 )
 
@@ -21,7 +20,7 @@ type Part interface {
 
 type score interface {
 	table.Score
-	Include(file path.Relative, sketch string, params []string) error
+	Include(file string, sketch string, params []string) error
 	Embed(patterns ...string) error
 	HasTrack(name string) bool
 	Properties() map[string]string

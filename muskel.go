@@ -197,7 +197,7 @@ func WriteSMF(filename path.Local, params []string, rd io.Reader, fmtwr io.Write
 }
 
 func ParseFile(mainFile path.Local, params []string, opts ...score.Option) (sc *score.Score, err error) {
-	fsys, err := dirfs.New(mainFile.Dir())
+	fsys, err := rootfs.New()
 
 	if err != nil {
 		panic(err.Error())
@@ -205,7 +205,7 @@ func ParseFile(mainFile path.Local, params []string, opts ...score.Option) (sc *
 
 	opts = append(opts, score.FS(fsys))
 
-	sc = score.New(path.Relative(path.Name(mainFile)), params, opts...)
+	sc = score.New(mainFile.RootRelative(), params, opts...)
 	err = sc.Parse()
 	return
 }
