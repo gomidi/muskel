@@ -6,7 +6,7 @@ require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
 	github.com/emersion/go-appdir v1.1.2
 	github.com/metakeule/observe v0.0.5
-	gitlab.com/golang-utils/config/v3 v3.0.49
+	gitlab.com/golang-utils/config/v3 v3.0.50
 	gitlab.com/golang-utils/fs v0.24.15
 	gitlab.com/golang-utils/version/v2 v2.0.1
 	gitlab.com/gomidi/lilypond v0.1.18
@@ -25,7 +25,7 @@ require (
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/zs5460/art v0.3.0 // indirect
-	gitlab.com/golang-utils/bash_completion v0.0.4 // indirect
+	gitlab.com/golang-utils/bash_completion v0.0.7 // indirect
 	gitlab.com/golang-utils/errors v0.0.3 // indirect
 	gitlab.com/golang-utils/fmtdate v1.0.4 // indirect
 	gitlab.com/golang-utils/fsutils v0.24.15 // indirect
