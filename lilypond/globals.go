@@ -47,7 +47,7 @@ func WriteFile(s *score.Score, pdffile path.Local) (err error) {
 		}
 	}()
 
-	hasPlaceholder := strings.Index(pdffile.String(), "%s") > -1
+	hasPlaceholder := strings.Contains(pdffile.String(), "%s")
 
 	if !hasPlaceholder {
 		return WritePDFTo(s, pdffile, "*")

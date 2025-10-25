@@ -208,7 +208,7 @@ func (p *column) setAbsolutePositions(es *items.EventStream, params []string) (m
 		}
 
 		if _, isInc := inEv.Item.(items.Include); isInc {
-			panic(fmt.Sprintf("unsupported: includes in columns"))
+			panic("unsupported: includes in columns")
 		}
 
 		pos := p.sketch.Positions[i]
