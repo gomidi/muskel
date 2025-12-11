@@ -21,14 +21,14 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    NoteItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
+						{pos32th: 0, msg: midi.C(2).NoteOn(2, 100).Bytes()},
 					},
 				},
 				{
 					pos32th: 16,
 					Item:    NoteItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
+						{pos32th: 0, msg: midi.D(2).NoteOn(2, 90).Bytes()},
 					},
 				},
 			},
@@ -44,14 +44,14 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    NoteItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
 					},
 				},
 				{
 					pos32th: 16,
 					Item:    NoteOnItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
 					},
 				},
 			},
@@ -66,21 +66,21 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    NoteOnItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
 					},
 				},
 				{
 					pos32th: 16,
 					Item:    NoteItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
 					},
 				},
 				{
 					pos32th: 32,
 					Item:    NoteOffItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOff(2, midi.C(2)).Bytes()},
+						{pos32th: 0, msg: midi.NoteOff(2, midi.C(2).Value()).Bytes()},
 					},
 				},
 			},
@@ -96,15 +96,15 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
 					},
 				},
 				{
 					pos32th: 32,
 					Item:    NoteOnItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2), 110).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2).Value(), 110).Bytes()},
 					},
 				},
 			},
@@ -122,16 +122,16 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
 					},
 				},
 				{
 					pos32th: 32,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2), 110).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2), 110).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2).Value(), 110).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2).Value(), 110).Bytes()},
 					},
 				},
 			},
@@ -151,18 +151,18 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    MidiSampleItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
-						{pos32th: 12, msg: midi.NoteOff(2, midi.C(2)).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
-						{pos32th: 64, msg: midi.NoteOff(2, midi.D(2)).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
+						{pos32th: 12, msg: midi.NoteOff(2, midi.C(2).Value()).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
+						{pos32th: 64, msg: midi.NoteOff(2, midi.D(2).Value()).Bytes()},
 					},
 				},
 				{
 					pos32th: 32,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2), 110).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2), 110).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2).Value(), 110).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2).Value(), 110).Bytes()},
 					},
 				},
 			},
@@ -182,26 +182,26 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
 					},
 				},
 				{
 					pos32th: 32,
 					Item:    MidiSampleItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
-						{pos32th: 12, msg: midi.NoteOff(2, midi.C(2)).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
-						{pos32th: 64, msg: midi.NoteOff(2, midi.D(2)).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
+						{pos32th: 12, msg: midi.NoteOff(2, midi.C(2).Value()).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
+						{pos32th: 64, msg: midi.NoteOff(2, midi.D(2).Value()).Bytes()},
 					},
 				},
 				{
 					pos32th: 128,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2), 110).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2), 110).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2).Value(), 110).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2).Value(), 110).Bytes()},
 					},
 				},
 			},
@@ -226,8 +226,8 @@ func TestOverride(t *testing.T) {
 					pos32th: 0,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2), 100).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2), 90).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(2).Value(), 100).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.D(2).Value(), 90).Bytes()},
 					},
 				},
 				{
@@ -235,18 +235,18 @@ func TestOverride(t *testing.T) {
 					Item:    MidiSampleItem,
 					Offset:  -2000,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.C(3), 100).Bytes()},
-						{pos32th: 12, msg: midi.NoteOff(2, midi.C(3)).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.D(3), 90).Bytes()},
-						{pos32th: 64, msg: midi.NoteOff(2, midi.D(3)).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.C(3).Value(), 100).Bytes()},
+						{pos32th: 12, msg: midi.NoteOff(2, midi.C(3).Value()).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.D(3).Value(), 90).Bytes()},
+						{pos32th: 64, msg: midi.NoteOff(2, midi.D(3).Value()).Bytes()},
 					},
 				},
 				{
 					pos32th: 128,
 					Item:    PatternItem,
 					evts: Events{
-						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2), 110).Bytes()},
-						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2), 110).Bytes()},
+						{pos32th: 0, msg: midi.NoteOn(2, midi.G(2).Value(), 110).Bytes()},
+						{pos32th: 16, msg: midi.NoteOn(2, midi.A(2).Value(), 110).Bytes()},
 					},
 				},
 			},
