@@ -11,18 +11,18 @@ import (
 )
 
 type Note struct {
-	Letter         string
-	Octave         int
-	Augmenter      string
-	Dynamic        string
-	GlissandoStart bool
-	GlissandoExp   bool
-	Dotted         string
-	IsScaleNote    bool
-	ScaleNote      int8
-	PosShift       int // 0 = no, 1 = laidback, -1 = ahead of time
 	NoteOn         bool
 	NoteOff        bool
+	GlissandoStart bool
+	GlissandoExp   bool
+	IsScaleNote    bool
+	ScaleNote      int8
+	Octave         int
+	PosShift       int // 0 = no, 1 = laidback, -1 = ahead of time
+	Letter         string
+	Augmenter      string
+	Dynamic        string
+	Dotted         string
 }
 
 var _ Item = &Note{}

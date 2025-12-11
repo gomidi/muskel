@@ -8,20 +8,20 @@ import (
 )
 
 type Pattern struct {
-	Name                               string
-	Params                             []string
+	Exploded                           bool // e.g. when token is (a b c) then =patt(token...) becomes =patt(a,b,c)
 	SyncFirst                          bool
-	firstPos                           uint
-	DynamicAdd                         string
+	syncFirstThroughTemplateDefinition bool
+	FirstNoteAbsKey                    uint8
 	ScaleMove                          int8 // 0: force to scale (take next note in scale if not exact matching, no movement for in scale notes), n >0 || n < 0: move by n steps along the scale
 	ScaleMoveMode                      int8 // 0: no scale movement, 1: move only scale notes, 2: move only scale notes or non scale notes depending on the first item
-	FirstNoteIsScaleNote               int  // 0: not set, 1: true, 2: false
-	FirstNoteAbsKey                    uint8
-	syncFirstThroughTemplateDefinition bool
-	PosShift                           int // 0 = no, 1 = laidback, -1 = ahead of time
+	firstPos                           uint
 	Repeat                             uint
+	FirstNoteIsScaleNote               int // 0: not set, 1: true, 2: false
+	PosShift                           int // 0 = no, 1 = laidback, -1 = ahead of time
+	Name                               string
+	Params                             []string
+	DynamicAdd                         string
 	Lyrics                             *LyricsTable
-	Exploded                           bool // e.g. when token is (a b c) then =patt(token...) becomes =patt(a,b,c)
 	IncludeFile                        string
 	Part                               string
 }

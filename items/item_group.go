@@ -31,13 +31,13 @@ items.BarRepeater -> EventSequence
 */
 
 type itemGroupModifier struct {
-	Params      []string
-	Slice       [2]int
-	SingleSlice int
-	DynamicAdd  string
-	ScaleMove   int8
-	PosShift    int
 	Exploded    bool
+	ScaleMove   int8
+	SingleSlice int
+	PosShift    int
+	Slice       [2]int
+	Params      []string
+	DynamicAdd  string
 }
 
 func (i *itemGroupModifier) string() string {

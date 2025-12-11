@@ -7,12 +7,12 @@ import (
 )
 
 type MIDINote struct {
-	Note     int8
-	Dynamic  string
-	Dotted   string
-	PosShift int // 0 = no, 1 = laidback, -1 = ahead of time
 	NoteOn   bool
 	NoteOff  bool
+	Note     int8
+	PosShift int // 0 = no, 1 = laidback, -1 = ahead of time
+	Dynamic  string
+	Dotted   string
 }
 
 var _ Item = &MIDINote{}

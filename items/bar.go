@@ -5,11 +5,11 @@ import (
 )
 
 type Bar struct {
+	No            int
+	Position      uint // number of 32th from start of Piece
 	TempoChange   float64
 	TimeSigChange [2]uint8
-	Position      uint // number of 32th from start of Piece
 
-	No int
 	// real time sig (inherited or changed)
 	TimeSig           [2]uint8
 	JumpTo            string

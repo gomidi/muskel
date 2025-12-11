@@ -7,27 +7,28 @@ import (
 )
 
 type Track struct {
-	Name           string
-	FileGroup      string
-	Import         string
-	MIDIChannel    int8
-	MIDIProgram    int8
-	MIDIBank       int8
-	MIDIVolume     int8
-	MIDITranspose  int8   // only transposes Notes not MIDINotes
-	Delay          [2]int // fraction of 4/4
-	PitchbendRange uint8
+	SkipInScore        bool
+	AmbitusCutOverFlow bool
+	MIDIChannel        int8
+	MIDIProgram        int8
+	MIDIBank           int8
+	MIDIVolume         int8
+	MIDITranspose      int8   // only transposes Notes not MIDINotes
+	Delay              [2]int // fraction of 4/4
+	PitchbendRange     uint8
 	// velocity-scale property to refine velocity conversion (min, max, randomize-factor, step-width)
 	VelocityScale [5]uint8 // 0: min 1: max 2: randomize-factor 3: step-width, 4: center
+
+	EndPos    uint
+	Position  int
+	SoloGroup int // x < 0 =  never export; x = 0 = no solo group (will only be exported without solo); x > 0 = number of the solo group (only relevant in solo mode)
+	Name      string
+	FileGroup string
+	Import    string
 	/*
 		ambitus from: to:
 	*/
-	Ambitus            [2]string // notes
-	AmbitusCutOverFlow bool
-	EndPos             uint
-	SkipInScore        bool
-	Position           int
-	SoloGroup          int // x < 0 =  never export; x = 0 = no solo group (will only be exported without solo); x > 0 = number of the solo group (only relevant in solo mode)
+	Ambitus [2]string // notes
 
 	LilyPondClef     string
 	LilyPondDynamics LilyPondDynamics

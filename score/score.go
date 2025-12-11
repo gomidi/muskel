@@ -43,6 +43,17 @@ func (p ProjectPath) Relative(projectDir path.Relative) path.Relative {
 }
 
 type Score struct {
+	noEmptyLines     bool
+	IsUnrolled       bool
+	printBarComments bool
+	cutout           bool
+	csvSeperator     rune
+	fromBar          uint
+	fromPos          uint
+	toBar            uint
+	toPos            uint
+	soloGroup        uint
+
 	FS             fs.FS
 	ProjectDir     path.Relative
 	mainFile       ProjectPath
@@ -53,19 +64,7 @@ type Score struct {
 	lyrics         map[string][]string
 	properties     map[string]string
 	tokens         map[string]string
-	IsUnrolled     bool
 	exclSketch     map[string]string
-	noEmptyLines   bool
-	csvSeperator   rune
-
-	printBarComments bool
-
-	cutout    bool
-	fromBar   uint
-	fromPos   uint
-	toBar     uint
-	toPos     uint
-	soloGroup uint
 
 	Bars     []*items.Bar
 	Parts    map[string][2]uint
