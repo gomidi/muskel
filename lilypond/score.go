@@ -18,31 +18,31 @@ import (
 type Option func(*Score)
 
 type Score struct {
-	score                 *score.Score
-	fileGroup             string
-	smf                   *smf.SMF
-	currentBarNo          uint
-	currentBarTick        smf.TicksAbsPos
-	lastEvTick            smf.TicksAbsPos
+	lastOpenedNote        uint8
 	currentTimeSignature  [2]uint8
-	currentTempo          float64
-	timeSignatureChanges  [][3]uint                     // 0 = tick 1 num 2 denom
-	tempoChanges          []map[smf.TicksAbsPos]float64 // tick => value
-	keyChanges            map[uint]midismf.Key          // tick => val
 	startingTimeSignature [2]uint8
+	currentBarNo          uint
 	ticksPerQN            uint
-	startingTempo         float64
-	bars                  []bar
+	currentBarTick        smf.TicksAbsPos
 	endPos                smf.TicksAbsPos
-	tracks                []*Track
+	lastEvTick            smf.TicksAbsPos
+	timeSignatureChanges  [][3]uint // 0 = tick 1 num 2 denom
+	currentTempo          float64
+	startingTempo         float64
+	fileGroup             string
 	copyright             string
 	title                 string
 	subtitle              string
 	composer              string
 	poet                  string
 	arranger              string
-	lastOpenedNote        uint8
-	markers               map[uint]string // absticks => text
+	score                 *score.Score
+	smf                   *smf.SMF
+	bars                  []bar
+	tracks                []*Track
+	tempoChanges          []map[smf.TicksAbsPos]float64 // tick => value
+	keyChanges            map[uint]midismf.Key          // tick => val
+	markers               map[uint]string               // absticks => text
 }
 
 func newScore(s *score.Score, filegroup string) *Score {
