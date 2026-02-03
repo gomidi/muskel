@@ -22,26 +22,26 @@ import (
 )
 
 type converter struct {
-	inFile    path.Local
-	checksums map[string]string
-	ignore    map[string]bool
 	player    *Player
+	inFile    path.Local
 	dir       path.Local
 	file      string
+	checksums map[string]string
+	ignore    map[string]bool
 	Config    struct {
 		PrintBarComments bool
 		Flow             bool
 		CutOut           bool
+		Fmt              bool
+		Debug            bool
+		KeepEmptyLines   bool
+		XLSX             bool
 		SoloGroup        uint
 		Sketch           string
-		Debug            bool
 		Pattern          string
-		KeepEmptyLines   bool
-		Params           []string
 		UnrollFile       string
-		Fmt              bool
 		CSV              string
-		XLSX             bool
+		Params           []string
 	}
 }
 

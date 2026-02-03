@@ -1,6 +1,6 @@
 module gitlab.com/gomidi/muskel
 
-go 1.24.2
+go 1.25.0
 
 require (
 	github.com/360EntSecGroup-Skylar/excelize v1.4.1
@@ -8,7 +8,7 @@ require (
 	github.com/metakeule/observe v0.0.5
 	gitlab.com/golang-utils/config/v3 v3.1.6
 	gitlab.com/golang-utils/fs v0.24.20
-	gitlab.com/golang-utils/version/v2 v2.0.1
+	gitlab.com/golang-utils/version/v2 v2.0.2
 	gitlab.com/gomidi/lilypond v0.1.18
 	gitlab.com/gomidi/midi/tools/smfimage v0.20.0
 	gitlab.com/gomidi/midi/v2 v2.3.17

@@ -24,24 +24,24 @@ func newDriver() (midi.Driver, error) {
 */
 
 func (p *Process) Start() error {
-	p.cmd = exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
-	err := p.cmd.Start()
+	cmd := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	err := cmd.Start()
 	if err != nil {
 		return err
 	}
 
-	p.PID = p.cmd.Process.Pid
+	p.PID = cmd.Process.Pid
 	return nil
 }
 
 func (p *Process) Run() error {
-	p.cmd = exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
-	_, err := p.cmd.CombinedOutput()
+	cmd := exec.Command("/bin/sh", "-c", "exec "+p.Program+" "+p.Args)
+	_, err := cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
 
-	p.PID = p.cmd.Process.Pid
+	p.PID = cmd.Process.Pid
 	return nil
 }
 

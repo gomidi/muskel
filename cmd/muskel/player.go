@@ -16,6 +16,9 @@ import (
 )
 
 type Player struct {
+	playToPort    bool
+	playerEnabled bool
+
 	playCh    chan bool
 	stoppedCh chan bool
 	toggleCh  chan bool
@@ -25,16 +28,13 @@ type Player struct {
 
 	program [2]string
 
-	playToPort bool
-	portOut    drivers.Out
+	portOut drivers.Out
 
 	cmdMaps map[string][2]string
 
 	portRegEx *regexp.Regexp
 
 	outFile path.Local
-
-	playerEnabled bool
 }
 
 func newPlayer() (p *Player, err error) {

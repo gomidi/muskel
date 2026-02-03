@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"gitlab.com/golang-utils/version/v2"
 )
 
 func main() {
@@ -11,6 +13,11 @@ func main() {
 		fmt.Fprintf(os.Stdout, "%s\n", err.Error())
 		os.Exit(1)
 	}
+}
+
+func allVersionate(file string, v *version.Version) string {
+	// muskel_1_0_29.exe
+	return fmt.Sprintf("%s_%v_%v_%v", file, v.Major, v.Minor, v.Patch)
 }
 
 func run() error {

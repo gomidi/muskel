@@ -84,21 +84,21 @@ func (p *Process) Start() error {
 		return err
 	}
 
-	p.cmd = exec.Command("powershell.exe",
+	cmd := exec.Command("powershell.exe",
 		"/Command",
 		//`$Process = [Diagnostics.Process]::Start("`+p.Program+`.exe", "`+p.Args+`") ; echo $Process.Id `,
 		//`$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo; $ProcessInfo.FileName = "`+p.Program+`.exe" ; $ProcessInfo.RedirectStandardError = $true ; $ProcessInfo.RedirectStandardOutput = $true; $ProcessInfo.UseShellExecute = $false; $ProcessInfo.Arguments = "`+p.Args+`"; $Process = New-Object System.Diagnostics.Process; $Process.StartInfo = $ProcessInfo ; $Process.Start() ; echo $Process.Id `,
 		`$ProcessInfo = New-Object System.Diagnostics.ProcessStartInfo; $ProcessInfo.FileName = "`+p.Program+`" ;  $ProcessInfo.UseShellExecute = $false; $ProcessInfo.Arguments = "`+p.Args+`"; $Process = New-Object System.Diagnostics.Process; $Process.StartInfo = $ProcessInfo ; $Process.Start() | Out-Null ; echo $Process.Id `,
 	)
 
-	err = p.cmd.Start()
+	err = cmd.Start()
 
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		return err
 	}
 
-	err = g.AddProcess(p.cmd.Process)
+	err = g.AddProcess(cmd.Process)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 		return err
@@ -113,17 +113,17 @@ func (p *Process) Start() error {
 }
 
 func (p *Process) Run() error {
-	p.cmd = exec.Command("powershell.exe",
+	cmd := exec.Command("powershell.exe",
 		"/Command",
 		//`"`+p.Program+`.exe `+p.Args+`"`,
 		p.Program+` `+p.Args,
 	)
 
-	p.cmd.SysProcAttr = &syscall.SysProcAttr{
+	cmd.SysProcAttr = &syscall.SysProcAttr{
 		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP, //  .CREATE_NEW_CONSOLE,
 	}
 
-	out, err := p.cmd.CombinedOutput()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return err
 	}

@@ -1,3 +1,6 @@
+//go:build !android
+// +build !android
+
 package main
 
 import (
@@ -6,7 +9,6 @@ import (
 	"os/exec"
 
 	"gitlab.com/golang-utils/fs/path"
-	"gitlab.com/golang-utils/version/v2"
 	"gitlab.com/gomidi/muskel"
 )
 
@@ -39,9 +41,4 @@ func checkMuskelVersion(version string, versionFile string, a *args) {
 		}
 	}
 	muskel.WriteWDVersionFile(path.ToSystem(srcdir))
-}
-
-func allVersionate(file string, v *version.Version) string {
-	// muskel_1_0_29.exe
-	return fmt.Sprintf("%s_%v_%v_%v", file, v.Major, v.Minor, v.Patch)
 }

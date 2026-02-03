@@ -29,24 +29,24 @@ var (
 
 type args struct {
 	*config.App
-	InFile              config.FileLocal
-	CSVSeparator        config.String
-	IgnoreMuskelVersion config.Bool
-	Sketch              config.String
-	Flow                config.Bool
-	Solo                config.Int
-	CutOut              config.Bool
-	Params              config.JSON[[]string]
-	Pattern             config.String
-	Fmt                 config.Bool
-	KeepEmptyLines      config.Bool
-	Watch               config.Bool
-	WatchDir            config.Bool
-	OutFile             config.FileLocal
-	TrackFiles          config.Bool
-	SleepingTime        config.Int
-	UnrollFile          config.String
-	Debug               config.Bool
+	InFile         config.FileLocal
+	CSVSeparator   config.String
+	Current        config.Bool
+	Sketch         config.String
+	Flow           config.Bool
+	Solo           config.Int
+	CutOut         config.Bool
+	Params         config.JSON[[]string]
+	Pattern        config.String
+	Fmt            config.Bool
+	KeepEmptyLines config.Bool
+	Watch          config.Bool
+	WatchDir       config.Bool
+	OutFile        config.FileLocal
+	TrackFiles     config.Bool
+	SleepingTime   config.Int
+	UnrollFile     config.String
+	Debug          config.Bool
 
 	smf struct {
 		command         *config.Command
@@ -265,7 +265,7 @@ func init() {
 }
 
 func (a *args) run(app config.Application) error {
-	if !a.IgnoreMuskelVersion.Val {
+	if !a.Current.Val {
 		// check, if muskel_version.txt is inside the current dir
 		// If the version does not match, it delegates to the versioned muskel command (e.g. muskel_1_1_33.exe)
 		// checkMuskelVersion exits if appropriate
@@ -319,7 +319,7 @@ func (a *args) init() {
 	// the main argument set
 	a.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired().WithDefault("./main.mskl")
 	a.AddFlag("csvsep", &a.CSVSeparator).WithHelp("uses the given string as csv seperator.").WithDefault(";")
-	a.AddFlag("current", &a.IgnoreMuskelVersion).WithHelp("use the current version of the muskel command and ignore the " + muskel.MUSKEL_VERSION_FILE + " file").WithDefault("false").WithShortFlag('c')
+	a.AddFlag("current", &a.Current).WithHelp("use the current version of the muskel command and ignore the " + muskel.MUSKEL_VERSION_FILE + " file").WithDefault("false").WithShortFlag('c')
 	a.AddFlag("sketch", &a.Sketch).WithHelp("name of the sketch table").WithShortFlag('s').WithDefault("=SCORE")
 	a.AddFlag("flow", &a.Flow).WithHelp("flow mode; sets sketch to ! and pattern to !").WithDefault("false")
 	cutOutFlag := a.AddFlag("cutout", &a.CutOut).WithHelp("limit the score to the innermost cutout section (indicated by > and _ after the hash in the score)").WithDefault("false")

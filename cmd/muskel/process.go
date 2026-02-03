@@ -1,14 +1,9 @@
 package main
 
-import (
-	"os/exec"
-)
-
 type Process struct {
 	Program string
 	Args    string
 	PID     int
-	cmd     *exec.Cmd
 	killer  func()
 }
 
