@@ -49,7 +49,7 @@ type Sketch struct {
 	Name              string
 	Bars              []*items.Bar        `json:"-"`
 	Positions         [][2]uint           `json:"-"` // bar+position
-	Columns           map[string][]string `json:"Columns,omitempty"`
+	Columns           map[string][]string `json:"-"`
 	Parts             map[string][2]uint  `json:"Parts,omitempty"` // absolute positions
 	Score             Score               `json:"-"`
 	File              string

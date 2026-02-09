@@ -287,7 +287,7 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 
 type Score struct {
 	noEmptyLines     bool
-	IsUnrolled       bool
+	IsUnrolled       bool `json:"-"`
 	printBarComments bool
 	cutout           bool
 	csvSeperator     rune
