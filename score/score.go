@@ -68,6 +68,17 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 		return err
 	}
 
+	bt, err = json.MarshalIndent(me.tokens, " ", "  ")
+
+	if err != nil {
+		return err
+	}
+
+	err = fs.WriteFile(fsys, parent.Join("tokens.json"), bt, true)
+	if err != nil {
+		return err
+	}
+
 	tracks := parent.Join("tracks/")
 	sketches := parent.Join("sketches/")
 	scores := parent.Join("scores/")
@@ -315,7 +326,7 @@ type Score struct {
 	includedScores map[path.Relative]*Score
 	Lyrics         map[string][]string
 	properties     map[string]string
-	tokens         map[string]string
+	tokens         map[string]string `json:"-"`
 	exclSketch     map[string]string
 
 	Bars     []*items.Bar `json:"-"`
