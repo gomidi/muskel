@@ -72,12 +72,14 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 	sketches := parent.Join("sketches/")
 	scores := parent.Join("scores/")
 	files := parent.Join("files/")
+	lyrics := parent.Join("lyrics/")
 
 	dirs := []path.Relative{
 		tracks,
 		sketches,
 		files,
 		scores,
+		lyrics,
 	}
 
 	for _, dir := range dirs {
@@ -106,6 +108,13 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 		}
 	}
 
+	for part, text := range me.Lyrics {
+		err = fs.WriteFile(fsys, lyrics.Join(part+"txt"), []byte(strings.Join(text, "\n\n")), true)
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, sk := range me.Sketches {
 		d := sketches.Join(sk.Name + "/")
 		err := fs.MkDirAll(fsys, d)
@@ -126,7 +135,7 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 	}
 
 	for _, fl := range me.Files {
-		d := sketches.Join(fl.Name() + "/")
+		d := files.Join(fl.Name() + "/")
 		err := fs.MkDirAll(fsys, d)
 		if err != nil {
 			return err
@@ -304,7 +313,7 @@ type Score struct {
 	mainCol        string
 	params         []string // params must have the syntax [trackname]#[no]:[value] where no is the params number, e.g. voc#2:c#'
 	includedScores map[path.Relative]*Score
-	lyrics         map[string][]string
+	Lyrics         map[string][]string
 	properties     map[string]string
 	tokens         map[string]string
 	exclSketch     map[string]string
@@ -340,7 +349,7 @@ func New(filepath path.Relative, params []string, options ...Option) *Score {
 		Parts:          map[string][2]uint{},
 		tokens:         map[string]string{},
 		includedScores: map[path.Relative]*Score{},
-		lyrics:         map[string][]string{},
+		Lyrics:         map[string][]string{},
 		mainFile:       ProjectPath(path.Name(filepath)),
 		ProjectDir:     filepath.Dir(),
 		mainSketch:     "=SCORE",
@@ -417,13 +426,13 @@ func (sc *Score) Properties() map[string]string {
 
 func (sc *Score) AddLyrics(l map[string][]string) {
 	for k, v := range l {
-		sc.lyrics[k] = v
+		sc.Lyrics[k] = v
 	}
 }
 
 func (sc *Score) Lyric(part string, fromLine, toLine int) (tokens []string, err error) {
 	//fmt.Printf("Lyrics %q[%v:%v] // %#v", part, fromLine, toLine, sc.lyrics)
-	p, has := sc.lyrics[part]
+	p, has := sc.Lyrics[part]
 
 	if !has {
 		return nil, fmt.Errorf("could not find lyrics for %q", part)
@@ -495,7 +504,7 @@ func (sc *Score) AddInclude(filepath string, tableName string, params []string) 
 			sc.Sketches[skname] = sk
 		}
 
-		sc.AddLyrics(sco.lyrics)
+		sc.AddLyrics(sco.Lyrics)
 
 		for trname, tr := range sco.Tracks {
 			sc.Tracks[trname] = tr
@@ -521,11 +530,11 @@ func (sc *Score) AddInclude(filepath string, tableName string, params []string) 
 		sc.Sketches[tableName] = sk
 		return nil
 	case '@':
-		ly, has := sco.lyrics[tableName]
+		ly, has := sco.Lyrics[tableName]
 		if !has {
 			return fmt.Errorf("can't find lyrics %q in include %q", tableName, filepath)
 		}
-		sc.lyrics[tableName] = ly
+		sc.Lyrics[tableName] = ly
 		return nil
 	default:
 		sh, err := sco.GetToken(tableName)
