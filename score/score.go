@@ -82,13 +82,11 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 	tracks := parent.Join("tracks/")
 	sketches := parent.Join("sketches/")
 	scores := parent.Join("scores/")
-	files := parent.Join("files/")
 	lyrics := parent.Join("lyrics/")
 
 	dirs := []path.Relative{
 		tracks,
 		sketches,
-		files,
 		scores,
 		lyrics,
 	}
@@ -140,14 +138,6 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 		}
 
 		err = fs.WriteFile(fsys, d.Join("inspect.json"), bt, true)
-		if err != nil {
-			return err
-		}
-	}
-
-	for _, fl := range me.Files {
-		d := files.Join(fl.Name() + "/")
-		err := fs.MkDirAll(fsys, d)
 		if err != nil {
 			return err
 		}
