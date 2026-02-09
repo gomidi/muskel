@@ -19,19 +19,19 @@ type Track struct {
 	// velocity-scale property to refine velocity conversion (min, max, randomize-factor, step-width)
 	VelocityScale [5]uint8 // 0: min 1: max 2: randomize-factor 3: step-width, 4: center
 
-	EndPos    uint
+	EndPos    uint `json:"-"`
 	Position  int
 	SoloGroup int // x < 0 =  never export; x = 0 = no solo group (will only be exported without solo); x > 0 = number of the solo group (only relevant in solo mode)
 	Name      string
-	FileGroup string
-	Import    string
+	FileGroup string `json:"FileGroup,omitempty"`
+	Import    string `json:"Import,omitempty"`
 	/*
 		ambitus from: to:
 	*/
 	Ambitus [2]string // notes
 
-	LilyPondClef     string
-	LilyPondDynamics LilyPondDynamics
+	LilyPondClef     string           `json:"LilyPondClef,omitempty"`
+	LilyPondDynamics LilyPondDynamics `json:"-"`
 }
 
 func New(name string) *Track {

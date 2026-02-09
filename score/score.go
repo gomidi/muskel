@@ -1,6 +1,7 @@
 package score
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"regexp"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"gitlab.com/golang-utils/fs"
+	"gitlab.com/golang-utils/fs/filesystems/mapfs"
 	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/tools/smfimage"
@@ -42,6 +44,247 @@ func (p ProjectPath) Relative(projectDir path.Relative) path.Relative {
 	return projectDir.Join(string(p))
 }
 
+func (me *Score) AsFS() (fs.ReadOnly, error) {
+	fsys, err := mapfs.New(me.FS.Abs(me.ProjectDir))
+
+	if err != nil {
+		return nil, err
+	}
+
+	me.populateFS(fsys, "")
+
+	return fsys, nil
+}
+
+func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
+	bt, err := json.MarshalIndent(me, " ", "  ")
+
+	if err != nil {
+		return err
+	}
+
+	err = fs.WriteFile(fsys, parent.Join("inspect.json"), bt, true)
+	if err != nil {
+		return err
+	}
+
+	tracks := parent.Join("tracks/")
+	sketches := parent.Join("sketches/")
+	scores := parent.Join("scores/")
+	files := parent.Join("files/")
+
+	dirs := []path.Relative{
+		tracks,
+		sketches,
+		files,
+		scores,
+	}
+
+	for _, dir := range dirs {
+		err := fs.MkDir(fsys, dir)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, tr := range me.Tracks {
+		d := tracks.Join(tr.Name + "/")
+		err := fs.MkDirAll(fsys, d)
+		if err != nil {
+			return err
+		}
+
+		bt, err := json.MarshalIndent(tr, " ", "  ")
+
+		if err != nil {
+			return err
+		}
+
+		err = fs.WriteFile(fsys, d.Join("inspect.json"), bt, true)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, sk := range me.Sketches {
+		d := sketches.Join(sk.Name + "/")
+		err := fs.MkDirAll(fsys, d)
+		if err != nil {
+			return err
+		}
+
+		bt, err := json.MarshalIndent(sk, " ", "  ")
+
+		if err != nil {
+			return err
+		}
+
+		err = fs.WriteFile(fsys, d.Join("inspect.json"), bt, true)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, fl := range me.Files {
+		d := sketches.Join(fl.Name() + "/")
+		err := fs.MkDirAll(fsys, d)
+		if err != nil {
+			return err
+		}
+	}
+
+	for k, sc := range me.includedScores {
+		d := scores.Join(k.String() + "/")
+		err := fs.MkDirAll(fsys, d)
+		if err != nil {
+			return err
+		}
+		err = sc.populateFS(fsys, d)
+		if err != nil {
+			return err
+		}
+	}
+
+	/*
+		for _, c := range me.Consts {
+			d := consts.Join(c.Name + "/")
+			err := fs.MkDirAll(fsys, d)
+			if err != nil {
+				return err
+			}
+
+			err = fs.WriteFile(fsys, d.Join("type.txt"), []byte(c.Type), true)
+			if err != nil {
+				return err
+			}
+
+			err = fs.WriteFile(fsys, d.Join("doc.txt"), []byte(c.Doc), true)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, c := range me.Vars {
+			d := vars.Join(c.Name + "/")
+			err := fs.MkDirAll(fsys, d)
+			if err != nil {
+				return err
+			}
+
+			err = fs.WriteFile(fsys, d.Join("type.txt"), []byte(c.Type), true)
+			if err != nil {
+				return err
+			}
+
+			err = fs.WriteFile(fsys, d.Join("doc.txt"), []byte(c.Doc), true)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, c := range me.Funcs {
+			d := funcs.Join(c.Name + "/")
+			err := fs.MkDirAll(fsys, d)
+			if err != nil {
+				return err
+			}
+
+			err = fs.WriteFile(fsys, d.Join("type.txt"), []byte(c.Type), true)
+			if err != nil {
+				return err
+			}
+
+			err = fs.WriteFile(fsys, d.Join("doc.txt"), []byte(c.Doc), true)
+			if err != nil {
+				return err
+			}
+		}
+
+		for _, c := range me.Types {
+			d := types.Join(c.Name + "/")
+			err := fs.MkDirAll(fsys, types.Join(c.Name+"/"))
+			if err != nil {
+				return err
+			}
+
+
+
+			err = fs.WriteFile(fsys, d.Join("doc.txt"), []byte(c.Doc), true)
+			if err != nil {
+				return err
+			}
+
+			if len(c.Attributes) > 0 {
+				attrs := d.Join("attrs/")
+				err = fs.MkDirAll(fsys, attrs)
+				if err != nil {
+					return err
+				}
+
+				for _, a := range c.Attributes {
+					ad := attrs.Join(a.Name + "/")
+					err = fs.MkDirAll(fsys, ad)
+					if err != nil {
+						return err
+					}
+
+					err = fs.WriteFile(fsys, ad.Join("type.txt"), []byte(a.Type), true)
+					if err != nil {
+						return err
+					}
+
+					err = fs.WriteFile(fsys, ad.Join("doc.txt"), []byte(a.Doc), true)
+					if err != nil {
+						return err
+					}
+				}
+			}
+
+			if len(c.Methods) > 0 {
+				methods := d.Join("methods/")
+				err = fs.MkDirAll(fsys, methods)
+				if err != nil {
+					return err
+				}
+
+				for _, m := range c.Methods {
+					md := methods.Join(m.Name + "/")
+					err = fs.MkDirAll(fsys, md)
+					if err != nil {
+						return err
+					}
+
+					err = fs.WriteFile(fsys, md.Join("type.txt"), []byte(m.Type), true)
+					if err != nil {
+						return err
+					}
+
+					err = fs.WriteFile(fsys, md.Join("doc.txt"), []byte(m.Doc), true)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+
+		for _, c := range me.SubPackages {
+			//fmt.Printf("package %q\n", c.Name)
+			d := subpkgs.Join(c.Name + "/")
+			err := fs.MkDirAll(fsys, d)
+			if err != nil {
+				return err
+			}
+			err = c.populateFS(fsys, d)
+			if err != nil {
+				return err
+			}
+
+		}
+	*/
+
+	return nil
+}
+
 type Score struct {
 	noEmptyLines     bool
 	IsUnrolled       bool
@@ -54,7 +297,7 @@ type Score struct {
 	toPos            uint
 	soloGroup        uint
 
-	FS             fs.FS
+	FS             fs.FS `json:"-"`
 	ProjectDir     path.Relative
 	mainFile       ProjectPath
 	mainSketch     string
@@ -66,17 +309,17 @@ type Score struct {
 	tokens         map[string]string
 	exclSketch     map[string]string
 
-	Bars     []*items.Bar
+	Bars     []*items.Bar `json:"-"`
 	Parts    map[string][2]uint
-	Tracks   map[string]*track.Track
-	Tunings  map[string]*tuning.Tuning
-	Timbres  map[string]*timbre.Timbre
-	Scales   map[string]items.Mode
-	Filters  map[string]*filter.Filter
-	Sketches map[string]*sketch.Sketch
-	Unrolled map[string][]*items.Event
-	Files    map[path.Relative]*file.File
-	Parent   *Score
+	Tracks   map[string]*track.Track      `json:"-"`
+	Tunings  map[string]*tuning.Tuning    `json:"-"`
+	Timbres  map[string]*timbre.Timbre    `json:"-"`
+	Scales   map[string]items.Mode        `json:"-"`
+	Filters  map[string]*filter.Filter    `json:"-"`
+	Sketches map[string]*sketch.Sketch    `json:"-"`
+	Unrolled map[string][]*items.Event    `json:"-"`
+	Files    map[path.Relative]*file.File `json:"-"`
+	Parent   *Score                       `json:"-"`
 }
 
 func (s *Score) FilterTrack(colName string, events []*items.Event) []*items.Event {

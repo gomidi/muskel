@@ -47,15 +47,15 @@ type include struct {
 
 type Sketch struct {
 	Name              string
-	Bars              []*items.Bar
-	Positions         [][2]uint // bar+position
-	Columns           map[string][]string
-	Parts             map[string][2]uint // absolute positions
-	Score             Score
+	Bars              []*items.Bar        `json:"-"`
+	Positions         [][2]uint           `json:"-"` // bar+position
+	Columns           map[string][]string `json:"Columns,omitempty"`
+	Parts             map[string][2]uint  `json:"Parts,omitempty"` // absolute positions
+	Score             Score               `json:"-"`
 	File              string
 	barChangeRequired bool
-	RealColNum        int // is in the file, i.e. a group column counts as 1
-	GroupCols         map[int][]string
+	RealColNum        int              `json:"-"` // is in the file, i.e. a group column counts as 1
+	GroupCols         map[int][]string `json:"GroupCols,omitempty"`
 	patternCalls      map[string]int
 
 	includes            []*include

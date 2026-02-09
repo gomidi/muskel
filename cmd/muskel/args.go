@@ -14,6 +14,7 @@ import (
 	"gitlab.com/golang-utils/config/v3"
 	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
+	"gitlab.com/golang-utils/fsutils/fsshell"
 	"gitlab.com/golang-utils/version/v2"
 	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/midi/v2/smf"
@@ -133,6 +134,22 @@ func (a *args) runClient() error {
 func (a *args) runConfigDirs(app config.Application) error {
 	fmt.Fprintf(os.Stdout, "USER_DIR: %q\nWORKING_DIR: %q\n\n", muskel.USER_DIR, muskel.WORKING_DIR)
 	return nil
+}
+
+func (a *args) runInspect(app config.Application) error {
+	sc, err := muskel.ParseFile(a.InFile.Val, nil)
+
+	if err != nil {
+		return err
+	}
+
+	fsys, err := sc.AsFS()
+
+	if err != nil {
+		return err
+	}
+
+	return fsshell.New(fsys, "").Run()
 }
 
 func (a *args) runServer(cbr *converter) error {
@@ -380,6 +397,10 @@ func (a *args) init() {
 	client.AddFlag("toggle", &a.client.Toggle).WithHelp("toggle between play/stop playing the current file").WithShortFlag('t')
 	client.AddFlag("play", &a.client.Play).WithHelp("play (true) or stop (false) playing the current file").WithShortFlag('p')
 	client.AddFlag("convert", &a.client.Convert).WithHelp("converts the current file to smf").WithShortFlag('c')
+
+	cmdInspect := a.App.AddCommand("inspect", a.runInspect).WithHelp("inspect muskel project").SkipAllBut()
+	cmdInspect.AddArg("file", &a.InFile).WithHelp("path of the muskel file").WithRequired().WithDefault("./main.mskl")
+	///AsFS
 
 	//argSmallCols = cfg.NewBool("small", "small columns in formatting", config.Shortflag('s'), config.Default(false))
 }
