@@ -109,7 +109,7 @@ func (me *Score) populateFS(fsys fs.FS, parent path.Relative) error {
 	}
 
 	for part, text := range me.Lyrics {
-		err = fs.WriteFile(fsys, lyrics.Join(part+"txt"), []byte(strings.Join(text, "\n\n")), true)
+		err = fs.WriteFile(fsys, lyrics.Join(strings.TrimLeft(part, "@")+".txt"), []byte(strings.Join(text, "\n\n")), true)
 		if err != nil {
 			return err
 		}
