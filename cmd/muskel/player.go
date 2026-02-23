@@ -180,18 +180,20 @@ func (p *Player) playWithoutProgram() error {
 func (p *Player) playWithProgram() {
 	fmt.Println("playWithProgram")
 	var cmd *Process
-	var mx sync.Mutex
+	//	var mx sync.Mutex
 
-	var startProc = func() {
-		mx.Lock()
-		go func() {
-			err := cmd.Start()
-			mx.Unlock()
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "ERROR while running %s %s: %v", cmd.Program, cmd.Args, err)
-			}
-		}()
-	}
+	/*
+		var startProc = func() {
+			mx.Lock()
+			go func() {
+				err := cmd.Start()
+				mx.Unlock()
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "ERROR while running %s %s: %v", cmd.Program, cmd.Args, err)
+				}
+			}()
+		}
+	*/
 
 	for {
 		select {
@@ -200,8 +202,9 @@ func (p *Player) playWithProgram() {
 				cmd.Kill()
 				cmd = nil
 			} else {
-				cmd = newProcess(p.program[0], p.program[1])
-				startProc()
+				p.playWithoutProgram()
+				//cmd = newProcess(p.program[0], p.program[1])
+				//startProc()
 			}
 		case <-p.stopPlayer:
 			if cmd != nil {
@@ -217,8 +220,9 @@ func (p *Player) playWithProgram() {
 					cmd.Kill()
 					cmd = nil
 				}
-				cmd = newProcess(p.program[0], p.program[1])
-				startProc()
+				p.playWithoutProgram()
+				//cmd = newProcess(p.program[0], p.program[1])
+				//startProc()
 			} else {
 				if cmd != nil {
 					cmd.Kill()
