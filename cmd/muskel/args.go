@@ -165,7 +165,8 @@ func (a *args) runServer(cbr *converter) error {
 	if cbr.player.playToPort {
 		go cbr.player.playThroughPort()
 	} else {
-		go cbr.player.playWithProgram()
+		return cbr.player.playWithoutProgram()
+		//go cbr.player.playWithProgram()
 	}
 
 	go func() {

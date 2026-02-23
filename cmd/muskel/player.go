@@ -8,10 +8,12 @@ import (
 	"strings"
 	"sync"
 
+	"gitlab.com/golang-utils/fs/filesystems/rootfs"
 	"gitlab.com/golang-utils/fs/path"
 	"gitlab.com/gomidi/midi/v2"
 	"gitlab.com/gomidi/midi/v2/drivers"
 	"gitlab.com/gomidi/midi/v2/smf"
+	"gitlab.com/gomidi/smfplayer"
 	//"gitlab.com/gomidi/midi/player"
 )
 
@@ -144,12 +146,39 @@ func (ps *Player) setupProgram() error {
 		}
 	} else {
 		ps.mkPlayCmdString(cmd, ps.outFile)
-		fmt.Printf("%s %s\n", ps.program[0], ps.program[1])
+		//fmt.Printf("%s %s\n", ps.program[0], ps.program[1])
 	}
 	return nil
 }
 
+func (p *Player) playWithoutProgram() error {
+	//fmt.Println("playWithoutProgram")
+	fsys, err := rootfs.New()
+	if err != nil {
+		return err
+	}
+
+	player := smfplayer.New(int32(44100))
+
+	_fsys, file, err := smfplayer.DefaultSF2()
+	if err != nil {
+		return err
+	}
+	err = player.LoadSF2(_fsys, file)
+	if err != nil {
+		return err
+	}
+
+	err = player.SynthesizeSMF(fsys, p.outFile.RootRelative())
+	if err != nil {
+		return err
+	}
+
+	return player.Play()
+}
+
 func (p *Player) playWithProgram() {
+	fmt.Println("playWithProgram")
 	var cmd *Process
 	var mx sync.Mutex
 
@@ -202,6 +231,7 @@ func (p *Player) playWithProgram() {
 }
 
 func (p *Player) playThroughPort() {
+	fmt.Println("playThroughPort")
 	var cmd *smf.TracksReader
 
 	var stopPortPlayer = make(chan bool, 1)
@@ -286,10 +316,16 @@ func (p *Player) playOnce(stopPortPlayer chan bool, stoppedPortPlayer chan bool)
 		pl.Play(p.portOut)
 		//pl.PlayAll(p.portOut, stopPortPlayer, stoppedPortPlayer)
 	} else {
-		cmd := newProcess(p.program[0], p.program[1])
-		err := cmd.Run()
+		err := p.playWithoutProgram()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR while running %s %s: %v", cmd.Program, cmd.Args, err)
+			fmt.Fprintf(os.Stderr, "ERROR while playing %s", err)
 		}
+		/*
+			cmd := newProcess(p.program[0], p.program[1])
+			err := cmd.Run()
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "ERROR while running %s %s: %v", cmd.Program, cmd.Args, err)
+			}
+		*/
 	}
 }
