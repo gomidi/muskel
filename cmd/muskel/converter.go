@@ -229,7 +229,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 		// open possibly all exported files
 		if ARGS.Watch.Val {
 			//open(c.player.outFile, true)
-			c.player.playWithoutProgram()
+			go c.player.playWithoutProgram()
 			if ARGS.smf.ExportImage.Val {
 				open(locImgFile, true)
 			}
@@ -250,7 +250,7 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 			open(locImgFile, false)
 		default:
 			// open the smf
-			c.player.playWithoutProgram()
+			go c.player.playWithoutProgram()
 			//open(c.player.outFile, false)
 		}
 	}
