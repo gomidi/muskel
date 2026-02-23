@@ -152,7 +152,7 @@ func (ps *Player) setupProgram() error {
 }
 
 func (p *Player) playWithoutProgram() error {
-	//fmt.Println("playWithoutProgram")
+	fmt.Println("playWithoutProgram")
 	fsys, err := rootfs.New()
 	if err != nil {
 		return err
