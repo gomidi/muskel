@@ -228,7 +228,8 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 
 		// open possibly all exported files
 		if ARGS.Watch.Val {
-			open(c.player.outFile, true)
+			//open(c.player.outFile, true)
+			c.player.playWithoutProgram()
 			if ARGS.smf.ExportImage.Val {
 				open(locImgFile, true)
 			}
