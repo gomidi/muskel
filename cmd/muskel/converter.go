@@ -249,7 +249,8 @@ func (c *converter) cmdSMF(sc *score.Score) error {
 			open(locImgFile, false)
 		default:
 			// open the smf
-			open(c.player.outFile, false)
+			c.player.playWithoutProgram()
+			//open(c.player.outFile, false)
 		}
 	}
 
