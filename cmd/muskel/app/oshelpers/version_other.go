@@ -1,7 +1,7 @@
 //go:build !android
 // +build !android
 
-package main
+package oshelpers
 
 import (
 	"fmt"
@@ -12,18 +12,17 @@ import (
 	"gitlab.com/gomidi/muskel"
 )
 
-func checkMuskelVersion(version string, versionFile string, a *args) {
-	srcdir := a.InFile.Val.Dir()
+func CheckMuskelVersion(version string, versionFile string, srcdir path.Local) {
 	v, err := muskel.ReadWDVersionFile(srcdir)
 	if err == nil {
 		if v.String() != version {
-			name := versionate("muskel", v)
+			name := Versionate("muskel", v)
 			fmt.Fprint(os.Stderr, "This is version "+version+" of muskel and your "+versionFile+
 				" points to version "+v.String()+
 				".\nTo preserve compatibility with your musical notation, the binary \""+name+"\" will be called.\nIf you don't want this behavior or have no such older versioned muskel file, "+
 				"\nremove the file \""+srcdir.Join(versionFile).String()+"\"\nor pass the \"--current\" option to let your file be parsed anyway.\n\n")
 
-			cmd := runVersionated(name, os.Args[1:])
+			cmd := RunVersionated(name, os.Args[1:])
 			cmd.Dir, _ = os.Getwd()
 			cmd.Env = os.Environ()
 			var out []byte

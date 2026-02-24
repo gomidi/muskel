@@ -28,7 +28,7 @@ func (s *SMF) ConvertTrack(track *track.Track) (tr smf.Track, endPos TicksAbsPos
 	t := s.newTrack()
 	evts := t.trackIntroEvents(track)
 	scevts, err := t.trackScoreEvents(track, s.score.Unrolled[track.Name])
-	if err != nil && err != smf.ErrFinished {
+	if err != nil {
 		err = fmt.Errorf("could not write track %q: %v", track.Name, err)
 		return
 	}
@@ -45,9 +45,6 @@ func (s *SMF) writeEventsToTrack(ch uint8, endPos int, evts Events) (tr smf.Trac
 
 func (s *SMF) addTrack(tr smf.Track) error {
 	err := s.writer.SMF.Add(tr)
-	if err == smf.ErrFinished {
-		return nil
-	}
 	s.writer.currentTrack++
 	return err
 }
@@ -132,7 +129,7 @@ func (s *SMF) write() error {
 			err = s.writeTrack(uint8(track.MIDIChannel), int(endPos), evts)
 		*/
 
-		if err != nil && err != smf.ErrFinished {
+		if err != nil {
 			return fmt.Errorf("could not write track %q: %v", track.Name, err)
 		}
 	}

@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"crypto/md5"
@@ -26,9 +26,9 @@ func fileCheckSum(file string) string {
 }
 
 func convertArgStringToInts(s string) (res []int) {
-	ms := strings.Split(s, ",")
+	ms := strings.SplitSeq(s, ",")
 
-	for _, m := range ms {
+	for m := range ms {
 		i, errI := strconv.Atoi(strings.TrimSpace(m))
 		if errI == nil {
 			res = append(res, i)

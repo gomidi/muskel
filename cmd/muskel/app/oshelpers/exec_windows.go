@@ -1,7 +1,7 @@
 //go:build windows
 // +build windows
 
-package main
+package oshelpers
 
 import (
 	"fmt"
@@ -149,29 +149,6 @@ func (p *Process) Kill() {
 	p.killer()
 }
 
-func vlcCmd() [2]string {
-	return [2]string{"vlc.exe", "--no-video --play-and-exit --no-playlist-tree --quiet -Idummy $_file"}
-}
-
-//vlc.exe --no-video --play-and-exit --no-playlist-tree --quiet -Idummy main.mid
-
-func fluidsynthCmd() [2]string {
-	return [2]string{"fluidsynth.exe", "-i -n --quiet $_file"}
-}
-
-func audaciousCmd() [2]string {
-	return [2]string{"audacious.exe", "-1 -H -p -q $_file"}
-}
-
-func timidityCmd() [2]string {
-	return [2]string{"timidity.exe", "--quiet -V linear --noise-shaping=1 $_file"}
-}
-
-func defaultPlayCmd() [2]string {
-	//	return `C:\Program Files\fluidsynth\fluidsynth.exe -i -q -n $_file`
-	return vlcCmd()
-}
-
 /*
 func execCommand(c string) *exec.Cmd {
 	//return exec.Command("powershell.exe", "/Command",  `$Process = [Diagnostics.Process]::Start("` + c + `") ; echo $Process.Id `)
@@ -180,23 +157,23 @@ func execCommand(c string) *exec.Cmd {
 }
 */
 
-func alert(msg string, err error) {
+func Alert(msg string, err error) {
 
 }
 
-func notify(msg, details string) {
+func Notify(msg, details string) {
 
 }
 
-func runVersionated(file string, args []string) *exec.Cmd {
+func RunVersionated(file string, args []string) *exec.Cmd {
 	return exec.Command(file, args...)
 }
 
-func versionate(file string, v *version.Version) string {
-	return allVersionate(file, v) + ".exe"
+func Versionate(file string, v *version.Version) string {
+	return AllVersionate(file, v) + ".exe"
 }
 
-func openInDefaultProgram(file path.Local) error {
+func OpenInDefaultProgram(file path.Local) error {
 	cmd := exec.Command("cmd.exe", "start", fmt.Sprintf(`"%s"`, file.ToSystem()))
 	return cmd.Run()
 }
